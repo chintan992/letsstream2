@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import AccentColorPicker from '@/components/AccentColorPicker';
+import { BackupRestore } from '@/components/BackupRestore';
+import { BackupRestoreErrorBoundary } from '@/components/BackupRestoreErrorBoundary';
 import { videoSources } from '@/utils/video-sources';
 import { trackEvent } from '@/lib/analytics';
 
@@ -168,6 +170,10 @@ const Profile = () => {
               <Settings className="h-4 w-4 mr-2" />
               Preferences
             </TabsTrigger>
+            <TabsTrigger value="backup" className="data-[state=active]:bg-accent">
+              <User className="h-4 w-4 mr-2" />
+              Backup & Restore
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="history" className="pt-4">
@@ -298,6 +304,12 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="backup" className="pt-4">
+            <BackupRestoreErrorBoundary>
+              <BackupRestore />
+            </BackupRestoreErrorBoundary>
           </TabsContent>
         </Tabs>
       </motion.div>
