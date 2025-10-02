@@ -9,8 +9,8 @@
         {
             "key": "xprime",
             "name": "XPrime",
-            "movieUrlPattern": "letsstream-xprime.chintanr21.workers.dev/{id}",
-            "tvUrlPattern": "letsstream-xprime.chintanr21.workers.dev/{id}/{season}/{episode}"
+            "movieUrlPattern": "https://letsstream-xprime.chintanr21.workers.dev/{id}",
+            "tvUrlPattern": "https://letsstream-xprime.chintanr21.workers.dev/{id}/{season}/{episode}"
         },
         {
             "key": "mappletv",
