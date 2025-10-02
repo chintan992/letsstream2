@@ -14,7 +14,7 @@
         },
         {
             "key": "mappletv",
-            "name": "Flixer",
+            "name": "mappletv",
             "movieUrlPattern": "https://mappletv.uk/watch/movie/{id}",
             "tvUrlPattern": "https://mappletv.uk/watch/tv/{id}-{season}-{episode}"
         },
