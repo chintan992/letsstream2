@@ -1,6 +1,30 @@
 {
     "videoSources": [
         {
+            "key": "flixer",
+            "name": "Flixer",
+            "movieUrlPattern": "https://letsstream-flixer.chintanr21.workers.dev/{id}",
+            "tvUrlPattern": "https://letsstream-flixer.chintanr21.workers.dev/{id}/{season}/{episode}"
+        },
+        {
+            "key": "xprime",
+            "name": "XPrime",
+            "movieUrlPattern": "letsstream-xprime.chintanr21.workers.dev/{id}",
+            "tvUrlPattern": "letsstream-xprime.chintanr21.workers.dev/{id}/{season}/{episode}"
+        },
+        {
+            "key": "mappletv",
+            "name": "Flixer",
+            "movieUrlPattern": "https://mappletv.uk/watch/movie/{id}",
+            "tvUrlPattern": "https://mappletv.uk/watch/tv/{id}-{season}-{episode}"
+        },
+        {
+            "key": "spencerdevs",
+            "name": "SpencerDevs",
+            "movieUrlPattern": "https://spencerdevs.xyz/movie/{id}",
+            "tvUrlPattern": "https://spencerdevs.xyz/tv/{id}/{season}/{episode}"
+        },
+        {
             "key": "vidlink",
             "name": "VidLink",
             "movieUrlPattern": "https://vidlink.pro/movie/{id}?autoplay=true&title=true",
