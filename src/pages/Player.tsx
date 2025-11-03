@@ -1,12 +1,15 @@
 
 import { useParams } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, List } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Navbar from '@/components/Navbar';
 import { VideoPlayer } from '@/components/player/VideoPlayer';
 import VideoSourceSelector from '@/components/player/VideoSourceSelector';
 import EpisodeNavigation from '@/components/player/EpisodeNavigation';
+import EpisodeSidebar from '@/components/player/EpisodeSidebar';
 import MediaActions from '@/components/player/MediaActions';
 import { useMediaPlayer } from '@/hooks/use-media-player';
 import { videoSources } from '@/utils/video-sources';
@@ -20,6 +23,7 @@ const Player = () => {
     type: string;
   }>();
   const { user } = useAuth();
+  const [isEpisodeSheetOpen, setIsEpisodeSheetOpen] = useState(false);
   
   const {
     title,
@@ -78,22 +82,67 @@ const Player = () => {
           onViewDetails={goToDetails}
         />
 
-        <VideoPlayer 
-          isLoading={isLoading}
-          iframeUrl={iframeUrl}
-          title={title}
-          poster={posterUrl}
-          onLoaded={handlePlayerLoaded}
-          onError={handlePlayerError}
-        />
+        {/* Flex Layout for Video Player and Episode Sidebar */}
+        <div className="flex flex-col md:flex-row gap-4 xl:gap-6">
+          {/* Video Player Section */}
+          <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px]">
+            {/* Mobile Toggle Button for Episodes */}
+            {mediaType === 'tv' && episodes.length > 0 && (
+              <div className="md:hidden mb-4">
+                <Sheet open={isEpisodeSheetOpen} onOpenChange={setIsEpisodeSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                    >
+                      <List className="h-4 w-4 mr-2" />
+                      Episodes
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-80 p-0 bg-background/95 backdrop-blur-md border-white/10">
+                    <EpisodeSidebar
+                      episodes={episodes}
+                      currentEpisodeIndex={currentEpisodeIndex}
+                      showId={id ? parseInt(id, 10) : 0}
+                      season={season ? parseInt(season, 10) : 1}
+                    />
+                  </SheetContent>
+                </Sheet>
+              </div>
+            )}
+            
+            <VideoPlayer
+              isLoading={isLoading}
+              iframeUrl={iframeUrl}
+              title={title}
+              poster={posterUrl}
+              onLoaded={handlePlayerLoaded}
+              onError={handlePlayerError}
+            />
+          </div>
 
-        <motion.div 
+          {/* Episode Sidebar Section - Desktop Only */}
+          {mediaType === 'tv' && episodes.length > 0 && (
+            <div className="hidden md:block flex-shrink-0">
+              <EpisodeSidebar
+                episodes={episodes}
+                currentEpisodeIndex={currentEpisodeIndex}
+                showId={id ? parseInt(id, 10) : 0}
+                season={season ? parseInt(season, 10) : 1}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Existing components below video player */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-6 space-y-6"
         >
           {mediaType === 'tv' && episodes.length > 0 && (
-            <EpisodeNavigation 
+            <EpisodeNavigation
               episodes={episodes}
               currentEpisodeIndex={currentEpisodeIndex}
               onPreviousEpisode={goToPreviousEpisode}
@@ -116,7 +165,7 @@ const Player = () => {
                 View Details
               </Button>
             </div>
-            <VideoSourceSelector 
+            <VideoSourceSelector
               videoSources={videoSources}
               selectedSource={selectedSource}
               onSourceChange={handleSourceChange}

@@ -12,7 +12,11 @@
       "@/hooks/*": ["./src/hooks/*"],
       "@/components/ui/*": ["./src/components/ui/*"],
       "@/lib/*": ["./src/lib/*"],
-      "@/contexts/types/*": ["./src/contexts/types/*"]
+      "@/contexts/types/*": ["./src/contexts/types/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/utils/services/*": ["./src/utils/services/*"],
+      "@/utils/config/*": ["./src/utils/config/*"],
+      "@/utils/types/*": ["./src/utils/types/*"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,
