@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import ContentRow from '@/components/ContentRow';
 import Navbar from '@/components/Navbar';
@@ -22,25 +22,58 @@ const TVDetailsPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>('episodes');
+  const [lastWatchedEpisode, setLastWatchedEpisode] = useState<{
+    season: number;
+    episode: number;
+    progress: number;
+    episodeTitle: string;
+    episodeThumbnail: string | null;
+    timeRemaining: number;
+    watchPosition: number;
+    duration: number;
+  } | null>(null);
+  const [isLastWatchedLoading, setIsLastWatchedLoading] = useState(false);
   const { user } = useAuth();
   
-  const { 
-    tvShow, 
-    episodes, 
-    selectedSeason, 
-    setSelectedSeason, 
-    isLoading, 
-    error, 
-    recommendations, 
-    cast, 
+  const {
+    tvShow,
+    episodes,
+    selectedSeason,
+    setSelectedSeason,
+    isLoading,
+    error,
+    recommendations,
+    cast,
     trailerKey,
-    isFavorite, 
-    isInMyWatchlist, 
-    handlePlayEpisode, 
-    handleToggleFavorite, 
-    handleToggleWatchlist, 
+    isFavorite,
+    isInMyWatchlist,
+    handlePlayEpisode,
+    handleToggleFavorite,
+    handleToggleWatchlist,
     getLastWatchedEpisode
   } = useTVDetails(id);
+
+  // Fetch last watched episode when tvShow changes
+  useEffect(() => {
+    const fetchLastWatchedEpisode = async () => {
+      if (!tvShow) return;
+      
+      try {
+        setIsLastWatchedLoading(true);
+        const episode = await getLastWatchedEpisode();
+        setLastWatchedEpisode(episode);
+      } catch (error) {
+        console.error('Error fetching last watched episode:', error);
+        setLastWatchedEpisode(null);
+      } finally {
+        setIsLastWatchedLoading(false);
+      }
+    };
+
+    if (tvShow?.id) {
+      fetchLastWatchedEpisode();
+    }
+  }, [tvShow, getLastWatchedEpisode]);
 
   if (isLoading) {
     return (
@@ -96,14 +129,15 @@ const TVDetailsPage = () => {
           </div>
         )}
 
-        <TVShowHeader 
+        <TVShowHeader
           tvShow={tvShow}
           isFavorite={isFavorite}
           isInWatchlist={isInMyWatchlist}
           onToggleFavorite={handleToggleFavorite}
           onToggleWatchlist={handleToggleWatchlist}
           onPlayEpisode={handlePlayEpisode}
-          lastWatchedEpisode={getLastWatchedEpisode()}
+          lastWatchedEpisode={lastWatchedEpisode}
+          isLastWatchedLoading={isLastWatchedLoading}
         />
       </div>
       

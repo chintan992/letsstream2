@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { SkipBack, SkipForward } from 'lucide-react';
 import { Episode } from '@/utils/types';
@@ -9,17 +8,27 @@ interface EpisodeNavigationProps {
   currentEpisodeIndex: number;
   onPreviousEpisode: () => void;
   onNextEpisode: () => void;
+  isLastEpisodeOfSeason?: boolean;
+  hasNextSeason?: boolean;
+  nextSeasonNumber?: number | null;
+  nextSeasonHasEpisodes?: boolean;
 }
 
 const EpisodeNavigation = ({
   episodes,
   currentEpisodeIndex,
   onPreviousEpisode,
-  onNextEpisode
+  onNextEpisode,
+  isLastEpisodeOfSeason = false,
+  hasNextSeason = false,
+  nextSeasonNumber = null,
+  nextSeasonHasEpisodes = false
 }: EpisodeNavigationProps) => {
   if (episodes.length === 0) return null;
   
   const currentEpisode = episodes[currentEpisodeIndex];
+  const isFinalEpisode = isLastEpisodeOfSeason && (!hasNextSeason || !nextSeasonHasEpisodes);
+  const canGoToNextSeason = hasNextSeason && nextSeasonHasEpisodes;
   
   return (
     <div className="space-y-4">
@@ -63,12 +72,25 @@ const EpisodeNavigation = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                className={cn(
+                  "border-white/10 backdrop-blur-sm transition-all duration-300",
+                  isLastEpisodeOfSeason && canGoToNextSeason
+                    ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 border-purple-400/30"
+                    : "bg-white/5 hover:bg-white/10"
+                )}
                 onClick={onNextEpisode}
-                disabled={currentEpisodeIndex === episodes.length - 1}
+                disabled={isFinalEpisode}
               >
-                Next
-                <SkipForward className="h-4 w-4 ml-2" />
+                {isLastEpisodeOfSeason && canGoToNextSeason
+                  ? `Next Season${nextSeasonNumber ? ` ${nextSeasonNumber}` : ''}`
+                  : isFinalEpisode
+                    ? "Series Complete"
+                    : "Next"
+                }
+                {isLastEpisodeOfSeason && canGoToNextSeason
+                  ? "→"
+                  : <SkipForward className="h-4 w-4 ml-2" />
+                }
               </Button>
             </div>
 
@@ -78,6 +100,26 @@ const EpisodeNavigation = ({
               </span>
             )}
           </div>
+
+          {/* Transitional Messaging */}
+          {isLastEpisodeOfSeason && (
+            <div className="pt-2 border-t border-white/10">
+              {canGoToNextSeason && nextSeasonNumber ? (
+                <p className="text-sm text-purple-300/80 flex items-center gap-1">
+                  <span>Next up:</span>
+                  <span className="font-medium">Season {nextSeasonNumber}, Episode 1</span>
+                </p>
+              ) : hasNextSeason && !nextSeasonHasEpisodes ? (
+                <p className="text-sm text-yellow-300/80">
+                  Next season exists but episodes are not available yet
+                </p>
+              ) : (
+                <p className="text-sm text-white/60">
+                  You've reached the final episode
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

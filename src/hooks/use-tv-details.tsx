@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTVDetails, getTVRecommendations, getSeasonDetails, getTVTrailer, getTVCast } from '@/utils/api';
+import { getTVDetails, getTVRecommendations, getSeasonDetails, getTVTrailer, getTVCast, getTVEpisode } from '@/utils/api';
 import { TVDetails, Episode, Media, CastMember } from '@/utils/types';
 import { useWatchHistory } from '@/hooks/watch-history';
 import { useToast } from '@/hooks/use-toast';
@@ -156,7 +156,7 @@ export const useTVDetails = (id: string | undefined) => {
     }
   };
 
-  const getLastWatchedEpisode = () => {
+  const getLastWatchedEpisode = useCallback(async (): Promise<{ season: number; episode: number; progress: number; episodeTitle: string; episodeThumbnail: string | null; timeRemaining: number; watchPosition: number; duration: number } | null> => {
     if (!tvShow || !watchHistory.length) return null;
 
     const tvWatchHistory = watchHistory.filter(
@@ -169,12 +169,48 @@ export const useTVDetails = (id: string | undefined) => {
       return new Date(current.created_at) > new Date(latest.created_at) ? current : latest;
     });
 
-    return {
-      season: lastWatched.season,
-      episode: lastWatched.episode,
-      progress: Math.round((lastWatched.watch_position / lastWatched.duration) * 100)
-    };
-  };
+    try {
+      // Fetch episode details
+      const episodeData = await getTVEpisode(tvShow.id, lastWatched.season, lastWatched.episode);
+      
+      // Calculate time remaining
+      const timeRemaining = Math.max(0, lastWatched.duration - lastWatched.watch_position);
+      
+      // Guard for division by zero and clamp progress to [0, 100]
+      const progress = lastWatched.duration > 0
+        ? Math.min(100, Math.max(0, Math.round((lastWatched.watch_position / lastWatched.duration) * 100)))
+        : 0;
+      
+      return {
+        season: lastWatched.season,
+        episode: lastWatched.episode,
+        progress,
+        episodeTitle: episodeData.name || `Episode ${lastWatched.episode}`,
+        episodeThumbnail: episodeData.still_path,
+        timeRemaining,
+        watchPosition: lastWatched.watch_position,
+        duration: lastWatched.duration
+      };
+    } catch (error) {
+      console.error('Error fetching episode details:', error);
+      // Return basic data with fallback values if episode fetch fails
+      // Guard for division by zero and clamp progress to [0, 100]
+      const progress = lastWatched.duration > 0
+        ? Math.min(100, Math.max(0, Math.round((lastWatched.watch_position / lastWatched.duration) * 100)))
+        : 0;
+        
+      return {
+        season: lastWatched.season,
+        episode: lastWatched.episode,
+        progress,
+        episodeTitle: `Episode ${lastWatched.episode}`,
+        episodeThumbnail: null,
+        timeRemaining: Math.max(0, lastWatched.duration - lastWatched.watch_position),
+        watchPosition: lastWatched.watch_position,
+        duration: lastWatched.duration
+      };
+    }
+  }, [tvShow, watchHistory]);
 
   return {
     tvShow,

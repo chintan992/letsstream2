@@ -34,11 +34,12 @@ const Player = () => {
     isLoading,
     isPlayerLoaded,
     iframeUrl,
-    // ...existing code...
-    // ...existing code...
     selectedSource,
     isFavorite,
     isInMyWatchlist,
+    hasNextSeason,
+    nextSeasonNumber,
+    nextSeasonHasEpisodes,
     handleSourceChange,
     goToDetails,
     goToNextEpisode,
@@ -147,6 +148,10 @@ const Player = () => {
               currentEpisodeIndex={currentEpisodeIndex}
               onPreviousEpisode={goToPreviousEpisode}
               onNextEpisode={goToNextEpisode}
+              isLastEpisodeOfSeason={currentEpisodeIndex >= episodes.length - 1}
+              hasNextSeason={hasNextSeason}
+              nextSeasonNumber={nextSeasonNumber}
+              nextSeasonHasEpisodes={nextSeasonHasEpisodes}
             />
           )}
           <div className="space-y-4">

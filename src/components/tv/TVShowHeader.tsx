@@ -1,10 +1,11 @@
 
-import { Tv, Heart, Bookmark, History, Play, Calendar, Star, List, Shield } from 'lucide-react';
+import { Tv, Heart, Bookmark, History, Play, Calendar, Star, List, Shield, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { backdropSizes, posterSizes } from '@/utils/api';
 import { getImageUrl } from '@/utils/services/tmdb';
 import { TVDetails } from '@/utils/types';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -15,7 +16,8 @@ interface TVShowHeaderProps {
   onToggleFavorite: () => void;
   onToggleWatchlist: () => void;
   onPlayEpisode: (season: number, episode: number) => void;
-  lastWatchedEpisode: { season: number; episode: number; progress: number } | null;
+  lastWatchedEpisode: { season: number; episode: number; progress: number; episodeTitle: string; episodeThumbnail: string | null; timeRemaining: number; watchPosition: number; duration: number } | null;
+  isLastWatchedLoading?: boolean;
 }
 
 export const TVShowHeader = ({
@@ -25,7 +27,8 @@ export const TVShowHeader = ({
   onToggleFavorite,
   onToggleWatchlist,
   onPlayEpisode,
-  lastWatchedEpisode
+  lastWatchedEpisode,
+  isLastWatchedLoading = false
 }: TVShowHeaderProps) => {
   const [backdropLoaded, setBackdropLoaded] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
@@ -37,6 +40,13 @@ export const TVShowHeader = ({
     } catch (error) {
       return 'Invalid date';
     }
+  };
+  
+  const formatTimeRemaining = (seconds: number) => {
+    if (!seconds) return '';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')} remaining`;
   };
   
   return (
@@ -133,26 +143,98 @@ export const TVShowHeader = ({
             <p className="text-white/80 mb-6">{tvShow.overview}</p>
               
             <div className="flex flex-wrap gap-3">
-              <Button 
-                onClick={() => onPlayEpisode(1, 1)}
-                className="bg-accent hover:bg-accent/80 text-white flex items-center"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Play Latest Episode
-              </Button>
-
-              {lastWatchedEpisode && (
-                <Button 
-                  onClick={() => {
-                    onPlayEpisode(lastWatchedEpisode.season, lastWatchedEpisode.episode);
-                  }}
-                  variant="outline"
-                  className="border-accent text-accent hover:bg-accent/10 flex items-center"
+              {/* Show "Start from Beginning" button only when there's no last watched episode */}
+              {!lastWatchedEpisode && !isLastWatchedLoading && (
+                <Button
+                  onClick={() => onPlayEpisode(1, 1)}
+                  className="bg-accent hover:bg-accent/80 text-white flex items-center"
                 >
-                  <History className="h-4 w-4 mr-2" />
-                  Continue S{lastWatchedEpisode.season} E{lastWatchedEpisode.episode} ({lastWatchedEpisode.progress}%)
+                  <Play className="h-4 w-4 mr-2" />
+                  Start from Beginning
                 </Button>
               )}
+
+              {/* Last Watched Episode or Loading State */}
+              {isLastWatchedLoading ? (
+                // Loading skeleton for continue watching card
+                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                  <div className="flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-white/20 rounded-lg p-3 min-w-[280px] max-w-[400px] animate-pulse">
+                    <div className="relative flex-shrink-0 w-24 h-16 rounded overflow-hidden bg-muted/20">
+                      <div className="w-full h-full bg-muted/30 rounded" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="h-3 bg-muted/30 rounded w-20"></div>
+                      <div className="h-4 bg-muted/30 rounded w-32"></div>
+                      <div className="h-3 bg-muted/30 rounded w-24"></div>
+                      <div className="h-1 bg-muted/30 rounded"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Start from Beginning Button */}
+                  <Button
+                    onClick={() => onPlayEpisode(1, 1)}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10 flex items-center whitespace-nowrap"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Start from Beginning
+                  </Button>
+                </div>
+              ) : lastWatchedEpisode ? (
+                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                  {/* Enhanced Continue Watching Card */}
+                  <div
+                    onClick={() => onPlayEpisode(lastWatchedEpisode.season, lastWatchedEpisode.episode)}
+                    className="flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-white/20 rounded-lg p-3 hover:border-accent/70 transition-all duration-300 cursor-pointer group min-w-[280px] max-w-[400px]"
+                  >
+                    {/* Episode Thumbnail */}
+                    <div className="relative flex-shrink-0 w-24 h-16 rounded overflow-hidden bg-card">
+                      {lastWatchedEpisode.episodeThumbnail ? (
+                        <img
+                          src={getImageUrl(lastWatchedEpisode.episodeThumbnail, backdropSizes.medium)}
+                          alt={lastWatchedEpisode.episodeTitle}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
+                          <Play className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+                    </div>
+                    
+                    {/* Episode Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-white/70 mb-1">Continue Watching</div>
+                      <div className="text-white font-medium text-sm mb-1 truncate">{lastWatchedEpisode.episodeTitle}</div>
+                      <div className="text-xs text-white/60 mb-2">S{lastWatchedEpisode.season}, E{lastWatchedEpisode.episode}</div>
+                      
+                      {/* Progress Bar */}
+                      <div className="relative">
+                        <Progress value={lastWatchedEpisode.progress} className="h-1 mb-1" />
+                        <div className="flex justify-between items-center text-xs text-white/60">
+                          <span>{lastWatchedEpisode.progress}%</span>
+                          <span className="flex items-center">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {formatTimeRemaining(lastWatchedEpisode.timeRemaining)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Start from Beginning Button */}
+                  <Button
+                    onClick={() => onPlayEpisode(1, 1)}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10 flex items-center whitespace-nowrap"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Start from Beginning
+                  </Button>
+                </div>
+              ) : null}
 
               <Button 
                 onClick={onToggleFavorite}
