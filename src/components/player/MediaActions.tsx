@@ -4,6 +4,13 @@ import { Heart, Bookmark, ArrowLeft, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
+/**
+ * Z-INDEX STRATEGY:
+ * - No explicit z-index - relies on natural document flow
+ * - Positioned at top of watch page content area
+ * - Buttons and icons use natural stacking
+ */
+
 interface MediaActionsProps {
   isFavorite: boolean;
   isInWatchlist: boolean;

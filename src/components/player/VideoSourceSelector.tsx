@@ -8,6 +8,13 @@ import { useUserPreferences } from '@/hooks/user-preferences';
 import { useAuth } from '@/hooks';
 import { useState } from 'react';
 
+/**
+ * Z-INDEX STRATEGY:
+ * - No explicit z-index - relies on natural document flow
+ * - Grid layout with natural stacking for hover effects
+ * - Absolute positioned elements (check icon) stack within button context
+ */
+
 interface VideoSourceSelectorProps {
   videoSources: VideoSource[];
   selectedSource: string;

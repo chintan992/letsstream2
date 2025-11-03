@@ -8,6 +8,13 @@ import { Episode } from '@/utils/types';
 import { getImageUrl } from '@/utils/services/tmdb';
 import { backdropSizes } from '@/utils/api';
 
+/**
+ * Z-INDEX STRATEGY:
+ * - Episode number badges: z-20 (always visible on thumbnails)
+ * - Episode overlays (play indicator, watched): z-10 (base overlay layer)
+ * - Container: no explicit z-index (natural flow within parent)
+ */
+
 interface EpisodeSidebarProps {
   episodes: Episode[];
   currentEpisodeIndex: number;
@@ -71,9 +78,9 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   }, [currentEpisode, filteredEpisodes, searchQuery]);
 
   return (
-    <div className="w-80 md:w-80 lg:w-96 xl:w-[400px] h-full bg-black/95 flex flex-col border border-white/10">
+    <div className="w-80 md:w-80 lg:w-96 xl:w-[400px] h-full bg-black/95 flex flex-col border border-white/10 z-10">
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
+      <div className="p-4 border-b border-white/10 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Episodes</h2>
           <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
@@ -83,7 +90,7 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
       </div>
 
       {/* Search Bar */}
-      <div className="px-4 pb-3">
+      <div className="px-4 pb-3 flex-shrink-0">
         <div className="relative">
           <Input
             type="text"
@@ -105,7 +112,7 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
       </div>
 
       {/* Episode List */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0" scrollBarVariant="accent">
         <div className="p-4 space-y-4">
           {filteredEpisodes.length === 0 && searchQuery.length > 0 ? (
             <div className="py-12 px-4 text-center">
@@ -151,11 +158,13 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
                       )}
                       
                       {/* Episode Number Badge */}
+                      {/* z-20: Episode number badge - appears above thumbnail but below overlays */}
                       <div className="absolute bottom-1 left-1 bg-black/80 text-white text-xs font-semibold px-2 py-0.5 rounded z-20">
                         EP {episode.episode_number}
                       </div>
 
                       {/* Current Episode Indicator */}
+                      {/* z-10: Current episode play indicator - base layer for thumbnail overlays */}
                       {isCurrentEpisode && (
                         <div className="absolute inset-0 bg-accent/20 flex items-center justify-center z-10">
                           <Play className="w-4 h-4 text-white" />

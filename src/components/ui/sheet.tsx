@@ -26,10 +26,12 @@ const SheetOverlay = React.forwardRef<
     ref={ref}
   />
 ))
+// z-50: Sheet overlay - matches navbar z-index to ensure proper modal behavior
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
   "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+// z-50: Sheet content - appears above all page content as a modal
   {
     variants: {
       side: {

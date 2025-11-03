@@ -129,6 +129,34 @@
   }
 }
 
+/* Custom Animated Scrollbar Styles */
+
+
+.custom-scrollbar-thumb-accent {
+  background: linear-gradient(180deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.7) 100%);
+  opacity: 0.6;
+  transition: background-color 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-thumb-accent:hover {
+  opacity: 1;
+  box-shadow: 0 0 10px hsl(var(--accent) / 0.5);
+}
+
+.custom-scrollbar-thumb-default {
+  background: hsl(var(--border));
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+  border-radius: 9999px;
+  opacity: 0.6;
+}
+
+.custom-scrollbar-thumb-default:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+  opacity: 1;
+}
+
+
 #root {
   @apply w-full min-h-screen overflow-x-hidden;
 }

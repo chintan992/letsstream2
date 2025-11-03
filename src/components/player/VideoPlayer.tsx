@@ -2,6 +2,12 @@ import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 // ...existing code...
 
+/**
+ * Z-INDEX STRATEGY:
+ * - No explicit z-index - relies on natural document flow
+ * - Parent container controls positioning within flex layout
+ * - Loading overlay uses natural stacking within component
+ */
 
 interface VideoPlayerProps {
   isLoading: boolean;

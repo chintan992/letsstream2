@@ -63,12 +63,18 @@ const Player = () => {
       className="min-h-screen bg-background relative"
     >
       <div className="fixed inset-0 bg-gradient-to-b from-background/95 to-background pointer-events-none" />
-      
-      <motion.nav 
+
+      {/* Z-INDEX HIERARCHY:
+         - Navbar & Sheet overlays: z-50 (highest - always visible)
+         - Episode thumbnail overlays: z-20 (internal UI elements)
+         - Episode number badges: z-10 (base UI elements)
+         - Video player & other components: natural flow (no explicit z-index)
+       */}
+      <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 z-30"
+        className="sticky top-0 z-50"
       >
         <Navbar />
       </motion.nav>
@@ -84,35 +90,10 @@ const Player = () => {
         />
 
         {/* Flex Layout for Video Player and Episode Sidebar */}
-        <div className="flex flex-col md:flex-row gap-4 xl:gap-6">
+        <div className="flex flex-col md:flex-row gap-4 xl:gap-6 h-[calc(100vh-16rem)]">
           {/* Video Player Section */}
-          <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px]">
-            {/* Mobile Toggle Button for Episodes */}
-            {mediaType === 'tv' && episodes.length > 0 && (
-              <div className="md:hidden mb-4">
-                <Sheet open={isEpisodeSheetOpen} onOpenChange={setIsEpisodeSheetOpen}>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
-                    >
-                      <List className="h-4 w-4 mr-2" />
-                      Episodes
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-80 p-0 bg-background/95 backdrop-blur-md border-white/10">
-                    <EpisodeSidebar
-                      episodes={episodes}
-                      currentEpisodeIndex={currentEpisodeIndex}
-                      showId={id ? parseInt(id, 10) : 0}
-                      season={season ? parseInt(season, 10) : 1}
-                    />
-                  </SheetContent>
-                </Sheet>
-              </div>
-            )}
-            
+          <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px] z-10">
+
             <VideoPlayer
               isLoading={isLoading}
               iframeUrl={iframeUrl}
@@ -123,26 +104,26 @@ const Player = () => {
             />
           </div>
 
-          {/* Episode Sidebar Section - Desktop Only */}
+          {/* Episode Sidebar Section */}
           {mediaType === 'tv' && episodes.length > 0 && (
-            <div className="hidden md:block flex-shrink-0">
-              <EpisodeSidebar
-                episodes={episodes}
-                currentEpisodeIndex={currentEpisodeIndex}
-                showId={id ? parseInt(id, 10) : 0}
-                season={season ? parseInt(season, 10) : 1}
-              />
+            <div className="flex flex-shrink-0 h-full overflow-hidden z-10">
+              <div className="flex flex-col">
+                <div className="flex-1 min-h-0">
+                  <EpisodeSidebar
+                    episodes={episodes}
+                    currentEpisodeIndex={currentEpisodeIndex}
+                    showId={id ? parseInt(id, 10) : 0}
+                    season={season ? parseInt(season, 10) : 1}
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Existing components below video player */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-6 space-y-6"
-        >
-          {mediaType === 'tv' && episodes.length > 0 && (
+        {/* Episode navigation moved below the player and sidebar */}
+        {mediaType === 'tv' && episodes.length > 0 && (
+          <div className="mt-6">
             <EpisodeNavigation
               episodes={episodes}
               currentEpisodeIndex={currentEpisodeIndex}
@@ -153,7 +134,15 @@ const Player = () => {
               nextSeasonNumber={nextSeasonNumber}
               nextSeasonHasEpisodes={nextSeasonHasEpisodes}
             />
-          )}
+          </div>
+        )}
+
+        {/* Existing components below video player */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 space-y-6"
+        >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>

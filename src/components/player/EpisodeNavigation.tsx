@@ -3,6 +3,13 @@ import { SkipBack, SkipForward } from 'lucide-react';
 import { Episode } from '@/utils/types';
 import { cn } from '@/lib/utils';
 
+/**
+ * Z-INDEX STRATEGY:
+ * - No explicit z-index - relies on natural document flow
+ * - Positioned within flex container in Player.tsx
+ * - All internal elements use natural stacking
+ */
+
 interface EpisodeNavigationProps {
   episodes: Episode[];
   currentEpisodeIndex: number;

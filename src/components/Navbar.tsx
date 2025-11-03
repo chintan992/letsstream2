@@ -62,6 +62,7 @@ const Navbar = () => {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled ? 'nav-scrolled' : 'nav-transparent'
     }`}>
+      {/* z-50: Ensures navbar stays above all page content including modals and overlays */}
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo area - always visible */}
