@@ -78,7 +78,7 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   }, [currentEpisode, filteredEpisodes, searchQuery]);
 
   return (
-    <div className="w-80 md:w-80 lg:w-96 xl:w-[400px] h-full bg-black/95 flex flex-col border border-white/10 z-10">
+    <div className="w-full md:w-80 lg:w-96 xl:w-[400px] h-full md:h-full bg-black/95 flex flex-col border border-white/10 z-10">
       {/* Header */}
       <div className="p-4 border-b border-white/10 flex-shrink-0">
         <div className="flex items-center justify-between">

@@ -1,10 +1,10 @@
 
 import { useParams } from 'react-router-dom';
-import { ExternalLink, List } from 'lucide-react';
+import { ExternalLink, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import Navbar from '@/components/Navbar';
 import { VideoPlayer } from '@/components/player/VideoPlayer';
 import VideoSourceSelector from '@/components/player/VideoSourceSelector';
@@ -14,6 +14,7 @@ import MediaActions from '@/components/player/MediaActions';
 import { useMediaPlayer } from '@/hooks/use-media-player';
 import { videoSources } from '@/utils/video-sources';
 import { useAuth } from '@/hooks';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Player = () => {
   const { id, season, episode, type } = useParams<{
@@ -23,7 +24,8 @@ const Player = () => {
     type: string;
   }>();
   const { user } = useAuth();
-  const [isEpisodeSheetOpen, setIsEpisodeSheetOpen] = useState(false);
+  const [isEpisodeSidebarOpen, setIsEpisodeSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const {
     title,
@@ -89,37 +91,71 @@ const Player = () => {
           onViewDetails={goToDetails}
         />
 
-        {/* Flex Layout for Video Player and Episode Sidebar */}
-        <div className="flex flex-col md:flex-row gap-4 xl:gap-6 h-[calc(100vh-16rem)]">
-          {/* Video Player Section */}
-          <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px] z-10">
-
-            <VideoPlayer
-              isLoading={isLoading}
-              iframeUrl={iframeUrl}
-              title={title}
-              poster={posterUrl}
-              onLoaded={handlePlayerLoaded}
-              onError={handlePlayerError}
-            />
+        {/* Desktop Layout: Video Player and Episode Sidebar side-by-side */}
+        {!isMobile && mediaType === 'tv' && episodes.length > 0 ? (
+          <div className="flex flex-row gap-4 xl:gap-6">
+            <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px] z-10">
+              <VideoPlayer
+                isLoading={isLoading}
+                iframeUrl={iframeUrl}
+                title={title}
+                poster={posterUrl}
+                onLoaded={handlePlayerLoaded}
+                onError={handlePlayerError}
+              />
+            </div>
+            <div>
+              <EpisodeSidebar
+                episodes={episodes}
+                currentEpisodeIndex={currentEpisodeIndex}
+                showId={id ? parseInt(id, 10) : 0}
+                season={season ? parseInt(season, 10) : 1}
+              />
+            </div>
           </div>
+        ) : (
+          <>
+            {/* Video Player Section for Mobile or Non-TV content */}
+            <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px] z-10">
+              <VideoPlayer
+                isLoading={isLoading}
+                iframeUrl={iframeUrl}
+                title={title}
+                poster={posterUrl}
+                onLoaded={handlePlayerLoaded}
+                onError={handlePlayerError}
+              />
+            </div>
 
-          {/* Episode Sidebar Section */}
-          {mediaType === 'tv' && episodes.length > 0 && (
-            <div className="flex flex-shrink-0 h-full overflow-hidden z-10">
-              <div className="flex flex-col">
-                <div className="flex-1 min-h-0">
+            {/* Collapsible Episode Sidebar for Mobile/Tablet */}
+            {isMobile && mediaType === 'tv' && episodes.length > 0 && (
+              <Collapsible open={isEpisodeSidebarOpen} onOpenChange={setIsEpisodeSidebarOpen} className="mt-4">
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-black/95 border border-white/10 backdrop-blur-sm p-4 rounded-lg flex items-center justify-between hover:bg-white/5 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-medium">Episodes</span>
+                      <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
+                        {episodes.length}
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-300 ${isEpisodeSidebarOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 overflow-hidden data-[state=open]:animate-slide-down data-[state=closed]:animate-slide-up max-h-[60vh] overflow-y-auto">
                   <EpisodeSidebar
                     episodes={episodes}
                     currentEpisodeIndex={currentEpisodeIndex}
                     showId={id ? parseInt(id, 10) : 0}
                     season={season ? parseInt(season, 10) : 1}
                   />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+          </>
+        )}
 
         {/* Episode navigation moved below the player and sidebar */}
         {mediaType === 'tv' && episodes.length > 0 && (
