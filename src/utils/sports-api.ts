@@ -120,7 +120,7 @@ export const getMatchStreams = async (source: string | null, id: string): Promis
           console.warn(`No streams found for source ${src} and match ${id}`);
         }
       } catch (error) {
-        console.error(`Error fetching streams for match ${id} from source ${src}:`, error);
+        console.error('Error fetching streams for match %s from source %s:', id, src, error);
       }
     }
     return allStreams;
