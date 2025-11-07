@@ -1,6 +1,12 @@
 {
     "videoSources": [
         {
+            "key": "vidnest",
+            "name": "VidNest",
+            "movieUrlPattern": "https://vidnest.fun/movie/{id}",
+            "tvUrlPattern": "https://vidnest.fun/tv/{id}/{season}/{episode}"
+        },
+        {
             "key": "flixer",
             "name": "Flixer",
             "movieUrlPattern": "https://letsstream-flixer.chintanr21.workers.dev/{id}",
