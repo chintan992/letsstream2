@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback, ReactNode } from 'react';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/hooks';
 import { useUserPreferences } from '@/hooks/user-preferences';
-import { getApp } from 'firebase/app';
 import { 
-  getFirestore, 
   collection, 
   doc, 
   setDoc, 
@@ -20,6 +18,7 @@ import {
   QueryDocumentSnapshot,
   DocumentData
 } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { generateId } from '@/utils/supabase';
 import { Media } from '@/utils/types';
 import { useToast } from '@/components/ui/use-toast';
@@ -47,8 +46,7 @@ const MINIMUM_UPDATE_INTERVAL = 30000; // 30 seconds
 const lastUpdateTimestamps = new Map<string, number>();
 const pendingOperations: Array<() => Promise<void>> = [];
 
-const app = getApp();
-const db = getFirestore(app);
+
 
 const readRateLimiter = RateLimiter.getInstance(200, 300000);
 const writeRateLimiter = RateLimiter.getInstance(100, 300000);

@@ -1,30 +1,42 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getFirestore, initializeFirestore, memoryLocalCache } from 'firebase/firestore';
 
-// Load Firebase configuration from environment variables with fallbacks
+// Load Firebase configuration from environment variables - no fallbacks to ensure proper project usage
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyC0TaRtjDOcQgtTB0UI2XBv4zYYbeTg3FU",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "lets-stream-c09e3.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "lets-stream-c09e3",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "lets-stream-c09e3.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1080273996839",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1080273996839:web:2b42f26b59f4e22ff91202",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-691PPKTFXS"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// Validate that all required Firebase config values are present
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId || 
+    !firebaseConfig.storageBucket || !firebaseConfig.messagingSenderId || !firebaseConfig.appId) {
+  const missingKeys = [];
+  if (!firebaseConfig.apiKey) missingKeys.push('VITE_FIREBASE_API_KEY');
+  if (!firebaseConfig.authDomain) missingKeys.push('VITE_FIREBASE_AUTH_DOMAIN');
+  if (!firebaseConfig.projectId) missingKeys.push('VITE_FIREBASE_PROJECT_ID');
+  if (!firebaseConfig.storageBucket) missingKeys.push('VITE_FIREBASE_STORAGE_BUCKET');
+  if (!firebaseConfig.messagingSenderId) missingKeys.push('VITE_FIREBASE_MESSAGING_SENDER_ID');
+  if (!firebaseConfig.appId) missingKeys.push('VITE_FIREBASE_APP_ID');
+  
+  console.warn(`Missing required Firebase configuration environment variables: ${missingKeys.join(', ')}. 
+  Please ensure all required Firebase environment variables are set in your .env file. 
+  Refer to .env.example for the required variables.`);
+}
 
 // Initialize Firebase with specified config or get existing instance
 let app: ReturnType<typeof initializeApp>;
-try {
+const existingApps = getApps();
+if (existingApps.length > 0) {
+  app = getApp();
+} else {
   app = initializeApp(firebaseConfig);
-} catch (error) {
-  // If an app already exists, get that instance
-  if (error instanceof Error && error.message.includes('duplicate-app')) {
-    app = initializeApp();
-  } else {
-    throw error;
-  }
 }
 
 export const auth = getAuth(app);

@@ -23,19 +23,21 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
 
 - **Frontend**:
   - React 18.x
-  - TypeScript
-  - Vite
-  - TailwindCSS
+  - TypeScript 5.9.x
+  - Vite 7.x
+  - TailwindCSS 4.x
   - Radix UI Components
   - Framer Motion
-  - React Query
+  - React Query (installed but not used)
 
 - **Backend & Services**:
-  - Firebase (Authentication, Firestore)
-  - Supabase
+  - Firebase 12.x (Authentication, Firestore, Analytics)
+  - Supabase (not currently used - only localStorage utilities in codebase)
+
+*Note: Several dependencies are installed but unused and should be removed in a future cleanup: @supabase/supabase-js, @tanstack/react-query, axios, date-fns, next-themes, web-vitals, @google/generative-ai, @google/genai*
 
 - **Development & Build Tools**:
-  - ESLint
+  - ESLint 9.x
   - PostCSS
   - TypeScript
   - Vite PWA Plugin
@@ -44,10 +46,10 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
 
 ### Prerequisites
 
-- Node.js 20.19+ or 22.12+ (required for Vite 7)
+- Node.js 20.19+ or 22.12+ (required for Vite 7 and Firebase 12) - Check with `node --version`
 - npm or yarn
 - Firebase account and project
-- Supabase account and project
+- Supabase account and project (not currently used in codebase)
 
 ### Installation
 
@@ -57,16 +59,18 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
 npm install
 ```
 
-3. Create a `.env` file based on `.example.env` and fill in your Firebase credentials:
+3. Create a `.env` file based on `.env.example` and fill in your Firebase credentials:
 ```
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-VITE_FIREBASE_MEASUREMENT_ID=
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
+*Note: These values come from Firebase Console > Project Settings > General*
 
 ### Development
 
@@ -87,6 +91,43 @@ npm run preview
 
 > **Note**: Ensure you're using Node.js 20.19+ or 22.12+. Check with `node --version`
 
+### Verification
+
+Run all verification checks before committing:
+```bash
+npm run verify
+```
+
+This runs TypeScript type checking, linting, and production build.
+
+Run individual checks:
+```bash
+# Type checking
+npm run tsc
+
+# Linting
+npm run lint
+
+# Production build
+npm run build
+
+# Formatting check (placeholder - Prettier not configured)
+npm run format:check
+
+# Test coverage (placeholder - No test framework configured) 
+npm run test:coverage
+```
+
+> **Note:** The `format:check` and `test:coverage` scripts are temporary placeholders. The project currently does not have Prettier for code formatting or a test framework (such as Vitest) configured. These will be added in future updates.
+
+### Testing
+
+Currently, there are no automated tests in the codebase. However, the CI workflow includes runtime error checking using Playwright to catch any JavaScript runtime errors during page load. 
+
+For comprehensive testing, manual testing should be performed using the TESTING_CHECKLIST.md file after major updates.
+
+Future improvements should include adding Vitest for unit testing and React Testing Library for component testing.
+
 ### Deployment
 
 #### Deploy on Netlify
@@ -103,7 +144,7 @@ npm run preview
 3. Configure the build settings:
    - Build command: `npm run build`
    - Build output directory: `dist`
-   - Node.js version: `18.x`
+   - Node.js version: `20.x` (or `20.19+`)
 4. Add your environment variables in the Pages settings
 5. Your site will be automatically deployed
 
@@ -120,7 +161,7 @@ npm run preview
 ## Features in Detail
 
 ### Authentication
-- User signup/login with Firebase
+- User signup/login with Firebase Authentication
 - Protected routes for authenticated users
 - User profile management
 
@@ -129,6 +170,12 @@ npm run preview
 - HD quality indicators
 - Continuous playback
 - Watch history tracking
+
+### Backend Services
+- **Firebase Authentication**: User management and authentication
+- **Cloud Firestore**: Data persistence for watch history, favorites, and watchlist
+- **Firebase Analytics**: Usage tracking and analytics
+- **Supabase**: Not currently used (only localStorage utilities exist in the codebase - see `src/utils/supabase.ts`)
 
 ### Sports Streaming
 - Live sports events
@@ -147,6 +194,16 @@ npm run preview
 - Watch history
 - Favorites list
 - Watch later list
+
+## Known Issues
+
+Several dependencies were manually updated beyond the recommended versions in the migration guide:
+- React Router v7 (recommended v6) - potential breaking changes with import paths and future flags
+- recharts v3 (recommended v2) - potential breaking changes with tooltip typing and component props
+- react-day-picker v9 (recommended v8) - potential breaking changes with controlled props and class names
+- Zod v4 (not used in codebase) - no impact as no schemas exist
+
+These manual updates may introduce compatibility issues that require additional testing.
 
 ## Contributing
 

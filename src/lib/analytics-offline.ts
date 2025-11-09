@@ -146,11 +146,7 @@ class OfflineAnalyticsQueue {
       }, timeout);
 
       try {
-        const analyticsParams: AnalyticsCallOptions = {
-          ...eventParams,
-          global: true // Ensure the required global property is set
-        };
-        logEvent(analytics, eventName, analyticsParams);
+        logEvent(analytics, eventName, eventParams, { global: true });
         clearTimeout(timeoutId);
         resolve();
       } catch (error) {

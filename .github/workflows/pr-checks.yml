@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: ['20.x']
 
     steps:
     - uses: actions/checkout@v4
@@ -29,7 +29,6 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          **/node_modules
           ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
@@ -43,7 +42,7 @@ jobs:
       continue-on-error: true
     
     - name: Type check
-      run: npm run tsc --noEmit
+      run: npm run tsc
     
     - name: Lint
       run: npm run lint
@@ -63,7 +62,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: ['20.x']
 
     steps:
     - uses: actions/checkout@v4
@@ -89,6 +88,7 @@ jobs:
         name: coverage-report
         path: coverage/
         retention-days: 30
+        if-no-files-found: ignore
 
   size:
     name: Bundle Size
@@ -101,7 +101,7 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: '20.19'
         cache: 'npm'
     
     - name: Install dependencies

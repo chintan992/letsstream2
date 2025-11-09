@@ -1,4 +1,4 @@
-import { getAnalytics, logEvent, setCurrentScreen } from '@firebase/analytics';
+import { getAnalytics, logEvent, setCurrentScreen } from 'firebase/analytics';
 import { getAnalyticsInstance } from './firebase';
 import { offlineQueue } from './analytics-offline';
 
