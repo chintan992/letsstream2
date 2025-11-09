@@ -7,6 +7,12 @@
             "tvUrlPattern": "https://vidnest.fun/tv/{id}/{season}/{episode}"
         },
         {
+            "key": "cinezo",
+            "name": "Cinezo",
+            "movieUrlPattern": "https://api.cinezo.net/embed/tmdb-movie-{id}",
+            "tvUrlPattern": "https://api.cinezo.net/embed/tmdb-tv-{id}/{season}/{episode}"
+        },
+        {
             "key": "flixer",
             "name": "Flixer",
             "movieUrlPattern": "https://letsstream-flixer.chintanr21.workers.dev/{id}",
