@@ -1,6 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-border: 240 3.7% 15.9%;
+  --color-input: 240 3.7% 15.9%;
+  --color-ring: 240 4.9% 83.9%;
+  --color-background: 240 10% 3.9%;
+  --color-foreground: 0 0% 98%;
+  --color-primary: 0 0% 98%;
+  --color-primary-foreground: 240 5.9% 10%;
+  --color-secondary: 240 3.7% 15.9%;
+  --color-secondary-foreground: 0 0% 98%;
+  --color-destructive: 0 62.8% 30.6%;
+  --color-destructive-foreground: 0 0% 98%;
+  --color-muted: 240 3.7% 15.9%;
+  --color-muted-foreground: 240 5% 64.9%;
+  --color-accent: 347 80% 55%;
+  --color-accent-foreground: 210 40% 98%;
+  --color-popover: 240 10% 3.9%;
+  --color-popover-foreground: 0 0% 98%;
+  --color-card: 240 10% 3.9%;
+  --color-card-foreground: 0 0% 98%;
+  --color-sidebar: 240 10% 3.9%;
+  --color-sidebar-foreground: 0 0% 98%;
+  --color-sidebar-primary: 0 0% 98%;
+  --color-sidebar-primary-foreground: 240 5.9% 10%;
+  --color-sidebar-accent: 347 80% 55%;
+  --color-sidebar-accent-foreground: 210 40% 98%;
+  --color-sidebar-border: 240 3.7% 15.9%;
+  --color-sidebar-ring: 240 4.9% 83.9%;
+  --radius: 0.75rem;
+  --tracking-tight: -0.025em;
+  --leading-relaxed: 1.625;
+  --backdrop-blur-xl: 24px;
+}
 
 @keyframes fade-in {
   from { opacity: 0; }
@@ -45,16 +77,20 @@
   }
 
   * {
-    @apply border-border selection:bg-accent/10;
+    border-color: hsl(240 3.7% 15.9%);
+    selection-background-color: hsl(347 80% 55% / 0.1);
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: hsl(240 10% 3.9%);
+    color: hsl(0 0% 98%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
   }
 
   html {
-    @apply scroll-smooth;
+    scroll-behavior: smooth;
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -80,17 +116,32 @@
   }
   
   .hero-badge {
-    @apply px-2 py-1 rounded-sm bg-white/10 text-xs font-medium uppercase tracking-wider;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-radius: 0.125rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)];
+    backdrop-filter: blur(24px);
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
   }
 
   .neo-blur {
-    @apply backdrop-blur-2xl bg-black/40 border border-white/10;
+    backdrop-filter: blur(40px);
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .text-balance {
@@ -158,7 +209,9 @@
 
 
 #root {
-  @apply w-full min-h-screen overflow-x-hidden;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .page-transition-enter {

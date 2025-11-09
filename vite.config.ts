@@ -3,7 +3,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json';
 
@@ -45,6 +44,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     // Increase the warning limit to reduce unnecessary warnings
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
@@ -98,7 +98,6 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
     VitePWA({
       strategies: 'generateSW',
       registerType: 'autoUpdate',
@@ -355,12 +354,7 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
-        navigationPreload: true,
-        offlineGoogleAnalytics: {
-          parameterOverrides: {
-            cd1: 'offline'
-          }
-        }
+        navigationPreload: true
       },
       devOptions: {
         enabled: true,

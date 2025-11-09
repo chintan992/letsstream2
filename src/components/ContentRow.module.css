@@ -1,5 +1,7 @@
 /* ContentRow CSS Module */
 
+@import "tailwindcss";
+
 .container {
   @apply px-0 md:px-0 mb-8 opacity-0 w-full;
   animation: fade-in 0.6s ease-out forwards;

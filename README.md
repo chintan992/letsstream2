@@ -44,7 +44,7 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
 
 ### Prerequisites
 
-- Node.js (Latest LTS version recommended)
+- Node.js 20.19+ or 22.12+ (required for Vite 7)
 - npm or yarn
 - Firebase account and project
 - Supabase account and project
@@ -84,6 +84,8 @@ Preview production build:
 ```bash
 npm run preview
 ```
+
+> **Note**: Ensure you're using Node.js 20.19+ or 22.12+. Check with `node --version`
 
 ### Deployment
 
