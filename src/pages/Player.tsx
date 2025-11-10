@@ -104,7 +104,7 @@ const Player = () => {
                 onError={handlePlayerError}
               />
             </div>
-            <div>
+            <div className="h-[calc(9/16*56.25vw)] max-h-[80vh] min-h-[400px] w-[280px] md:w-80 lg:w-96 xl:w-[400px] flex-shrink-0">
               <EpisodeSidebar
                 episodes={episodes}
                 currentEpisodeIndex={currentEpisodeIndex}
