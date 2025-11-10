@@ -10,7 +10,7 @@
  */
 
 .container {
-  @apply px-0 md:px-0 mb-8 opacity-0 w-full;
+  @apply mb-8 opacity-0 w-full;
   animation: fade-in-slide 0.6s ease-out forwards;
   animation-delay: 0.2s;
   animation-fill-mode: forwards;

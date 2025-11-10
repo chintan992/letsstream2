@@ -97,21 +97,23 @@ const Index = () => {
         ) : (
           <>
             <div className="pt-16 flex-shrink-0 w-full"> {/* Add padding-top to account for navbar */}
-              {trendingMedia.length > 0 && <Hero media={trendingMedia.slice(0, 10)} className="hero w-full px-0 md:px-0" />}
+              {trendingMedia.length > 0 && <Hero media={trendingMedia.slice(0, 10)} className="hero w-full" />}
             </div>
 
             <div className={`flex-1 flex flex-col mt-8 md:mt-12 transition-opacity duration-300 w-full px-0 md:px-0 ${contentVisible ? 'opacity-100' : 'opacity-0'}`}>
-              {user && <ContinueWatching />}
-              <ContentRow title="Trending Now" media={trendingMedia} featured />
-              <ContentRow title="Popular Movies" media={popularMovies} />
-              <ContentRow title="Popular TV Shows" media={popularTVShows} />
-              <ContentRow title="Top Rated TV Shows" media={topRatedTVShows} />
-              {/* Lazy load secondary content */}
-              {secondaryLoaded && (
-                <Suspense fallback={<div className="py-8"><Spinner size="lg" className="mx-auto" /></div>}>
-                  <SecondaryContent />
-                </Suspense>
-              )}
+              <div className="container mx-auto px-6 md:px-10 lg:px-16">
+                {user && <ContinueWatching />}
+                <ContentRow title="Trending Now" media={trendingMedia} featured />
+                <ContentRow title="Popular Movies" media={popularMovies} />
+                <ContentRow title="Popular TV Shows" media={popularTVShows} />
+                <ContentRow title="Top Rated TV Shows" media={topRatedTVShows} />
+                {/* Lazy load secondary content */}
+                {secondaryLoaded && (
+                  <Suspense fallback={<div className="py-8"><Spinner size="lg" className="mx-auto" /></div>}>
+                    <SecondaryContent />
+                  </Suspense>
+                )}
+              </div>
             </div>
           </>
         )}
