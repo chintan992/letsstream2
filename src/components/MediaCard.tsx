@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useWatchHistory } from '@/hooks/watch-history';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
@@ -6,9 +6,10 @@ import { triggerHapticFeedback, triggerSuccessHaptic } from '@/utils/haptic-feed
 import { Media } from '@/utils/types';
 import { posterSizes } from '@/utils/api';
 import { getImageUrl } from '@/utils/services/tmdb';
-import { Star, Info, Heart } from 'lucide-react';
+import { Star, Info, Heart, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { trackMediaPreference, trackMediaView } from '@/lib/analytics';
+import { useWillChange } from '@/hooks/useWillChange';
 
 interface MediaCardProps {
   media: Media;
@@ -196,7 +197,8 @@ const MediaCard = React.memo(({ media, className, featured = false, minimal = fa
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" />
           <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
             <p className="text-white/80 text-xs line-clamp-3">{media.overview}</p>
-            <div className="flex justify-center mt-2">
+            <div className="flex justify-center gap-2 mt-2">
+              <PlayButtonWithWillChange />
               <button
                 className="glass px-3 py-1 rounded text-xs flex items-center gap-1 text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
                 aria-label="Show details"
@@ -229,5 +231,58 @@ const MediaCard = React.memo(({ media, className, featured = false, minimal = fa
     </Link>
   );
 });
+
+// Play button with will-change management for animations
+const PlayButtonWithWillChange = () => {
+  const playButtonRef = useRef<HTMLButtonElement>(null);
+  const { setupVisibilityHandler, isReducedMotion } = useWillChange(
+    playButtonRef,
+    'transform, filter',
+    {
+      respectReducedMotion: true,
+      cleanupOnUnmount: false // Since this is a reusable component
+    }
+  );
+
+  // Set up visibility handler to apply will-change only when visible
+  React.useEffect(() => {
+    if (isReducedMotion) return;
+    
+    const cleanup = setupVisibilityHandler((isVisible) => {
+      if (playButtonRef.current) {
+        if (isVisible) {
+          // Apply will-change when element becomes visible
+          playButtonRef.current.style.willChange = 'transform, filter';
+        } else {
+          // Remove will-change when element goes out of view
+          playButtonRef.current.style.willChange = 'auto';
+        }
+      }
+    });
+    
+    return cleanup;
+  }, [setupVisibilityHandler, isReducedMotion]);
+
+  // On hover, ensure will-change is applied
+  const handleMouseEnter = () => {
+    if (!isReducedMotion && playButtonRef.current) {
+      playButtonRef.current.style.willChange = 'transform, filter';
+    }
+  };
+
+  return (
+    <button
+      ref={playButtonRef}
+      className="play-icon glass px-3 py-1 rounded text-xs flex items-center gap-1 text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+      aria-label="Play media"
+      tabIndex={0}
+      type="button"
+      role="button"
+      onMouseEnter={handleMouseEnter}
+    >
+      <Play size={12} /> Play
+    </button>
+  );
+};
 
 export default MediaCard;

@@ -13,6 +13,7 @@ import { useMediaPreferences } from '@/hooks/use-media-preferences';
 import { trackMediaPreference } from '@/lib/analytics';
 import useKeyPress from '@/hooks/use-key-press';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useWillChange } from '@/hooks/useWillChange';
 
 interface ExtendedMedia extends Media {
   logo_path?: string;
@@ -55,6 +56,26 @@ const Hero = ({ media, className = '' }: HeroProps) => {
   const swipeTimeout = useRef<NodeJS.Timeout | null>(null);
   const swipeProgress = useRef<number>(0);
   const [visualSwipeFeedback, setVisualSwipeFeedback] = useState(0);
+
+  // Refs for pagination progress indicators
+  const paginationProgressRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  // Manage will-change for active pagination indicator
+  const {
+    setWillChange: setActiveIndicatorWillChange,
+    removeWillChange: removeActiveIndicatorWillChange,
+    resetIdleTimeout: resetActiveIndicatorTimeout,
+    setupInteractionHandler: setupProgressInteractionHandler
+  } = useWillChange(
+    { current: paginationProgressRefs.current[currentIndex] } as React.RefObject<HTMLDivElement>,
+    'transform, opacity',
+    {
+      animationName: 'paginationPulse',
+      idleTimeout: 500,  // 500ms idle timeout for infinite animation
+      cleanupOnUnmount: true,
+      respectReducedMotion: true
+    }
+  );
 
   // Helper to build srcSet for a given backdrop_path
   const buildSrcSet = useCallback((backdrop_path: string) => [
@@ -109,6 +130,8 @@ const Hero = ({ media, className = '' }: HeroProps) => {
   // Handle mouse interactions
   const handleMouseEnter = () => {
     pauseAutoRotation();
+    // Reset will-change timeout when user interacts with the carousel
+    resetActiveIndicatorTimeout();
   };
 
   const handleMouseLeave = () => {
@@ -262,6 +285,23 @@ const Hero = ({ media, className = '' }: HeroProps) => {
       return () => { document.head.removeChild(link); };
     }
   }, [currentIndex, featuredMedia, buildSrcSet]);
+
+  // Apply will-change to the active pagination indicator when it's being animated
+  useEffect(() => {
+    // Update will-change for the currently active indicator
+    const activeProgressElement = paginationProgressRefs.current[currentIndex];
+    if (activeProgressElement) {
+      setActiveIndicatorWillChange();
+      
+      // Set up interaction handlers for the active element
+      const cleanup = setupProgressInteractionHandler(activeProgressElement);
+      
+      return () => {
+        cleanup();
+        removeActiveIndicatorWillChange();
+      };
+    }
+  }, [currentIndex, setActiveIndicatorWillChange, removeActiveIndicatorWillChange, setupProgressInteractionHandler]);
 
   // Always call hooks at the top level
   useEffect(() => {
@@ -483,6 +523,7 @@ const Hero = ({ media, className = '' }: HeroProps) => {
       >
         {index === currentIndex && (
           <motion.div
+            ref={el => paginationProgressRefs.current[index] = el}
             className="h-full bg-white"
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}

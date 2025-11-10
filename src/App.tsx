@@ -17,7 +17,6 @@ import ProactiveSuggestions from './components/chatbot/ProactiveSuggestions';
 import AppRoutes from './routes.tsx';
 // ...existing code...
 import { trackPageView } from './lib/analytics';
-import './App.css';
 import './styles/notifications.css';
 import { FeatureNotificationsListener } from './hooks/FeatureNotificationsListener';
 

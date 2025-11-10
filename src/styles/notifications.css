@@ -1,3 +1,10 @@
+@import "./animations.css";
+
+/* Performance optimizations:
+ * - CSS containment on viewport and individual toasts
+ * - Hardware-accelerated transforms in slideIn/slideOut keyframes
+ */
+
 /* Notification viewport */
 .notification-viewport {
   position: fixed;
@@ -13,40 +20,48 @@
   list-style: none;
   z-index: 9999;
   outline: none;
+  contain: layout style;
 }
 
 /* Base toast styles */
 .notification-toast {
-  background-color: white;
+  background-color: hsl(var(--card));
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px hsl(var(--background) / 0.15);
   padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   border-left: 4px solid;
+  /* Uses hardware-accelerated slideIn animation */
   animation: slideIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  contain: layout style paint;
+}
+
+.notification-toast[data-state='closed'] {
+  /* Uses hardware-accelerated slideOut animation */
+  animation: slideOut 150ms ease-out;
 }
 
 /* Notification types */
 .notification-success {
-  border-left-color: #10B981;
-  background-color: #F0FDF4;
+  border-left-color: hsl(var(--success));
+  background-color: hsl(var(--success) / 0.1);
 }
 
 .notification-error {
-  border-left-color: #EF4444;
-  background-color: #FEF2F2;
+  border-left-color: hsl(var(--error));
+  background-color: hsl(var(--error) / 0.1);
 }
 
 .notification-warning {
-  border-left-color: #F59E0B;
-  background-color: #FFFBEB;
+  border-left-color: hsl(var(--warning));
+  background-color: hsl(var(--warning) / 0.1);
 }
 
 .notification-info {
-  border-left-color: #3B82F6;
-  background-color: #EFF6FF;
+  border-left-color: hsl(var(--info));
+  background-color: hsl(var(--info) / 0.1);
 }
 
 /* Toast title */
@@ -54,35 +69,16 @@
   font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: #1F2937;
+  color: hsl(var(--foreground));
 }
 
 /* Toast description */
 .notification-description {
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: #4B5563;
-}
-
-/* Animation */
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  color: hsl(var(--muted-foreground));
 }
 
 .notification-toast[data-state='closed'] {
   animation: slideOut 150ms ease-out;
-}
-
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
 }

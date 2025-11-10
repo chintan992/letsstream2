@@ -1,9 +1,4 @@
-@keyframes flicker {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
-    text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09, 0 0 80px #f09, 0 0 90px #f09, 0 0 100px #f09, 0 0 150px #f09;
-  }
-  20%, 24%, 55% { text-shadow: none; }
-}
+@import "../../styles/animations.css";
 
 .flickerL {
   animation: flicker 1.5s infinite alternate;

@@ -1,3 +1,5 @@
+@import "../../styles/animations.css";
+
 /* Mobile-specific chatbot enhancements */
 
 /* Handle safe areas on mobile devices */
@@ -61,13 +63,7 @@
   .haptic-feedback {
     animation: pulse 0.3s ease-out;
   }
-  
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.97); }
-    100% { transform: scale(1); }
-  }
-  
+
   /* Optimize for one-handed use */
   .bottom-controls {
     padding-bottom: 0.25rem;
@@ -89,10 +85,6 @@
     animation: voice-pulse 1.5s infinite ease-in-out;
   }
   
-  @keyframes voice-pulse {
-    0%, 100% { transform: scale(1); background: rgba(220, 38, 38, 0.2); }
-    50% { transform: scale(1.1); background: rgba(220, 38, 38, 0.5); }
-  }
 }
 
 /* Custom scrollbar for mobile */
@@ -128,12 +120,6 @@
 
 .notification-badge.pulse {
   animation: badge-pulse 2s infinite;
-}
-
-@keyframes badge-pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
 }
 
 /* Shadow effect when dragging */

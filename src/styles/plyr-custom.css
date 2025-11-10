@@ -9,14 +9,14 @@
 
 /* Customize Plyr controls colors to match app theme */
 :root {
-  --plyr-color-main: #ffffff; /* Changed to white */
-  --plyr-video-control-color: white;
-  --plyr-video-control-color-hover: #cccccc; /* Changed to light grey */
-  --plyr-video-control-background-hover: rgba(26, 31, 44, 0.8);
-  --plyr-audio-control-background-hover: rgba(26, 31, 44, 0.8);
+  --plyr-color-main: hsl(var(--foreground)); /* Matches app's foreground color */
+  --plyr-video-control-color: hsl(var(--foreground));
+  --plyr-video-control-color-hover: hsl(var(--muted-foreground)); /* Lighter grey */
+  --plyr-video-control-background-hover: hsl(var(--background) / 0.8);
+  --plyr-audio-control-background-hover: hsl(var(--background) / 0.8);
   --plyr-video-control-radius: 4px;
-  --plyr-range-thumb-background: #ffffff; /* Changed to white */
-  --plyr-range-fill-background: #ffffff; /* Changed to white */
+  --plyr-range-thumb-background: hsl(var(--foreground)); /* Matches app's foreground color */
+  --plyr-range-fill-background: hsl(var(--accent)); /* Use accent for better visibility */
 }
 
 /* Control spacing */
@@ -26,7 +26,7 @@
 
 /* Improve contrast for captions */
 .plyr__captions {
-  background: rgba(0, 0, 0, 0.7);
+  background: hsl(var(--background) / 0.7);
   border-radius: 4px;
   padding: 4px 8px;
 }
@@ -45,13 +45,13 @@
 
 /* Buffering indicator */
 .plyr__progress__buffer {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: hsl(var(--foreground) / 0.25);
 }
 
 /* Progress hover preview */
 .plyr__tooltip {
-  background: rgba(26, 31, 44, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: hsl(var(--background) / 0.9);
+  border: 1px solid hsl(var(--foreground) / 0.2);
 }
 
 /* Custom focus styles */
