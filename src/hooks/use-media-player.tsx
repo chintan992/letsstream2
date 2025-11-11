@@ -196,7 +196,7 @@ export const useMediaPlayer = (
     } else if (mediaType === 'tv' && season && episode) {
       updateIframeUrl(mediaId, parseInt(season, 10), parseInt(episode, 10));
     }
-  }, [id, mediaType, season, episode, hasInitialized, mediaDetails, updateIframeUrl]);
+  }, [id, mediaType, season, episode, hasInitialized, mediaDetails, selectedSource]);
 
   // Calculate next season availability when media details change
   useEffect(() => {
@@ -251,9 +251,6 @@ export const useMediaPlayer = (
     setSelectedSource(sourceKey);
     setIsPlayerLoaded(false);
     watchHistoryRecorded.current = false;
-    if (iframeUrl) {
-      setIframeUrl('');
-    }
   };
 
   const goToDetails = () => {

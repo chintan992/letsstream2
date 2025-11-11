@@ -30,6 +30,7 @@ const VideoPlayer = ({ isLoading, iframeUrl, title, poster, onLoaded, onError }:
   };
 
   const handleIframeLoad = () => {
+    if (!iframeUrl) return;
     onLoaded();
   };
 
@@ -52,6 +53,7 @@ const VideoPlayer = ({ isLoading, iframeUrl, title, poster, onLoaded, onError }:
         className="w-full h-full"
       >
         <iframe
+          key={iframeUrl}
           ref={iframeRef}
           src={iframeUrl}
           className="w-full h-full"
