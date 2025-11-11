@@ -19,10 +19,10 @@
     "verify": "npm run tsc && npm run lint && npm run format && npm run build"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.8.0",
-    "@docusaurus/plugin-content-docs": "^3.8.0",
-    "@docusaurus/preset-classic": "^3.8.0",
-    "@docusaurus/theme-classic": "^3.8.0",
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/plugin-content-docs": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/theme-classic": "^3.9.2",
     "@firebase/analytics": "^0.10.0",
     "@firebase/auth": "^1.7.0",
     "@google/generative-ai": "^0.24.0",
