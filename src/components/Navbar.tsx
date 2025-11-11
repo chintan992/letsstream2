@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { triggerHapticFeedback } from '@/utils/haptic-feedback';
-import PWAInstallPrompt from './PWAInstallPrompt';
-import { Menu } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { triggerHapticFeedback } from "@/utils/haptic-feedback";
+import PWAInstallPrompt from "./PWAInstallPrompt";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from '@/hooks';
-import { useIsMobile } from '@/hooks/use-mobile';
-import Logo from './navigation/Logo';
-import SearchBar from './navigation/SearchBar';
-import NavLinks from './navigation/NavLinks';
-import MobileMenu from './navigation/MobileMenu';
-import UserMenu from './navigation/UserMenu';
-import AuthButtons from './navigation/AuthButtons';
+import { useAuth } from "@/hooks";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Logo from "./navigation/Logo";
+import SearchBar from "./navigation/SearchBar";
+import NavLinks from "./navigation/NavLinks";
+import MobileMenu from "./navigation/MobileMenu";
+import UserMenu from "./navigation/UserMenu";
+import AuthButtons from "./navigation/AuthButtons";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,20 +36,20 @@ const Navbar = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     // Prevent scrolling when mobile menu is open
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
-    
+
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen]);
 
@@ -59,9 +59,11 @@ const Navbar = () => {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'nav-scrolled' : 'nav-transparent'
-    }`}>
+    <header
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+        isScrolled ? "nav-scrolled" : "nav-transparent"
+      }`}
+    >
       {/* z-50: Ensures navbar stays above all page content including modals and overlays */}
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
@@ -69,9 +71,9 @@ const Navbar = () => {
           <div className="flex items-center">
             <Logo />
           </div>
-          
+
           {/* Desktop nav links - hidden on mobile */}
-          <div className="hidden md:flex items-center justify-center ml-8">
+          <div className="ml-8 hidden items-center justify-center md:flex">
             <NavLinks />
           </div>
 
@@ -81,22 +83,22 @@ const Navbar = () => {
             <div className="hidden md:block">
               <SearchBar />
             </div>
-            
+
             {/* Mobile search - Only visible on mobile */}
             {isMobile && !isSearchExpanded && (
-              <SearchBar 
-                isMobile 
-                expanded={isSearchExpanded} 
+              <SearchBar
+                isMobile
+                expanded={isSearchExpanded}
                 onToggleExpand={toggleSearch}
               />
             )}
 
             {/* Expanded mobile search takes full width - Only visible when expanded */}
             {isMobile && isSearchExpanded && (
-              <div className="absolute inset-x-0 top-0 p-3 bg-black/95 backdrop-blur-xl z-50 flex items-center">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+              <div className="absolute inset-x-0 top-0 z-50 flex items-center bg-black/95 p-3 backdrop-blur-xl">
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => {
                     triggerHapticFeedback(15);
                     toggleSearch();
@@ -105,16 +107,16 @@ const Navbar = () => {
                 >
                   <Menu className="h-6 w-6" />
                 </Button>
-                <SearchBar 
-                  isMobile 
-                  expanded={true} 
-                  onToggleExpand={toggleSearch} 
+                <SearchBar
+                  isMobile
+                  expanded={true}
+                  onToggleExpand={toggleSearch}
                   className="flex-1"
                   onSearch={toggleSearch}
                 />
               </div>
             )}
-            
+
             {/* User menu or auth buttons */}
             {!isSearchExpanded && (
               <>
@@ -129,12 +131,12 @@ const Navbar = () => {
                     <AuthButtons />
                   </>
                 )}
-                
+
                 {/* Mobile menu button - only visible on mobile */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden text-white hover:bg-white/10"
+                  className="text-white hover:bg-white/10 md:hidden"
                   onClick={() => {
                     triggerHapticFeedback(20);
                     setIsMobileMenuOpen(true);
@@ -148,10 +150,10 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Mobile menu overlay */}
-      <MobileMenu 
-        isOpen={isMobileMenuOpen} 
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
         onClose={() => {
           triggerHapticFeedback(20);
           setIsMobileMenuOpen(false);

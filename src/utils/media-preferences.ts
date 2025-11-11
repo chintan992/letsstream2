@@ -1,5 +1,5 @@
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export interface MediaStats {
   total: number;
@@ -14,9 +14,9 @@ export interface MediaPreferenceStats {
   tv: MediaStats;
 }
 
-export type ContentPreference = 'movie' | 'tv' | 'balanced';
+export type ContentPreference = "movie" | "tv" | "balanced";
 
-export type PreferenceTimePeriod = 'all' | 'week' | 'month' | 'year';
+export type PreferenceTimePeriod = "all" | "week" | "month" | "year";
 
 export interface MediaPreferencesResponse {
   stats: MediaPreferenceStats;
@@ -42,8 +42,8 @@ export interface MediaPreferencesResponse {
 }
 
 export async function analyzeUserPreferences(
-  userId: string, 
-  period: PreferenceTimePeriod = 'all'
+  userId: string,
+  period: PreferenceTimePeriod = "all"
 ): Promise<MediaPreferenceStats> {
   const stats: MediaPreferenceStats = {
     movies: {
@@ -51,37 +51,37 @@ export async function analyzeUserPreferences(
       favorited: 0,
       watched: 0,
       completed: 0,
-      avgWatchTime: 0
+      avgWatchTime: 0,
     },
     tv: {
       total: 0,
       favorited: 0,
       watched: 0,
       completed: 0,
-      avgWatchTime: 0
-    }
+      avgWatchTime: 0,
+    },
   };
 
   try {
     // Get favorites
-    const favoritesRef = collection(db, 'favorites');
-    const favoritesQuery = query(favoritesRef, where('user_id', '==', userId));
+    const favoritesRef = collection(db, "favorites");
+    const favoritesQuery = query(favoritesRef, where("user_id", "==", userId));
     const favoritesSnapshot = await getDocs(favoritesQuery);
-    
+
     favoritesSnapshot.forEach(doc => {
       const item = doc.data();
-      if (item.media_type === 'movie') {
+      if (item.media_type === "movie") {
         stats.movies.favorited++;
-      } else if (item.media_type === 'tv') {
+      } else if (item.media_type === "tv") {
         stats.tv.favorited++;
       }
     });
 
     // Get watch history
-    const historyRef = collection(db, 'watchHistory');
-    const historyQuery = query(historyRef, where('user_id', '==', userId));
+    const historyRef = collection(db, "watchHistory");
+    const historyQuery = query(historyRef, where("user_id", "==", userId));
     const historySnapshot = await getDocs(historyQuery);
-    
+
     let movieWatchTime = 0;
     let tvWatchTime = 0;
     let movieCount = 0;
@@ -89,14 +89,14 @@ export async function analyzeUserPreferences(
 
     historySnapshot.forEach(doc => {
       const item = doc.data();
-      if (item.media_type === 'movie') {
+      if (item.media_type === "movie") {
         stats.movies.watched++;
         if (item.watch_position / item.duration >= 0.9) {
           stats.movies.completed++;
         }
         movieWatchTime += item.watch_position;
         movieCount++;
-      } else if (item.media_type === 'tv') {
+      } else if (item.media_type === "tv") {
         stats.tv.watched++;
         if (item.watch_position / item.duration >= 0.9) {
           stats.tv.completed++;
@@ -107,7 +107,8 @@ export async function analyzeUserPreferences(
     });
 
     // Calculate averages
-    stats.movies.avgWatchTime = movieCount > 0 ? movieWatchTime / movieCount : 0;
+    stats.movies.avgWatchTime =
+      movieCount > 0 ? movieWatchTime / movieCount : 0;
     stats.tv.avgWatchTime = tvCount > 0 ? tvWatchTime / tvCount : 0;
 
     // Get total counts
@@ -116,36 +117,38 @@ export async function analyzeUserPreferences(
 
     return stats;
   } catch (error) {
-    console.error('Error analyzing user preferences:', error);
+    console.error("Error analyzing user preferences:", error);
     throw error;
   }
 }
 
-export function calculatePreferenceScore(stats: MediaPreferenceStats): ContentPreference {
+export function calculatePreferenceScore(
+  stats: MediaPreferenceStats
+): ContentPreference {
   // Calculate preference scores
-  const movieScore = (
-    (stats.movies.favorited * 2) +  // Favorites are weighted more heavily
-    (stats.movies.completed * 1.5) + // Completed views are also important
-    (stats.movies.watched * 1)       // Regular views have base weight
-  ) / stats.movies.total;
+  const movieScore =
+    (stats.movies.favorited * 2 + // Favorites are weighted more heavily
+      stats.movies.completed * 1.5 + // Completed views are also important
+      stats.movies.watched * 1) / // Regular views have base weight
+    stats.movies.total;
 
-  const tvScore = (
-    (stats.tv.favorited * 2) +
-    (stats.tv.completed * 1.5) +
-    (stats.tv.watched * 1)
-  ) / stats.tv.total;
+  const tvScore =
+    (stats.tv.favorited * 2 + stats.tv.completed * 1.5 + stats.tv.watched * 1) /
+    stats.tv.total;
 
   // Compare scores with a threshold for "balanced"
   const threshold = 0.2; // 20% difference threshold
   const scoreDiff = Math.abs(movieScore - tvScore);
 
   if (scoreDiff < threshold) {
-    return 'balanced';
+    return "balanced";
   }
-  return movieScore > tvScore ? 'movie' : 'tv';
+  return movieScore > tvScore ? "movie" : "tv";
 }
 
-export function calculateMediaStats(stats: MediaPreferenceStats): MediaPreferencesResponse {
+export function calculateMediaStats(
+  stats: MediaPreferenceStats
+): MediaPreferencesResponse {
   const total = stats.movies.total + stats.tv.total;
   const moviePercentage = total > 0 ? (stats.movies.total / total) * 100 : 0;
   const tvPercentage = total > 0 ? (stats.tv.total / total) * 100 : 0;
@@ -157,19 +160,25 @@ export function calculateMediaStats(stats: MediaPreferenceStats): MediaPreferenc
     tvPercentage,
     favoriteStats: {
       movies: stats.movies.favorited,
-      tv: stats.tv.favorited
+      tv: stats.tv.favorited,
     },
     completionStats: {
       movies: {
         total: stats.movies.watched,
         completed: stats.movies.completed,
-        rate: stats.movies.watched > 0 ? (stats.movies.completed / stats.movies.watched) * 100 : 0
+        rate:
+          stats.movies.watched > 0
+            ? (stats.movies.completed / stats.movies.watched) * 100
+            : 0,
       },
       tv: {
         total: stats.tv.watched,
         completed: stats.tv.completed,
-        rate: stats.tv.watched > 0 ? (stats.tv.completed / stats.tv.watched) * 100 : 0
-      }
-    }
+        rate:
+          stats.tv.watched > 0
+            ? (stats.tv.completed / stats.tv.watched) * 100
+            : 0,
+      },
+    },
   };
 }

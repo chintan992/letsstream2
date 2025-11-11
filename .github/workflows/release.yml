@@ -10,7 +10,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     if: startsWith(github.event.head_commit.message, 'Release')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

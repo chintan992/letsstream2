@@ -1,7 +1,7 @@
-import { getAnalyticsInstance } from './firebase';
-import { logEvent } from 'firebase/analytics';
-import { AnalyticsEvent, AnalyticsParams } from './analytics';
-import { retryQueue } from './analytics-retry';
+import { getAnalyticsInstance } from "./firebase";
+import { logEvent } from "firebase/analytics";
+import { AnalyticsEvent, AnalyticsParams } from "./analytics";
+import { retryQueue } from "./analytics-retry";
 
 const BATCH_SIZE = 10;
 const BATCH_INTERVAL = 2000; // 2 seconds
@@ -12,8 +12,8 @@ class AnalyticsBatchProcessor {
 
   constructor() {
     // Process any remaining events when the page is being unloaded
-    if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', () => {
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", () => {
         this.processEvents(true);
       });
     }

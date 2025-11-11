@@ -1,14 +1,13 @@
-
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const TVShowsRedirect = () => {
   const navigate = useNavigate();
-  
+
   useEffect(() => {
-    navigate('/tv', { replace: true });
+    navigate("/tv", { replace: true });
   }, [navigate]);
-  
+
   return null;
 };
 

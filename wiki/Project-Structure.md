@@ -21,12 +21,14 @@ This document explains the organization and architecture of Let's Stream V2.0.
 ## Core Components
 
 ### Application Root
+
 - `src/App.tsx`: Main application component
 - `src/main.tsx`: Application entry point
 - `src/index.css`: Global styles
 - `src/vite-env.d.ts`: TypeScript declarations
 
 ### Components Directory
+
 ```
 components/
 ├── ui/                 # Shared UI components
@@ -43,6 +45,7 @@ components/
 ```
 
 ### Context Providers
+
 ```
 contexts/
 ├── auth.ts            # Authentication context
@@ -52,6 +55,7 @@ contexts/
 ```
 
 ### Custom Hooks
+
 ```
 hooks/
 ├── auth-context.tsx
@@ -63,6 +67,7 @@ hooks/
 ```
 
 ### Pages Directory
+
 ```
 pages/
 ├── Index.tsx          # Home page
@@ -77,6 +82,7 @@ pages/
 ## Key Architectural Patterns
 
 ### Component Architecture
+
 1. **Presentational Components**
    - Focus on UI rendering
    - Receive data via props
@@ -90,6 +96,7 @@ pages/
    - Located in `pages/`
 
 ### State Management
+
 1. **React Context**
    - Authentication state
    - User preferences
@@ -102,6 +109,7 @@ pages/
    - Component-specific state
 
 ### Routing Structure
+
 ```typescript
 // Main routing configuration
 <Routes>
@@ -110,17 +118,17 @@ pages/
   <Route path="/movies" element={<Movies />} />
   <Route path="/tv" element={<TVShows />} />
   <Route path="/sports" element={<Sports />} />
-  
+
   {/* Protected Routes */}
   <Route element={<ProtectedRoute />}>
     <Route path="/profile" element={<Profile />} />
     <Route path="/watch-history" element={<WatchHistory />} />
   </Route>
-  
+
   {/* Auth Routes */}
   <Route path="/login" element={<Login />} />
   <Route path="/signup" element={<Signup />} />
-  
+
   {/* Utility Routes */}
   <Route path="*" element={<NotFound />} />
 </Routes>
@@ -129,16 +137,19 @@ pages/
 ## Data Flow
 
 ### Authentication Flow
+
 ```
 Login/Signup → Firebase Auth → Auth Context → Protected Routes
 ```
 
 ### Content Flow
+
 ```
 API Request → Rate Limiter → Data Fetch → State Update → Render
 ```
 
 ### User Preferences Flow
+
 ```
 User Action → Context Update → Firestore → UI Update
 ```
@@ -146,16 +157,19 @@ User Action → Context Update → Firestore → UI Update
 ## File Naming Conventions
 
 ### Components
+
 - PascalCase for component files
 - `.tsx` extension for components
 - Corresponding `.test.tsx` for tests
 
 ### Utilities
+
 - camelCase for utility files
 - `.ts` extension for TypeScript files
 - Descriptive, function-focused names
 
 ### Styles
+
 - Same name as component
 - `.module.css` for CSS modules
 - TailwindCSS classes in components
@@ -163,6 +177,7 @@ User Action → Context Update → Firestore → UI Update
 ## Module Dependencies
 
 ### Core Dependencies
+
 - React & React DOM
 - TypeScript
 - Vite
@@ -170,12 +185,14 @@ User Action → Context Update → Firestore → UI Update
 - TailwindCSS
 
 ### UI Dependencies
+
 - Radix UI components
 - Framer Motion
 - Lucide icons
 - Sonner toasts
 
 ### Development Dependencies
+
 - ESLint
 - TypeScript ESLint
 - Prettier
@@ -184,17 +201,20 @@ User Action → Context Update → Firestore → UI Update
 ## Configuration Files
 
 ### TypeScript
+
 - `tsconfig.json`: Base configuration
 - `tsconfig.app.json`: App-specific config
 - `tsconfig.node.json`: Node-specific config
 
 ### Vite
+
 - `vite.config.ts`: Build configuration
 - PWA plugin setup
 - Path aliases
 - Development server settings
 
 ### Environment
+
 - `.env`: Environment variables
 - `.env.example`: Template
 - `.env.development`: Development values
@@ -203,19 +223,22 @@ User Action → Context Update → Firestore → UI Update
 ## Performance Optimizations
 
 ### Code Splitting
+
 ```typescript
 // Dynamic imports for routes
-const Movies = lazy(() => import('./pages/Movies'));
-const TVShows = lazy(() => import('./pages/TVShows'));
+const Movies = lazy(() => import("./pages/Movies"));
+const TVShows = lazy(() => import("./pages/TVShows"));
 ```
 
 ### Asset Optimization
+
 - Image compression
 - Font subsetting
 - SVG optimization
 - Cache strategies
 
 ### Lazy Loading
+
 - Route-based splitting
 - Component lazy loading
 - Image lazy loading
@@ -224,6 +247,7 @@ const TVShows = lazy(() => import('./pages/TVShows'));
 ## Testing Structure
 
 ### Unit Tests
+
 ```
 __tests__/
 ├── components/
@@ -232,6 +256,7 @@ __tests__/
 ```
 
 ### Integration Tests
+
 ```
 tests/
 ├── auth/
@@ -240,6 +265,7 @@ tests/
 ```
 
 ### E2E Tests
+
 ```
 cypress/
 └── e2e/
@@ -248,6 +274,7 @@ cypress/
 ## Build Output
 
 ### Production Build
+
 ```
 dist/
 ├── assets/
@@ -256,6 +283,7 @@ dist/
 ```
 
 ### Development Build
+
 ```
 dev-dist/
 ├── sw.js
@@ -266,12 +294,14 @@ dev-dist/
 ## Documentation
 
 ### API Documentation
+
 - Component props
 - Hook parameters
 - Utility functions
 - Type definitions
 
 ### Code Comments
+
 ```typescript
 /**
  * Component description
@@ -281,6 +311,7 @@ dev-dist/
 ```
 
 ### JSDoc Comments
+
 ```typescript
 /**
  * Function description
@@ -293,18 +324,21 @@ dev-dist/
 ## Security Considerations
 
 ### Authentication
+
 - Protected routes
 - Token management
 - Session handling
 - OAuth integration
 
 ### Data Protection
+
 - Input validation
 - XSS prevention
 - CSRF protection
 - Rate limiting
 
 ### Error Handling
+
 - Global error boundary
 - API error handling
 - Fallback components

@@ -3,6 +3,7 @@
 Thank you for your interest in contributing to Let's Stream V2.0! This guide will help you get started with contributing to the project.
 
 ## Table of Contents
+
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
 - [Development Workflow](#development-workflow)
@@ -14,6 +15,7 @@ Thank you for your interest in contributing to Let's Stream V2.0! This guide wil
 ## Code of Conduct
 
 We are committed to providing a welcoming and inclusive experience for everyone. Please follow these guidelines:
+
 - Use welcoming and inclusive language
 - Be respectful of differing viewpoints
 - Accept constructive criticism gracefully
@@ -52,13 +54,18 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 ## Development Workflow
 
 1. **Run Development Server**
+
    ```bash
    npm run dev
    ```
 
 2. **Code Style**
    - Follow the TypeScript style guide
-   - Use ESLint and Prettier configurations
+   - Use ESLint and Prettier with Tailwind CSS plugin configurations
+   - Format code before committing:
+     ```bash
+     npm run format
+     ```
    - Run linting before committing:
      ```bash
      npm run lint
@@ -75,6 +82,7 @@ We are committed to providing a welcoming and inclusive experience for everyone.
    - chore: Maintenance tasks
 
    Example:
+
    ```bash
    git commit -m "feat: add dark mode support"
    ```
@@ -103,6 +111,7 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 ## Style Guide
 
 ### TypeScript Guidelines
+
 ```typescript
 // Use interfaces for objects
 interface User {
@@ -112,7 +121,7 @@ interface User {
 }
 
 // Use type for unions/intersections
-type MediaType = 'movie' | 'tv' | 'sport';
+type MediaType = "movie" | "tv" | "sport";
 
 // Use functional components
 const MyComponent: React.FC<Props> = ({ prop1, prop2 }) => {
@@ -120,13 +129,14 @@ const MyComponent: React.FC<Props> = ({ prop1, prop2 }) => {
 };
 
 // Use hooks for state/effects
-const [state, setState] = useState<string>('');
+const [state, setState] = useState<string>("");
 useEffect(() => {
   // Side effects here
 }, [dependencies]);
 ```
 
 ### Component Structure
+
 ```typescript
 // 1. Imports
 import { useState, useEffect } from 'react';
@@ -141,17 +151,17 @@ interface Props {
 const ComponentName: React.FC<Props> = ({ prop1, prop2 }) => {
   // 3.1 Hooks
   const [state, setState] = useState();
-  
+
   // 3.2 Effects
   useEffect(() => {
     // ...
   }, []);
-  
+
   // 3.3 Handlers
   const handleClick = () => {
     // ...
   };
-  
+
   // 3.4 Render
   return (
     // JSX

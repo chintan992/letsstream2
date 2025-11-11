@@ -10,7 +10,7 @@
  */
 
 .container {
-  @apply mb-8 opacity-0 w-full;
+  @apply mb-8 w-full opacity-0;
   animation: fade-in-slide 0.6s ease-out forwards;
   animation-delay: 0.2s;
   animation-fill-mode: forwards;
@@ -18,7 +18,7 @@
 }
 
 .title {
-  @apply text-xl md:text-2xl font-bold text-white mb-4 text-left;
+  @apply mb-4 text-left text-xl font-bold text-white md:text-2xl;
 }
 
 .scrollContainer {
@@ -31,8 +31,10 @@
 }
 
 .scrollButton {
-  @apply absolute top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/70 text-white;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  @apply absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   contain: layout style paint;
 }
 
@@ -45,19 +47,19 @@
 }
 
 .scrollButtonVisible {
-  @apply opacity-100 translate-x-0;
+  @apply translate-x-0 opacity-100;
 }
 
 .scrollButtonHiddenLeft {
-  @apply opacity-0 -translate-x-4;
+  @apply -translate-x-4 opacity-0;
 }
 
 .scrollButtonHiddenRight {
-  @apply opacity-0 translate-x-4;
+  @apply translate-x-4 opacity-0;
 }
 
 .contentRow {
-  @apply flex overflow-x-auto gap-4 pb-4;
+  @apply flex gap-4 overflow-x-auto pb-4;
 }
 
 /* Hide scrollbar for webkit browsers */

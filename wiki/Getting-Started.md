@@ -122,8 +122,8 @@ The project uses:
 
 ```typescript
 // ComponentName.tsx
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks";
 
 interface Props {
   // Props definition

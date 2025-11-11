@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { trackPageView } from '../lib/analytics';
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { trackPageView } from "../lib/analytics";
 
 interface AnalyticsWrapperProps {
   children: React.ReactNode;

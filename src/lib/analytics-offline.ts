@@ -1,8 +1,8 @@
 // This file handles offline analytics events and syncs them when online
-import { Analytics, AnalyticsCallOptions, logEvent } from 'firebase/analytics';
-import { AnalyticsEvent } from './analytics';
+import { Analytics, AnalyticsCallOptions, logEvent } from "firebase/analytics";
+import { AnalyticsEvent } from "./analytics";
 
-const OFFLINE_QUEUE_KEY = 'offline_analytics_queue';
+const OFFLINE_QUEUE_KEY = "offline_analytics_queue";
 const MAX_QUEUE_SIZE = 100;
 
 interface QueuedAnalyticsEvent extends AnalyticsEvent {
@@ -26,7 +26,7 @@ class OfflineAnalyticsQueue {
         this.queue = JSON.parse(savedQueue);
       }
     } catch (error) {
-      console.error('Failed to load offline analytics queue:', error);
+      console.error("Failed to load offline analytics queue:", error);
     }
   }
 
@@ -34,9 +34,12 @@ class OfflineAnalyticsQueue {
     try {
       localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.queue));
     } catch (error) {
-      console.error('Failed to save offline analytics queue:', error);
+      console.error("Failed to save offline analytics queue:", error);
       // If storage is full, remove older events
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      if (
+        error instanceof DOMException &&
+        error.name === "QuotaExceededError"
+      ) {
         this.queue = this.queue.slice(-MAX_QUEUE_SIZE);
         localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(this.queue));
       }
@@ -44,8 +47,8 @@ class OfflineAnalyticsQueue {
   }
 
   private setupOnlineListener() {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => {
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", () => {
         void this.processQueue();
       });
     }
@@ -55,11 +58,11 @@ class OfflineAnalyticsQueue {
     const queuedEvent: QueuedAnalyticsEvent = {
       ...event,
       timestamp: Date.now(),
-      retryCount: 0
+      retryCount: 0,
     };
 
     this.queue.push(queuedEvent);
-    
+
     // Keep queue size in check
     if (this.queue.length > MAX_QUEUE_SIZE) {
       this.queue = this.queue.slice(-MAX_QUEUE_SIZE);
@@ -94,10 +97,13 @@ class OfflineAnalyticsQueue {
             if (event.retryCount < 3) {
               this.queue.push({
                 ...event,
-                retryCount: event.retryCount + 1
+                retryCount: event.retryCount + 1,
               });
             } else {
-              console.error('Failed to send analytics event after max retries:', event);
+              console.error(
+                "Failed to send analytics event after max retries:",
+                event
+              );
             }
           }
         })
@@ -107,9 +113,8 @@ class OfflineAnalyticsQueue {
       if (this.queue.length > 0) {
         this.saveQueueToStorage();
       }
-
     } catch (error) {
-      console.error('Error processing offline analytics queue:', error);
+      console.error("Error processing offline analytics queue:", error);
     } finally {
       this.isProcessing = false;
     }
@@ -117,19 +122,21 @@ class OfflineAnalyticsQueue {
 
   private async sendEvent(event: QueuedAnalyticsEvent): Promise<void> {
     try {
-      const analytics = await import('./firebase').then(m => m.getAnalyticsInstance());
+      const analytics = await import("./firebase").then(m =>
+        m.getAnalyticsInstance()
+      );
       if (!analytics) {
-        throw new Error('Analytics not initialized');
+        throw new Error("Analytics not initialized");
       }
 
       await this.logEventWithTimeout(analytics, event.name, {
         ...event.params,
         offline_queued: true,
         queued_at: event.timestamp,
-        retry_count: event.retryCount
+        retry_count: event.retryCount,
       });
     } catch (error) {
-      console.error('Failed to send queued analytics event:', error);
+      console.error("Failed to send queued analytics event:", error);
       throw error;
     }
   }
@@ -142,7 +149,7 @@ class OfflineAnalyticsQueue {
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        reject(new Error('Analytics event timed out'));
+        reject(new Error("Analytics event timed out"));
       }, timeout);
 
       try {

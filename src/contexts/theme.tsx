@@ -1,7 +1,11 @@
-
-import React, { useEffect, useState } from 'react';
-import { Theme, ThemeContextType, getStoredTheme, applyTheme } from './theme-utils';
-import { ThemeContext } from './theme-context';
+import React, { useEffect, useState } from "react";
+import {
+  Theme,
+  ThemeContextType,
+  getStoredTheme,
+  applyTheme,
+} from "./theme-utils";
+import { ThemeContext } from "./theme-context";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getStoredTheme);
@@ -13,16 +17,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Listen for system color scheme changes if using system theme
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
     const handleChange = () => {
-      if (theme === 'system') {
+      if (theme === "system") {
         applyTheme(theme);
       }
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
 
   return (

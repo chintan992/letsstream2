@@ -24,12 +24,14 @@ export const ensureExtendedMedia = (media: Media): ExtendedMedia => {
   return {
     ...media,
     media_id: media.media_id || media.id, // Ensure media_id is present
-    media_type: media.media_type as "movie" | "tv" // Ensure correct media_type
+    media_type: media.media_type as "movie" | "tv", // Ensure correct media_type
   };
 };
 
 // Helper function to convert an array of Media to ExtendedMedia[]
-export const ensureExtendedMediaArray = (mediaArray: Media[]): ExtendedMedia[] => {
+export const ensureExtendedMediaArray = (
+  mediaArray: Media[]
+): ExtendedMedia[] => {
   return mediaArray.map(ensureExtendedMedia);
 };
 
@@ -141,8 +143,14 @@ export interface CustomVideoSourceResult {
 export interface VideoSource {
   key: string;
   name: string;
-  getMovieUrl: (id: number) => string | Promise<string> | Promise<CustomVideoSourceResult | string>;
-  getTVUrl: (id: number, season: number, episode: number) => string | Promise<string> | Promise<CustomVideoSourceResult | string>;
+  getMovieUrl: (
+    id: number
+  ) => string | Promise<string> | Promise<CustomVideoSourceResult | string>;
+  getTVUrl: (
+    id: number,
+    season: number,
+    episode: number
+  ) => string | Promise<string> | Promise<CustomVideoSourceResult | string>;
 }
 
 // Image response types

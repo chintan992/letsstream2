@@ -1,8 +1,14 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
-import * as Toast from '@radix-ui/react-toast';
-import { useWillChange } from '@/hooks/useWillChange';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
+import * as Toast from "@radix-ui/react-toast";
+import { useWillChange } from "@/hooks/useWillChange";
 
-export type NotificationType = 'success' | 'error' | 'warning' | 'info';
+export type NotificationType = "success" | "error" | "warning" | "info";
 
 export interface Notification {
   id: string;
@@ -13,39 +19,48 @@ export interface Notification {
 }
 
 interface NotificationContextType {
-  showNotification: (notification: Omit<Notification, 'id'>) => void;
+  showNotification: (notification: Omit<Notification, "id">) => void;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(
+  undefined
+);
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
 
-  const showNotification = useCallback((notification: Omit<Notification, 'id'>) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setNotifications((prev) => [...prev, { ...notification, id }]);
-  }, []);
+  const showNotification = useCallback(
+    (notification: Omit<Notification, "id">) => {
+      const id = Math.random().toString(36).substring(2, 9);
+      setNotifications(prev => [...prev, { ...notification, id }]);
+    },
+    []
+  );
 
   const removeNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    setNotifications(prev =>
+      prev.filter(notification => notification.id !== id)
+    );
   }, []);
 
   return (
     <NotificationContext.Provider value={{ showNotification }}>
       <Toast.Provider swipeDirection="right">
         {children}
-        {notifications.map((notification) => {
+        {notifications.map(notification => {
           const toastRef = useRef<HTMLDivElement>(null);
 
           // Manage will-change for notification toast using the updated hook
           const { setWillChange, removeWillChange } = useWillChange(
             toastRef,
-            'transform, opacity',
+            "transform, opacity",
             {
-              animationName: 'slideIn, slideOut', // For slide animations
+              animationName: "slideIn, slideOut", // For slide animations
               animationDuration: 150, // 150ms for slideIn/slideOut animations
               cleanupOnUnmount: true,
-              respectReducedMotion: true
+              respectReducedMotion: true,
             }
           );
 
@@ -58,20 +73,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
               // Listen for animation end to clean up will-change appropriately
               const handleAnimationEnd = (e: AnimationEvent) => {
-                if (e.animationName === 'slideOut') {
+                if (e.animationName === "slideOut") {
                   // After slideOut, remove will-change
                   removeWillChange();
-                } else if (e.animationName === 'slideIn') {
+                } else if (e.animationName === "slideIn") {
                   // For slideIn, keep will-change until slideOut or unmount
                   // This is handled by the hook's cleanup
                 }
               };
 
-              element.addEventListener('animationend', handleAnimationEnd);
+              element.addEventListener("animationend", handleAnimationEnd);
 
               // Cleanup
               return () => {
-                element.removeEventListener('animationend', handleAnimationEnd);
+                element.removeEventListener("animationend", handleAnimationEnd);
                 removeWillChange();
               };
             }
@@ -83,11 +98,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               key={notification.id}
               className={`notification-toast notification-${notification.type}`}
               duration={notification.duration || 5000}
-              onOpenChange={(open) => {
+              onOpenChange={open => {
                 if (!open) removeNotification(notification.id);
               }}
             >
-              <Toast.Title className="notification-title">{notification.title}</Toast.Title>
+              <Toast.Title className="notification-title">
+                {notification.title}
+              </Toast.Title>
               {notification.description && (
                 <Toast.Description className="notification-description">
                   {notification.description}
@@ -105,7 +122,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotification must be used within a NotificationProvider');
+    throw new Error(
+      "useNotification must be used within a NotificationProvider"
+    );
   }
   return context;
 };

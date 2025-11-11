@@ -7,6 +7,7 @@ This document provides detailed information about the APIs used in Let's Stream 
 ### User Management
 
 #### Sign Up
+
 ```typescript
 interface SignUpParams {
   email: string;
@@ -20,6 +21,7 @@ interface SignUpResponse {
 ```
 
 #### Sign In
+
 ```typescript
 interface SignInParams {
   email: string;
@@ -33,9 +35,10 @@ interface SignInResponse {
 ```
 
 #### Social Authentication
+
 ```typescript
 interface SocialAuthParams {
-  provider: 'google';
+  provider: "google";
 }
 
 interface SocialAuthResponse {
@@ -50,6 +53,7 @@ interface SocialAuthResponse {
 ### Movies
 
 #### Get Popular Movies
+
 ```typescript
 interface MovieParams {
   page?: number;
@@ -65,6 +69,7 @@ interface MovieResponse {
 ```
 
 #### Search Movies
+
 ```typescript
 interface SearchParams {
   query: string;
@@ -77,6 +82,7 @@ interface SearchParams {
 ### TV Shows
 
 #### Get Popular Shows
+
 ```typescript
 interface TVParams {
   page?: number;
@@ -94,6 +100,7 @@ interface TVResponse {
 ### Sports
 
 #### Get Live Matches
+
 ```typescript
 interface LiveMatchesParams {
   sport?: string;
@@ -112,6 +119,7 @@ interface LiveMatchesResponse {
 ### Custom Streaming API
 
 #### Get Movie Stream
+
 ```typescript
 interface MovieStreamParams {
   id: number;
@@ -138,6 +146,7 @@ interface StreamResponse {
 ```
 
 #### Get TV Stream
+
 ```typescript
 interface TVStreamParams {
   id: number;
@@ -149,6 +158,7 @@ interface TVStreamParams {
 ```
 
 #### Proxy Implementation
+
 ```typescript
 interface ProxyParams {
   url: string;
@@ -164,17 +174,19 @@ const proxyUrl = `${PROXY_URL}/v2?url=${encodeURIComponent(videoUrl)}&headers=${
 ### Watch History
 
 #### Add to History
+
 ```typescript
 interface WatchHistoryEntry {
   user_id: string;
   media_id: string;
-  media_type: 'movie' | 'tv';
+  media_type: "movie" | "tv";
   progress: number;
   timestamp: number;
 }
 ```
 
 #### Get History
+
 ```typescript
 interface GetHistoryParams {
   user_id: string;
@@ -191,6 +203,7 @@ interface GetHistoryResponse {
 ### User Preferences
 
 #### Update Preferences
+
 ```typescript
 interface UserPreferences {
   user_id: string;
@@ -207,6 +220,7 @@ interface UserPreferences {
 ## Firestore Collections
 
 ### Collection: userPreferences
+
 ```typescript
 interface UserPreferencesDoc {
   user_id: string;
@@ -218,11 +232,12 @@ interface UserPreferencesDoc {
 ```
 
 ### Collection: watchHistory
+
 ```typescript
 interface WatchHistoryDoc {
   user_id: string;
   media_id: string;
-  media_type: 'movie' | 'tv';
+  media_type: "movie" | "tv";
   title: string;
   poster_path: string;
   watched_at: Timestamp;
@@ -233,19 +248,21 @@ interface WatchHistoryDoc {
 ## Error Handling
 
 ### Error Codes
+
 ```typescript
 enum ErrorCode {
-  INVALID_CREDENTIALS = 'auth/invalid-credentials',
-  USER_NOT_FOUND = 'auth/user-not-found',
-  EMAIL_IN_USE = 'auth/email-already-in-use',
-  WEAK_PASSWORD = 'auth/weak-password',
-  NETWORK_ERROR = 'network/error',
-  API_ERROR = 'api/error',
-  RATE_LIMIT = 'api/rate-limit',
+  INVALID_CREDENTIALS = "auth/invalid-credentials",
+  USER_NOT_FOUND = "auth/user-not-found",
+  EMAIL_IN_USE = "auth/email-already-in-use",
+  WEAK_PASSWORD = "auth/weak-password",
+  NETWORK_ERROR = "network/error",
+  API_ERROR = "api/error",
+  RATE_LIMIT = "api/rate-limit",
 }
 ```
 
 ### Error Responses
+
 ```typescript
 interface ErrorResponse {
   code: ErrorCode;
@@ -257,6 +274,7 @@ interface ErrorResponse {
 ## Rate Limiting
 
 ### Configuration
+
 ```typescript
 interface RateLimitConfig {
   maxRequests: number;
@@ -274,9 +292,10 @@ const defaultConfig: RateLimitConfig = {
 ## WebSocket Events
 
 ### User Events
+
 ```typescript
 interface UserEvent {
-  type: 'presence' | 'status' | 'preferences';
+  type: "presence" | "status" | "preferences";
   user_id: string;
   data: any;
   timestamp: number;
@@ -284,9 +303,10 @@ interface UserEvent {
 ```
 
 ### Media Events
+
 ```typescript
 interface MediaEvent {
-  type: 'play' | 'pause' | 'seek' | 'end';
+  type: "play" | "pause" | "seek" | "end";
   media_id: string;
   user_id: string;
   timestamp: number;
@@ -300,15 +320,17 @@ interface MediaEvent {
 ## PWA Events
 
 ### Service Worker
+
 ```typescript
 interface ServiceWorkerEvent {
-  type: 'install' | 'activate' | 'update' | 'error';
+  type: "install" | "activate" | "update" | "error";
   timestamp: number;
   details?: any;
 }
 ```
 
 ### Push Notifications
+
 ```typescript
 interface PushNotification {
   title: string;
@@ -325,6 +347,7 @@ interface PushNotification {
 ## Authentication Flow
 
 ### Token Management
+
 ```typescript
 interface AuthToken {
   access_token: string;
@@ -335,6 +358,7 @@ interface AuthToken {
 ```
 
 ### Session Management
+
 ```typescript
 interface Session {
   user: User;
@@ -347,64 +371,67 @@ interface Session {
 ## Example Usage
 
 ### Authentication
+
 ```typescript
 const auth = new Auth();
 
 // Sign up
 const user = await auth.signUp({
-  email: 'user@example.com',
-  password: 'password123'
+  email: "user@example.com",
+  password: "password123",
 });
 
 // Sign in
 const session = await auth.signIn({
-  email: 'user@example.com',
-  password: 'password123'
+  email: "user@example.com",
+  password: "password123",
 });
 
 // Google sign in
 const googleUser = await auth.socialAuth({
-  provider: 'google'
+  provider: "google",
 });
 ```
 
 ### Media Operations
+
 ```typescript
 const media = new MediaAPI();
 
 // Get popular movies
 const movies = await media.getPopular({
   page: 1,
-  language: 'en'
+  language: "en",
 });
 
 // Search content
 const results = await media.search({
-  query: 'matrix',
-  include_adult: false
+  query: "matrix",
+  include_adult: false,
 });
 
 // Get live sports
 const matches = await media.getLiveMatches({
-  sport: 'football',
-  limit: 10
+  sport: "football",
+  limit: 10,
 });
 ```
 
 ### User Operations
+
 ```typescript
 const userAPI = new UserAPI();
 
 // Update preferences
 await userAPI.updatePreferences({
-  user_id: 'user123',
-  accentColor: '#ff0000',
-  isWatchHistoryEnabled: true
+  user_id: "user123",
+  accentColor: "#ff0000",
+  isWatchHistoryEnabled: true,
 });
 
 // Get watch history
 const history = await userAPI.getHistory({
-  user_id: 'user123',
-  limit: 20
+  user_id: "user123",
+  limit: 20,
 });
 ```

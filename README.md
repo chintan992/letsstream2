@@ -34,7 +34,7 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
   - Firebase 12.x (Authentication, Firestore, Analytics)
   - Supabase (not currently used - only localStorage utilities in codebase)
 
-*Note: Several dependencies are installed but unused and should be removed in a future cleanup: @supabase/supabase-js, @tanstack/react-query, axios, date-fns, next-themes, web-vitals, @google/generative-ai, @google/genai*
+_Note: Several dependencies are installed but unused and should be removed in a future cleanup: @supabase/supabase-js, @tanstack/react-query, axios, date-fns, next-themes, web-vitals, @google/generative-ai, @google/genai_
 
 - **Development & Build Tools**:
   - ESLint 9.x
@@ -55,11 +55,13 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
 
 1. Clone the repository
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Create a `.env` file based on `.env.example` and fill in your Firebase credentials:
+
 ```
 # Firebase Configuration
 VITE_FIREBASE_API_KEY=your_api_key_here
@@ -70,21 +72,25 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
-*Note: These values come from Firebase Console > Project Settings > General*
+
+_Note: These values come from Firebase Console > Project Settings > General_
 
 ### Development
 
 Run the development server:
+
 ```bash
 npm run dev
 ```
 
 Build for production:
+
 ```bash
 npm run build
 ```
 
 Preview production build:
+
 ```bash
 npm run preview
 ```
@@ -94,6 +100,7 @@ npm run preview
 ### Verification
 
 Run all verification checks before committing:
+
 ```bash
 npm run verify
 ```
@@ -101,6 +108,7 @@ npm run verify
 This runs TypeScript type checking, linting, and production build.
 
 Run individual checks:
+
 ```bash
 # Type checking
 npm run tsc
@@ -108,21 +116,24 @@ npm run tsc
 # Linting
 npm run lint
 
+# Format the entire codebase
+npm run format
+
+# Check if codebase is formatted correctly
+npm run format:check
+
 # Production build
 npm run build
 
-# Formatting check (placeholder - Prettier not configured)
-npm run format:check
-
-# Test coverage (placeholder - No test framework configured) 
+# Test coverage (placeholder - No test framework configured)
 npm run test:coverage
 ```
 
-> **Note:** The `format:check` and `test:coverage` scripts are temporary placeholders. The project currently does not have Prettier for code formatting or a test framework (such as Vitest) configured. These will be added in future updates.
+> **Note:** The `test:coverage` script is a temporary placeholder. The project currently does not have a test framework (such as Vitest) configured. This will be added in future updates.
 
 ### Testing
 
-Currently, there are no automated tests in the codebase. However, the CI workflow includes runtime error checking using Playwright to catch any JavaScript runtime errors during page load. 
+Currently, there are no automated tests in the codebase. However, the CI workflow includes runtime error checking using Playwright to catch any JavaScript runtime errors during page load.
 
 For comprehensive testing, manual testing should be performed using the TESTING_CHECKLIST.md file after major updates.
 
@@ -161,35 +172,41 @@ Future improvements should include adding Vitest for unit testing and React Test
 ## Features in Detail
 
 ### Authentication
+
 - User signup/login with Firebase Authentication
 - Protected routes for authenticated users
 - User profile management
 
 ### Content Streaming
+
 - Multiple streaming sources support
 - HD quality indicators
 - Continuous playback
 - Watch history tracking
 
 ### Backend Services
+
 - **Firebase Authentication**: User management and authentication
 - **Cloud Firestore**: Data persistence for watch history, favorites, and watchlist
 - **Firebase Analytics**: Usage tracking and analytics
 - **Supabase**: Not currently used (only localStorage utilities exist in the codebase - see `src/utils/supabase.ts`)
 
 ### Sports Streaming
+
 - Live sports events
 - Multiple stream qualities
 - Real-time updates
 - Sports categories and filtering
 
 ### PWA Features
+
 - Offline support
 - Install prompt
 - Service worker caching
 - Push notifications (planned)
 
 ### User Preferences
+
 - Custom accent colors
 - Watch history
 - Favorites list
@@ -198,6 +215,7 @@ Future improvements should include adding Vitest for unit testing and React Test
 ## Known Issues
 
 Several dependencies were manually updated beyond the recommended versions in the migration guide:
+
 - React Router v7 (recommended v6) - potential breaking changes with import paths and future flags
 - recharts v3 (recommended v2) - potential breaking changes with tooltip typing and component props
 - react-day-picker v9 (recommended v8) - potential breaking changes with controlled props and class names

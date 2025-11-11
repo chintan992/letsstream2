@@ -1,37 +1,48 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { useProfileData } from '@/hooks/useProfileData';
-import { useProfileActions } from '@/hooks/useProfileActions';
-import ProfileHeader from '@/components/ProfileHeader';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useProfileData } from "@/hooks/useProfileData";
+import { useProfileActions } from "@/hooks/useProfileActions";
+import ProfileHeader from "@/components/ProfileHeader";
 
 // Lazy load tab components for better performance
-const OverviewTab = lazy(() => import('../components/profile/OverviewTab'));
-const FavoritesTab = lazy(() => import('../components/profile/FavoritesTab'));
-const WatchlistTab = lazy(() => import('../components/profile/WatchlistTab'));
-const PreferencesTab = lazy(() => import('../components/profile/PreferencesTab'));
-const BackupTab = lazy(() => import('../components/profile/BackupTab'));
+const OverviewTab = lazy(() => import("../components/profile/OverviewTab"));
+const FavoritesTab = lazy(() => import("../components/profile/FavoritesTab"));
+const WatchlistTab = lazy(() => import("../components/profile/WatchlistTab"));
+const PreferencesTab = lazy(
+  () => import("../components/profile/PreferencesTab")
+);
+const BackupTab = lazy(() => import("../components/profile/BackupTab"));
 
 const Profile = () => {
   const { user } = useProfileData();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
 
   useEffect(() => {
     // Redirect to home if not logged in
     if (!user) {
-      navigate('/');
+      navigate("/");
     }
   }, [user, navigate]);
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse-slow text-white font-medium">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-pulse-slow font-medium text-white">
+          Loading...
+        </div>
       </div>
     );
   }

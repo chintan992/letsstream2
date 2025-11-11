@@ -1,7 +1,7 @@
-
 Collection 1 -> favourites:
 
-Data Stored in one of the index: 
+Data Stored in one of the index:
+
 ```
 added_at
 "2025-03-23T02:52:02.975Z"
@@ -55,6 +55,7 @@ user_id
 Collection 2 -> userPreferences:
 
 Data stored in one of the index:
+
 ```
 accentColor
 "#E63462"
@@ -80,10 +81,10 @@ user_id
 "2Kajnqnlt6M7y8R3DbGyiCRrsDD3"
 ```
 
+Collection 3 -> users:
 
-Collection 3 -> users: 
+Data Stored in one of the index:
 
-Data Stored in one of the index: 
 ```
 createdAt
 "2025-06-15T03:32:32.656Z"
@@ -119,10 +120,10 @@ watchHistory
 watchlist
 ```
 
-
-Collection 4 -> watchHistory: 
+Collection 4 -> watchHistory:
 
 Data Stored in one of the index:
+
 ```
 backdrop_path
 "/AuSip6e3uvQgPnnFQjzdTrOVPx7.jpg"
@@ -192,10 +193,10 @@ watch_position
 Database location: nam5
 ```
 
+Collection 5 -> watchlist:
 
-Collection 5 -> watchlist: 
+Data stored in one of the index:
 
-Data stored in one of the index: 
 ```
 added_at
 "2025-03-23T02:52:05.492Z"

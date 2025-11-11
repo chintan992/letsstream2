@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export function useInfiniteScroll(callback: () => void, isLoading: boolean) {
   const observerRef = useRef<HTMLDivElement | null>(null);

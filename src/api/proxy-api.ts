@@ -1,4 +1,3 @@
-
 /**
  * Proxy API routes for handling streaming content
  * This file defines API routes that can be used with a backend framework
@@ -10,9 +9,9 @@
 
 /**
  * Handler for proxying requests to external resources
- * 
+ *
  * Example usage with Express:
- * 
+ *
  * app.get('/worker-proxy', async (req, res) => {
  *   try {
  *     await proxyHandler(req.query.url, req.query.headers, res);
@@ -22,48 +21,56 @@
  * });
  */
 export async function proxyHandler(
-  url: string, 
+  url: string,
   headersStr: string | undefined,
   responseWriter: any
 ): Promise<void> {
   if (!url) {
-    responseWriter.status(400).send({ error: 'URL is required' });
+    responseWriter.status(400).send({ error: "URL is required" });
     return;
   }
-  
+
   let headers: Record<string, string> = {};
   if (headersStr) {
     try {
       headers = JSON.parse(headersStr);
     } catch (e) {
-      console.error('Failed to parse headers:', e);
+      console.error("Failed to parse headers:", e);
     }
   }
-  
+
   try {
     const response = await fetch(url, {
       headers: {
         ...headers,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
     });
-    
+
     // Copy response headers
     for (const [key, value] of Object.entries(response.headers)) {
       // Skip headers that might cause issues
-      if (!['content-encoding', 'content-length', 'connection'].includes(key.toLowerCase())) {
+      if (
+        !["content-encoding", "content-length", "connection"].includes(
+          key.toLowerCase()
+        )
+      ) {
         responseWriter.setHeader(key, value);
       }
     }
-    
+
     // Add CORS headers
-    responseWriter.setHeader('Access-Control-Allow-Origin', '*');
-    responseWriter.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    responseWriter.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    
+    responseWriter.setHeader("Access-Control-Allow-Origin", "*");
+    responseWriter.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    responseWriter.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept"
+    );
+
     // Set appropriate status
     responseWriter.status(response.status);
-    
+
     // Stream the response
     const reader = response.body.getReader();
     const pump = async () => {
@@ -75,10 +82,10 @@ export async function proxyHandler(
       responseWriter.write(value);
       return pump();
     };
-    
+
     await pump();
   } catch (error) {
-    console.error('Proxy error:', error);
+    console.error("Proxy error:", error);
     responseWriter.status(500).send({ error: error.message });
   }
 }
@@ -87,8 +94,11 @@ export async function proxyHandler(
  * Handler for OPTIONS requests (CORS preflight)
  */
 export function optionsHandler(responseWriter: any): void {
-  responseWriter.setHeader('Access-Control-Allow-Origin', '*');
-  responseWriter.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  responseWriter.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  responseWriter.setHeader("Access-Control-Allow-Origin", "*");
+  responseWriter.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  responseWriter.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   responseWriter.status(200).end();
 }

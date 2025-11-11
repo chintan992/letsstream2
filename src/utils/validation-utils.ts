@@ -1,12 +1,15 @@
+import { getMovieDetails, getTVDetails } from "./api";
 
-import { getMovieDetails, getTVDetails } from './api';
-
-export const validateMediaId = async (mediaId: number, mediaType: 'movie' | 'tv'): Promise<boolean> => {
+export const validateMediaId = async (
+  mediaId: number,
+  mediaType: "movie" | "tv"
+): Promise<boolean> => {
   try {
-    const details = mediaType === 'movie' 
-      ? await getMovieDetails(mediaId)
-      : await getTVDetails(mediaId);
-    
+    const details =
+      mediaType === "movie"
+        ? await getMovieDetails(mediaId)
+        : await getTVDetails(mediaId);
+
     return details !== null;
   } catch (error) {
     console.error(`Error validating media ID ${mediaId}:`, error);

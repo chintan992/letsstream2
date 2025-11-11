@@ -1,11 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // Helper functions from new config
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
+match /databases/{database}/documents {
+// Helper functions from new config
+function isAuthenticated() {
+return request.auth != null;
+}
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -14,11 +14,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }
-    
+
     match /users/{userId}/watchlist/{document=**} {
       allow read, write: if isOwner(userId);
     }
-    
+
     match /users/{userId}/history/{document=**} {
       allow read, write: if isOwner(userId);
     }
@@ -56,13 +56,13 @@ service cloud.firestore {
     match /media-preferences/{userId} {
       allow read, write: if isOwner(userId);
     }
-    
+
     match /watchHistory/{documentId} {
       allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
     }
-    
+
     match /favorites/{documentId} {
       allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
@@ -78,5 +78,6 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if false;
     }
-  }
+
+}
 }

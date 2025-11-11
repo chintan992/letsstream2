@@ -1,10 +1,10 @@
-import { Media } from '@/utils/types';
+import { Media } from "@/utils/types";
 import {
   ProviderResponse,
   AvailabilityResponse,
   ContentResponse,
-  ProviderContentItem
-} from '@/utils/types/streaming-types';
+  ProviderContentItem,
+} from "@/utils/types/streaming-types";
 
 interface StreamingProvider {
   id: string;
@@ -16,9 +16,9 @@ interface StreamingProvider {
 interface StreamingAvailability {
   providerId: string;
   url: string;
-  quality: 'SD' | 'HD' | '4K';
-  price?: number;  // For rental/purchase options
-  type: 'subscription' | 'rent' | 'buy' | 'free';
+  quality: "SD" | "HD" | "4K";
+  price?: number; // For rental/purchase options
+  type: "subscription" | "rent" | "buy" | "free";
 }
 
 interface ContentMetadata {
@@ -31,10 +31,10 @@ class StreamingPlatformService {
   private static instance: StreamingPlatformService;
   private providers: Map<string, StreamingProvider> = new Map();
   private contentCache: Map<number, ContentMetadata> = new Map();
-  
+
   // Cache TTL in milliseconds (24 hours)
   private readonly CACHE_TTL = 24 * 60 * 60 * 1000;
-  
+
   private constructor() {
     this.initializeProviders();
   }
@@ -53,28 +53,28 @@ class StreamingPlatformService {
     const defaultProviders: StreamingProvider[] = [
       // Mock streaming services for demo
       {
-        id: 'netflix',
-        name: 'Netflix',
-        baseUrl: 'https://api.netflix.com/v1',
-        apiKey: 'mock-netflix-key'
+        id: "netflix",
+        name: "Netflix",
+        baseUrl: "https://api.netflix.com/v1",
+        apiKey: "mock-netflix-key",
       },
       {
-        id: 'prime',
-        name: 'Amazon Prime Video',
-        baseUrl: 'https://api.primevideo.com/v1',
-        apiKey: 'mock-prime-key'
+        id: "prime",
+        name: "Amazon Prime Video",
+        baseUrl: "https://api.primevideo.com/v1",
+        apiKey: "mock-prime-key",
       },
       {
-        id: 'hulu',
-        name: 'Hulu',
-        baseUrl: 'https://api.hulu.com/v1',
-        apiKey: 'mock-hulu-key'
+        id: "hulu",
+        name: "Hulu",
+        baseUrl: "https://api.hulu.com/v1",
+        apiKey: "mock-hulu-key",
       },
       {
-        id: 'disney',
-        name: 'Disney+',
-        baseUrl: 'https://api.disneyplus.com/v1',
-        apiKey: 'mock-disney-key'
+        id: "disney",
+        name: "Disney+",
+        baseUrl: "https://api.disneyplus.com/v1",
+        apiKey: "mock-disney-key",
       },
       // Add more providers as needed
     ];
@@ -87,19 +87,21 @@ class StreamingPlatformService {
   /**
    * Get streaming availability for a specific media item
    */
-  public async getStreamingAvailability(mediaId: number): Promise<StreamingAvailability[]> {
+  public async getStreamingAvailability(
+    mediaId: number
+  ): Promise<StreamingAvailability[]> {
     const cached = this.contentCache.get(mediaId);
-    
+
     if (cached && this.isCacheValid(cached.lastUpdated)) {
       return cached.availability;
     }
 
     const availability = await this.fetchAvailabilityFromProviders(mediaId);
-    
+
     this.contentCache.set(mediaId, {
       mediaId,
       availability,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
 
     return availability;
@@ -115,8 +117,14 @@ class StreamingPlatformService {
     }
 
     try {
-      const response = await this.fetchFromProvider<ContentResponse>(provider, 'catalog');
-      return this.normalizeProviderContent(response as ContentResponse, provider);
+      const response = await this.fetchFromProvider<ContentResponse>(
+        provider,
+        "catalog"
+      );
+      return this.normalizeProviderContent(
+        response as ContentResponse,
+        provider
+      );
     } catch (error) {
       console.error(`Error fetching content from ${provider.name}:`, error);
       return [];
@@ -132,14 +140,14 @@ class StreamingPlatformService {
   ): Promise<Media[]> {
     const availabilityPromises = recommendations.map(async media => {
       const availability = await this.getStreamingAvailability(media.id);
-      const isAvailable = availability.some(a => 
-        userServices.includes(a.providerId) && a.type === 'subscription'
+      const isAvailable = availability.some(
+        a => userServices.includes(a.providerId) && a.type === "subscription"
       );
-      
+
       return {
         media,
         isAvailable,
-        availability
+        availability,
       };
     });
 
@@ -163,26 +171,36 @@ class StreamingPlatformService {
       this.contentCache.set(mediaId, {
         mediaId,
         availability,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     });
 
     await Promise.all(updatePromises);
   }
 
-  private async fetchAvailabilityFromProviders(mediaId: number): Promise<StreamingAvailability[]> {
-    const availabilityPromises = Array.from(this.providers.values()).map(async provider => {
-      try {
-        const response = await this.fetchFromProvider<AvailabilityResponse>(
-          provider,
-          `content/${mediaId}/availability`
-        );
-        return this.normalizeAvailability(response as AvailabilityResponse, provider.id);
-      } catch (error) {
-        console.error(`Error fetching availability from ${provider.name}:`, error);
-        return [];
+  private async fetchAvailabilityFromProviders(
+    mediaId: number
+  ): Promise<StreamingAvailability[]> {
+    const availabilityPromises = Array.from(this.providers.values()).map(
+      async provider => {
+        try {
+          const response = await this.fetchFromProvider<AvailabilityResponse>(
+            provider,
+            `content/${mediaId}/availability`
+          );
+          return this.normalizeAvailability(
+            response as AvailabilityResponse,
+            provider.id
+          );
+        } catch (error) {
+          console.error(
+            `Error fetching availability from ${provider.name}:`,
+            error
+          );
+          return [];
+        }
       }
-    });
+    );
 
     const results = await Promise.all(availabilityPromises);
     return results.flat();
@@ -200,9 +218,9 @@ class StreamingPlatformService {
     try {
       const response = await fetch(`${provider.baseUrl}/${endpoint}`, {
         headers: {
-          'Authorization': `Bearer ${provider.apiKey}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${provider.apiKey}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -229,9 +247,9 @@ class StreamingPlatformService {
     return rawData.data.availability.map(item => ({
       providerId,
       url: item.url,
-      quality: item.quality || 'HD',
+      quality: item.quality || "HD",
       price: item.price,
-      type: item.type || 'subscription'
+      type: item.type || "subscription",
     }));
   }
 
@@ -255,12 +273,12 @@ class StreamingPlatformService {
       genre_ids: item.genres,
       vote_average: item.rating,
       release_date: item.releaseDate,
-      first_air_date: item.firstAirDate
+      first_air_date: item.firstAirDate,
     }));
   }
 
   private isCacheValid(lastUpdated: Date): boolean {
-    return (Date.now() - lastUpdated.getTime()) < this.CACHE_TTL;
+    return Date.now() - lastUpdated.getTime() < this.CACHE_TTL;
   }
 }
 

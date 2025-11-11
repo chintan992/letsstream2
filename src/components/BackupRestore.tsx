@@ -1,14 +1,34 @@
-import React, { useState, useRef } from 'react';
-import { useAuth } from '@/hooks';
-import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Upload, AlertTriangle, CheckCircle, XCircle, FileText, Trash2 } from 'lucide-react';
+import React, { useState, useRef } from "react";
+import { useAuth } from "@/hooks";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Download,
+  Upload,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  FileText,
+  Trash2,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   createBackup,
   downloadBackup,
@@ -30,8 +50,8 @@ import {
   generateBackupFilenameSuggestions,
   type BackupData,
   type RestoreResult,
-  type ValidationResult
-} from '@/utils/services/backup-restore';
+  type ValidationResult,
+} from "@/utils/services/backup-restore";
 
 export function BackupRestore() {
   const { user } = useAuth();
@@ -42,9 +62,12 @@ export function BackupRestore() {
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [restoreProgress, setRestoreProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [restoreResult, setRestoreResult] = useState<RestoreResult | null>(null);
-  const [customFilename, setCustomFilename] = useState('');
+  const [validationResult, setValidationResult] =
+    useState<ValidationResult | null>(null);
+  const [restoreResult, setRestoreResult] = useState<RestoreResult | null>(
+    null
+  );
+  const [customFilename, setCustomFilename] = useState("");
   const [filenameSuggestions, setFilenameSuggestions] = useState<string[]>([]);
   const [showFilenameOptions, setShowFilenameOptions] = useState(false);
   const [isValidatingFile, setIsValidatingFile] = useState(false);
@@ -54,7 +77,7 @@ export function BackupRestore() {
       toast({
         title: "Authentication required",
         description: "Please log in to create a backup.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -64,7 +87,10 @@ export function BackupRestore() {
       const backupData = await createBackup(user.uid);
 
       // Generate filename suggestions
-      const suggestions = generateBackupFilenameSuggestions(backupData, user.email);
+      const suggestions = generateBackupFilenameSuggestions(
+        backupData,
+        user.email
+      );
       setFilenameSuggestions(suggestions);
 
       // Use custom filename if provided, otherwise use first suggestion
@@ -79,27 +105,32 @@ export function BackupRestore() {
       // Show filename options after successful backup
       setShowFilenameOptions(true);
     } catch (error) {
-      console.error('Error creating backup:', error);
+      console.error("Error creating backup:", error);
       toast({
         title: "Backup failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred while creating the backup.",
-        variant: "destructive"
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred while creating the backup.",
+        variant: "destructive",
       });
     } finally {
       setIsCreatingBackup(false);
     }
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Basic file type check
-    if (!file.name.toLowerCase().endsWith('.json')) {
+    if (!file.name.toLowerCase().endsWith(".json")) {
       toast({
         title: "Invalid file type",
         description: "Please select a JSON file.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -118,13 +149,13 @@ export function BackupRestore() {
         toast({
           title: "Invalid backup file",
           description: "The selected file is not a valid backup file.",
-          variant: "destructive"
+          variant: "destructive",
         });
       } else if (validation.warnings.length > 0) {
         toast({
           title: "Backup file validated with warnings",
-          description: validation.warnings.join(', '),
-          variant: "default"
+          description: validation.warnings.join(", "),
+          variant: "default",
         });
       } else {
         toast({
@@ -133,12 +164,15 @@ export function BackupRestore() {
         });
       }
     } catch (error) {
-      console.error('Error parsing backup file:', error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to read the backup file.";
+      console.error("Error parsing backup file:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to read the backup file.";
       toast({
         title: "Error reading file",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
       setSelectedFile(null);
       setValidationResult(null);
@@ -171,24 +205,28 @@ export function BackupRestore() {
         toast({
           title: "Restore failed",
           description: result.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error restoring backup:', error);
+      console.error("Error restoring backup:", error);
       setRestoreResult({
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
         stats: {
           watchHistory: { added: 0, updated: 0, errors: 0 },
           favorites: { added: 0, updated: 0, errors: 0 },
-          watchlist: { added: 0, updated: 0, errors: 0 }
-        }
+          watchlist: { added: 0, updated: 0, errors: 0 },
+        },
       });
       toast({
         title: "Restore failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred during restore.",
-        variant: "destructive"
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred during restore.",
+        variant: "destructive",
       });
     } finally {
       setIsRestoringBackup(false);
@@ -203,14 +241,16 @@ export function BackupRestore() {
       await clearUserData(user.uid);
       toast({
         title: "Data cleared",
-        description: "All your watch history, favorites, and watchlist have been cleared.",
+        description:
+          "All your watch history, favorites, and watchlist have been cleared.",
       });
     } catch (error) {
-      console.error('Error clearing data:', error);
+      console.error("Error clearing data:", error);
       toast({
         title: "Error clearing data",
-        description: error instanceof Error ? error.message : "Failed to clear data.",
-        variant: "destructive"
+        description:
+          error instanceof Error ? error.message : "Failed to clear data.",
+        variant: "destructive",
       });
     }
   };
@@ -239,7 +279,8 @@ export function BackupRestore() {
       <CardHeader>
         <CardTitle>Backup & Restore</CardTitle>
         <CardDescription>
-          Create backups of your watch history, favorites, and watchlist, or restore from a previous backup.
+          Create backups of your watch history, favorites, and watchlist, or
+          restore from a previous backup.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -248,7 +289,8 @@ export function BackupRestore() {
           <div>
             <h3 className="text-lg font-semibold">Create Backup</h3>
             <p className="text-sm text-muted-foreground">
-              Download a JSON file containing all your watch history, favorites, and watchlist data.
+              Download a JSON file containing all your watch history, favorites,
+              and watchlist data.
             </p>
           </div>
           <Button
@@ -257,7 +299,9 @@ export function BackupRestore() {
             className="w-full"
           >
             <Download className="mr-2 h-4 w-4" />
-            {isCreatingBackup ? 'Creating Backup...' : 'Create & Download Backup'}
+            {isCreatingBackup
+              ? "Creating Backup..."
+              : "Create & Download Backup"}
           </Button>
 
           {/* Filename Customization */}
@@ -271,18 +315,20 @@ export function BackupRestore() {
                 type="text"
                 placeholder="Enter custom filename or leave empty for auto-generated"
                 value={customFilename}
-                onChange={(e) => setCustomFilename(e.target.value)}
+                onChange={e => setCustomFilename(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 File will automatically have .json extension added
               </p>
             </div>
 
             {filenameSuggestions.length > 0 && (
               <div>
-                <Label className="text-sm font-medium">Suggested Filenames</Label>
-                <Select onValueChange={(value) => setCustomFilename(value)}>
+                <Label className="text-sm font-medium">
+                  Suggested Filenames
+                </Label>
+                <Select onValueChange={value => setCustomFilename(value)}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Choose a suggested filename" />
                   </SelectTrigger>
@@ -307,7 +353,8 @@ export function BackupRestore() {
           <div>
             <h3 className="text-lg font-semibold">Restore Backup</h3>
             <p className="text-sm text-muted-foreground">
-              Upload a backup file to restore your data. This will merge with existing data.
+              Upload a backup file to restore your data. This will merge with
+              existing data.
             </p>
           </div>
 
@@ -337,15 +384,24 @@ export function BackupRestore() {
                 aria-describedby="file-input-help"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                {isValidatingFile ? 'Validating...' : selectedFile ? selectedFile.name : 'Select Backup File'}
+                {isValidatingFile
+                  ? "Validating..."
+                  : selectedFile
+                    ? selectedFile.name
+                    : "Select Backup File"}
               </Button>
-              <p id="file-input-help" className="text-xs text-muted-foreground mt-1">
+              <p
+                id="file-input-help"
+                className="mt-1 text-xs text-muted-foreground"
+              >
                 Only JSON files are supported. Maximum file size: 50MB
               </p>
             </div>
 
             {validationResult && (
-              <Alert variant={validationResult.isValid ? "default" : "destructive"}>
+              <Alert
+                variant={validationResult.isValid ? "default" : "destructive"}
+              >
                 {validationResult.isValid ? (
                   <CheckCircle className="h-4 w-4" />
                 ) : (
@@ -356,9 +412,11 @@ export function BackupRestore() {
                     <div>
                       <p>Backup file is valid.</p>
                       {validationResult.warnings.length > 0 && (
-                        <ul className="mt-2 list-disc list-inside">
+                        <ul className="mt-2 list-inside list-disc">
                           {validationResult.warnings.map((warning, index) => (
-                            <li key={index} className="text-sm">{warning}</li>
+                            <li key={index} className="text-sm">
+                              {warning}
+                            </li>
                           ))}
                         </ul>
                       )}
@@ -366,9 +424,11 @@ export function BackupRestore() {
                   ) : (
                     <div>
                       <p>Backup file has errors:</p>
-                      <ul className="mt-2 list-disc list-inside">
+                      <ul className="mt-2 list-inside list-disc">
                         {validationResult.errors.map((error, index) => (
-                          <li key={index} className="text-sm">{error}</li>
+                          <li key={index} className="text-sm">
+                            {error}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -380,17 +440,21 @@ export function BackupRestore() {
             {isRestoringBackup && (
               <div className="space-y-2">
                 <Progress value={restoreProgress} />
-                <p className="text-sm text-muted-foreground">Restoring backup...</p>
+                <p className="text-sm text-muted-foreground">
+                  Restoring backup...
+                </p>
               </div>
             )}
 
             <Button
               onClick={handleRestoreBackup}
-              disabled={!selectedFile || !validationResult?.isValid || isRestoringBackup}
+              disabled={
+                !selectedFile || !validationResult?.isValid || isRestoringBackup
+              }
               className="w-full"
             >
               <Upload className="mr-2 h-4 w-4" />
-              {isRestoringBackup ? 'Restoring...' : 'Restore Backup'}
+              {isRestoringBackup ? "Restoring..." : "Restore Backup"}
             </Button>
           </div>
         </div>
@@ -431,17 +495,16 @@ export function BackupRestore() {
         {/* Clear Data Section */}
         <div className="space-y-4 border-t pt-4">
           <div>
-            <h3 className="text-lg font-semibold text-destructive">Danger Zone</h3>
+            <h3 className="text-lg font-semibold text-destructive">
+              Danger Zone
+            </h3>
             <p className="text-sm text-muted-foreground">
               Clear all your data. This action cannot be undone.
             </p>
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                className="w-full"
-              >
+              <Button variant="destructive" className="w-full">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Clear All Data
               </Button>
@@ -450,8 +513,9 @@ export function BackupRestore() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all your:
-                  <ul className="list-disc list-inside mt-2 space-y-1">
+                  This action cannot be undone. This will permanently delete all
+                  your:
+                  <ul className="mt-2 list-inside list-disc space-y-1">
                     <li>Watch history</li>
                     <li>Favorite movies and shows</li>
                     <li>Watchlist items</li>
@@ -464,7 +528,7 @@ export function BackupRestore() {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleClearData}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className="hover:bg-destructive/90 bg-destructive text-destructive-foreground"
                 >
                   Yes, clear all data
                 </AlertDialogAction>

@@ -1,6 +1,6 @@
 ---
 
-[![Let's Stream V2.0](https://img.shields.io/badge/Let's%20Stream-V2.0-blue)](https://github.com/chintan992/letsstream2) 
+[![Let's Stream V2.0](https://img.shields.io/badge/Let's%20Stream-V2.0-blue)](https://github.com/chintan992/letsstream2)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/chintan992/letsstream2/pulls)
 

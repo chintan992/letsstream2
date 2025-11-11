@@ -1,5 +1,5 @@
-import { UserInteraction, UserPreference } from '@/contexts/types/user-profile';
-import { Media } from '@/utils/types';
+import { UserInteraction, UserPreference } from "@/contexts/types/user-profile";
+import { Media } from "@/utils/types";
 
 interface EntityExtraction {
   genres: string[];
@@ -11,14 +11,14 @@ interface EntityExtraction {
 }
 
 interface PreferenceUpdate {
-  type: 'genre' | 'actor' | 'director' | 'keyword' | 'year';
+  type: "genre" | "actor" | "director" | "keyword" | "year";
   value: string;
   weight: number;
 }
 
 class NLPService {
   private static instance: NLPService;
-  
+
   private constructor() {}
 
   public static getInstance(): NLPService {
@@ -43,7 +43,14 @@ class NLPService {
     const timeReferences = this.extractTimeReferences(processedText);
     const sentiment = this.analyzeSentiment(processedText);
 
-    console.debug('Extracted entities:', { genres, actors, directors, keywords, timeReferences, sentiment });
+    console.debug("Extracted entities:", {
+      genres,
+      actors,
+      directors,
+      keywords,
+      timeReferences,
+      sentiment,
+    });
 
     return {
       genres,
@@ -51,7 +58,7 @@ class NLPService {
       directors,
       keywords,
       timeReferences,
-      sentiment
+      sentiment,
     };
   }
 
@@ -59,7 +66,7 @@ class NLPService {
    * Analyzes user feedback to update preferences
    */
   public async processUserFeedback(
-    interaction: UserInteraction, 
+    interaction: UserInteraction,
     media: Media
   ): Promise<PreferenceUpdate[]> {
     const updates: PreferenceUpdate[] = [];
@@ -69,22 +76,22 @@ class NLPService {
     if (media.genre_ids) {
       media.genre_ids.forEach(genreId => {
         updates.push({
-          type: 'genre',
+          type: "genre",
           value: genreId.toString(),
-          weight: weight
+          weight: weight,
         });
       });
     }
 
     // Process sentiment and adjust weights
     const sentimentMultiplier = interaction.sentiment.score > 0 ? 1.5 : 0.5;
-    
+
     // Add keyword-based updates
     interaction.sentiment.keywords.forEach(keyword => {
       updates.push({
-        type: 'keyword',
+        type: "keyword",
         value: keyword,
-        weight: weight * sentimentMultiplier
+        weight: weight * sentimentMultiplier,
       });
     });
 
@@ -94,13 +101,19 @@ class NLPService {
   /**
    * Calculates content similarity between two items
    */
-  public async calculateSimilarity(source: Media, target: Media): Promise<number> {
+  public async calculateSimilarity(
+    source: Media,
+    target: Media
+  ): Promise<number> {
     let similarity = 0;
     let weights = 0;
 
     // Genre similarity (40% weight)
     if (source.genre_ids && target.genre_ids) {
-      const genreSimilarity = this.calculateGenreSimilarity(source.genre_ids, target.genre_ids);
+      const genreSimilarity = this.calculateGenreSimilarity(
+        source.genre_ids,
+        target.genre_ids
+      );
       similarity += genreSimilarity * 0.4;
       weights += 0.4;
     }
@@ -115,7 +128,10 @@ class NLPService {
 
     // Overview/theme similarity (40% weight)
     if (source.overview && target.overview) {
-      const themeSimilarity = await this.calculateThemeSimilarity(source.overview, target.overview);
+      const themeSimilarity = await this.calculateThemeSimilarity(
+        source.overview,
+        target.overview
+      );
       similarity += themeSimilarity * 0.4;
       weights += 0.4;
     }
@@ -125,9 +141,22 @@ class NLPService {
 
   private extractGenres(text: string): string[] {
     const genreKeywords = [
-      'action', 'adventure', 'comedy', 'drama', 'horror', 'thriller',
-      'sci-fi', 'science fiction', 'romance', 'documentary', 'animation',
-      'fantasy', 'mystery', 'crime', 'family', 'western'
+      "action",
+      "adventure",
+      "comedy",
+      "drama",
+      "horror",
+      "thriller",
+      "sci-fi",
+      "science fiction",
+      "romance",
+      "documentary",
+      "animation",
+      "fantasy",
+      "mystery",
+      "crime",
+      "family",
+      "western",
     ];
 
     return genreKeywords.filter(genre => text.includes(genre));
@@ -150,9 +179,20 @@ class NLPService {
 
   private extractKeywords(text: string): string[] {
     const themeKeywords = [
-      'inspiring', 'thought-provoking', 'funny', 'scary', 'emotional',
-      'intense', 'relaxing', 'classic', 'innovative', 'artistic',
-      'nostalgic', 'mind-bending', 'controversial', 'uplifting'
+      "inspiring",
+      "thought-provoking",
+      "funny",
+      "scary",
+      "emotional",
+      "intense",
+      "relaxing",
+      "classic",
+      "innovative",
+      "artistic",
+      "nostalgic",
+      "mind-bending",
+      "controversial",
+      "uplifting",
     ];
 
     return themeKeywords.filter(keyword => text.includes(keyword));
@@ -160,9 +200,9 @@ class NLPService {
 
   private extractTimeReferences(text: string): string[] {
     const timePatterns = [
-      /\d{4}s?/,  // Years like 1990s
+      /\d{4}s?/, // Years like 1990s
       /recent|new|latest|old|classic/i,
-      /(19|20)\d{2}/  // Specific years
+      /(19|20)\d{2}/, // Specific years
     ];
 
     return timePatterns
@@ -175,13 +215,29 @@ class NLPService {
 
   private analyzeSentiment(text: string): number {
     const positiveWords = [
-      'love', 'great', 'awesome', 'excellent', 'amazing',
-      'good', 'favorite', 'best', 'enjoyed', 'fantastic'
+      "love",
+      "great",
+      "awesome",
+      "excellent",
+      "amazing",
+      "good",
+      "favorite",
+      "best",
+      "enjoyed",
+      "fantastic",
     ];
 
     const negativeWords = [
-      'hate', 'terrible', 'awful', 'bad', 'worst',
-      'boring', 'waste', 'disappointed', 'poor', 'dislike'
+      "hate",
+      "terrible",
+      "awful",
+      "bad",
+      "worst",
+      "boring",
+      "waste",
+      "disappointed",
+      "poor",
+      "dislike",
     ];
 
     const words = text.toLowerCase().split(/\W+/);
@@ -205,7 +261,8 @@ class NLPService {
     }
 
     // Adjust based on recency (higher weight for recent interactions)
-    const daysSince = (Date.now() - interaction.timestamp.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSince =
+      (Date.now() - interaction.timestamp.getTime()) / (1000 * 60 * 60 * 24);
     const recencyFactor = Math.exp(-daysSince / 30); // Exponential decay over 30 days
     weight *= recencyFactor;
 
@@ -218,7 +275,10 @@ class NLPService {
     return intersection.length / union.length;
   }
 
-  private calculateYearSimilarity(sourceDate?: string, targetDate?: string): number {
+  private calculateYearSimilarity(
+    sourceDate?: string,
+    targetDate?: string
+  ): number {
     if (!sourceDate || !targetDate) return 0;
 
     const sourceYear = new Date(sourceDate).getFullYear();
@@ -229,13 +289,18 @@ class NLPService {
     return Math.exp(-yearDiff / 10);
   }
 
-  private async calculateThemeSimilarity(sourceText: string, targetText: string): Promise<number> {
+  private async calculateThemeSimilarity(
+    sourceText: string,
+    targetText: string
+  ): Promise<number> {
     // In a real implementation, this would use more sophisticated NLP
     // For now, we'll use a simple keyword overlap approach
     const sourceWords = new Set(sourceText.toLowerCase().split(/\W+/));
     const targetWords = new Set(targetText.toLowerCase().split(/\W+/));
 
-    const intersection = new Set([...sourceWords].filter(x => targetWords.has(x)));
+    const intersection = new Set(
+      [...sourceWords].filter(x => targetWords.has(x))
+    );
     const union = new Set([...sourceWords, ...targetWords]);
 
     return intersection.size / union.size;

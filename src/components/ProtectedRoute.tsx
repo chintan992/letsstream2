@@ -1,5 +1,5 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,8 +10,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse-slow text-white font-medium">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-pulse-slow font-medium text-white">
+          Loading...
+        </div>
       </div>
     );
   }

@@ -1,11 +1,11 @@
-import { createContext } from 'react';
-import { Media } from '@/utils/types';
+import { createContext } from "react";
+import { Media } from "@/utils/types";
 
 export interface WatchHistoryItem {
   id: string;
   user_id: string;
   media_id: number;
-  media_type: 'movie' | 'tv';
+  media_type: "movie" | "tv";
   title: string;
   poster_path: string;
   backdrop_path: string;
@@ -23,7 +23,7 @@ export interface FavoriteItem {
   id: string;
   user_id: string;
   media_id: number;
-  media_type: 'movie' | 'tv';
+  media_type: "movie" | "tv";
   title: string;
   poster_path: string;
   backdrop_path: string;
@@ -36,7 +36,7 @@ export interface WatchlistItem {
   id: string;
   user_id: string;
   media_id: number;
-  media_type: 'movie' | 'tv';
+  media_type: "movie" | "tv";
   title: string;
   poster_path: string;
   backdrop_path: string;
@@ -47,7 +47,7 @@ export interface WatchlistItem {
 
 export interface MediaBaseItem {
   media_id: number;
-  media_type: 'movie' | 'tv';
+  media_type: "movie" | "tv";
   title: string;
   poster_path: string;
   backdrop_path: string;
@@ -62,8 +62,21 @@ export interface WatchHistoryContextType {
   hasMore: boolean;
   isLoading: boolean;
   loadMore: () => Promise<void>;
-  addToWatchHistory: (media: Media, position: number, duration: number, season?: number, episode?: number, preferredSource?: string) => Promise<void>;
-  updateWatchPosition: (mediaId: number, mediaType: 'movie' | 'tv', position: number, season?: number, episode?: number) => Promise<void>;
+  addToWatchHistory: (
+    media: Media,
+    position: number,
+    duration: number,
+    season?: number,
+    episode?: number,
+    preferredSource?: string
+  ) => Promise<void>;
+  updateWatchPosition: (
+    mediaId: number,
+    mediaType: "movie" | "tv",
+    position: number,
+    season?: number,
+    episode?: number
+  ) => Promise<void>;
   clearWatchHistory: () => Promise<void>;
   deleteWatchHistoryItem: (id: string) => Promise<void>;
   deleteSelectedWatchHistory: (ids: string[]) => Promise<void>;
@@ -72,11 +85,19 @@ export interface WatchHistoryContextType {
   deleteWatchlistItem: (id: string) => Promise<void>;
   deleteSelectedWatchlist: (ids: string[]) => Promise<void>;
   addToFavorites: (item: MediaBaseItem) => Promise<void>;
-  removeFromFavorites: (mediaId: number, mediaType: 'movie' | 'tv') => Promise<void>;
-  isInFavorites: (mediaId: number, mediaType: 'movie' | 'tv') => boolean;
+  removeFromFavorites: (
+    mediaId: number,
+    mediaType: "movie" | "tv"
+  ) => Promise<void>;
+  isInFavorites: (mediaId: number, mediaType: "movie" | "tv") => boolean;
   addToWatchlist: (item: MediaBaseItem) => Promise<void>;
-  removeFromWatchlist: (mediaId: number, mediaType: 'movie' | 'tv') => Promise<void>;
-  isInWatchlist: (mediaId: number, mediaType: 'movie' | 'tv') => boolean;
+  removeFromWatchlist: (
+    mediaId: number,
+    mediaType: "movie" | "tv"
+  ) => Promise<void>;
+  isInWatchlist: (mediaId: number, mediaType: "movie" | "tv") => boolean;
 }
 
-export const WatchHistoryContext = createContext<WatchHistoryContextType | undefined>(undefined);
+export const WatchHistoryContext = createContext<
+  WatchHistoryContextType | undefined
+>(undefined);

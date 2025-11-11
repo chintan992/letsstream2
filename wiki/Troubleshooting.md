@@ -86,7 +86,7 @@ Error: Registration failed - Service worker not found
 
 ```typescript
 // Cache storage problems
-Error: QuotaExceededError
+Error: QuotaExceededError;
 ```
 
 **Solution:**
@@ -112,7 +112,7 @@ Error: QuotaExceededError
 
 ```typescript
 // Add dynamic imports
-const Component = lazy(() => import('./Component'));
+const Component = lazy(() => import("./Component"));
 ```
 
 2. Optimize images:
@@ -157,7 +157,7 @@ Error: Too many requests
 ```typescript
 const rateLimiter = new RateLimiter({
   maxRequests: 100,
-  timeWindow: 60000
+  timeWindow: 60000,
 });
 ```
 
@@ -211,9 +211,9 @@ Access to fetch at 'URL' has been blocked by CORS policy
 
 ```typescript
 // Stale data in cache
-const { data } = useQuery(['key'], fetcher, {
+const { data } = useQuery(["key"], fetcher, {
   staleTime: 1000 * 60 * 5, // 5 minutes
-  cacheTime: 1000 * 60 * 30 // 30 minutes
+  cacheTime: 1000 * 60 * 30, // 30 minutes
 });
 ```
 
@@ -253,14 +253,14 @@ const { data } = useQuery(['key'], fetcher, {
 // Enhanced logging
 const logger = {
   info: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.log(`[INFO] ${message}`, data);
     }
   },
   error: (message: string, error: Error) => {
     console.error(`[ERROR] ${message}`, error);
     // Add error reporting service here
-  }
+  },
 };
 ```
 

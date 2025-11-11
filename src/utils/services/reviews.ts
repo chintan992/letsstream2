@@ -1,10 +1,10 @@
-import { tmdb } from './tmdb';
-import { Review } from '../types';
+import { tmdb } from "./tmdb";
+import { Review } from "../types";
 
 // Get reviews for movie or TV show
 export const getReviews = async (
   id: number,
-  mediaType: 'movie' | 'tv'
+  mediaType: "movie" | "tv"
 ): Promise<Review[]> => {
   try {
     const response = await tmdb.get(`/${mediaType}/${id}/reviews`);

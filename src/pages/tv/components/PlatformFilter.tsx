@@ -1,15 +1,14 @@
-
-import { Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuCheckboxItem, 
-  DropdownMenuContent, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { STREAMING_PLATFORMS } from '../constants/streamingPlatforms';
+import { Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { STREAMING_PLATFORMS } from "../constants/streamingPlatforms";
 
 interface PlatformFilterProps {
   platformFilters: string[];
@@ -19,12 +18,12 @@ interface PlatformFilterProps {
   showPlatformBar: boolean;
 }
 
-const PlatformFilter = ({ 
-  platformFilters, 
-  togglePlatformFilter, 
+const PlatformFilter = ({
+  platformFilters,
+  togglePlatformFilter,
   clearPlatformFilters,
   togglePlatformBar,
-  showPlatformBar
+  showPlatformBar,
 }: PlatformFilterProps) => {
   return (
     <DropdownMenu>
@@ -32,18 +31,18 @@ const PlatformFilter = ({
         <Button
           variant="outline"
           size="sm"
-          className="border-white/10 text-white hover:bg-white/10 relative"
+          className="relative border-white/10 text-white hover:bg-white/10"
         >
-          <Filter className="h-4 w-4 mr-2" />
+          <Filter className="mr-2 h-4 w-4" />
           Platforms
           {platformFilters.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-accent text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs">
               {platformFilters.length}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-background border-white/10 text-white">
+      <DropdownMenuContent className="w-56 border-white/10 bg-background text-white">
         <DropdownMenuLabel>Streaming Platforms</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-white/10" />
         {STREAMING_PLATFORMS.map(platform => (

@@ -1,17 +1,17 @@
-import { Media } from '@/utils/types';
-import MediaCard from './MediaCard';
-import { motion, Variants } from 'framer-motion';
-import { formatDistanceToNow } from 'date-fns';
-import { Clock, Trash2, SquareCheck, Square } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useState } from 'react';
+import { Media } from "@/utils/types";
+import MediaCard from "./MediaCard";
+import { motion, Variants } from "framer-motion";
+import { formatDistanceToNow } from "date-fns";
+import { Clock, Trash2, SquareCheck, Square } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
 
 // Extend Media type to include optional string ID and timestamp
-interface ExtendedMedia extends Omit<Media, 'id'> {
+interface ExtendedMedia extends Omit<Media, "id"> {
   id: string | number;
   media_id: number;
-  docId?: string;  // Document ID for deletion
+  docId?: string; // Document ID for deletion
   created_at?: string;
   watch_position?: number;
   duration?: number;
@@ -26,13 +26,13 @@ interface MediaGridProps {
   onDeleteSelected?: (ids: string[]) => void;
 }
 
-const MediaGrid = ({ 
-  media, 
-  title, 
-  listView = false, 
+const MediaGrid = ({
+  media,
+  title,
+  listView = false,
   selectable = false,
   onDelete,
-  onDeleteSelected
+  onDeleteSelected,
 }: MediaGridProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
@@ -50,14 +50,14 @@ const MediaGrid = ({
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05
-      }
-    }
+        staggerChildren: 0.05,
+      },
+    },
   };
 
   const item: Variants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   };
 
   const toggleSelectMode = () => {
@@ -84,10 +84,10 @@ const MediaGrid = ({
 
   const renderTimestamp = (media: ExtendedMedia) => {
     if (!media.created_at) return null;
-    
+
     return (
-      <div className="flex items-center text-xs text-white/70 mb-2">
-        <Clock className="h-3 w-3 mr-1" />
+      <div className="mb-2 flex items-center text-xs text-white/70">
+        <Clock className="mr-1 h-3 w-3" />
         {formatDistanceToNow(new Date(media.created_at), { addSuffix: true })}
       </div>
     );
@@ -97,16 +97,16 @@ const MediaGrid = ({
     if (!selectable) return null;
 
     return (
-      <div className="flex gap-2 mb-4">
+      <div className="mb-4 flex gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={toggleSelectMode}
           className="border-white/20 bg-black/50 text-white hover:bg-black/70"
         >
-          {selectMode ? 'Cancel Selection' : 'Select Items'}
+          {selectMode ? "Cancel Selection" : "Select Items"}
         </Button>
-        
+
         {selectMode && (
           <>
             <Button
@@ -116,13 +116,15 @@ const MediaGrid = ({
               className="border-white/20 bg-black/50 text-white hover:bg-black/70"
             >
               {selectedItems.length === media.length ? (
-                <Square className="h-4 w-4 mr-2" />
+                <Square className="mr-2 h-4 w-4" />
               ) : (
-                <SquareCheck className="h-4 w-4 mr-2" />
+                <SquareCheck className="mr-2 h-4 w-4" />
               )}
-              {selectedItems.length === media.length ? 'Deselect All' : 'Select All'}
+              {selectedItems.length === media.length
+                ? "Deselect All"
+                : "Select All"}
             </Button>
-            
+
             {selectedItems.length > 0 && onDeleteSelected && (
               <Button
                 variant="destructive"
@@ -130,7 +132,7 @@ const MediaGrid = ({
                 onClick={() => onDeleteSelected(selectedItems)}
                 className="ml-auto"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 Delete Selected ({selectedItems.length})
               </Button>
             )}
@@ -139,14 +141,14 @@ const MediaGrid = ({
       </div>
     );
   };
-  
+
   return (
-    <div className="px-4 md:px-8 py-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+    <div className="px-4 py-6 md:px-8">
+      <div className="mb-6 flex flex-col justify-between md:flex-row md:items-center">
         {title && <h2 className="text-2xl font-bold text-white">{title}</h2>}
         {renderSelectionButtons()}
       </div>
-      
+
       {listView ? (
         <motion.div
           className="flex flex-col gap-4"
@@ -155,40 +157,46 @@ const MediaGrid = ({
           animate="show"
         >
           {media.map((mediaItem, idx) => (
-            <motion.div 
+            <motion.div
               key={`${mediaItem.media_type}-${mediaItem.id}-${mediaItem.docId ?? idx}`}
               variants={item}
-              className="glass p-4 rounded-lg hover:bg-white/10 transition-colors group"
+              className="glass group rounded-lg p-4 transition-colors hover:bg-white/10"
             >
-              <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-4">
                 {selectMode && mediaItem.docId && (
                   <div className="flex-shrink-0">
-                    <Checkbox 
+                    <Checkbox
                       checked={selectedItems.includes(mediaItem.docId)}
                       onCheckedChange={() => handleSelect(mediaItem.docId!)}
                     />
                   </div>
                 )}
-                <div className="flex-shrink-0 w-16 h-24 md:w-20 md:h-30 overflow-hidden rounded-md">
-                  <MediaCard media={{ ...mediaItem, id: mediaItem.media_id }} className="h-full w-full" minimal />
+                <div className="md:h-30 h-24 w-16 flex-shrink-0 overflow-hidden rounded-md md:w-20">
+                  <MediaCard
+                    media={{ ...mediaItem, id: mediaItem.media_id }}
+                    className="h-full w-full"
+                    minimal
+                  />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-white">{mediaItem.title || mediaItem.name}</h3>
+                    <h3 className="text-lg font-semibold text-white">
+                      {mediaItem.title || mediaItem.name}
+                    </h3>
                     {!selectMode && onDelete && mediaItem.docId && (
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onDelete(mediaItem.docId!)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         <Trash2 className="h-4 w-4 text-white/70 hover:text-red-500" />
                       </Button>
                     )}
                   </div>
-                  <div className="flex items-center text-sm text-white/70 mb-2">
+                  <div className="mb-2 flex items-center text-sm text-white/70">
                     <span>
-                      {mediaItem.media_type === 'movie'
+                      {mediaItem.media_type === "movie"
                         ? mediaItem.release_date?.substring(0, 4)
                         : mediaItem.first_air_date?.substring(0, 4)}
                     </span>
@@ -199,28 +207,30 @@ const MediaGrid = ({
                     )}
                   </div>
                   {renderTimestamp(mediaItem)}
-                  <p className="text-white/70 text-sm line-clamp-2">{mediaItem.overview}</p>
+                  <p className="line-clamp-2 text-sm text-white/70">
+                    {mediaItem.overview}
+                  </p>
                 </div>
               </div>
             </motion.div>
           ))}
         </motion.div>
       ) : (
-        <motion.div 
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6"
+        <motion.div
+          className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5 xl:grid-cols-6"
           variants={container}
           initial="hidden"
           animate="show"
         >
           {media.map((mediaItem, idx) => (
-            <motion.div 
-              key={`${mediaItem.media_type}-${mediaItem.id}-${mediaItem.docId ?? idx}`} 
+            <motion.div
+              key={`${mediaItem.media_type}-${mediaItem.id}-${mediaItem.docId ?? idx}`}
               variants={item}
               className="group relative"
             >
               {selectMode && mediaItem.docId && (
-                <div className="absolute top-2 left-2 z-10">
-                  <Checkbox 
+                <div className="absolute left-2 top-2 z-10">
+                  <Checkbox
                     checked={selectedItems.includes(mediaItem.docId)}
                     onCheckedChange={() => handleSelect(mediaItem.docId!)}
                   />
@@ -231,7 +241,7 @@ const MediaGrid = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => onDelete(mediaItem.docId!)}
-                  className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100"
                 >
                   <Trash2 className="h-4 w-4 text-white/70 hover:text-red-500" />
                 </Button>

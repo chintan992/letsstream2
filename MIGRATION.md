@@ -1,9 +1,11 @@
 # Migration Guide: Dependency Updates
 
 ## Overview
+
 This document summarizes the dependency update from the previous version to the current one, focusing on core build infrastructure updates: Vite, TypeScript, ESLint ecosystem, TailwindCSS, PostCSS, and Vite plugins.
 
 ## Node.js Requirement Change
+
 - **Old**: Node.js 20.0.0+
 - **New**: Node.js 20.19+ or 22.12+
 - **Reason**: Vite 7 requirement for ESM-only distribution
@@ -12,20 +14,24 @@ This document summarizes the dependency update from the previous version to the 
 ## Major Version Updates
 
 ### Vite 5.4.1 → 7.1.4
+
 - Default browser target changed to 'baseline-widely-available'
 - Sass legacy API removed (not applicable to this project)
 - splitVendorChunkPlugin removed (already using manualChunks)
 - Added explicit build.target configuration to maintain older browser compatibility
 
 ### vite-plugin-pwa 0.21.2 → 1.0.3
+
 - Workbox updated to 7.3.0
 - workbox-google-analytics deprecated (GA4 incompatible) - removed from configuration
 - Maintains complex workbox runtime caching strategies
 
 ### eslint-plugin-react-hooks 5.1.0-rc.0 → 7.0.1
+
 - Now a stable release (no longer RC)
 
 ## Minor/Patch Updates
+
 - TypeScript 5.5.3 → 5.9.3
 - ESLint ecosystem updates (9.9.0 → 9.39.1)
 - TailwindCSS 3.4.11 → 3.4.18
@@ -33,27 +39,33 @@ This document summarizes the dependency update from the previous version to the 
 - @vitejs/plugin-react-swc 3.5.0 → 4.2.1
 
 ## Removed Dependencies
+
 - `@tailwindcss/line-clamp`: Built into TailwindCSS core since v3.3, no longer needed as a separate plugin
 
 ## Configuration Changes
 
 ### package.json
+
 - Updated `engines.node` to `>=20.19.0`
 - All devDependencies updated to latest stable versions per the update plan
 
 ### vite.config.ts
+
 - Added explicit `build.target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14']` for browser compatibility
 - Removed deprecated `offlineGoogleAnalytics` configuration
 - Verified workbox type definitions remain compatible
 
 ### tailwind.config.ts
+
 - Removed `@tailwindcss/line-clamp` import and plugin from plugins array
 - Line-clamp utilities are now built into TailwindCSS v3.4.18
 
 ### CI Workflows
+
 - No changes needed: both workflows already used `node-version: [20.x]` which meets Vite 7 requirements
 
 ## TailwindCSS v4 Migration
+
 - Successfully migrated from v3.4.18 to v4.1.16
 - Updated configuration from JavaScript to CSS-first approach
 - Changed `@tailwind` directives to `@import "tailwindcss"`
@@ -62,6 +74,7 @@ This document summarizes the dependency update from the previous version to the 
 - Removed `@tailwindcss/line-clamp` (built into v4 core)
 
 ## Testing Recommendations
+
 - Run `npm install` to ensure clean dependency resolution
 - Run `npm run build` to verify production build
 - Run `npm run lint` to check for linting errors
@@ -70,6 +83,7 @@ This document summarizes the dependency update from the previous version to the 
 - Test authentication flows and API integrations
 
 ## Rollback Plan
+
 - Revert package.json to previous dependency versions
 - Restore previous versions of configuration files if issues arise
 - Keep a copy of the old `package-lock.json` for quick rollback if needed
@@ -80,6 +94,7 @@ This document summarizes the dependency update from the previous version to the 
 Updated React 18.x ecosystem and UI libraries to their latest stable versions, prioritizing backward-compatible updates to avoid breaking changes that would require extensive testing.
 
 **Strategic Decisions:**
+
 1. **Stayed on current major versions** for libraries with breaking changes:
    - React Router v6.30.1 (avoided v7 due to package merge, import changes, and future flags)
    - recharts v2.12.7 (avoided v3 due to API removals and typing changes)
@@ -97,7 +112,8 @@ Updated React 18.x ecosystem and UI libraries to their latest stable versions, p
 
 **Updated Dependencies:**
 
-*Radix UI Primitives (all backward-compatible):*
+_Radix UI Primitives (all backward-compatible):_
+
 - @radix-ui/react-accordion: 1.2.0 → 1.2.12
 - @radix-ui/react-alert-dialog: 1.1.1 → 1.1.15
 - @radix-ui/react-avatar: 1.1.0 → 1.1.10
@@ -110,22 +126,26 @@ Updated React 18.x ecosystem and UI libraries to their latest stable versions, p
 - @radix-ui/react-tooltip: 1.1.4 → 1.2.8
 - (and 20+ more Radix UI packages - see package.json for complete list)
 
-*UI Utilities & Animation:*
+_UI Utilities & Animation:_
+
 - framer-motion: 12.5.0 → 12.23.24
 - lucide-react: 0.462.0 → 0.542.0
 - sonner: 1.5.0 → 2.0.7
 - vaul: 0.9.3 → 1.1.2
 - embla-carousel-react: 8.3.0 → 8.6.0
 
-*Forms & Routing:*
+_Forms & Routing:_
+
 - react-hook-form: 7.53.0 → 7.65.0
 - react-router-dom: 6.30.0 → 6.30.1
 
-*Type Definitions:*
+_Type Definitions:_
+
 - @types/react: 18.3.3 → 18.3.12
 - @types/react-dom: 18.3.0 → 18.3.5
 
 **Components Verified:**
+
 - `src/components/ui/form.tsx` - react-hook-form v7.65.0 compatible
 - `src/components/ui/calendar.tsx` - react-day-picker v8.10.1 (no changes)
 - `src/components/ui/chart.tsx` - recharts v2.12.7 (no changes)
@@ -136,27 +156,31 @@ Updated React 18.x ecosystem and UI libraries to their latest stable versions, p
 
 **Breaking Changes Avoided:**
 
-*React Router v7 (not upgraded):*
+_React Router v7 (not upgraded):_
+
 - Would require package merge (react-router-dom → react-router)
 - Import path changes across 34+ files
 - Future flags enablement (v7_relativeSplatPath, v7_startTransition, etc.)
 - Form method normalization (lowercase → UPPERCASE)
 - Splat route restructuring
 
-*react-day-picker v9 (not upgraded):*
+_react-day-picker v9 (not upgraded):_
+
 - `selected` becomes controlled (requires onSelect handler)
 - Class name changes (day → day_button, day_disabled → disabled, etc.)
 - Component renames (IconLeft/IconRight → Chevron)
 - fromDate/toDate → startMonth/endMonth + hidden matchers
 
-*recharts v3 (not upgraded):*
+_recharts v3 (not upgraded):_
+
 - CategoricalChartState removed
 - Tooltip typing changes (TooltipContentProps)
 - activeIndex prop removed
 - ResponsiveContainer ref shape changed
 - Z-order now purely render order
 
-*Zod v4 (not upgraded - not used):*
+_Zod v4 (not upgraded - not used):_
+
 - message → error for customization
 - String APIs moved to top-level (z.email(), z.uuid(), etc.)
 - Number validation changes (Infinity no longer valid)
@@ -164,6 +188,7 @@ Updated React 18.x ecosystem and UI libraries to their latest stable versions, p
 - Would require codebase-wide schema updates if Zod were used
 
 **Testing Recommendations:**
+
 1. Run `npm install` to ensure clean dependency resolution
 2. Run `npm run build` to verify production build succeeds
 3. Run `npm run lint` to check for linting errors
@@ -180,6 +205,7 @@ Updated React 18.x ecosystem and UI libraries to their latest stable versions, p
 9. Test carousels (embla-carousel-react)
 
 **Future Considerations:**
+
 1. **React Router v7 migration**: Plan as a separate task with comprehensive testing
    - Enable future flags incrementally in v6
    - Test each flag before upgrading to v7
@@ -204,6 +230,7 @@ Updated React 18.x ecosystem and UI libraries to their latest stable versions, p
    - If adopted, plan migration to Zod v4 with codemod assistance
 
 ## Future Considerations
+
 - TailwindCSS v4 migration (separate task requiring extensive testing)
 - React 19 upgrade (when stable and tested)
 - Monitoring for Vite 8 and other major updates
@@ -216,6 +243,7 @@ Updated backend services and data management dependencies with a **usage-based a
 **Strategic Decision: Update Only Used Dependencies**
 
 Rationale:
+
 1. **Zero Risk for Unused Code:** Can't break what isn't imported or used
 2. **Avoid Unnecessary Work:** No need to research breaking changes for unused dependencies
 3. **Reduce Testing Burden:** Updating unused deps adds no value but increases testing surface
@@ -223,25 +251,30 @@ Rationale:
 
 **Dependencies Updated:**
 
-*Firebase Ecosystem (USED):*
+_Firebase Ecosystem (USED):_
+
 - `firebase`: 11.7.1 → 12.5.0
 - ` @firebase/analytics`: 0.10.13 → 0.11.7
 - ` @firebase/auth`: 1.9.1 → 1.10.7
 
-*Utilities (USED):*
+_Utilities (USED):_
+
 - `tailwind-merge`: 2.5.2 → 3.3.1 (REQUIRED for Tailwind v4 compatibility)
 
 **Dependencies NOT Updated (Unused in Codebase):**
 
-*Backend Services:*
+_Backend Services:_
+
 - ` @supabase/supabase-js`: 2.49.1 (no imports found; `src/utils/supabase.ts` is misleadingly named - only contains localStorage utilities)
 - ` @tanstack/react-query`: 5.56.2 (no imports found)
 
-*AI Services:*
+_AI Services:_
+
 - ` @google/generative-ai`: 0.24.0 (no imports found)
 - ` @google/genai`: 0.7.0 (no imports found)
 
-*HTTP & Utilities:*
+_HTTP & Utilities:_
+
 - `axios`: 1.8.4 (no imports found)
 - `date-fns`: 3.6.0 (no imports found)
 - `next-themes`: 0.3.0 (no imports found; custom theme implementation exists in `src/contexts/theme.tsx`)
@@ -249,7 +282,8 @@ Rationale:
 
 **Breaking Changes Addressed:**
 
-*Firebase 11 → 12:*
+_Firebase 11 → 12:_
+
 1. **Node.js requirement:** Minimum Node 20.19+ (already met in package.json engines)
 2. **ES2020 target:** Firebase 12 uses ES2020 output (verified tsconfig.app.json has ES2020 target)
 3. **AI/VertexAI API removal:** Not applicable (no AI imports in codebase)
@@ -263,7 +297,8 @@ Rationale:
 7. **Analytics APIs:** All used APIs remain stable:
    - `getAnalytics`, `isSupported`, `logEvent`
 
-*tailwind-merge 2 → 3:*
+_tailwind-merge 2 → 3:_
+
 1. **Tailwind CSS v4 requirement:** Already met (tailwindcss 4.1.16 installed)
 2. **No custom config:** Project uses default `twMerge` without custom configuration
 3. **No breaking changes affecting usage:** The `cn` utility in `src/lib/utils.ts` works unchanged
@@ -273,7 +308,8 @@ Rationale:
 
 **Files Verified for Compatibility:**
 
-*Firebase Usage:*
+_Firebase Usage:_
+
 - `src/lib/firebase.ts` - Core Firebase initialization (app, auth, analytics, Firestore)
 - `src/contexts/watch-history.tsx` - Extensive Firestore operations (CRUD, queries, batches)
 - `src/contexts/auth.ts` - Firebase Auth type definitions
@@ -282,13 +318,15 @@ Rationale:
 - `src/lib/analytics-offline.ts` - Offline analytics queueing
 - `src/lib/analytics-batch.ts` - Analytics event batching
 
-*tailwind-merge Usage:*
+_tailwind-merge Usage:_
+
 - `src/lib/utils.ts` - `cn` utility function using `twMerge`
 - All UI components in `src/components/ui/` - Use `cn` utility extensively
 
 **Package.json Inconsistency Discovered:**
 
 During analysis, discovered that several dependencies were already updated beyond previous phase recommendations:
+
 - `tailwindcss`: 4.1.16 (Phase 1 decided to stay on v3, but v4 is installed)
 - `react-router-dom`: 7.9.5 (Phase 2 decided to stay on v6, but v7 is installed)
 - `recharts`: 3.3.0 (Phase 2 decided to stay on v2, but v3 is installed)
@@ -299,7 +337,8 @@ This suggests manual updates occurred. Since Tailwind v4 is installed, tailwind-
 
 **Testing Recommendations:**
 
-*Firebase Testing:*
+_Firebase Testing:_
+
 1. **Authentication:** Test login, signup, Google sign-in, logout flows
 2. **Firestore Operations:**
    - Watch history: Add, update, delete items
@@ -319,7 +358,8 @@ This suggests manual updates occurred. Since Tailwind v4 is installed, tailwind-
    - Verify data persists across page refreshes
    - Test multi-tab scenarios
 
-*tailwind-merge Testing:*
+_tailwind-merge Testing:_
+
 1. **Class Merging:** Test `cn` utility with conflicting classes
 2. **UI Components:** Verify all components render correctly
 3. **Tailwind v4 Classes:** Test any v4-specific utilities
@@ -350,6 +390,7 @@ This suggests manual updates occurred. Since Tailwind v4 is installed, tailwind-
 **Rollback Plan:**
 
 If issues arise with Firebase 12 or tailwind-merge 3:
+
 1. Revert to previous versions:
    - `firebase @11.7.1`
    - ` @firebase/analytics@0.10.13`
@@ -368,7 +409,7 @@ Comprehensive verification and testing plan after completing all three phases of
 
 1. **Added Missing npm Scripts:**
    - `npm run tsc` - TypeScript type checking (required by pr-checks.yml)
-   - `npm run format:check` - Placeholder for formatting check (Prettier not installed)
+   - `npm run format:check` - Check if codebase is formatted correctly with Prettier
    - `npm run test:coverage` - Placeholder for test coverage (no test framework)
    - `npm run verify` - Convenience script running tsc + lint + build
 
@@ -380,6 +421,7 @@ Comprehensive verification and testing plan after completing all three phases of
 **Step-by-Step Verification Process:**
 
 **Step 1: Clean Installation**
+
 ```bash
 # Remove existing node_modules and lock file
 rm -rf node_modules package-lock.json
@@ -391,34 +433,40 @@ npm install
 **Expected Result:** Clean dependency resolution without conflicts or warnings
 
 **Step 2: TypeScript Type Checking**
+
 ```bash
 npm run tsc
 ```
 
 **Expected Result:** No TypeScript errors. Verify:
+
 - ES2020 target compatibility with Firebase 12
-- All path aliases resolve correctly ( @/*, @/hooks/*, etc.)
+- All path aliases resolve correctly ( @/_, @/hooks/_, etc.)
 - React Router v7 types are compatible
 - Radix UI component types resolve
 - No missing type definitions
 
 **Step 3: Linting**
+
 ```bash
 npm run lint
 ```
 
 **Expected Result:** No ESLint errors. Verify:
+
 - ESLint 9.39.1 flat config works correctly
 - typescript-eslint 8.46.3 rules apply properly
 - react-hooks/exhaustive-deps warnings are addressed
 - No unused imports or variables (if rules enabled)
 
 **Step 4: Production Build**
+
 ```bash
 npm run build
 ```
 
 **Expected Result:** Successful build with no errors. Verify:
+
 - Vite 7 builds without errors
 - All code splitting chunks are generated
 - Service worker is generated by vite-plugin-pwa
@@ -427,6 +475,7 @@ npm run build
 - PWA manifest and icons are copied to dist/
 
 **Step 5: Build Preview**
+
 ```bash
 npm run preview
 ```
@@ -436,6 +485,7 @@ npm run preview
 **Manual Testing Checklist:**
 
 **Authentication Flows:**
+
 - [ ] Navigate to /login page
 - [ ] Test email/password login with valid credentials
 - [ ] Test email/password login with invalid credentials (error handling)
@@ -448,6 +498,7 @@ npm run preview
 - [ ] Verify authenticated users can access protected routes (/profile, /watch-history)
 
 **Content Browsing:**
+
 - [ ] Navigate to /movies page
 - [ ] Verify movie grid loads and displays correctly
 - [ ] Test movie card hover effects (framer-motion animations)
@@ -462,6 +513,7 @@ npm run preview
 - [ ] Test sports filtering and categories
 
 **Search Functionality:**
+
 - [ ] Navigate to /search or use search bar in navbar
 - [ ] Test search with movie titles
 - [ ] Test search with TV show titles
@@ -471,6 +523,7 @@ npm run preview
 - [ ] Verify search results display correctly
 
 **Video Player Functionality:**
+
 - [ ] Navigate to /watch/:type/:id
 - [ ] Verify video player loads (Plyr player)
 - [ ] Test play/pause controls
@@ -483,6 +536,7 @@ npm run preview
 - [ ] Verify next episode auto-play (if implemented)
 
 **User Profile & Preferences:**
+
 - [ ] Navigate to /profile page (requires authentication)
 - [ ] Verify profile overview tab displays user stats
 - [ ] Test profile edit functionality (ProfileEditModal)
@@ -500,6 +554,7 @@ npm run preview
 - [ ] Test backup/restore functionality (BackupRestore component)
 
 **Watch History:**
+
 - [ ] Navigate to /watch-history page
 - [ ] Verify watch history displays correctly
 - [ ] Test continue watching cards (ContinueWatchingCard)
@@ -509,6 +564,7 @@ npm run preview
 - [ ] Verify Firestore operations work (add, update, delete)
 
 **PWA Features:**
+
 - [ ] Open browser DevTools > Application > Service Workers
 - [ ] Verify service worker is registered and active
 - [ ] Check service worker version and status
@@ -526,6 +582,7 @@ npm run preview
 - [ ] Verify workbox caching strategies work (check Network tab)
 
 **Firebase Integration:**
+
 - [ ] Open browser DevTools > Console
 - [ ] Verify no Firebase initialization errors
 - [ ] Check Firebase Analytics is initialized (if supported)
@@ -546,6 +603,7 @@ npm run preview
 - [ ] Verify analytics events are being logged
 
 **UI Components (Radix UI):**
+
 - [ ] Test Dialog components (movie details, profile edit)
 - [ ] Test Dropdown menus (user menu, video source selector)
 - [ ] Test Tooltips (hover over icons)
@@ -560,6 +618,7 @@ npm run preview
 - [ ] Test Calendar/Date picker (if used)
 
 **Routing (React Router v7):**
+
 - [ ] Test navigation between all routes
 - [ ] Verify lazy-loaded pages load correctly
 - [ ] Test dynamic routes (/movie/:id, /tv/:id, /sports/:id)
@@ -571,6 +630,7 @@ npm run preview
 - [ ] Test AnalyticsWrapper tracks page views
 
 **Responsive Design:**
+
 - [ ] Test on desktop (1920x1080, 1366x768)
 - [ ] Test on tablet (768x1024)
 - [ ] Test on mobile (375x667, 414x896)
@@ -580,6 +640,7 @@ npm run preview
 - [ ] Test landscape and portrait orientations
 
 **Performance:**
+
 - [ ] Open DevTools > Lighthouse
 - [ ] Run Lighthouse audit (Performance, Accessibility, Best Practices, SEO, PWA)
 - [ ] Verify Performance score > 80
@@ -592,6 +653,7 @@ npm run preview
 - [ ] Verify images are optimized and lazy-loaded
 
 **Browser Compatibility:**
+
 - [ ] Test on Chrome/Edge (latest)
 - [ ] Test on Firefox (latest)
 - [ ] Test on Safari (latest)
@@ -602,6 +664,7 @@ npm run preview
 **Step 6: Run CI Workflows Locally**
 
 **Simulate pr-checks workflow:**
+
 ```bash
 # Quality checks
 npm ci
@@ -624,6 +687,7 @@ source-map-explorer 'dist/**/*.js' --json bundle-size.json || true
 **Step 7: Run Runtime Error Check Workflow**
 
 **Option A: Trigger workflow manually on GitHub:**
+
 1. Go to GitHub repository > Actions tab
 2. Select "Runtime Error Check" workflow
 3. Click "Run workflow" button
@@ -632,6 +696,7 @@ source-map-explorer 'dist/**/*.js' --json bundle-size.json || true
 6. Review Playwright report artifact if errors occur
 
 **Option B: Run locally with Playwright:**
+
 ```bash
 # Install Playwright
 npm install -D @playwright/test
@@ -669,6 +734,7 @@ kill %1
 
 **React Router v7 (Manually Updated):**
 The package.json shows react-router-dom @7.9.5 was manually installed, but Phase 2 recommended staying on v6. Potential breaking changes:
+
 - Package structure changed (react-router-dom merged into react-router)
 - Import paths may need updates in 34+ files using routing
 - Future flags may need to be enabled
@@ -677,6 +743,7 @@ The package.json shows react-router-dom @7.9.5 was manually installed, but Phase
 
 **recharts v3 (Manually Updated):**
 The package.json shows recharts @3.3.0 was manually installed, but Phase 2 recommended staying on v2. Potential breaking changes:
+
 - Tooltip typing changed to TooltipContentProps
 - activeIndex prop removed
 - ResponsiveContainer ref shape changed
@@ -685,6 +752,7 @@ The package.json shows recharts @3.3.0 was manually installed, but Phase 2 recom
 
 **react-day-picker v9 (Manually Updated):**
 The package.json shows react-day-picker @9.11.1 was manually installed, but Phase 2 recommended staying on v8. Potential breaking changes:
+
 - `selected` prop is now controlled (requires onSelect handler)
 - Class names changed (day → day_button, day_disabled → disabled)
 - Component names changed (IconLeft/IconRight → Chevron)
@@ -695,6 +763,7 @@ The package.json shows zod @4.1.12 was manually installed, but Phase 2 noted Zod
 
 **Tailwind CSS v4 (Manually Updated):**
 The package.json shows tailwindcss @4.1.16 was manually installed. Phase 1 documented the migration, but verify:
+
 - All utility classes work correctly
 - No class name conflicts
 - PostCSS configuration uses @tailwindcss/postcss
@@ -703,36 +772,42 @@ The package.json shows tailwindcss @4.1.16 was manually installed. Phase 1 docum
 **Troubleshooting:**
 
 **Build Errors:**
+
 - Check Node.js version: `node --version` (must be 20.19+ or 22.12+)
 - Clear cache: `rm -rf node_modules package-lock.json && npm install`
 - Check for TypeScript errors: `npm run tsc`
 - Verify all imports resolve correctly
 
 **Runtime Errors:**
+
 - Check browser console for errors
 - Verify Firebase environment variables are set
 - Check service worker registration errors
 - Verify all routes are defined correctly
 
 **Firebase Errors:**
+
 - Verify Firebase config in `.env` file
 - Check Firebase Console for project status
 - Verify Firestore rules allow read/write
 - Check Firebase Analytics is enabled
 
 **PWA Errors:**
+
 - Check service worker registration in DevTools
 - Verify manifest.json is valid
 - Check workbox configuration in vite.config.ts
 - Verify offline.html exists in public/
 
 **Routing Errors (React Router v7):**
+
 - Check for import path changes (react-router-dom → react-router)
 - Verify all route components are imported correctly
 - Check for future flags that need to be enabled
 - Consider reverting to v6.30.1 if issues persist
 
 **UI Component Errors (Radix UI):**
+
 - Check for prop changes in updated versions
 - Verify all Radix UI imports resolve
 - Check for className conflicts with Tailwind v4
@@ -798,6 +873,7 @@ The package.json shows tailwindcss @4.1.16 was manually installed. Phase 1 docum
 This dependency update project successfully modernized the codebase from older versions to the latest stable releases. The pragmatic approach of updating only used dependencies and staying on stable major versions (where appropriate) minimized risk while achieving the goal of keeping dependencies current.
 
 Key achievements:
+
 - ✅ Vite 5 → 7 (major performance improvements)
 - ✅ TypeScript 5.5 → 5.9 (latest features)
 - ✅ ESLint 9.9 → 9.39 (improved linting)

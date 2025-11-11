@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useChatbot } from '@/contexts/chatbot-context';
-import { useUserProfile } from '@/contexts/user-profile-context';
-import { Button } from '@/components/ui/button';
-import { Sparkles, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState, useEffect } from "react";
+import { useChatbot } from "@/contexts/chatbot-context";
+import { useUserProfile } from "@/contexts/user-profile-context";
+import { Button } from "@/components/ui/button";
+import { Sparkles, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 
 /**
  * ProactiveSuggestions component that provides contextual suggestions
@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
  */
 const ProactiveSuggestions: React.FC = () => {
   const [visible, setVisible] = useState(false);
-  const [suggestion, setSuggestion] = useState('');
+  const [suggestion, setSuggestion] = useState("");
   const { sendMessage, isOpen } = useChatbot();
   const { profile } = useUserProfile();
 
@@ -22,20 +22,20 @@ const ProactiveSuggestions: React.FC = () => {
     const hour = now.getHours();
     const day = now.getDay(); // 0 = Sunday, 6 = Saturday
     const isWeekend = day === 0 || day === 6;
-    
+
     // Suggestions based on time of day
     if (hour < 12) {
-      return isWeekend ? 
-        'Looking for something to watch with breakfast?' : 
-        'Need a quick show recommendation before work?';
+      return isWeekend
+        ? "Looking for something to watch with breakfast?"
+        : "Need a quick show recommendation before work?";
     } else if (hour < 17) {
-      return 'How about a recommendation for this afternoon?';
+      return "How about a recommendation for this afternoon?";
     } else if (hour < 21) {
-      return isWeekend ?
-        'Looking for a movie for weekend night?' :
-        'Need something to unwind after work?';
+      return isWeekend
+        ? "Looking for a movie for weekend night?"
+        : "Need something to unwind after work?";
     } else {
-      return 'Late night viewing recommendations?';
+      return "Late night viewing recommendations?";
     }
   };
 
@@ -53,7 +53,7 @@ const ProactiveSuggestions: React.FC = () => {
       if (Math.random() < 0.3) {
         setSuggestion(generateSuggestion());
         setVisible(true);
-        
+
         // Auto-hide after 15 seconds
         setTimeout(() => {
           setVisible(false);
@@ -63,10 +63,10 @@ const ProactiveSuggestions: React.FC = () => {
 
     // Initial check
     const timer = setTimeout(checkProactiveSuggestion, 10000);
-    
+
     // Check again periodically
     const interval = setInterval(checkProactiveSuggestion, 60000 * 30); // every 30 minutes
-    
+
     return () => {
       clearTimeout(timer);
       clearInterval(interval);
@@ -74,7 +74,7 @@ const ProactiveSuggestions: React.FC = () => {
   }, [isOpen]);
 
   const handleSuggestionClick = () => {
-    const message = suggestion.replace(/\?$/, '');
+    const message = suggestion.replace(/\?$/, "");
     sendMessage(message);
     setVisible(false);
   };
@@ -95,28 +95,28 @@ const ProactiveSuggestions: React.FC = () => {
           transition={{ duration: 0.3 }}
           className="fixed bottom-20 right-4 z-40"
         >
-          <Card className="shadow-lg w-[250px]">
-            <CardContent className="p-3 flex flex-col">
-              <div className="flex justify-between items-center mb-2">
+          <Card className="w-[250px] shadow-lg">
+            <CardContent className="flex flex-col p-3">
+              <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center text-primary">
                   <Sparkles size={14} className="mr-1" />
                   <span className="text-xs font-medium">Suggestion</span>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
                   onClick={handleDismiss}
                 >
                   <X size={12} />
                 </Button>
               </div>
-              
-              <p className="text-sm mb-3">{suggestion}</p>
-              
-              <Button 
-                size="sm" 
-                variant="outline" 
+
+              <p className="mb-3 text-sm">{suggestion}</p>
+
+              <Button
+                size="sm"
+                variant="outline"
                 className="w-full text-xs"
                 onClick={handleSuggestionClick}
               >

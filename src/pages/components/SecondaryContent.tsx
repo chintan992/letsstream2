@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
-import ContentRow from '@/components/ContentRow';
-import { Media } from '@/utils/types';
+import { useState, useEffect, useCallback } from "react";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import ContentRow from "@/components/ContentRow";
+import { Media } from "@/utils/types";
 import {
   getBasedOnTrueStories,
   getActionMovies,
@@ -26,8 +26,8 @@ import {
   getYouTubeOriginals,
   getHBOMax,
   getPeacock,
-  getCrunchyroll
-} from '@/utils/api';
+  getCrunchyroll,
+} from "@/utils/api";
 
 const SecondaryContent = () => {
   // Thematic/Curated
@@ -63,7 +63,8 @@ const SecondaryContent = () => {
   const [isLoadingMoreFamily, setIsLoadingMoreFamily] = useState(false);
   const [documentaryMovies, setDocumentaryMovies] = useState<Media[]>([]);
   const [documentaryPage, setDocumentaryPage] = useState(1);
-  const [isLoadingMoreDocumentary, setIsLoadingMoreDocumentary] = useState(false);
+  const [isLoadingMoreDocumentary, setIsLoadingMoreDocumentary] =
+    useState(false);
   const [mysteryMovies, setMysteryMovies] = useState<Media[]>([]);
   const [mysteryPage, setMysteryPage] = useState(1);
   const [isLoadingMoreMystery, setIsLoadingMoreMystery] = useState(false);
@@ -81,7 +82,10 @@ const SecondaryContent = () => {
     setActionPage(nextPage);
     setIsLoadingMoreAction(false);
   }, [actionPage, isLoadingMoreAction]);
-  const actionLoadMoreRef = useInfiniteScroll(loadMoreAction, isLoadingMoreAction);
+  const actionLoadMoreRef = useInfiniteScroll(
+    loadMoreAction,
+    isLoadingMoreAction
+  );
 
   const loadMoreComedy = useCallback(async () => {
     if (isLoadingMoreComedy) return;
@@ -92,7 +96,10 @@ const SecondaryContent = () => {
     setComedyPage(nextPage);
     setIsLoadingMoreComedy(false);
   }, [comedyPage, isLoadingMoreComedy]);
-  const comedyLoadMoreRef = useInfiniteScroll(loadMoreComedy, isLoadingMoreComedy);
+  const comedyLoadMoreRef = useInfiniteScroll(
+    loadMoreComedy,
+    isLoadingMoreComedy
+  );
 
   const loadMoreDrama = useCallback(async () => {
     if (isLoadingMoreDrama) return;
@@ -114,7 +121,10 @@ const SecondaryContent = () => {
     setThrillerPage(nextPage);
     setIsLoadingMoreThriller(false);
   }, [thrillerPage, isLoadingMoreThriller]);
-  const thrillerLoadMoreRef = useInfiniteScroll(loadMoreThriller, isLoadingMoreThriller);
+  const thrillerLoadMoreRef = useInfiniteScroll(
+    loadMoreThriller,
+    isLoadingMoreThriller
+  );
 
   const loadMoreSciFi = useCallback(async () => {
     if (isLoadingMoreSciFi) return;
@@ -136,7 +146,10 @@ const SecondaryContent = () => {
     setHorrorPage(nextPage);
     setIsLoadingMoreHorror(false);
   }, [horrorPage, isLoadingMoreHorror]);
-  const horrorLoadMoreRef = useInfiniteScroll(loadMoreHorror, isLoadingMoreHorror);
+  const horrorLoadMoreRef = useInfiniteScroll(
+    loadMoreHorror,
+    isLoadingMoreHorror
+  );
 
   const loadMoreRomance = useCallback(async () => {
     if (isLoadingMoreRomance) return;
@@ -147,7 +160,10 @@ const SecondaryContent = () => {
     setRomancePage(nextPage);
     setIsLoadingMoreRomance(false);
   }, [romancePage, isLoadingMoreRomance]);
-  const romanceLoadMoreRef = useInfiniteScroll(loadMoreRomance, isLoadingMoreRomance);
+  const romanceLoadMoreRef = useInfiniteScroll(
+    loadMoreRomance,
+    isLoadingMoreRomance
+  );
 
   const loadMoreAnimation = useCallback(async () => {
     if (isLoadingMoreAnimation) return;
@@ -158,7 +174,10 @@ const SecondaryContent = () => {
     setAnimationPage(nextPage);
     setIsLoadingMoreAnimation(false);
   }, [animationPage, isLoadingMoreAnimation]);
-  const animationLoadMoreRef = useInfiniteScroll(loadMoreAnimation, isLoadingMoreAnimation);
+  const animationLoadMoreRef = useInfiniteScroll(
+    loadMoreAnimation,
+    isLoadingMoreAnimation
+  );
 
   const loadMoreFamily = useCallback(async () => {
     if (isLoadingMoreFamily) return;
@@ -169,7 +188,10 @@ const SecondaryContent = () => {
     setFamilyPage(nextPage);
     setIsLoadingMoreFamily(false);
   }, [familyPage, isLoadingMoreFamily]);
-  const familyLoadMoreRef = useInfiniteScroll(loadMoreFamily, isLoadingMoreFamily);
+  const familyLoadMoreRef = useInfiniteScroll(
+    loadMoreFamily,
+    isLoadingMoreFamily
+  );
 
   const loadMoreDocumentary = useCallback(async () => {
     if (isLoadingMoreDocumentary) return;
@@ -180,7 +202,10 @@ const SecondaryContent = () => {
     setDocumentaryPage(nextPage);
     setIsLoadingMoreDocumentary(false);
   }, [documentaryPage, isLoadingMoreDocumentary]);
-  const documentaryLoadMoreRef = useInfiniteScroll(loadMoreDocumentary, isLoadingMoreDocumentary);
+  const documentaryLoadMoreRef = useInfiniteScroll(
+    loadMoreDocumentary,
+    isLoadingMoreDocumentary
+  );
 
   const loadMoreMystery = useCallback(async () => {
     if (isLoadingMoreMystery) return;
@@ -191,7 +216,10 @@ const SecondaryContent = () => {
     setMysteryPage(nextPage);
     setIsLoadingMoreMystery(false);
   }, [mysteryPage, isLoadingMoreMystery]);
-  const mysteryLoadMoreRef = useInfiniteScroll(loadMoreMystery, isLoadingMoreMystery);
+  const mysteryLoadMoreRef = useInfiniteScroll(
+    loadMoreMystery,
+    isLoadingMoreMystery
+  );
 
   const loadMoreFantasy = useCallback(async () => {
     if (isLoadingMoreFantasy) return;
@@ -202,7 +230,10 @@ const SecondaryContent = () => {
     setFantasyPage(nextPage);
     setIsLoadingMoreFantasy(false);
   }, [fantasyPage, isLoadingMoreFantasy]);
-  const fantasyLoadMoreRef = useInfiniteScroll(loadMoreFantasy, isLoadingMoreFantasy);
+  const fantasyLoadMoreRef = useInfiniteScroll(
+    loadMoreFantasy,
+    isLoadingMoreFantasy
+  );
   // Binge/For Kids
   const [bingeSeries, setBingeSeries] = useState<Media[]>([]);
   const [moviesForKids, setMoviesForKids] = useState<Media[]>([]);
@@ -222,13 +253,24 @@ const SecondaryContent = () => {
     const fetchAllContent = async () => {
       try {
         // Thematic/Curated
-        const [trueStories] = await Promise.all([
-          getBasedOnTrueStories()
-        ]);
+        const [trueStories] = await Promise.all([getBasedOnTrueStories()]);
         setBasedOnTrueStories(trueStories);
 
         // Genre-Based (Action row loads page 1 only here)
-        const [action, comedy, drama, thriller, scifi, horror, romance, animation, family, documentary, mystery, fantasy] = await Promise.all([
+        const [
+          action,
+          comedy,
+          drama,
+          thriller,
+          scifi,
+          horror,
+          romance,
+          animation,
+          family,
+          documentary,
+          mystery,
+          fantasy,
+        ] = await Promise.all([
           getActionMovies(1),
           getComedyMovies(),
           getDramaMovies(),
@@ -240,7 +282,7 @@ const SecondaryContent = () => {
           getFamilyMovies(),
           getDocumentaryMovies(),
           getMysteryMovies(),
-          getFantasyMovies()
+          getFantasyMovies(),
         ]);
         setActionMovies(action);
         setComedyMovies(comedy);
@@ -258,7 +300,7 @@ const SecondaryContent = () => {
         // Binge/For Kids
         const [binge, kids] = await Promise.all([
           getBingeWorthySeries(),
-          getMoviesForKids()
+          getMoviesForKids(),
         ]);
         setBingeSeries(binge);
         setMoviesForKids(kids);
@@ -269,7 +311,7 @@ const SecondaryContent = () => {
           getBollywoodMovies(),
           getKoreanDramas(),
           getJapaneseAnime(),
-          getEuropeanCinema()
+          getEuropeanCinema(),
         ]);
         setHollywoodMovies(hollywood);
         setBollywoodMovies(bollywood);
@@ -282,14 +324,14 @@ const SecondaryContent = () => {
           getYouTubeOriginals(),
           getHBOMax(),
           getPeacock(),
-          getCrunchyroll()
+          getCrunchyroll(),
         ]);
         setYouTubeOriginals(yt);
         setHBOMax(hbo);
         setPeacock(pea);
         setCrunchyroll(crun);
       } catch (error) {
-        console.error('Error fetching homepage content:', error);
+        console.error("Error fetching homepage content:", error);
       }
     };
     fetchAllContent();
@@ -298,7 +340,9 @@ const SecondaryContent = () => {
   return (
     <>
       {/* Thematic/Curated Rows */}
-      {basedOnTrueStories.length > 0 && <ContentRow title="Based on True Stories" media={basedOnTrueStories} />}
+      {basedOnTrueStories.length > 0 && (
+        <ContentRow title="Based on True Stories" media={basedOnTrueStories} />
+      )}
 
       {/* Genre-Based Rows (all with infinite scroll) */}
       {actionMovies.length > 0 && (
@@ -399,21 +443,39 @@ const SecondaryContent = () => {
       )}
 
       {/* Binge/For Kids */}
-      {bingeSeries.length > 0 && <ContentRow title="Binge-Worthy Series" media={bingeSeries} />}
-      {moviesForKids.length > 0 && <ContentRow title="Movies for Kids" media={moviesForKids} />}
+      {bingeSeries.length > 0 && (
+        <ContentRow title="Binge-Worthy Series" media={bingeSeries} />
+      )}
+      {moviesForKids.length > 0 && (
+        <ContentRow title="Movies for Kids" media={moviesForKids} />
+      )}
 
       {/* Regional/Language Rows */}
-      {hollywoodMovies.length > 0 && <ContentRow title="Hollywood" media={hollywoodMovies} />}
-      {bollywoodMovies.length > 0 && <ContentRow title="Bollywood" media={bollywoodMovies} />}
-      {koreanDramas.length > 0 && <ContentRow title="Korean Dramas" media={koreanDramas} />}
-      {japaneseAnime.length > 0 && <ContentRow title="Japanese Anime" media={japaneseAnime} />}
-      {europeanCinema.length > 0 && <ContentRow title="European Cinema" media={europeanCinema} />}
+      {hollywoodMovies.length > 0 && (
+        <ContentRow title="Hollywood" media={hollywoodMovies} />
+      )}
+      {bollywoodMovies.length > 0 && (
+        <ContentRow title="Bollywood" media={bollywoodMovies} />
+      )}
+      {koreanDramas.length > 0 && (
+        <ContentRow title="Korean Dramas" media={koreanDramas} />
+      )}
+      {japaneseAnime.length > 0 && (
+        <ContentRow title="Japanese Anime" media={japaneseAnime} />
+      )}
+      {europeanCinema.length > 0 && (
+        <ContentRow title="European Cinema" media={europeanCinema} />
+      )}
 
       {/* Platform/Provider Rows */}
-      {youTubeOriginals.length > 0 && <ContentRow title="YouTube Originals" media={youTubeOriginals} />}
+      {youTubeOriginals.length > 0 && (
+        <ContentRow title="YouTube Originals" media={youTubeOriginals} />
+      )}
       {hboMax.length > 0 && <ContentRow title="HBO Max" media={hboMax} />}
       {peacock.length > 0 && <ContentRow title="Peacock" media={peacock} />}
-      {crunchyroll.length > 0 && <ContentRow title="Crunchyroll" media={crunchyroll} />}
+      {crunchyroll.length > 0 && (
+        <ContentRow title="Crunchyroll" media={crunchyroll} />
+      )}
     </>
   );
 };

@@ -1,6 +1,6 @@
-import { getAnalyticsInstance } from './firebase';
-import { logEvent } from 'firebase/analytics';
-import { AnalyticsEvent } from './analytics';
+import { getAnalyticsInstance } from "./firebase";
+import { logEvent } from "firebase/analytics";
+import { AnalyticsEvent } from "./analytics";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -20,8 +20,8 @@ class AnalyticsRetryQueue {
     setInterval(() => this.processRetryQueue(), RETRY_DELAY);
 
     // Save failed events before page unload
-    if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', () => {
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", () => {
         this.saveFailedEvents();
       });
 
@@ -50,7 +50,10 @@ class AnalyticsRetryQueue {
         if (item.retryCount >= MAX_RETRIES) {
           // Remove failed event after max retries
           this.retryQueue = this.retryQueue.filter(i => i !== item);
-          console.error('Failed to send analytics event after max retries:', item.event);
+          console.error(
+            "Failed to send analytics event after max retries:",
+            item.event
+          );
         } else {
           // Increment retry count
           item.retryCount++;
@@ -65,7 +68,7 @@ class AnalyticsRetryQueue {
   private async sendEvent(event: AnalyticsEvent): Promise<void> {
     const analytics = await getAnalyticsInstance();
     if (!analytics) {
-      throw new Error('Analytics not supported in this environment');
+      throw new Error("Analytics not supported in this environment");
     }
 
     return new Promise((resolve, reject) => {
@@ -103,22 +106,25 @@ class AnalyticsRetryQueue {
   private saveFailedEvents() {
     if (this.retryQueue.length > 0) {
       try {
-        localStorage.setItem('analyticsRetryQueue', JSON.stringify(this.retryQueue));
+        localStorage.setItem(
+          "analyticsRetryQueue",
+          JSON.stringify(this.retryQueue)
+        );
       } catch (error) {
-        console.error('Failed to save analytics retry queue:', error);
+        console.error("Failed to save analytics retry queue:", error);
       }
     }
   }
 
   private restoreFailedEvents() {
     try {
-      const savedQueue = localStorage.getItem('analyticsRetryQueue');
+      const savedQueue = localStorage.getItem("analyticsRetryQueue");
       if (savedQueue) {
         this.retryQueue = JSON.parse(savedQueue);
-        localStorage.removeItem('analyticsRetryQueue');
+        localStorage.removeItem("analyticsRetryQueue");
       }
     } catch (error) {
-      console.error('Failed to restore analytics retry queue:', error);
+      console.error("Failed to restore analytics retry queue:", error);
     }
   }
 }

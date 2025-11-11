@@ -1,4 +1,4 @@
-import { Genre, Company } from '../types';
+import { Genre, Company } from "../types";
 
 export interface TMDBVideo {
   id: string;
@@ -26,7 +26,7 @@ export interface TMDBMovieResult {
   vote_average: number;
   release_date?: string;
   first_air_date?: string;
-  media_type?: 'movie' | 'tv';
+  media_type?: "movie" | "tv";
   genre_ids: number[];
 }
 
@@ -40,7 +40,7 @@ export interface TMDBTVResult {
   vote_average: number;
   first_air_date: string;
   release_date?: string;
-  media_type?: 'movie' | 'tv';
+  media_type?: "movie" | "tv";
   genre_ids: number[];
 }
 

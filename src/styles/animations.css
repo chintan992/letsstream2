@@ -23,7 +23,7 @@
   .haptic-feedback {
     animation: none !important;
   }
-  
+
   /* For fade-in animations, ensure content becomes visible */
   .container,
   .mediaItem {
@@ -34,8 +34,12 @@
 
 /* Basic Animations */
 @keyframes fade-in-simple {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fade-in-slide {
@@ -141,54 +145,111 @@
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes sparkle {
-  0% { transform: scale(0) rotate(0deg); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: scale(3) rotate(45deg); opacity: 0; }
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3) rotate(45deg);
+    opacity: 0;
+  }
 }
 
 /* Interactive Effects */
 @keyframes pulse-glow {
-  0%, 100% { filter: drop-shadow(0 0 3px rgba(255,255,255,0.6)); }
-  50% { filter: drop-shadow(0 0 12px rgba(255,255,255,0.8)); }
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8));
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 @keyframes wave {
-  0% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-  100% { transform: rotate(-2deg); }
+  0% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(-2deg);
+  }
 }
 
 @keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.97); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes voice-pulse {
-  0%, 100% { transform: scale(1); background: rgba(220, 38, 38, 0.2); }
-  50% { transform: scale(1.1); background: rgba(220, 38, 38, 0.5); }
+  0%,
+  100% {
+    transform: scale(1);
+    background: rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    transform: scale(1.1);
+    background: rgba(220, 38, 38, 0.5);
+  }
 }
 
 @keyframes badge-pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Logo Animations */
@@ -202,14 +263,33 @@
 }
 
 @keyframes flicker {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
-    text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09, 0 0 80px #f09, 0 0 90px #f09, 0 0 100px #f09, 0 0 150px #f09;
+  0%,
+  18%,
+  22%,
+  25%,
+  53%,
+  57%,
+  100% {
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px #f09,
+      0 0 80px #f09,
+      0 0 90px #f09,
+      0 0 100px #f09,
+      0 0 150px #f09;
   }
-  20%, 24%, 55% { text-shadow: none; }
+  20%,
+  24%,
+  55% {
+    text-shadow: none;
+  }
 }
 
 @keyframes paginationPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.8;
   }
   50% {

@@ -1,12 +1,15 @@
-import { Check } from 'lucide-react';
-import { triggerHapticFeedback, triggerSuccessHaptic } from '@/utils/haptic-feedback';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { VideoSource } from '@/utils/types';
-import { useToast } from '@/hooks/use-toast';
-import { useUserPreferences } from '@/hooks/user-preferences';
-import { useAuth } from '@/hooks';
-import { useState } from 'react';
+import { Check } from "lucide-react";
+import {
+  triggerHapticFeedback,
+  triggerSuccessHaptic,
+} from "@/utils/haptic-feedback";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { VideoSource } from "@/utils/types";
+import { useToast } from "@/hooks/use-toast";
+import { useUserPreferences } from "@/hooks/user-preferences";
+import { useAuth } from "@/hooks";
+import { useState } from "react";
 
 /**
  * Z-INDEX STRATEGY:
@@ -36,17 +39,18 @@ const VideoSourceSelector = ({
   const handleSourceChange = async (sourceKey: string) => {
     // Provide haptic feedback when changing source
     triggerSuccessHaptic();
-    
+
     setIsChanging(true);
     onSourceChange(sourceKey);
-    
+
     if (user) {
       await updatePreferences({
-        preferred_source: sourceKey
+        preferred_source: sourceKey,
       });
     }
-    
-    const sourceName = videoSources.find(s => s.key === sourceKey)?.name || 'new source';
+
+    const sourceName =
+      videoSources.find(s => s.key === sourceKey)?.name || "new source";
     toast({
       title: "Source Changed",
       description: `Switched to ${sourceName}`,
@@ -56,8 +60,8 @@ const VideoSourceSelector = ({
   };
 
   return (
-    <motion.div 
-      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4"
+    <motion.div
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4 lg:grid-cols-5 xl:grid-cols-6"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -67,12 +71,12 @@ const VideoSourceSelector = ({
           key={source.key}
           onClick={() => handleSourceChange(source.key)}
           className={cn(
-            "relative group p-4 rounded-xl border transition-all duration-300 overflow-hidden",
-            "bg-gradient-to-br backdrop-blur-sm shadow-sm transform hover:-translate-y-0.5",
+            "group relative overflow-hidden rounded-xl border p-4 transition-all duration-300",
+            "transform bg-gradient-to-br shadow-sm backdrop-blur-sm hover:-translate-y-0.5",
             "hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
             selectedSource === source.key
-              ? "from-white/20 to-white/10 border-white/50 shadow-white/10"
-              : "from-white/5 to-transparent border-white/10 hover:border-white/30",
+              ? "border-white/50 from-white/20 to-white/10 shadow-white/10"
+              : "border-white/10 from-white/5 to-transparent hover:border-white/30",
             isChanging && selectedSource === source.key && "animate-pulse"
           )}
           initial={{ opacity: 0, scale: 0.95 }}
@@ -90,26 +94,28 @@ const VideoSourceSelector = ({
               transition={{
                 repeat: Infinity,
                 repeatType: "reverse",
-                duration: 2
+                duration: 2,
               }}
             />
           )}
 
           <div className="relative z-10 space-y-2 text-left">
             <div className="flex items-center justify-between">
-              <span className={cn(
-                "text-sm font-semibold transition-colors",
-                selectedSource === source.key
-                  ? "text-white"
-                  : "text-white/90 group-hover:text-white"
-              )}>
+              <span
+                className={cn(
+                  "text-sm font-semibold transition-colors",
+                  selectedSource === source.key
+                    ? "text-white"
+                    : "text-white/90 group-hover:text-white"
+                )}
+              >
                 {source.name}
               </span>
               {selectedSource === source.key && (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white flex items-center justify-center"
+                  className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white"
                 >
                   <Check className="h-2.5 w-2.5 text-black" />
                 </motion.div>
@@ -120,7 +126,7 @@ const VideoSourceSelector = ({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-xs font-medium text-white/90 flex items-center gap-1"
+                  className="flex items-center gap-1 text-xs font-medium text-white/90"
                 >
                   <Check className="h-3 w-3" />
                   Currently active
@@ -132,14 +138,16 @@ const VideoSourceSelector = ({
               )}
             </div>
           </div>
-          
+
           {/* Hover overlay */}
-          <div className={cn(
-            "absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300",
-            "bg-gradient-to-br from-white/10 via-transparent to-transparent",
-            "group-hover:opacity-100",
-            selectedSource === source.key && "opacity-30"
-          )} />
+          <div
+            className={cn(
+              "absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300",
+              "bg-gradient-to-br from-white/10 via-transparent to-transparent",
+              "group-hover:opacity-100",
+              selectedSource === source.key && "opacity-30"
+            )}
+          />
         </motion.button>
       ))}
     </motion.div>

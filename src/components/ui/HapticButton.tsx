@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button, ButtonProps } from './button';
-import { triggerHapticFeedback } from '@/utils/haptic-feedback';
+import React from "react";
+import { Button, ButtonProps } from "./button";
+import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 
 /**
  * A button component that automatically adds haptic feedback on click.
@@ -12,7 +12,7 @@ export const HapticButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       // Standard button feedback (short and subtle)
       triggerHapticFeedback(15);
-      
+
       // Call the original onClick handler if provided
       onClick?.(e);
     };
@@ -21,5 +21,4 @@ export const HapticButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-HapticButton.displayName = 'HapticButton';
-
+HapticButton.displayName = "HapticButton";

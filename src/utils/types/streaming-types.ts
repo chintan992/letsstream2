@@ -1,5 +1,5 @@
 export interface ProviderResponse {
-  status: 'success' | 'error';
+  status: "success" | "error";
   error?: string;
   data: unknown;
 }
@@ -8,9 +8,9 @@ export interface AvailabilityResponse extends ProviderResponse {
   data: {
     availability: {
       url: string;
-      quality: 'SD' | 'HD' | '4K';
+      quality: "SD" | "HD" | "4K";
       price?: number;
-      type: 'subscription' | 'rent' | 'buy' | 'free';
+      type: "subscription" | "rent" | "buy" | "free";
     }[];
   };
 }
@@ -21,7 +21,7 @@ export interface ProviderContentItem {
   description: string;
   poster: string;
   backdrop: string;
-  type: 'movie' | 'tv';
+  type: "movie" | "tv";
   genres: number[];
   rating: number;
   releaseDate?: string;

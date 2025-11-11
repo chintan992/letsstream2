@@ -6,11 +6,15 @@ import {
   writeBatch,
   doc,
   setDoc,
-  deleteDoc
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { WatchHistoryItem, FavoriteItem, WatchlistItem } from '@/contexts/types/watch-history';
-import { trackEvent } from '@/lib/analytics';
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import {
+  WatchHistoryItem,
+  FavoriteItem,
+  WatchlistItem,
+} from "@/contexts/types/watch-history";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * Tracks backup and restore events for analytics
@@ -23,12 +27,12 @@ function trackBackupEvent(eventName: string, params: Record<string, any>) {
         ...params,
         timestamp: new Date().toISOString(),
         user_agent: navigator.userAgent,
-        online: navigator.onLine
-      }
+        online: navigator.onLine,
+      },
     });
   } catch (error) {
     // Silently fail analytics tracking to avoid breaking the main functionality
-    console.warn('Failed to track backup event:', error);
+    console.warn("Failed to track backup event:", error);
   }
 }
 
@@ -70,90 +74,101 @@ export function validateBackupData(data: any): ValidationResult {
   const warnings: string[] = [];
 
   // Check basic structure
-  if (!data || typeof data !== 'object') {
-    errors.push('Invalid backup data: not an object');
+  if (!data || typeof data !== "object") {
+    errors.push("Invalid backup data: not an object");
     return { isValid: false, errors, warnings };
   }
 
   // Check version
-  if (!data.version || typeof data.version !== 'string') {
-    errors.push('Missing or invalid version field');
+  if (!data.version || typeof data.version !== "string") {
+    errors.push("Missing or invalid version field");
   }
 
   // Check user_id
-  if (!data.user_id || typeof data.user_id !== 'string') {
-    errors.push('Missing or invalid user_id field');
+  if (!data.user_id || typeof data.user_id !== "string") {
+    errors.push("Missing or invalid user_id field");
   }
 
   // Check backup_date
-  if (!data.backup_date || typeof data.backup_date !== 'string') {
-    errors.push('Missing or invalid backup_date field');
+  if (!data.backup_date || typeof data.backup_date !== "string") {
+    errors.push("Missing or invalid backup_date field");
   }
 
   // Check data object
-  if (!data.data || typeof data.data !== 'object') {
-    errors.push('Missing or invalid data field');
+  if (!data.data || typeof data.data !== "object") {
+    errors.push("Missing or invalid data field");
     return { isValid: false, errors, warnings };
   }
 
   // Validate arrays
-  const collections = ['watchHistory', 'favorites', 'watchlist'];
+  const collections = ["watchHistory", "favorites", "watchlist"];
   for (const collectionName of collections) {
     if (!Array.isArray(data.data[collectionName])) {
       errors.push(`Missing or invalid ${collectionName} array`);
     } else {
       // Validate each item has required fields
       data.data[collectionName].forEach((item: any, index: number) => {
-        if (!item.id || typeof item.id !== 'string') {
+        if (!item.id || typeof item.id !== "string") {
           errors.push(`${collectionName}[${index}]: Missing or invalid id`);
         }
-        if (!item.user_id || typeof item.user_id !== 'string') {
-          errors.push(`${collectionName}[${index}]: Missing or invalid user_id`);
+        if (!item.user_id || typeof item.user_id !== "string") {
+          errors.push(
+            `${collectionName}[${index}]: Missing or invalid user_id`
+          );
         }
-        if (typeof item.media_id !== 'number') {
-          errors.push(`${collectionName}[${index}]: Missing or invalid media_id`);
+        if (typeof item.media_id !== "number") {
+          errors.push(
+            `${collectionName}[${index}]: Missing or invalid media_id`
+          );
         }
-        if (!item.media_type || !['movie', 'tv'].includes(item.media_type)) {
-          errors.push(`${collectionName}[${index}]: Missing or invalid media_type`);
+        if (!item.media_type || !["movie", "tv"].includes(item.media_type)) {
+          errors.push(
+            `${collectionName}[${index}]: Missing or invalid media_type`
+          );
         }
       });
     }
   }
 
   // Check for data consistency warnings
-  if (data.data.watchHistory.length === 0 &&
-      data.data.favorites.length === 0 &&
-      data.data.watchlist.length === 0) {
-    warnings.push('Backup contains no data');
+  if (
+    data.data.watchHistory.length === 0 &&
+    data.data.favorites.length === 0 &&
+    data.data.watchlist.length === 0
+  ) {
+    warnings.push("Backup contains no data");
   }
 
   return {
     isValid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
 /**
  * Creates a backup of user's watch history, favorites, and watchlist with retry mechanism
  */
-export async function createBackup(userId: string, maxRetries: number = 3): Promise<BackupData> {
+export async function createBackup(
+  userId: string,
+  maxRetries: number = 3
+): Promise<BackupData> {
   if (!userId) {
-    throw new Error('User ID is required for backup');
+    throw new Error("User ID is required for backup");
   }
 
   // Track analytics
-  trackBackupEvent('backup_started', { user_id: userId });
+  trackBackupEvent("backup_started", { user_id: userId });
 
   const backupData: BackupData = {
-    version: '1.0',
+    version: "1.0",
     user_id: userId,
     backup_date: new Date().toISOString(),
     data: {
       watchHistory: [],
       favorites: [],
-      watchlist: []
-    }
+      watchlist: [],
+    },
   };
 
   let lastError: Error | null = null;
@@ -164,64 +179,90 @@ export async function createBackup(userId: string, maxRetries: number = 3): Prom
 
       // Check network connectivity
       if (!navigator.onLine) {
-        throw new Error('No internet connection. Please check your network and try again.');
+        throw new Error(
+          "No internet connection. Please check your network and try again."
+        );
       }
 
       // Fetch watch history with timeout
       const watchHistoryPromise = Promise.race([
-        getDocs(query(collection(db, 'watchHistory'), where('user_id', '==', userId))),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Watch history fetch timeout')), 30000))
+        getDocs(
+          query(collection(db, "watchHistory"), where("user_id", "==", userId))
+        ),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Watch history fetch timeout")),
+            30000
+          )
+        ),
       ]);
-      const watchHistorySnapshot = await watchHistoryPromise as any;
-      backupData.data.watchHistory = watchHistorySnapshot.docs.map((doc: any) => ({
-        id: doc.id,
-        ...doc.data()
-      })) as WatchHistoryItem[];
+      const watchHistorySnapshot = (await watchHistoryPromise) as any;
+      backupData.data.watchHistory = watchHistorySnapshot.docs.map(
+        (doc: any) => ({
+          id: doc.id,
+          ...doc.data(),
+        })
+      ) as WatchHistoryItem[];
 
       // Fetch favorites with timeout
       const favoritesPromise = Promise.race([
-        getDocs(query(collection(db, 'favorites'), where('user_id', '==', userId))),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Favorites fetch timeout')), 30000))
+        getDocs(
+          query(collection(db, "favorites"), where("user_id", "==", userId))
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Favorites fetch timeout")), 30000)
+        ),
       ]);
-      const favoritesSnapshot = await favoritesPromise as any;
+      const favoritesSnapshot = (await favoritesPromise) as any;
       backupData.data.favorites = favoritesSnapshot.docs.map((doc: any) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as FavoriteItem[];
 
       // Fetch watchlist with timeout
       const watchlistPromise = Promise.race([
-        getDocs(query(collection(db, 'watchlist'), where('user_id', '==', userId))),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Watchlist fetch timeout')), 30000))
+        getDocs(
+          query(collection(db, "watchlist"), where("user_id", "==", userId))
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Watchlist fetch timeout")), 30000)
+        ),
       ]);
-      const watchlistSnapshot = await watchlistPromise as any;
+      const watchlistSnapshot = (await watchlistPromise) as any;
       backupData.data.watchlist = watchlistSnapshot.docs.map((doc: any) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as WatchlistItem[];
 
       // Track successful backup
-      trackBackupEvent('backup_completed', {
+      trackBackupEvent("backup_completed", {
         user_id: userId,
         watch_history_count: backupData.data.watchHistory.length,
         favorites_count: backupData.data.favorites.length,
         watchlist_count: backupData.data.watchlist.length,
-        total_items: backupData.data.watchHistory.length + backupData.data.favorites.length + backupData.data.watchlist.length,
-        attempts: attempt
+        total_items:
+          backupData.data.watchHistory.length +
+          backupData.data.favorites.length +
+          backupData.data.watchlist.length,
+        attempts: attempt,
       });
 
-      console.log(`Backup completed successfully for user ${userId} with ${backupData.data.watchHistory.length + backupData.data.favorites.length + backupData.data.watchlist.length} items`);
+      console.log(
+        `Backup completed successfully for user ${userId} with ${backupData.data.watchHistory.length + backupData.data.favorites.length + backupData.data.watchlist.length} items`
+      );
       return backupData;
-
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error during backup');
+      lastError =
+        error instanceof Error
+          ? error
+          : new Error("Unknown error during backup");
       console.error(`Backup attempt ${attempt} failed:`, lastError.message);
 
       // Track failed attempt
-      trackBackupEvent('backup_attempt_failed', {
+      trackBackupEvent("backup_attempt_failed", {
         user_id: userId,
         attempt,
-        error: lastError.message
+        error: lastError.message,
       });
 
       // If this is not the last attempt, wait before retrying
@@ -234,32 +275,37 @@ export async function createBackup(userId: string, maxRetries: number = 3): Prom
   }
 
   // All attempts failed
-  trackBackupEvent('backup_failed', {
+  trackBackupEvent("backup_failed", {
     user_id: userId,
     attempts: maxRetries,
-    final_error: lastError?.message || 'Unknown error'
+    final_error: lastError?.message || "Unknown error",
   });
 
-  throw new Error(`Failed to create backup after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`);
+  throw new Error(
+    `Failed to create backup after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`
+  );
 }
 
 /**
  * Downloads backup data as a JSON file with customizable filename
  */
-export function downloadBackup(backupData: BackupData, customFilename?: string): void {
+export function downloadBackup(
+  backupData: BackupData,
+  customFilename?: string
+): void {
   const dataStr = JSON.stringify(backupData, null, 2);
-  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const dataBlob = new Blob([dataStr], { type: "application/json" });
 
   const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
 
   // Use custom filename or generate default
   let filename = customFilename || generateDefaultBackupFilename(backupData);
 
   // Ensure .json extension
-  if (!filename.toLowerCase().endsWith('.json')) {
-    filename += '.json';
+  if (!filename.toLowerCase().endsWith(".json")) {
+    filename += ".json";
   }
 
   link.download = filename;
@@ -274,27 +320,31 @@ export function downloadBackup(backupData: BackupData, customFilename?: string):
  * Generates a default backup filename
  */
 export function generateDefaultBackupFilename(backupData: BackupData): string {
-  const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
   return `letsstream-backup-${backupData.user_id}-${date}.json`;
 }
 
 /**
  * Generates suggested backup filenames with different formats
  */
-export function generateBackupFilenameSuggestions(backupData: BackupData, userEmail?: string): string[] {
+export function generateBackupFilenameSuggestions(
+  backupData: BackupData,
+  userEmail?: string
+): string[] {
   const now = new Date();
-  const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
-  const time = now.toTimeString().split(' ')[0].replace(/:/g, ''); // HHMMSS
-  const datetime = now.toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + time; // YYYY-MM-DD_HHMMSS
+  const date = now.toISOString().split("T")[0]; // YYYY-MM-DD
+  const time = now.toTimeString().split(" ")[0].replace(/:/g, ""); // HHMMSS
+  const datetime =
+    now.toISOString().replace(/[:.]/g, "-").split("T")[0] + "_" + time; // YYYY-MM-DD_HHMMSS
 
-  const userIdentifier = userEmail ?
-    userEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') :
-    backupData.user_id.substring(0, 8);
+  const userIdentifier = userEmail
+    ? userEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, "")
+    : backupData.user_id.substring(0, 8);
 
   const dataCounts = {
     history: backupData.data.watchHistory.length,
     favorites: backupData.data.favorites.length,
-    watchlist: backupData.data.watchlist.length
+    watchlist: backupData.data.watchlist.length,
   };
 
   return [
@@ -316,7 +366,7 @@ export function generateBackupFilenameSuggestions(backupData: BackupData, userEm
 
     // Technical formats
     `letsstream_backup_v1.0_${backupData.user_id}_${datetime}.json`,
-    `firestore_export_${userIdentifier}_${date}.json`
+    `firestore_export_${userIdentifier}_${date}.json`,
   ];
 }
 
@@ -328,64 +378,74 @@ export function parseBackupFile(file: File): Promise<BackupData> {
     // File size validation (50MB limit)
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
     if (file.size > MAX_FILE_SIZE) {
-      reject(new Error(`File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum limit of 50MB`));
+      reject(
+        new Error(
+          `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum limit of 50MB`
+        )
+      );
       return;
     }
 
     // File type validation
-    if (!file.name.toLowerCase().endsWith('.json')) {
-      reject(new Error('File must be a JSON file (.json extension)'));
+    if (!file.name.toLowerCase().endsWith(".json")) {
+      reject(new Error("File must be a JSON file (.json extension)"));
       return;
     }
 
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const content = e.target?.result as string;
 
         // Check if content is empty
         if (!content || content.trim().length === 0) {
-          reject(new Error('File is empty'));
+          reject(new Error("File is empty"));
           return;
         }
 
         // Check content size (should be reasonable for JSON)
         if (content.length > MAX_FILE_SIZE) {
-          reject(new Error('File content is too large'));
+          reject(new Error("File content is too large"));
           return;
         }
 
         const data = JSON.parse(content);
 
         // Basic structure validation
-        if (!data || typeof data !== 'object') {
-          reject(new Error('Invalid backup file format'));
+        if (!data || typeof data !== "object") {
+          reject(new Error("Invalid backup file format"));
           return;
         }
 
         resolve(data);
       } catch (error) {
         if (error instanceof SyntaxError) {
-          reject(new Error('Invalid JSON format in backup file'));
+          reject(new Error("Invalid JSON format in backup file"));
         } else {
-          reject(new Error('Failed to parse backup file'));
+          reject(new Error("Failed to parse backup file"));
         }
       }
     };
 
     reader.onerror = () => {
-      reject(new Error('Failed to read file. The file may be corrupted or inaccessible.'));
+      reject(
+        new Error(
+          "Failed to read file. The file may be corrupted or inaccessible."
+        )
+      );
     };
 
     reader.onabort = () => {
-      reject(new Error('File reading was aborted'));
+      reject(new Error("File reading was aborted"));
     };
 
     // Add timeout for large files
     const timeout = setTimeout(() => {
       reader.abort();
-      reject(new Error('File reading timed out. File may be too large or corrupted.'));
+      reject(
+        new Error("File reading timed out. File may be too large or corrupted.")
+      );
     }, 30000); // 30 second timeout
 
     reader.onloadend = () => {
@@ -399,62 +459,70 @@ export function parseBackupFile(file: File): Promise<BackupData> {
 /**
  * Restores data from backup to Firestore with retry mechanism and analytics
  */
-export async function restoreBackup(backupData: BackupData, targetUserId: string, maxRetries: number = 3): Promise<RestoreResult> {
+export async function restoreBackup(
+  backupData: BackupData,
+  targetUserId: string,
+  maxRetries: number = 3
+): Promise<RestoreResult> {
   const result: RestoreResult = {
     success: false,
-    message: '',
+    message: "",
     stats: {
       watchHistory: { added: 0, updated: 0, errors: 0 },
       favorites: { added: 0, updated: 0, errors: 0 },
-      watchlist: { added: 0, updated: 0, errors: 0 }
-    }
+      watchlist: { added: 0, updated: 0, errors: 0 },
+    },
   };
 
   // Track analytics
-  trackBackupEvent('restore_started', {
+  trackBackupEvent("restore_started", {
     user_id: targetUserId,
     backup_user_id: backupData.user_id,
     backup_date: backupData.backup_date,
     watch_history_count: backupData.data.watchHistory.length,
     favorites_count: backupData.data.favorites.length,
-    watchlist_count: backupData.data.watchlist.length
+    watchlist_count: backupData.data.watchlist.length,
   });
 
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Restore attempt ${attempt}/${maxRetries} for user ${targetUserId}`);
+      console.log(
+        `Restore attempt ${attempt}/${maxRetries} for user ${targetUserId}`
+      );
 
       // Check network connectivity
       if (!navigator.onLine) {
-        throw new Error('No internet connection. Please check your network and try again.');
+        throw new Error(
+          "No internet connection. Please check your network and try again."
+        );
       }
 
       // Validate backup data
       const validation = validateBackupData(backupData);
       if (!validation.isValid) {
-        result.message = `Validation failed: ${validation.errors.join(', ')}`;
-        trackBackupEvent('restore_validation_failed', {
+        result.message = `Validation failed: ${validation.errors.join(", ")}`;
+        trackBackupEvent("restore_validation_failed", {
           user_id: targetUserId,
-          errors: validation.errors
+          errors: validation.errors,
         });
         return result;
       }
 
       if (validation.warnings.length > 0) {
-        console.warn('Backup validation warnings:', validation.warnings);
-        trackBackupEvent('restore_validation_warnings', {
+        console.warn("Backup validation warnings:", validation.warnings);
+        trackBackupEvent("restore_validation_warnings", {
           user_id: targetUserId,
-          warnings: validation.warnings
+          warnings: validation.warnings,
         });
       }
 
       // Process each collection with timeout protection
       const collections = [
-        { name: 'watchHistory', data: backupData.data.watchHistory },
-        { name: 'favorites', data: backupData.data.favorites },
-        { name: 'watchlist', data: backupData.data.watchlist }
+        { name: "watchHistory", data: backupData.data.watchHistory },
+        { name: "favorites", data: backupData.data.favorites },
+        { name: "watchlist", data: backupData.data.watchlist },
       ];
 
       for (const collectionInfo of collections) {
@@ -474,65 +542,90 @@ export async function restoreBackup(backupData: BackupData, targetUserId: string
             batch.set(docRef, itemData);
 
             batchCount++;
-            result.stats[collectionInfo.name as keyof typeof result.stats].added++;
+            result.stats[collectionInfo.name as keyof typeof result.stats]
+              .added++;
 
             if (batchCount >= maxBatchSize) {
               await Promise.race([
                 batch.commit(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Batch commit timeout')), 30000))
+                new Promise((_, reject) =>
+                  setTimeout(
+                    () => reject(new Error("Batch commit timeout")),
+                    30000
+                  )
+                ),
               ]);
               batchCount = 0;
             }
           } catch (error) {
-            console.error(`Error processing ${collectionInfo.name} item ${item.id}:`, error);
-            result.stats[collectionInfo.name as keyof typeof result.stats].errors++;
+            console.error(
+              `Error processing ${collectionInfo.name} item ${item.id}:`,
+              error
+            );
+            result.stats[collectionInfo.name as keyof typeof result.stats]
+              .errors++;
           }
         }
 
         if (batchCount > 0) {
           await Promise.race([
             batch.commit(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Final batch commit timeout')), 30000))
+            new Promise((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Final batch commit timeout")),
+                30000
+              )
+            ),
           ]);
         }
       }
 
       result.success = true;
-      result.message = 'Backup restored successfully';
+      result.message = "Backup restored successfully";
 
       // Add summary to message
-      const totalAdded = Object.values(result.stats).reduce((sum, stat) => sum + stat.added, 0);
-      const totalErrors = Object.values(result.stats).reduce((sum, stat) => sum + stat.errors, 0);
-      result.message += ` (${totalAdded} items restored${totalErrors > 0 ? `, ${totalErrors} errors` : ''})`;
+      const totalAdded = Object.values(result.stats).reduce(
+        (sum, stat) => sum + stat.added,
+        0
+      );
+      const totalErrors = Object.values(result.stats).reduce(
+        (sum, stat) => sum + stat.errors,
+        0
+      );
+      result.message += ` (${totalAdded} items restored${totalErrors > 0 ? `, ${totalErrors} errors` : ""})`;
 
       // Track successful restore
-      trackBackupEvent('restore_completed', {
+      trackBackupEvent("restore_completed", {
         user_id: targetUserId,
         total_items: totalAdded,
         errors: totalErrors,
         attempts: attempt,
-        ...result.stats
+        ...result.stats,
       });
 
-      console.log(`Restore completed successfully for user ${targetUserId} with ${totalAdded} items`);
+      console.log(
+        `Restore completed successfully for user ${targetUserId} with ${totalAdded} items`
+      );
       return result;
-
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error during restore');
+      lastError =
+        error instanceof Error
+          ? error
+          : new Error("Unknown error during restore");
       console.error(`Restore attempt ${attempt} failed:`, lastError.message);
 
       // Track failed attempt
-      trackBackupEvent('restore_attempt_failed', {
+      trackBackupEvent("restore_attempt_failed", {
         user_id: targetUserId,
         attempt,
-        error: lastError.message
+        error: lastError.message,
       });
 
       // Reset stats for retry
       result.stats = {
         watchHistory: { added: 0, updated: 0, errors: 0 },
         favorites: { added: 0, updated: 0, errors: 0 },
-        watchlist: { added: 0, updated: 0, errors: 0 }
+        watchlist: { added: 0, updated: 0, errors: 0 },
       };
 
       // If this is not the last attempt, wait before retrying
@@ -545,12 +638,12 @@ export async function restoreBackup(backupData: BackupData, targetUserId: string
   }
 
   // All attempts failed
-  result.message = `Failed to restore backup after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`;
+  result.message = `Failed to restore backup after ${maxRetries} attempts: ${lastError?.message || "Unknown error"}`;
 
-  trackBackupEvent('restore_failed', {
+  trackBackupEvent("restore_failed", {
     user_id: targetUserId,
     attempts: maxRetries,
-    final_error: lastError?.message || 'Unknown error'
+    final_error: lastError?.message || "Unknown error",
   });
 
   return result;
@@ -561,22 +654,22 @@ export async function restoreBackup(backupData: BackupData, targetUserId: string
  */
 export async function clearUserData(userId: string): Promise<void> {
   if (!userId) {
-    throw new Error('User ID is required');
+    throw new Error("User ID is required");
   }
 
   try {
-    const collections = ['watchHistory', 'favorites', 'watchlist'];
+    const collections = ["watchHistory", "favorites", "watchlist"];
 
     for (const collectionName of collections) {
       const collectionRef = collection(db, collectionName);
-      const q = query(collectionRef, where('user_id', '==', userId));
+      const q = query(collectionRef, where("user_id", "==", userId));
       const snapshot = await getDocs(q);
 
       const batch = writeBatch(db);
       let batchCount = 0;
       const maxBatchSize = 500;
 
-      snapshot.docs.forEach((doc) => {
+      snapshot.docs.forEach(doc => {
         batch.delete(doc.ref);
         batchCount++;
 
@@ -591,7 +684,9 @@ export async function clearUserData(userId: string): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('Error clearing user data:', error);
-    throw new Error(`Failed to clear user data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Error clearing user data:", error);
+    throw new Error(
+      `Failed to clear user data: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }

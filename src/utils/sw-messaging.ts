@@ -1,18 +1,18 @@
-import { swMonitor } from './sw-monitor';
+import { swMonitor } from "./sw-monitor";
 
 export function initServiceWorkerMessaging() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event) => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", event => {
       const { type } = event.data;
 
       switch (type) {
-        case 'NETWORK_SUCCESS':
+        case "NETWORK_SUCCESS":
           swMonitor.recordNetworkSuccess();
           break;
-        case 'NETWORK_FAILURE':
+        case "NETWORK_FAILURE":
           swMonitor.recordNetworkFailure();
           break;
-        case 'NETWORK_TIMEOUT':
+        case "NETWORK_TIMEOUT":
           swMonitor.recordNetworkTimeout();
           break;
       }
@@ -24,7 +24,7 @@ export function initServiceWorkerMessaging() {
 export async function getServiceWorkerMetrics() {
   return {
     networkMetrics: swMonitor.getNetworkMetrics(),
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 

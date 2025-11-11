@@ -1,22 +1,25 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { triggerHapticFeedback, triggerSuccessHaptic } from '@/utils/haptic-feedback';
-import { trackEvent } from '@/lib/analytics';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { searchMedia } from '@/utils/api';
-import { Media } from '@/utils/types';
-import Navbar from '@/components/Navbar';
-import MediaGrid from '@/components/MediaGrid';
-import Footer from '@/components/Footer';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { 
+import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  triggerHapticFeedback,
+  triggerSuccessHaptic,
+} from "@/utils/haptic-feedback";
+import { trackEvent } from "@/lib/analytics";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { searchMedia } from "@/utils/api";
+import { Media } from "@/utils/types";
+import Navbar from "@/components/Navbar";
+import MediaGrid from "@/components/MediaGrid";
+import Footer from "@/components/Footer";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -29,13 +32,13 @@ import {
   PaginationLink,
   PaginationNext,
 } from "@/components/ui/pagination";
-import { Search as SearchIcon, X, Filter, ChevronDown } from 'lucide-react';
+import { Search as SearchIcon, X, Filter, ChevronDown } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import SearchSuggestions from '@/components/SearchSuggestions';
+import SearchSuggestions from "@/components/SearchSuggestions";
 
 const RESULTS_PER_PAGE = 20;
 
-interface ExtendedMedia extends Omit<Media, 'id'> {
+interface ExtendedMedia extends Omit<Media, "id"> {
   id: string | number;
   media_id: number;
   docId?: string;
@@ -49,27 +52,34 @@ const Search = () => {
   const [allResults, setAllResults] = useState<ExtendedMedia[]>([]);
   const [displayedResults, setDisplayedResults] = useState<ExtendedMedia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [page, setPage] = useState(1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [advancedSearch, setAdvancedSearch] = useState(false);
-  const [mediaType, setMediaType] = useState<string>(searchParams.get('type') || 'all');
-  const [sortBy, setSortBy] = useState<string>(searchParams.get('sort') || 'popularity');
+  const [mediaType, setMediaType] = useState<string>(
+    searchParams.get("type") || "all"
+  );
+  const [sortBy, setSortBy] = useState<string>(
+    searchParams.get("sort") || "popularity"
+  );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
-    const saved = localStorage.getItem('searchHistory');
+    const saved = localStorage.getItem("searchHistory");
     return saved ? JSON.parse(saved) : [];
   });
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [mediaSuggestions, setMediaSuggestions] = useState<Media[]>([]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && 
-          document.activeElement?.tagName !== 'TEXTAREA') {
+      if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
         e.preventDefault();
         searchInputRef.current?.focus();
         toast({
@@ -80,8 +90,8 @@ const Search = () => {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toast]);
 
   useEffect(() => {
@@ -92,35 +102,40 @@ const Search = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const generateSuggestions = useCallback(async (input: string) => {
-    if (!input || input.length < 2) {
-      setSuggestions([]);
-      setMediaSuggestions([]);
-      return;
-    }
+  const generateSuggestions = useCallback(
+    async (input: string) => {
+      if (!input || input.length < 2) {
+        setSuggestions([]);
+        setMediaSuggestions([]);
+        return;
+      }
 
-    try {
-      const results = await searchMedia(input);
-      
-      setMediaSuggestions(results.slice(0, 4));
-      
-      const apiSuggestions = results.slice(0, 3).map(item => 
-        item.title || item.name || ''
-      );
+      try {
+        const results = await searchMedia(input);
 
-      const historySuggestions = searchHistory
-        .filter(h => h.toLowerCase().includes(input.toLowerCase()))
-        .slice(0, 2);
+        setMediaSuggestions(results.slice(0, 4));
 
-      const combinedSuggestions = [...new Set([...historySuggestions, ...apiSuggestions])];
-      setSuggestions(combinedSuggestions);
-    } catch (error) {
-      console.error('Error generating suggestions:', error);
-    }
-  }, [searchHistory]);
+        const apiSuggestions = results
+          .slice(0, 3)
+          .map(item => item.title || item.name || "");
+
+        const historySuggestions = searchHistory
+          .filter(h => h.toLowerCase().includes(input.toLowerCase()))
+          .slice(0, 2);
+
+        const combinedSuggestions = [
+          ...new Set([...historySuggestions, ...apiSuggestions]),
+        ];
+        setSuggestions(combinedSuggestions);
+      } catch (error) {
+        console.error("Error generating suggestions:", error);
+      }
+    },
+    [searchHistory]
+  );
 
   useEffect(() => {
-    const searchQuery = searchParams.get('q');
+    const searchQuery = searchParams.get("q");
     if (!searchQuery) {
       setAllResults([]);
       setDisplayedResults([]);
@@ -130,47 +145,49 @@ const Search = () => {
     const fetchSearchResults = async () => {
       setIsLoading(true);
       try {
-        const type = searchParams.get('type') || 'all';
-        const sort = searchParams.get('sort') || 'popularity';
-        
+        const type = searchParams.get("type") || "all";
+        const sort = searchParams.get("sort") || "popularity";
+
         const results = await searchMedia(searchQuery);
-        
+
         let filteredResults = results.map(item => ({
           ...item,
           id: item.id,
           media_id: item.id,
           media_type: item.media_type,
-          title: item.title || '',
-          name: item.name || '',
+          title: item.title || "",
+          name: item.name || "",
           poster_path: item.poster_path,
           backdrop_path: item.backdrop_path,
           overview: item.overview,
           vote_average: item.vote_average,
           release_date: item.release_date,
           first_air_date: item.first_air_date,
-          genre_ids: item.genre_ids
+          genre_ids: item.genre_ids,
         })) as ExtendedMedia[];
 
-        if (type !== 'all') {
-          filteredResults = filteredResults.filter(item => item.media_type === type);
+        if (type !== "all") {
+          filteredResults = filteredResults.filter(
+            item => item.media_type === type
+          );
         }
-        
+
         const sortedResults = [...filteredResults];
-        if (sort === 'rating') {
+        if (sort === "rating") {
           sortedResults.sort((a, b) => b.vote_average - a.vote_average);
-        } else if (sort === 'newest') {
+        } else if (sort === "newest") {
           sortedResults.sort((a, b) => {
-            const dateA = a.release_date || a.first_air_date || '';
-            const dateB = b.release_date || b.first_air_date || '';
+            const dateA = a.release_date || a.first_air_date || "";
+            const dateB = b.release_date || b.first_air_date || "";
             return dateB.localeCompare(dateA);
           });
         }
-        
+
         setAllResults(sortedResults);
         setDisplayedResults(sortedResults.slice(0, RESULTS_PER_PAGE));
         setPage(1);
       } catch (error) {
-        console.error('Error fetching search results:', error);
+        console.error("Error fetching search results:", error);
         setAllResults([]);
         setDisplayedResults([]);
         toast({
@@ -185,14 +202,14 @@ const Search = () => {
 
     fetchSearchResults();
     setQuery(searchQuery);
-    setMediaType(searchParams.get('type') || 'all');
-    setSortBy(searchParams.get('sort') || 'popularity');
+    setMediaType(searchParams.get("type") || "all");
+    setSortBy(searchParams.get("sort") || "popularity");
   }, [searchParams, toast]);
 
   const updateSearchHistory = useCallback((term: string) => {
     setSearchHistory(prev => {
       const newHistory = [term, ...prev.filter(h => h !== term)].slice(0, 5);
-      localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+      localStorage.setItem("searchHistory", JSON.stringify(newHistory));
       return newHistory;
     });
   }, []);
@@ -205,17 +222,17 @@ const Search = () => {
     if (!query.trim()) return;
     let searchUrl = `/search?q=${encodeURIComponent(query.trim())}`;
     if (advancedSearch) {
-      if (mediaType !== 'all') {
+      if (mediaType !== "all") {
         searchUrl += `&type=${mediaType}`;
       }
-      if (sortBy !== 'popularity') {
+      if (sortBy !== "popularity") {
         searchUrl += `&sort=${sortBy}`;
       }
     }
     updateSearchHistory(query.trim());
     // Analytics: log search event
     await trackEvent({
-      name: 'search',
+      name: "search",
       params: {
         query: query.trim(),
         mediaType,
@@ -228,9 +245,9 @@ const Search = () => {
   };
 
   const handleClearSearch = () => {
-    setQuery('');
+    setQuery("");
     setShowSuggestions(false);
-    navigate('/search');
+    navigate("/search");
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,12 +262,12 @@ const Search = () => {
   };
 
   const handleSuggestionClick = async (suggestion: string | Media) => {
-    if (typeof suggestion === 'string') {
+    if (typeof suggestion === "string") {
       setQuery(suggestion);
       updateSearchHistory(suggestion);
       // Analytics: log search suggestion click
       await trackEvent({
-        name: 'search_suggestion_click',
+        name: "search_suggestion_click",
         params: {
           suggestion,
           query,
@@ -260,7 +277,7 @@ const Search = () => {
     } else {
       // Analytics: log search result click
       await trackEvent({
-        name: 'search_result_click',
+        name: "search_result_click",
         params: {
           mediaId: suggestion.id,
           mediaType: suggestion.media_type,
@@ -274,7 +291,7 @@ const Search = () => {
         description: `Going to ${suggestion.title || suggestion.name}`,
         duration: 2000,
       });
-      const term = suggestion.title || suggestion.name || '';
+      const term = suggestion.title || suggestion.name || "";
       if (term) {
         updateSearchHistory(term);
       }
@@ -291,15 +308,15 @@ const Search = () => {
 
   const hasMoreResults = allResults.length > displayedResults.length;
 
-const toggleAdvancedSearch = () => {
+  const toggleAdvancedSearch = () => {
     triggerHapticFeedback(20);
     setAdvancedSearch(!advancedSearch);
   };
 
-const clearSearchHistory = () => {
+  const clearSearchHistory = () => {
     triggerHapticFeedback(15);
     setSearchHistory([]);
-    localStorage.removeItem('searchHistory');
+    localStorage.removeItem("searchHistory");
     toast({
       title: "Search history cleared",
       description: "Your search history has been cleared.",
@@ -308,12 +325,14 @@ const clearSearchHistory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      
-      <div className="flex-grow pt-24 px-4 md:px-8 max-w-6xl mx-auto w-full">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Search</h1>
-        
+
+      <div className="mx-auto w-full max-w-6xl flex-grow px-4 pt-24 md:px-8">
+        <h1 className="mb-6 text-2xl font-bold text-white md:text-3xl">
+          Search
+        </h1>
+
         <form onSubmit={handleSearch} className="mb-8">
           <div className="flex flex-col gap-4">
             <div className="relative">
@@ -321,95 +340,104 @@ const clearSearchHistory = () => {
                 ref={searchInputRef}
                 type="search"
                 placeholder="Search for movies, TV shows..."
-                className="bg-white/10 border-white/10 pl-10 pr-10 text-white placeholder:text-white/50 h-12"
+                className="h-12 border-white/10 bg-white/10 pl-10 pr-10 text-white placeholder:text-white/50"
                 value={query}
                 onChange={handleInputChange}
                 onFocus={() => query.length > 1 && setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               />
-              <SearchIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" />
+              <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-white/50" />
               {query && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-white/50 hover:text-white"
                 >
                   <X className="h-5 w-5" />
                 </button>
               )}
-              
-              {showSuggestions && (
-                mediaSuggestions.length > 0 ? (
-                  <SearchSuggestions 
-                    suggestions={mediaSuggestions} 
+
+              {showSuggestions &&
+                (mediaSuggestions.length > 0 ? (
+                  <SearchSuggestions
+                    suggestions={mediaSuggestions}
                     onSuggestionClick={handleSuggestionClick}
                     searchQuery={query}
                     onViewAllResults={() => handleSearch()}
                   />
                 ) : suggestions.length > 0 ? (
-                  <SearchSuggestions 
-                    suggestions={suggestions} 
+                  <SearchSuggestions
+                    suggestions={suggestions}
                     onSuggestionClick={handleSuggestionClick}
                     searchQuery={query}
                     onViewAllResults={() => handleSearch()}
                   />
-                ) : null
-              )}
+                ) : null)}
             </div>
-            
-            <div className="flex gap-2 flex-wrap md:flex-nowrap">
-              <Button 
-                type="submit" 
-                className="bg-accent hover:bg-accent/80 h-12 px-6 ml-auto md:ml-0"
+
+            <div className="flex flex-wrap gap-2 md:flex-nowrap">
+              <Button
+                type="submit"
+                className="hover:bg-accent/80 ml-auto h-12 bg-accent px-6 md:ml-0"
               >
-                <SearchIcon className="h-4 w-4 mr-2" />
+                <SearchIcon className="mr-2 h-4 w-4" />
                 Search
               </Button>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="border-white/10 text-white h-12"
+
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 border-white/10 text-white"
                 onClick={toggleAdvancedSearch}
               >
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter className="mr-2 h-4 w-4" />
                 Advanced Search
               </Button>
             </div>
-            
+
             {advancedSearch && (
-              <div className="p-4 rounded-md bg-white/5 animate-fade-in">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="animate-fade-in rounded-md bg-white/5 p-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm text-white/70 mb-2">Media Type</label>
-                    <Select 
-                      value={mediaType} 
-                      onValueChange={setMediaType}
-                    >
-                      <SelectTrigger className="bg-white/10 border-white/10 text-white">
+                    <label className="mb-2 block text-sm text-white/70">
+                      Media Type
+                    </label>
+                    <Select value={mediaType} onValueChange={setMediaType}>
+                      <SelectTrigger className="border-white/10 bg-white/10 text-white">
                         <SelectValue placeholder="Select media type" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-white/10">
-                        <SelectItem value="all" className="text-white">All</SelectItem>
-                        <SelectItem value="movie" className="text-white">Movies</SelectItem>
-                        <SelectItem value="tv" className="text-white">TV Shows</SelectItem>
+                      <SelectContent className="border-white/10 bg-background">
+                        <SelectItem value="all" className="text-white">
+                          All
+                        </SelectItem>
+                        <SelectItem value="movie" className="text-white">
+                          Movies
+                        </SelectItem>
+                        <SelectItem value="tv" className="text-white">
+                          TV Shows
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm text-white/70 mb-2">Sort By</label>
-                    <Select 
-                      value={sortBy} 
-                      onValueChange={setSortBy}
-                    >
-                      <SelectTrigger className="bg-white/10 border-white/10 text-white">
+                    <label className="mb-2 block text-sm text-white/70">
+                      Sort By
+                    </label>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="border-white/10 bg-white/10 text-white">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-white/10">
-                        <SelectItem value="popularity" className="text-white">Popularity</SelectItem>
-                        <SelectItem value="rating" className="text-white">Rating</SelectItem>
-                        <SelectItem value="newest" className="text-white">Newest</SelectItem>
+                      <SelectContent className="border-white/10 bg-background">
+                        <SelectItem value="popularity" className="text-white">
+                          Popularity
+                        </SelectItem>
+                        <SelectItem value="rating" className="text-white">
+                          Rating
+                        </SelectItem>
+                        <SelectItem value="newest" className="text-white">
+                          Newest
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -419,10 +447,12 @@ const clearSearchHistory = () => {
           </div>
         </form>
 
-        {!searchParams.get('q') && searchHistory.length > 0 && (
+        {!searchParams.get("q") && searchHistory.length > 0 && (
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Recent Searches</h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">
+                Recent Searches
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -444,63 +474,77 @@ const clearSearchHistory = () => {
                     navigate(`/search?q=${encodeURIComponent(term)}`);
                   }}
                 >
-                  <SearchIcon className="h-4 w-4 mr-2" />
+                  <SearchIcon className="mr-2 h-4 w-4" />
                   {term}
                 </Button>
               ))}
             </div>
           </div>
         )}
-        
+
         {isLoading ? (
           <div className="flex justify-center py-12">
             <div className="animate-pulse text-white">Loading results...</div>
           </div>
         ) : (
           <>
-            {searchParams.get('q') ? (
+            {searchParams.get("q") ? (
               <div>
-                <MediaGrid 
-                  media={displayedResults} 
-                  title={`Results for "${searchParams.get('q')}"`} 
+                <MediaGrid
+                  media={displayedResults}
+                  title={`Results for "${searchParams.get("q")}"`}
                 />
-                
+
                 {hasMoreResults && (
-                  <div className="flex justify-center my-8">
-                    <Button 
-                      onClick={handleShowMore} 
-                      variant="outline" 
+                  <div className="my-8 flex justify-center">
+                    <Button
+                      onClick={handleShowMore}
+                      variant="outline"
                       className="border-white/10 text-white hover:bg-white/10"
                     >
                       Show More <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 )}
-                
+
                 {allResults.length > 0 && (
                   <Pagination className="my-8">
                     <PaginationContent>
                       <PaginationItem>
-                        <div className="text-white/70 text-sm">
-                          Showing {displayedResults.length} of {allResults.length} results
+                        <div className="text-sm text-white/70">
+                          Showing {displayedResults.length} of{" "}
+                          {allResults.length} results
                         </div>
                       </PaginationItem>
                     </PaginationContent>
                   </Pagination>
                 )}
-                
+
                 {allResults.length > 0 && (
                   <Accordion type="single" collapsible className="mb-8">
-                    <AccordionItem value="search-tips" className="border-white/10">
+                    <AccordionItem
+                      value="search-tips"
+                      className="border-white/10"
+                    >
                       <AccordionTrigger className="text-white hover:text-accent">
                         Search Tips
                       </AccordionTrigger>
                       <AccordionContent className="text-white/70">
-                        <ul className="list-disc list-inside space-y-2">
-                          <li>Use the advanced search options to filter by media type and sort results</li>
-                          <li>Press the "/" key anywhere on the site to quickly focus the search bar</li>
-                          <li>Try using more specific terms for better results</li>
-                          <li>Use the search suggestions that appear as you type</li>
+                        <ul className="list-inside list-disc space-y-2">
+                          <li>
+                            Use the advanced search options to filter by media
+                            type and sort results
+                          </li>
+                          <li>
+                            Press the "/" key anywhere on the site to quickly
+                            focus the search bar
+                          </li>
+                          <li>
+                            Try using more specific terms for better results
+                          </li>
+                          <li>
+                            Use the search suggestions that appear as you type
+                          </li>
                         </ul>
                       </AccordionContent>
                     </AccordionItem>
@@ -508,15 +552,17 @@ const clearSearchHistory = () => {
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 text-white/70">
+              <div className="py-12 text-center text-white/70">
                 <p>Enter a search term to find movies and TV shows</p>
-                <p className="mt-2 text-sm">Pro tip: Press "/" anywhere to quickly search</p>
+                <p className="mt-2 text-sm">
+                  Pro tip: Press "/" anywhere to quickly search
+                </p>
               </div>
             )}
           </>
         )}
       </div>
-      
+
       <Footer />
     </div>
   );

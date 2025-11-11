@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useAuth } from '@/hooks';
-import { useToast } from '@/hooks/use-toast';
-import { triggerSuccessHaptic } from '@/utils/haptic-feedback';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Camera, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAuth } from "@/hooks";
+import { useToast } from "@/hooks/use-toast";
+import { triggerSuccessHaptic } from "@/utils/haptic-feedback";
 
 interface ProfileEditModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) => {
+const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleSave = async () => {
@@ -32,14 +40,14 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
       triggerSuccessHaptic();
       toast({
         title: "Profile updated",
-        description: "Your profile has been successfully updated."
+        description: "Your profile has been successfully updated.",
       });
       onClose();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
@@ -50,7 +58,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
     // In a real app, this would open a file picker and upload to storage
     toast({
       title: "Feature coming soon",
-      description: "Profile photo upload will be available in a future update."
+      description: "Profile photo upload will be available in a future update.",
     });
   };
 
@@ -58,10 +66,10 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
     <AnimatePresence>
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent className="sm:max-w-md bg-background border-white/10">
+          <DialogContent className="border-white/10 bg-background sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-white flex items-center">
-                <User className="h-5 w-5 mr-2" />
+              <DialogTitle className="flex items-center text-white">
+                <User className="mr-2 h-5 w-5" />
                 Edit Profile
               </DialogTitle>
             </DialogHeader>
@@ -75,10 +83,15 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
               {/* Profile Picture */}
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
-                  <Avatar className="h-24 w-24 bg-accent text-white text-2xl">
-                    <AvatarImage src={user?.photoURL || ""} alt={user?.email || 'User'} />
+                  <Avatar className="h-24 w-24 bg-accent text-2xl text-white">
+                    <AvatarImage
+                      src={user?.photoURL || ""}
+                      alt={user?.email || "User"}
+                    />
                     <AvatarFallback>
-                      {user?.email ? user.email.substring(0, 2).toUpperCase() : 'U'}
+                      {user?.email
+                        ? user.email.substring(0, 2).toUpperCase()
+                        : "U"}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -90,7 +103,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
                     <Camera className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-sm text-white/70 text-center">
+                <p className="text-center text-sm text-white/70">
                   Click the camera icon to change your profile picture
                 </p>
               </div>
@@ -104,9 +117,9 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
                   id="displayName"
                   type="text"
                   value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  onChange={e => setDisplayName(e.target.value)}
                   placeholder="Enter your display name"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="border-white/20 bg-white/10 text-white placeholder:text-white/50"
                 />
                 <p className="text-xs text-white/70">
                   This is the name that will be displayed on your profile
@@ -118,9 +131,9 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
                 <Label className="text-white">Email Address</Label>
                 <Input
                   type="email"
-                  value={user?.email || ''}
+                  value={user?.email || ""}
                   disabled
-                  className="bg-white/5 border-white/10 text-white/70 cursor-not-allowed"
+                  className="cursor-not-allowed border-white/10 bg-white/5 text-white/70"
                 />
                 <p className="text-xs text-white/70">
                   Email cannot be changed here. Contact support if needed.
@@ -141,7 +154,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
                   disabled={isUpdating || !displayName.trim()}
                   className="flex-1"
                 >
-                  {isUpdating ? 'Saving...' : 'Save Changes'}
+                  {isUpdating ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </motion.div>

@@ -7,7 +7,7 @@
   .chatbot-window-mobile {
     padding-bottom: env(safe-area-inset-bottom);
   }
-  
+
   .chatbot-input-container {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
@@ -20,45 +20,45 @@
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Prevent text selection during dragging */
   .dragging * {
     user-select: none;
   }
-  
+
   /* Improve scrolling performance */
   .chatbot-messages {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     overscroll-behavior: contain;
   }
-  
+
   /* Better keyboard handling */
   .chatbot-input:focus {
     position: sticky;
     bottom: 0;
     z-index: 10;
   }
-  
+
   /* Optimize animations for battery */
   .chatbot-animation {
     will-change: transform, opacity;
   }
-  
+
   /* Handle device rotation */
   @media (orientation: landscape) {
     .chatbot-window-partial {
       height: 80% !important; /* Override height in landscape */
     }
   }
-  
+
   /* Dark mode optimization */
   @media (prefers-color-scheme: dark) {
     .chatbot-bubble {
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
   }
-  
+
   /* Haptic feedback visual cue */
   .haptic-feedback {
     animation: pulse 0.3s ease-out;
@@ -69,7 +69,7 @@
     padding-bottom: 0.25rem;
     max-height: calc(100% - 60px);
   }
-  
+
   /* Swipe to dismiss visual indicator */
   .swipe-indicator {
     height: 4px;
@@ -79,12 +79,11 @@
     margin: 0 auto;
     margin-top: 8px;
   }
-  
+
   /* Voice input feedback */
   .voice-active {
     animation: voice-pulse 1.5s infinite ease-in-out;
   }
-  
 }
 
 /* Custom scrollbar for mobile */

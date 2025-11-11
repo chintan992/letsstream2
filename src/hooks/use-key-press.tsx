@@ -1,9 +1,8 @@
-
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from "react";
 
 /**
  * A hook that executes a callback when a specific key is pressed
- * 
+ *
  * @param key - The key to listen for (e.g. "ArrowRight")
  * @param callback - The function to execute when the key is pressed
  * @param preventDefault - Whether to prevent the default action of the key
@@ -26,11 +25,11 @@ const useKeyPress = (
   );
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    
+    window.addEventListener("keydown", handleKeyDown);
+
     // Cleanup function
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
 };

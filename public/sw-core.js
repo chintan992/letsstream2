@@ -7,40 +7,40 @@ const initializeNetworkSimulation = self.initializeNetworkSimulation;
 const initializeAnalytics = self.initializeAnalytics;
 
 // Initialize all modules
-self.addEventListener('install', (event) => {
-  log('info', 'Service Worker installing');
+self.addEventListener("install", event => {
+  log("info", "Service Worker installing");
   event.waitUntil(
     Promise.all([
       initializeLogging(),
       initializePerformanceTracking(),
       initializeNetworkSimulation(),
       initializeAnalytics(),
-      caches.open('v1').then((cache) => {
+      caches.open("v1").then(cache => {
         return cache.addAll([
-          '/',
-          '/index.html',
-          '/offline.html',
-          '/favicon.ico'
+          "/",
+          "/index.html",
+          "/offline.html",
+          "/favicon.ico",
         ]);
-      })
+      }),
     ])
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  log('info', 'Service Worker activating');
+self.addEventListener("activate", event => {
+  log("info", "Service Worker activating");
   event.waitUntil(self.clients.claim());
 });
 
 // Message handling from debug panel
-self.addEventListener('message', (event) => {
+self.addEventListener("message", event => {
   const { type, payload } = event.data;
   switch (type) {
-    case 'SET_LOG_LEVEL':
+    case "SET_LOG_LEVEL":
       self.setLogLevel(payload.level);
       break;
-    case 'SET_NETWORK_CONDITIONS':
+    case "SET_NETWORK_CONDITIONS":
       self.setNetworkConditions(payload);
       break;
     default:

@@ -1,4 +1,4 @@
-export type Theme = 'dark' | 'light' | 'system';
+export type Theme = "dark" | "light" | "system";
 
 export interface ThemeContextType {
   theme: Theme;
@@ -6,22 +6,23 @@ export interface ThemeContextType {
 }
 
 export function getStoredTheme(): Theme {
-  const stored = localStorage.getItem('theme');
-  return (stored as Theme) || 'system';
+  const stored = localStorage.getItem("theme");
+  return (stored as Theme) || "system";
 }
 
 export function applyTheme(theme: Theme) {
   const root = window.document.documentElement;
-  root.classList.remove('light', 'dark');
+  root.classList.remove("light", "dark");
 
-  if (theme === 'system') {
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+  if (theme === "system") {
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+      .matches
+      ? "dark"
+      : "light";
     root.classList.add(systemTheme);
   } else {
     root.classList.add(theme);
   }
 
-  localStorage.setItem('theme', theme);
+  localStorage.setItem("theme", theme);
 }

@@ -1,4 +1,3 @@
-
 interface NetworkMetrics {
   successes: number;
   failures: number;
@@ -18,7 +17,7 @@ class ServiceWorkerMonitor {
   private networkMetrics = {
     successes: 0,
     failures: 0,
-    timeouts: 0
+    timeouts: 0,
   };
 
   private constructor() {
@@ -35,15 +34,15 @@ class ServiceWorkerMonitor {
 
   private initializeMonitoring() {
     // Only initialize in browser environment
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Listen for specific events
-      if ('addEventListener' in window) {
-        window.addEventListener('online', () => {
-          console.log('Network connection restored');
+      if ("addEventListener" in window) {
+        window.addEventListener("online", () => {
+          console.log("Network connection restored");
         });
-        
-        window.addEventListener('offline', () => {
-          console.error('Network connection lost');
+
+        window.addEventListener("offline", () => {
+          console.error("Network connection lost");
         });
       }
     }
@@ -79,7 +78,7 @@ class ServiceWorkerMonitor {
       const unregistered = await registration.unregister();
       return unregistered;
     } catch (error) {
-      console.error('Failed to unregister service worker:', error);
+      console.error("Failed to unregister service worker:", error);
       return false;
     }
   }
@@ -90,7 +89,7 @@ class ServiceWorkerMonitor {
       await registration.update();
       return true;
     } catch (error) {
-      console.error('Failed to update service worker:', error);
+      console.error("Failed to update service worker:", error);
       return false;
     }
   }
@@ -107,14 +106,14 @@ class ServiceWorkerMonitor {
 
   // Add the missing logAllMetrics method
   logAllMetrics(): void {
-    console.log('Service Worker Network Metrics:', this.networkMetrics);
+    console.log("Service Worker Network Metrics:", this.networkMetrics);
   }
 
   reset() {
     this.networkMetrics = {
       successes: 0,
       failures: 0,
-      timeouts: 0
+      timeouts: 0,
     };
   }
 }

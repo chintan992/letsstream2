@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { triggerHapticFeedback } from '@/utils/haptic-feedback';
-import { DownloadSection } from '@/components/DownloadSection';
+import React, { useState } from "react";
+import { triggerHapticFeedback } from "@/utils/haptic-feedback";
+import { DownloadSection } from "@/components/DownloadSection";
 
 interface TVDownloadSectionProps {
   tvShowName: string;
-  seasons: Array<{ season_number: number; name: string; episode_count: number }>;
-  episodesBySeason: Record<number, Array<{ episode_number: number; name: string }>>;
+  seasons: Array<{
+    season_number: number;
+    name: string;
+    episode_count: number;
+  }>;
+  episodesBySeason: Record<
+    number,
+    Array<{ episode_number: number; name: string }>
+  >;
 }
 
 export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
@@ -13,8 +20,12 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
   seasons,
   episodesBySeason,
 }) => {
-  const [selectedSeason, setSelectedSeason] = useState<number>(seasons[0]?.season_number || 1);
-  const [selectedEpisode, setSelectedEpisode] = useState<number>(episodesBySeason[selectedSeason]?.[0]?.episode_number || 1);
+  const [selectedSeason, setSelectedSeason] = useState<number>(
+    seasons[0]?.season_number || 1
+  );
+  const [selectedEpisode, setSelectedEpisode] = useState<number>(
+    episodesBySeason[selectedSeason]?.[0]?.episode_number || 1
+  );
 
   React.useEffect(() => {
     // When season changes, reset episode to first in that season
@@ -24,11 +35,11 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-4">
+      <div className="mb-4 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
         <div>
-          <label className="block text-white/80 text-sm mb-1">Season</label>
+          <label className="mb-1 block text-sm text-white/80">Season</label>
           <select
-            className="bg-[#23272f] border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded border border-white/10 bg-[#23272f] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent"
             value={selectedSeason}
             onChange={e => {
               triggerHapticFeedback(15);
@@ -43,9 +54,9 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
           </select>
         </div>
         <div>
-          <label className="block text-white/80 text-sm mb-1">Episode</label>
+          <label className="mb-1 block text-sm text-white/80">Episode</label>
           <select
-            className="bg-[#23272f] border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent"
+            className="rounded border border-white/10 bg-[#23272f] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent"
             value={selectedEpisode}
             onChange={e => {
               triggerHapticFeedback(15);
@@ -54,13 +65,19 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
           >
             {(episodesBySeason[selectedSeason] || []).map(ep => (
               <option key={ep.episode_number} value={ep.episode_number}>
-                {ep.name ? `${ep.episode_number}. ${ep.name}` : `Episode ${ep.episode_number}`}
+                {ep.name
+                  ? `${ep.episode_number}. ${ep.name}`
+                  : `Episode ${ep.episode_number}`}
               </option>
             ))}
           </select>
         </div>
       </div>
-      <DownloadSection mediaName={tvShowName} season={selectedSeason} episode={selectedEpisode} />
+      <DownloadSection
+        mediaName={tvShowName}
+        season={selectedSeason}
+        episode={selectedEpisode}
+      />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { ToastActionElement } from "@/components/ui/toast";
@@ -20,7 +19,9 @@ interface NotificationOptions {
 export function useNotifications() {
   const { toast } = useToast();
 
-  const getToastVariant = (variant: NotificationVariant): "default" | "destructive" => {
+  const getToastVariant = (
+    variant: NotificationVariant
+  ): "default" | "destructive" => {
     switch (variant) {
       case "error":
         return "destructive";
@@ -29,16 +30,22 @@ export function useNotifications() {
     }
   };
 
-  const notify = (variant: NotificationVariant, options: NotificationOptions) => {
+  const notify = (
+    variant: NotificationVariant,
+    options: NotificationOptions
+  ) => {
     const { title, description, duration = 5000, action } = options;
 
     let toastAction: ToastActionElement | undefined;
     if (action) {
       // Cast the Button component to ToastActionElement type to avoid TypeScript errors
       toastAction = (
-        <Button 
+        <Button
           onClick={action.onClick}
-          className={action.className || "bg-primary text-primary-foreground hover:bg-primary/90"}
+          className={
+            action.className ||
+            "hover:bg-primary/90 bg-primary text-primary-foreground"
+          }
           variant="secondary"
           aria-label={action.label}
         >
@@ -61,6 +68,7 @@ export function useNotifications() {
     error: (options: NotificationOptions) => notify("error", options),
     warning: (options: NotificationOptions) => notify("warning", options),
     info: (options: NotificationOptions) => notify("info", options),
-    custom: (variant: NotificationVariant, options: NotificationOptions) => notify(variant, options)
+    custom: (variant: NotificationVariant, options: NotificationOptions) =>
+      notify(variant, options),
   };
 }

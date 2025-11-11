@@ -8,11 +8,11 @@
  */
 export function triggerHapticFeedback(duration: number = 50): void {
   try {
-    if ('vibrate' in navigator) {
+    if ("vibrate" in navigator) {
       navigator.vibrate(duration);
     }
   } catch (error) {
-    console.error('Haptic feedback error:', error);
+    console.error("Haptic feedback error:", error);
   }
 }
 
@@ -22,11 +22,11 @@ export function triggerHapticFeedback(duration: number = 50): void {
  */
 export function triggerHapticPattern(pattern: number[] = [50, 50, 50]): void {
   try {
-    if ('vibrate' in navigator) {
+    if ("vibrate" in navigator) {
       navigator.vibrate(pattern);
     }
   } catch (error) {
-    console.error('Haptic feedback error:', error);
+    console.error("Haptic feedback error:", error);
   }
 }
 
@@ -49,11 +49,11 @@ export function triggerErrorHaptic(): void {
  */
 export function cancelHapticFeedback(): void {
   try {
-    if ('vibrate' in navigator) {
+    if ("vibrate" in navigator) {
       navigator.vibrate(0);
     }
   } catch (error) {
-    console.error('Error canceling haptic feedback:', error);
+    console.error("Error canceling haptic feedback:", error);
   }
 }
 
@@ -63,11 +63,13 @@ export function cancelHapticFeedback(): void {
  * @param callback - The function to call after haptic feedback
  * @returns A function that triggers haptic feedback and then calls the callback
  */
-export function withButtonHaptics<T extends (...args: any[]) => any>(callback?: T) {
+export function withButtonHaptics<T extends (...args: any[]) => any>(
+  callback?: T
+) {
   return (...args: Parameters<T>): ReturnType<T> | undefined => {
     // Standard button feedback (short and subtle)
     triggerHapticFeedback(15);
-    
+
     // Call the original callback if provided
     return callback?.(...args);
   };

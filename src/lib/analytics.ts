@@ -1,6 +1,6 @@
-import { getAnalytics, logEvent, setCurrentScreen } from 'firebase/analytics';
-import { getAnalyticsInstance } from './firebase';
-import { offlineQueue } from './analytics-offline';
+import { getAnalytics, logEvent, setCurrentScreen } from "firebase/analytics";
+import { getAnalyticsInstance } from "./firebase";
+import { offlineQueue } from "./analytics-offline";
 
 // Cache for analytics events to prevent duplicate submissions
 const analyticsCache = new Map<string, number>();
@@ -14,7 +14,7 @@ export type AnalyticsParams = {
   media_type?: string;
   media_id?: string;
   action?: string;
-  content_type?: 'movie' | 'tv';
+  content_type?: "movie" | "tv";
   item_id?: string;
   title?: string;
   duration?: number;
@@ -38,17 +38,17 @@ export const trackPageView = async (pageName: string) => {
     if (!analytics) return;
 
     setCurrentScreen(analytics, pageName);
-    await logEvent(analytics, 'page_view', {
+    await logEvent(analytics, "page_view", {
       page_title: pageName,
       page_location: window.location.href,
       page_path: window.location.pathname,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Failed to track page view:', error);
+    console.error("Failed to track page view:", error);
     // Queue for offline processing
     offlineQueue.addToQueue({
-      name: 'page_view',
+      name: "page_view",
       params: {
         page_title: pageName,
         page_location: window.location.href,
@@ -65,7 +65,13 @@ export const trackPageView = async (pageName: string) => {
  * @param {string} params.name - The name of the event to track
  * @param {AnalyticsParams} params.params - Additional parameters for the event
  */
-export const trackEvent = async ({ name, params = {} }: { name: string; params?: AnalyticsParams }) => {
+export const trackEvent = async ({
+  name,
+  params = {},
+}: {
+  name: string;
+  params?: AnalyticsParams;
+}) => {
   const cacheKey = `${name}-${JSON.stringify(params)}`;
   const now = Date.now();
   const lastTracked = analyticsCache.get(cacheKey);
@@ -78,7 +84,7 @@ export const trackEvent = async ({ name, params = {} }: { name: string; params?:
   try {
     const analytics = await getAnalyticsInstance();
     if (!analytics) {
-      throw new Error('Analytics not initialized');
+      throw new Error("Analytics not initialized");
     }
 
     analyticsCache.set(cacheKey, now);
@@ -87,7 +93,7 @@ export const trackEvent = async ({ name, params = {} }: { name: string; params?:
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Failed to track event:', error);
+    console.error("Failed to track event:", error);
     // Queue for offline processing
     offlineQueue.addToQueue({
       name,
@@ -113,13 +119,13 @@ export const trackMediaView = async ({
   title,
   duration,
 }: {
-  mediaType: 'movie' | 'tv';
+  mediaType: "movie" | "tv";
   mediaId: string;
   title: string;
   duration?: number;
 }) => {
   await trackEvent({
-    name: 'media_view',
+    name: "media_view",
     params: {
       content_type: mediaType,
       item_id: mediaId,
@@ -143,13 +149,13 @@ export const trackMediaComplete = async ({
   title,
   watchTime,
 }: {
-  mediaType: 'movie' | 'tv';
+  mediaType: "movie" | "tv";
   mediaId: string;
   title: string;
   watchTime: number;
 }) => {
   await trackEvent({
-    name: 'media_complete',
+    name: "media_complete",
     params: {
       content_type: mediaType,
       item_id: mediaId,
@@ -164,9 +170,12 @@ export const trackMediaComplete = async ({
  * @param {'movie' | 'tv'} mediaType - Type of media being interacted with
  * @param {'select' | 'browse' | 'favorite'} action - The type of interaction
  */
-export const trackMediaPreference = async (mediaType: 'movie' | 'tv', action: 'select' | 'browse' | 'favorite') => {
+export const trackMediaPreference = async (
+  mediaType: "movie" | "tv",
+  action: "select" | "browse" | "favorite"
+) => {
   await trackEvent({
-    name: 'media_preference',
+    name: "media_preference",
     params: {
       content_type: mediaType,
       action,
@@ -188,13 +197,13 @@ export const trackMediaEngagement = async ({
   action,
   additionalParams = {},
 }: {
-  mediaType: 'movie' | 'tv';
+  mediaType: "movie" | "tv";
   mediaId: string;
-  action: 'pause' | 'resume' | 'seek' | 'rate';
+  action: "pause" | "resume" | "seek" | "rate";
   additionalParams?: AnalyticsParams;
 }) => {
   await trackEvent({
-    name: 'media_engagement',
+    name: "media_engagement",
     params: {
       content_type: mediaType,
       item_id: mediaId,

@@ -3,6 +3,7 @@
 This guide covers different deployment options for Let's Stream V2.0.
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Environment Setup](#environment-setup)
 - [Deployment Options](#deployment-options)
@@ -13,6 +14,7 @@ This guide covers different deployment options for Let's Stream V2.0.
 ## Prerequisites
 
 Before deploying, ensure you have:
+
 1. A GitHub account
 2. Firebase account and project set up
 3. All environment variables ready
@@ -21,6 +23,7 @@ Before deploying, ensure you have:
 ## Environment Setup
 
 Create a `.env` file with the following variables:
+
 ```env
 VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=

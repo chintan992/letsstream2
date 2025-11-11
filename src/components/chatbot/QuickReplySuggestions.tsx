@@ -1,6 +1,6 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface QuickReplySuggestionsProps {
   suggestions: string[];
@@ -11,18 +11,21 @@ interface QuickReplySuggestionsProps {
 const QuickReplySuggestions: React.FC<QuickReplySuggestionsProps> = ({
   suggestions,
   onSelectSuggestion,
-  className
+  className,
 }) => {
   if (!suggestions.length) return null;
 
   return (
-    <div className={cn("flex overflow-x-auto py-2 px-1 scrollbar-hide snap-x gap-2", className)}>
+    <div
+      className={cn(
+        "scrollbar-hide flex snap-x gap-2 overflow-x-auto px-1 py-2",
+        className
+      )}
+    >
       {suggestions.map((suggestion, index) => (
         <motion.button
           key={suggestion}
-          className="bg-muted/50 hover:bg-muted text-sm px-3 py-1.5 rounded-full whitespace-nowrap 
-                     text-muted-foreground border border-border/20 snap-start flex-shrink-0
-                     active:scale-95 transition-all duration-200"
+          className="bg-muted/50 border-border/20 flex-shrink-0 snap-start whitespace-nowrap rounded-full border px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-muted active:scale-95"
           onClick={() => onSelectSuggestion(suggestion)}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

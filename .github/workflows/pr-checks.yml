@@ -2,9 +2,9 @@ name: Pull Request Checks
 
 on:
   pull_request:
-    branches: [ main, master, development ]
+    branches: [main, master, development]
   merge_group:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   quality:
@@ -14,46 +14,46 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['20.x']
+        node-version: ["20.x"]
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Setup dependency cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Check for vulnerabilities
-      run: npm audit
-      continue-on-error: true
-    
-    - name: Type check
-      run: npm run tsc
-    
-    - name: Lint
-      run: npm run lint
+      - uses: actions/checkout@v4
 
-    - name: Check formatting
-      run: npm run format:check || true
-    
-    - name: Build
-      run: npm run build
-      env:
-        CI: true
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Setup dependency cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for vulnerabilities
+        run: npm audit
+        continue-on-error: true
+
+      - name: Type check
+        run: npm run tsc
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check || true
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
 
   test:
     name: Tests
@@ -62,33 +62,33 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['20.x']
+        node-version: ["20.x"]
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run tests with coverage
-      run: npm run test:coverage || true
-      env:
-        CI: true
+      - uses: actions/checkout@v4
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-report
-        path: coverage/
-        retention-days: 30
-        if-no-files-found: ignore
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage || true
+        env:
+          CI: true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+          if-no-files-found: ignore
 
   size:
     name: Bundle Size
@@ -96,31 +96,31 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.19'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Build
-      run: npm run build
-      env:
-        CI: true
-    
-    - name: Check bundle size
-      run: |
-        npm install -g source-map-explorer
-        source-map-explorer 'dist/**/*.js' --json bundle-size.json || true
-    
-    - name: Upload bundle analysis
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: bundle-analysis
-        path: bundle-size.json
-        retention-days: 7
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
+
+      - name: Check bundle size
+        run: |
+          npm install -g source-map-explorer
+          source-map-explorer 'dist/**/*.js' --json bundle-size.json || true
+
+      - name: Upload bundle analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-analysis
+          path: bundle-size.json
+          retention-days: 7

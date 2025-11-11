@@ -1,43 +1,43 @@
-import { useState, useEffect, useCallback, ReactNode } from 'react';
-import { trackEvent } from '@/lib/analytics';
-import { useAuth } from '@/hooks';
-import { useUserPreferences } from '@/hooks/user-preferences';
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDocs, 
-  deleteDoc, 
-  query, 
-  where, 
-  deleteField, 
-  limit, 
-  orderBy, 
-  startAfter, 
+import { useState, useEffect, useCallback, ReactNode } from "react";
+import { trackEvent } from "@/lib/analytics";
+import { useAuth } from "@/hooks";
+import { useUserPreferences } from "@/hooks/user-preferences";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  deleteDoc,
+  query,
+  where,
+  deleteField,
+  limit,
+  orderBy,
+  startAfter,
   writeBatch,
   QueryDocumentSnapshot,
-  DocumentData
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { generateId } from '@/utils/supabase';
-import { Media } from '@/utils/types';
-import { useToast } from '@/components/ui/use-toast';
-import { 
+  DocumentData,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { generateId } from "@/utils/supabase";
+import { Media } from "@/utils/types";
+import { useToast } from "@/components/ui/use-toast";
+import {
   WatchHistoryContext,
   WatchHistoryItem,
   FavoriteItem,
   WatchlistItem,
   MediaBaseItem,
-  WatchHistoryContextType 
-} from './types/watch-history';
-import { RateLimiter } from '@/utils/rate-limiter';
-import { 
-  deduplicateWatchHistory, 
+  WatchHistoryContextType,
+} from "./types/watch-history";
+import { RateLimiter } from "@/utils/rate-limiter";
+import {
+  deduplicateWatchHistory,
   filterWatchHistoryDuplicates,
-  isSignificantProgress 
-} from '@/utils/watch-history-utils';
+  isSignificantProgress,
+} from "@/utils/watch-history-utils";
 
-const LOCAL_STORAGE_HISTORY_KEY = 'fdf_watch_history';
+const LOCAL_STORAGE_HISTORY_KEY = "fdf_watch_history";
 const ITEMS_PER_PAGE = 20;
 const MAX_LOCAL_HISTORY = 50;
 const DEBOUNCE_WINDOW = 300000; // 5 minutes
@@ -45,8 +45,6 @@ const SIGNIFICANT_PROGRESS = 60; // 60 seconds
 const MINIMUM_UPDATE_INTERVAL = 30000; // 30 seconds
 const lastUpdateTimestamps = new Map<string, number>();
 const pendingOperations: Array<() => Promise<void>> = [];
-
-
 
 const readRateLimiter = RateLimiter.getInstance(200, 300000);
 const writeRateLimiter = RateLimiter.getInstance(100, 300000);
@@ -63,7 +61,7 @@ const processPendingOperations = async () => {
       try {
         await operation();
       } catch (error) {
-        console.error('Error processing pending operation:', error);
+        console.error("Error processing pending operation:", error);
         pendingOperations.push(operation);
         break;
       }
@@ -76,16 +74,20 @@ interface QueuedUpdate {
   updatedItemData: Partial<WatchHistoryItem>;
 }
 
-const watchPositionQueue = new Map<string, {
-  data: QueuedUpdate,
-  timestamp: number
-}>();
+const watchPositionQueue = new Map<
+  string,
+  {
+    data: QueuedUpdate;
+    timestamp: number;
+  }
+>();
 
 export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { userPreferences } = useUserPreferences();
   const [watchHistory, setWatchHistory] = useState<WatchHistoryItem[]>([]);
-  const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [lastVisible, setLastVisible] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
@@ -107,7 +109,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
         const canExecute = await writeRateLimiter.canExecute();
         if (!canExecute) {
-          console.log('Write rate limit exceeded. Remaining updates will be processed later.');
+          console.log(
+            "Write rate limit exceeded. Remaining updates will be processed later."
+          );
           break;
         }
 
@@ -128,35 +132,38 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
       processedKeys.forEach(key => watchPositionQueue.delete(key));
     } catch (error) {
-      console.error('Error processing watch position queue:', error);
+      console.error("Error processing watch position queue:", error);
     }
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(processWatchPositionQueue, MINIMUM_UPDATE_INTERVAL);
+    const interval = setInterval(
+      processWatchPositionQueue,
+      MINIMUM_UPDATE_INTERVAL
+    );
     return () => clearInterval(interval);
   }, [processWatchPositionQueue]);
 
   useEffect(() => {
     const handleOnline = async () => {
-      console.log('Back online, processing pending operations...');
+      console.log("Back online, processing pending operations...");
       await processPendingOperations();
     };
 
     const handleOffline = () => {
-      console.log('Went offline, operations will be queued');
+      console.log("Went offline, operations will be queued");
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     if (navigator.onLine) {
       processPendingOperations();
     }
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -167,7 +174,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       const history = JSON.parse(storedHistory);
       return history.slice(0, MAX_LOCAL_HISTORY);
     } catch (error) {
-      console.error('Error loading local watch history:', error);
+      console.error("Error loading local watch history:", error);
       return [];
     }
   }, []);
@@ -175,57 +182,21 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const saveLocalWatchHistory = useCallback((history: WatchHistoryItem[]) => {
     try {
       const recentHistory = history.slice(0, MAX_LOCAL_HISTORY);
-      localStorage.setItem(LOCAL_STORAGE_HISTORY_KEY, JSON.stringify(recentHistory));
+      localStorage.setItem(
+        LOCAL_STORAGE_HISTORY_KEY,
+        JSON.stringify(recentHistory)
+      );
     } catch (error) {
-      console.error('Error saving local watch history:', error);
+      console.error("Error saving local watch history:", error);
     }
   }, []);
 
-  const fetchWatchHistory = useCallback(async (isInitial: boolean = false) => {
-    if (!user) {
-      const localHistory = loadLocalWatchHistory();
-      const deduplicatedHistory = deduplicateWatchHistory(localHistory);
-      setWatchHistory(deduplicatedHistory);
-      setHasMore(false);
-      if (isInitial) {
-        setInitialFetchDone(true);
-      }
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const historyRef = collection(db, 'watchHistory');
-      let historyQuery;
-
-      if (isInitial) {
-        historyQuery = query(
-          historyRef,
-          where('user_id', '==', user.uid),
-          orderBy('created_at', 'desc'),
-          limit(ITEMS_PER_PAGE)
-        );
-      } else if (lastVisible) {
-        historyQuery = query(
-          historyRef,
-          where('user_id', '==', user.uid),
-          orderBy('created_at', 'desc'),
-          startAfter(lastVisible),
-          limit(ITEMS_PER_PAGE)
-        );
-      } else {
-        return;
-      }
-
-      const canExecute = await readRateLimiter.canExecute();
-      if (!canExecute) {
-        console.log('Read rate limit exceeded. Skipping Firestore fetch.');
-        return;
-      }
-
-      const historySnapshot = await getDocs(historyQuery);
-      
-      if (historySnapshot.empty) {
+  const fetchWatchHistory = useCallback(
+    async (isInitial: boolean = false) => {
+      if (!user) {
+        const localHistory = loadLocalWatchHistory();
+        const deduplicatedHistory = deduplicateWatchHistory(localHistory);
+        setWatchHistory(deduplicatedHistory);
         setHasMore(false);
         if (isInitial) {
           setInitialFetchDone(true);
@@ -233,97 +204,145 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setLastVisible(historySnapshot.docs[historySnapshot.docs.length - 1] as QueryDocumentSnapshot<DocumentData>);
-      
-      const historyData = historySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data() as Omit<WatchHistoryItem, 'id'>,
-        created_at: (doc.data() as { created_at?: string })?.created_at || new Date().toISOString()
-      }));
+      try {
+        setIsLoading(true);
+        const historyRef = collection(db, "watchHistory");
+        let historyQuery;
 
-      if (isInitial) {
-        const deduplicatedHistory = deduplicateWatchHistory(historyData);
-        setWatchHistory(deduplicatedHistory);
-      } else {
-        const combinedHistory = [...watchHistory, ...historyData];
-        const deduplicatedHistory = deduplicateWatchHistory(combinedHistory);
-        setWatchHistory(deduplicatedHistory);
-      }
+        if (isInitial) {
+          historyQuery = query(
+            historyRef,
+            where("user_id", "==", user.uid),
+            orderBy("created_at", "desc"),
+            limit(ITEMS_PER_PAGE)
+          );
+        } else if (lastVisible) {
+          historyQuery = query(
+            historyRef,
+            where("user_id", "==", user.uid),
+            orderBy("created_at", "desc"),
+            startAfter(lastVisible),
+            limit(ITEMS_PER_PAGE)
+          );
+        } else {
+          return;
+        }
 
-      setHasMore(historySnapshot.docs.length === ITEMS_PER_PAGE);
-      if (isInitial) {
-        setInitialFetchDone(true);
+        const canExecute = await readRateLimiter.canExecute();
+        if (!canExecute) {
+          console.log("Read rate limit exceeded. Skipping Firestore fetch.");
+          return;
+        }
+
+        const historySnapshot = await getDocs(historyQuery);
+
+        if (historySnapshot.empty) {
+          setHasMore(false);
+          if (isInitial) {
+            setInitialFetchDone(true);
+          }
+          return;
+        }
+
+        setLastVisible(
+          historySnapshot.docs[
+            historySnapshot.docs.length - 1
+          ] as QueryDocumentSnapshot<DocumentData>
+        );
+
+        const historyData = historySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...(doc.data() as Omit<WatchHistoryItem, "id">),
+          created_at:
+            (doc.data() as { created_at?: string })?.created_at ||
+            new Date().toISOString(),
+        }));
+
+        if (isInitial) {
+          const deduplicatedHistory = deduplicateWatchHistory(historyData);
+          setWatchHistory(deduplicatedHistory);
+        } else {
+          const combinedHistory = [...watchHistory, ...historyData];
+          const deduplicatedHistory = deduplicateWatchHistory(combinedHistory);
+          setWatchHistory(deduplicatedHistory);
+        }
+
+        setHasMore(historySnapshot.docs.length === ITEMS_PER_PAGE);
+        if (isInitial) {
+          setInitialFetchDone(true);
+        }
+      } catch (error) {
+        console.error("Error fetching watch history:", error);
+        toast({
+          title: "Error loading watch history",
+          description: "There was a problem loading your watch history.",
+          variant: "destructive",
+        });
+        if (isInitial) {
+          setInitialFetchDone(true);
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching watch history:', error);
-      toast({
-        title: "Error loading watch history",
-        description: "There was a problem loading your watch history.",
-        variant: "destructive"
-      });
-      if (isInitial) {
-        setInitialFetchDone(true);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, lastVisible, loadLocalWatchHistory, watchHistory, toast]);
+    },
+    [user, lastVisible, loadLocalWatchHistory, watchHistory, toast]
+  );
 
   const fetchFavorites = useCallback(async () => {
     if (!user) return;
-    
+
     try {
-      const favoritesRef = collection(db, 'favorites');
+      const favoritesRef = collection(db, "favorites");
       const favoritesQuery = query(
         favoritesRef,
-        where('user_id', '==', user.uid),
-        orderBy('added_at', 'desc')
+        where("user_id", "==", user.uid),
+        orderBy("added_at", "desc")
       );
-      
+
       const canExecute = await readRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Read rate limit exceeded. Skipping Firestore fetch.');
+        console.log("Read rate limit exceeded. Skipping Firestore fetch.");
         return;
       }
 
       const snapshot = await getDocs(favoritesQuery);
       const favoritesData = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as FavoriteItem[];
-      
+
       setFavorites(favoritesData);
     } catch (error) {
-      console.error('Error fetching favorites:', error);
+      console.error("Error fetching favorites:", error);
     }
   }, [user]);
 
   const fetchWatchlist = useCallback(async () => {
     if (!user) return;
-    
+
     try {
-      const watchlistRef = collection(db, 'watchlist');
+      const watchlistRef = collection(db, "watchlist");
       const watchlistQuery = query(
         watchlistRef,
-        where('user_id', '==', user.uid),
-        orderBy('added_at', 'desc')
+        where("user_id", "==", user.uid),
+        orderBy("added_at", "desc")
       );
-      
+
       const canExecute = await readRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Read rate limit exceeded. Skipping Firestore fetch.');
+        console.log("Read rate limit exceeded. Skipping Firestore fetch.");
         return;
       }
 
       const snapshot = await getDocs(watchlistQuery);
       const watchlistData = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as WatchlistItem[];
-      
+
       setWatchlist(watchlistData);
     } catch (error) {
-      console.error('Error fetching watchlist:', error);
+      console.error("Error fetching watchlist:", error);
     }
   }, [user]);
   useEffect(() => {
@@ -334,10 +353,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           await Promise.all([
             fetchWatchHistory(true),
             fetchFavorites(),
-            fetchWatchlist()
+            fetchWatchlist(),
           ]);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error("Error fetching data:", error);
         } finally {
           setIsLoading(false);
         }
@@ -350,75 +369,84 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     };
 
     fetchAllData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, initialFetchDone]); // Remove function dependencies to prevent infinite loop
 
   useEffect(() => {
     const migrateWatchHistory = async () => {
       if (!user) return;
-      
+
       try {
-        const historyRef = collection(db, 'watchHistory');
-        const historyQuery = query(historyRef, where('user_id', '==', user.uid));
-        
+        const historyRef = collection(db, "watchHistory");
+        const historyQuery = query(
+          historyRef,
+          where("user_id", "==", user.uid)
+        );
+
         const canExecute = await readRateLimiter.canExecute();
         if (!canExecute) {
-          console.log('Read rate limit exceeded. Skipping Firestore migration.');
+          console.log(
+            "Read rate limit exceeded. Skipping Firestore migration."
+          );
           return;
         }
-        
+
         const historySnapshot = await getDocs(historyQuery);
-        
-        const migrationPromises = historySnapshot.docs.map(async (doc) => {
+
+        const migrationPromises = historySnapshot.docs.map(async doc => {
           const data = doc.data();
-          if ('last_watched' in data) {
-            await setDoc(doc.ref, { last_watched: deleteField() }, { merge: true });
+          if ("last_watched" in data) {
+            await setDoc(
+              doc.ref,
+              { last_watched: deleteField() },
+              { merge: true }
+            );
           }
         });
-        
+
         await Promise.all(migrationPromises);
       } catch (error) {
-        console.error('Error migrating watch history:', error);
+        console.error("Error migrating watch history:", error);
       }
     };
-    
+
     if (user && initialFetchDone) {
       migrateWatchHistory();
     }
   }, [user, initialFetchDone]);
   const addToWatchHistory = async (
-    media: Media, 
-    position: number, 
-    duration: number, 
-    season?: number, 
+    media: Media,
+    position: number,
+    duration: number,
+    season?: number,
     episode?: number,
     preferredSource?: string
   ) => {
     if (!user) {
-      console.warn('Cannot add to watch history: User not authenticated');
+      console.warn("Cannot add to watch history: User not authenticated");
       toast({
         title: "Authentication required",
         description: "Please log in to track your watch history.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
+
     if (!userPreferences?.isWatchHistoryEnabled) {
-      console.log('Watch history is disabled in user preferences');
+      console.log("Watch history is disabled in user preferences");
       return;
     }
 
     // Verify authentication state is valid
     if (!user.uid) {
-      console.error('Invalid authentication state: missing user ID');
+      console.error("Invalid authentication state: missing user ID");
       return;
     }
 
     const mediaType = media.media_type;
     const mediaId = media.id;
-    const title = media.title || media.name || '';
-    const mediaKey = `${mediaId}-${mediaType}-${season || ''}-${episode || ''}`;
+    const title = media.title || media.name || "";
+    const mediaKey = `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
     const now = Date.now();
     const lastUpdate = lastUpdateTimestamps.get(mediaKey) || 0;
 
@@ -437,27 +465,34 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       watch_position: position,
       duration,
       created_at: new Date().toISOString(),
-      preferred_source: preferredSource || '',
-      ...(typeof season === 'number' ? { season } : {}),
-      ...(typeof episode === 'number' ? { episode } : {})
+      preferred_source: preferredSource || "",
+      ...(typeof season === "number" ? { season } : {}),
+      ...(typeof episode === "number" ? { episode } : {}),
     };
 
-    const { items: updatedHistory, existingItem } = filterWatchHistoryDuplicates(watchHistory, newItem);
-    
+    const { items: updatedHistory, existingItem } =
+      filterWatchHistoryDuplicates(watchHistory, newItem);
+
     if (existingItem && position > 0) {
-      if (!isSignificantProgress(existingItem.watch_position, position, SIGNIFICANT_PROGRESS)) {
+      if (
+        !isSignificantProgress(
+          existingItem.watch_position,
+          position,
+          SIGNIFICANT_PROGRESS
+        )
+      ) {
         return;
       }
     }
-    
+
     setWatchHistory(updatedHistory);
     saveLocalWatchHistory(updatedHistory);
     lastUpdateTimestamps.set(mediaKey, now);
 
     if (!navigator.onLine) {
-      console.log('Queueing watch history update for later');
+      console.log("Queueing watch history update for later");
       queueOperation(async () => {
-        const historyRef = doc(db, 'watchHistory', newItem.id);
+        const historyRef = doc(db, "watchHistory", newItem.id);
         await setDoc(historyRef, newItem);
       });
       return;
@@ -465,9 +500,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
     const canExecute = await writeRateLimiter.canExecute();
     if (!canExecute) {
-      console.log('Write rate limit exceeded. Queueing update for later');
+      console.log("Write rate limit exceeded. Queueing update for later");
       queueOperation(async () => {
-        const historyRef = doc(db, 'watchHistory', newItem.id);
+        const historyRef = doc(db, "watchHistory", newItem.id);
         await setDoc(historyRef, newItem);
       });
       return;
@@ -475,32 +510,32 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
     try {
       if (existingItem) {
-        const existingRef = doc(db, 'watchHistory', existingItem.id);
+        const existingRef = doc(db, "watchHistory", existingItem.id);
         await deleteDoc(existingRef);
       }
-      
-      const historyRef = doc(db, 'watchHistory', newItem.id);
+
+      const historyRef = doc(db, "watchHistory", newItem.id);
       await setDoc(historyRef, newItem);
     } catch (error) {
-      console.error('Error adding to watch history:', error);
+      console.error("Error adding to watch history:", error);
       queueOperation(async () => {
-        const historyRef = doc(db, 'watchHistory', newItem.id);
+        const historyRef = doc(db, "watchHistory", newItem.id);
         await setDoc(historyRef, newItem);
       });
     }
   };
 
   const updateWatchPosition = async (
-    mediaId: number, 
-    mediaType: 'movie' | 'tv', 
-    position: number, 
-    season?: number, 
+    mediaId: number,
+    mediaType: "movie" | "tv",
+    position: number,
+    season?: number,
     episode?: number,
     preferredSource?: string
   ) => {
     if (!user) return;
 
-    const mediaKey = `${mediaId}-${mediaType}-${season || ''}-${episode || ''}`;
+    const mediaKey = `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
     const now = Date.now();
     const lastUpdate = lastUpdateTimestamps.get(mediaKey) || 0;
 
@@ -513,24 +548,25 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     const updatedItemData = {
       watch_position: position,
       created_at: new Date().toISOString(),
-      ...(typeof season === 'number' ? { season } : {}),
-      ...(typeof episode === 'number' ? { episode } : {}),
-      ...(preferredSource ? { preferred_source: preferredSource } : {})
+      ...(typeof season === "number" ? { season } : {}),
+      ...(typeof episode === "number" ? { episode } : {}),
+      ...(preferredSource ? { preferred_source: preferredSource } : {}),
     };
-    
+
     try {
-      const existingItem = watchHistory.find(item => 
-        item.media_id === mediaId && 
-        item.media_type === mediaType &&
-        item.season === season &&
-        item.episode === episode
+      const existingItem = watchHistory.find(
+        item =>
+          item.media_id === mediaId &&
+          item.media_type === mediaType &&
+          item.season === season &&
+          item.episode === episode
       );
 
       const canExecute = await writeRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Write rate limit exceeded. Skipping Firestore update.');
+        console.log("Write rate limit exceeded. Skipping Firestore update.");
         if (existingItem) {
-          const updatedHistory = watchHistory.map(h => 
+          const updatedHistory = watchHistory.map(h =>
             h.id === existingItem.id ? { ...h, ...updatedItemData } : h
           );
           setWatchHistory(updatedHistory);
@@ -540,173 +576,182 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       }
 
       if (existingItem) {
-        const progressDifference = Math.abs(existingItem.watch_position - position);
+        const progressDifference = Math.abs(
+          existingItem.watch_position - position
+        );
         if (progressDifference < SIGNIFICANT_PROGRESS) {
           return;
         }
 
-        const historyRef = doc(db, 'watchHistory', existingItem.id);
-        watchPositionQueue.set(mediaKey, { data: { historyRef, updatedItemData }, timestamp: now });
+        const historyRef = doc(db, "watchHistory", existingItem.id);
+        watchPositionQueue.set(mediaKey, {
+          data: { historyRef, updatedItemData },
+          timestamp: now,
+        });
 
-        const updatedHistory = watchHistory.map(h => 
+        const updatedHistory = watchHistory.map(h =>
           h.id === existingItem.id ? { ...h, ...updatedItemData } : h
         );
         setWatchHistory(updatedHistory);
         saveLocalWatchHistory(updatedHistory);
       }
     } catch (error) {
-      console.error('Error updating watch position:', error);
+      console.error("Error updating watch position:", error);
       toast({
         title: "Error updating progress",
         description: "There was a problem updating your watch progress.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
-  
+
   const clearWatchHistory = async () => {
     if (!user) return;
-    
+
     if (!navigator.onLine) {
       setWatchHistory([]);
       saveLocalWatchHistory([]);
       toast({
         title: "Watch history cleared",
-        description: "Your watch history has been successfully cleared."
+        description: "Your watch history has been successfully cleared.",
       });
       return;
     }
 
     try {
-      const historyRef = collection(db, 'watchHistory');
-      const historyQuery = query(historyRef, where('user_id', '==', user.uid));
+      const historyRef = collection(db, "watchHistory");
+      const historyQuery = query(historyRef, where("user_id", "==", user.uid));
       const historySnapshot = await getDocs(historyQuery);
-      
+
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Skipping Firestore delete.');
+        console.log("Delete rate limit exceeded. Skipping Firestore delete.");
         return;
       }
 
-      const deletePromises = historySnapshot.docs.map(doc => 
+      const deletePromises = historySnapshot.docs.map(doc =>
         deleteDoc(doc.ref)
       );
-      
+
       await Promise.all(deletePromises);
       setWatchHistory([]);
       saveLocalWatchHistory([]);
-      
+
       toast({
         title: "Watch history cleared",
-        description: "Your watch history has been successfully cleared."
+        description: "Your watch history has been successfully cleared.",
       });
     } catch (error) {
-      console.error('Error clearing watch history:', error);
+      console.error("Error clearing watch history:", error);
       toast({
         title: "Error clearing history",
         description: "There was a problem clearing your watch history.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const deleteWatchHistoryItem = async (id: string) => {
     if (!user) return;
-    
+
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Skipping Firestore delete.');
+        console.log("Delete rate limit exceeded. Skipping Firestore delete.");
         return;
       }
 
-      const historyRef = doc(db, 'watchHistory', id);
+      const historyRef = doc(db, "watchHistory", id);
       await deleteDoc(historyRef);
-      
+
       const updatedHistory = watchHistory.filter(item => item.id !== id);
       setWatchHistory(updatedHistory);
       saveLocalWatchHistory(updatedHistory);
-      
+
       toast({
         title: "Item removed",
-        description: "The item has been removed from your watch history."
+        description: "The item has been removed from your watch history.",
       });
     } catch (error) {
-      console.error('Error deleting watch history item:', error);
+      console.error("Error deleting watch history item:", error);
       toast({
         title: "Error removing item",
         description: "There was a problem removing the item from your history.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const deleteSelectedWatchHistory = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
-    
+
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Please try again later.');
+        console.log("Delete rate limit exceeded. Please try again later.");
         toast({
           title: "Rate limit exceeded",
-          description: "Too many operations in a short time. Please try again later.",
-          variant: "destructive"
+          description:
+            "Too many operations in a short time. Please try again later.",
+          variant: "destructive",
         });
         return;
       }
 
       const batch = writeBatch(db);
       ids.forEach(id => {
-        const historyRef = doc(db, 'watchHistory', id);
+        const historyRef = doc(db, "watchHistory", id);
         batch.delete(historyRef);
       });
-      
+
       await batch.commit();
-      
-      const updatedHistory = watchHistory.filter(item => !ids.includes(item.id));
+
+      const updatedHistory = watchHistory.filter(
+        item => !ids.includes(item.id)
+      );
       setWatchHistory(updatedHistory);
       saveLocalWatchHistory(updatedHistory);
-      
+
       toast({
         title: "Items removed",
-        description: `${ids.length} ${ids.length === 1 ? 'item has' : 'items have'} been removed from your watch history.`
+        description: `${ids.length} ${ids.length === 1 ? "item has" : "items have"} been removed from your watch history.`,
       });
     } catch (error) {
-      console.error('Error deleting watch history items:', error);
+      console.error("Error deleting watch history items:", error);
       toast({
         title: "Error removing items",
-        description: "There was a problem removing the items from your history.",
-        variant: "destructive"
+        description:
+          "There was a problem removing the items from your history.",
+        variant: "destructive",
       });
     }
   };
-
 
   // Import at top: import { trackEvent } from '@/lib/analytics';
 
   const addToFavorites = async (item: MediaBaseItem) => {
     if (!user) {
-      console.log('Cannot add to favorites: User not authenticated');
+      console.log("Cannot add to favorites: User not authenticated");
       toast({
         title: "Authentication required",
         description: "Please log in to add items to your favorites.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
+
     try {
-      console.log('Adding to favorites:', item);
-      const existingItem = favorites.find(fav => 
-        fav.media_id === item.media_id && fav.media_type === item.media_type
+      console.log("Adding to favorites:", item);
+      const existingItem = favorites.find(
+        fav =>
+          fav.media_id === item.media_id && fav.media_type === item.media_type
       );
-      
+
       if (existingItem) {
-        console.log('Item already in favorites:', existingItem);
+        console.log("Item already in favorites:", existingItem);
         return;
       }
-      
+
       const newItem: FavoriteItem = {
         id: generateId(),
         user_id: user.uid,
@@ -717,20 +762,20 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         backdrop_path: item.backdrop_path,
         overview: item.overview,
         rating: item.rating,
-        added_at: new Date().toISOString()
+        added_at: new Date().toISOString(),
       };
-      
-      console.log('Saving favorite to Firestore:', newItem);
-      const favoriteRef = doc(db, 'favorites', newItem.id);
+
+      console.log("Saving favorite to Firestore:", newItem);
+      const favoriteRef = doc(db, "favorites", newItem.id);
       await setDoc(favoriteRef, newItem);
-      
-      console.log('Favorite saved successfully');
+
+      console.log("Favorite saved successfully");
       const updatedFavorites = [newItem, ...favorites];
       setFavorites(updatedFavorites);
 
       // Analytics event
       trackEvent({
-        name: 'favorites_add',
+        name: "favorites_add",
         params: {
           media_type: item.media_type,
           media_id: String(item.media_id),
@@ -740,30 +785,36 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Added to favorites",
-        description: `${item.title} has been added to your favorites.`
+        description: `${item.title} has been added to your favorites.`,
       });
     } catch (error) {
-      console.error('Error adding to favorites:', error);
+      console.error("Error adding to favorites:", error);
       toast({
         title: "Error adding to favorites",
-        description: error instanceof Error ? error.message : "There was a problem adding to your favorites.",
-        variant: "destructive"
+        description:
+          error instanceof Error
+            ? error.message
+            : "There was a problem adding to your favorites.",
+        variant: "destructive",
       });
     }
   };
 
-  const removeFromFavorites = async (mediaId: number, mediaType: 'movie' | 'tv') => {
+  const removeFromFavorites = async (
+    mediaId: number,
+    mediaType: "movie" | "tv"
+  ) => {
     if (!user) return;
-    
+
     try {
       const itemToRemove = favorites.find(
         item => item.media_id === mediaId && item.media_type === mediaType
       );
 
       if (itemToRemove) {
-        const favoriteRef = doc(db, 'favorites', itemToRemove.id);
+        const favoriteRef = doc(db, "favorites", itemToRemove.id);
         await deleteDoc(favoriteRef);
-        
+
         const updatedFavorites = favorites.filter(
           item => !(item.media_id === mediaId && item.media_type === mediaType)
         );
@@ -771,118 +822,128 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       }
       // Analytics event
       trackEvent({
-        name: 'favorites_remove',
+        name: "favorites_remove",
         params: {
           media_type: mediaType,
           media_id: String(mediaId),
         },
       });
     } catch (error) {
-      console.error('Error removing from favorites:', error);
+      console.error("Error removing from favorites:", error);
       toast({
         title: "Error removing from favorites",
         description: "There was a problem removing from your favorites.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  const isInFavorites = (mediaId: number, mediaType: 'movie' | 'tv'): boolean => {
-    return favorites.some(item => item.media_id === mediaId && item.media_type === mediaType);
+  const isInFavorites = (
+    mediaId: number,
+    mediaType: "movie" | "tv"
+  ): boolean => {
+    return favorites.some(
+      item => item.media_id === mediaId && item.media_type === mediaType
+    );
   };
 
   const deleteFavoriteItem = async (id: string) => {
     if (!user) return;
-    
+
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Skipping Firestore delete.');
+        console.log("Delete rate limit exceeded. Skipping Firestore delete.");
         return;
       }
 
-      const favoriteRef = doc(db, 'favorites', id);
+      const favoriteRef = doc(db, "favorites", id);
       await deleteDoc(favoriteRef);
-      
+
       const updatedFavorites = favorites.filter(item => item.id !== id);
       setFavorites(updatedFavorites);
-      
+
       toast({
         title: "Item removed",
-        description: "The item has been removed from your favorites."
+        description: "The item has been removed from your favorites.",
       });
     } catch (error) {
-      console.error('Error deleting favorite item:', error);
+      console.error("Error deleting favorite item:", error);
       toast({
         title: "Error removing item",
-        description: "There was a problem removing the item from your favorites.",
-        variant: "destructive"
+        description:
+          "There was a problem removing the item from your favorites.",
+        variant: "destructive",
       });
     }
   };
 
   const deleteSelectedFavorites = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
-    
+
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Please try again later.');
+        console.log("Delete rate limit exceeded. Please try again later.");
         toast({
           title: "Rate limit exceeded",
-          description: "Too many operations in a short time. Please try again later.",
-          variant: "destructive"
+          description:
+            "Too many operations in a short time. Please try again later.",
+          variant: "destructive",
         });
         return;
       }
 
       const batch = writeBatch(db);
       ids.forEach(id => {
-        const favoriteRef = doc(db, 'favorites', id);
+        const favoriteRef = doc(db, "favorites", id);
         batch.delete(favoriteRef);
       });
-      
+
       await batch.commit();
-      
+
       const updatedFavorites = favorites.filter(item => !ids.includes(item.id));
       setFavorites(updatedFavorites);
-      
+
       toast({
         title: "Items removed",
-        description: `${ids.length} ${ids.length === 1 ? 'item has' : 'items have'} been removed from your favorites.`
+        description: `${ids.length} ${ids.length === 1 ? "item has" : "items have"} been removed from your favorites.`,
       });
     } catch (error) {
-      console.error('Error deleting favorite items:', error);
+      console.error("Error deleting favorite items:", error);
       toast({
         title: "Error removing items",
-        description: "There was a problem removing the items from your favorites.",
-        variant: "destructive"
+        description:
+          "There was a problem removing the items from your favorites.",
+        variant: "destructive",
       });
     }
   };
 
   const addToWatchlist = async (item: MediaBaseItem) => {
     if (!user) {
-      console.log('Cannot add to watchlist: User not authenticated');
+      console.log("Cannot add to watchlist: User not authenticated");
       toast({
         title: "Authentication required",
         description: "Please log in to add items to your watchlist.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
+
     try {
-      console.log('Adding to watchlist:', item);
-      const existingItem = watchlist.find(watch => 
-        watch.media_id === item.media_id && watch.media_type === item.media_type
+      console.log("Adding to watchlist:", item);
+      const existingItem = watchlist.find(
+        watch =>
+          watch.media_id === item.media_id &&
+          watch.media_type === item.media_type
       );
-      
+
       if (existingItem) {
-        console.log('Item already in watchlist:', existingItem);
+        console.log("Item already in watchlist:", existingItem);
         return;
       }
-      
+
       const newItem: WatchlistItem = {
         id: generateId(),
         user_id: user.uid,
@@ -893,20 +954,20 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         backdrop_path: item.backdrop_path,
         overview: item.overview,
         rating: item.rating,
-        added_at: new Date().toISOString()
+        added_at: new Date().toISOString(),
       };
-      
-      console.log('Saving watchlist item to Firestore:', newItem);
-      const watchlistRef = doc(db, 'watchlist', newItem.id);
+
+      console.log("Saving watchlist item to Firestore:", newItem);
+      const watchlistRef = doc(db, "watchlist", newItem.id);
       await setDoc(watchlistRef, newItem);
-      
-      console.log('Watchlist item saved successfully');
+
+      console.log("Watchlist item saved successfully");
       const updatedWatchlist = [newItem, ...watchlist];
       setWatchlist(updatedWatchlist);
 
       // Analytics event
       trackEvent({
-        name: 'watchlist_add',
+        name: "watchlist_add",
         params: {
           media_type: item.media_type,
           media_id: String(item.media_id),
@@ -916,30 +977,36 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Added to watchlist",
-        description: `${item.title} has been added to your watchlist.`
+        description: `${item.title} has been added to your watchlist.`,
       });
     } catch (error) {
-      console.error('Error adding to watchlist:', error);
+      console.error("Error adding to watchlist:", error);
       toast({
         title: "Error adding to watchlist",
-        description: error instanceof Error ? error.message : "There was a problem adding to your watchlist.",
-        variant: "destructive"
+        description:
+          error instanceof Error
+            ? error.message
+            : "There was a problem adding to your watchlist.",
+        variant: "destructive",
       });
     }
   };
 
-  const removeFromWatchlist = async (mediaId: number, mediaType: 'movie' | 'tv') => {
+  const removeFromWatchlist = async (
+    mediaId: number,
+    mediaType: "movie" | "tv"
+  ) => {
     if (!user) return;
-    
+
     try {
       const itemToRemove = watchlist.find(
         item => item.media_id === mediaId && item.media_type === mediaType
       );
 
       if (itemToRemove) {
-        const watchlistRef = doc(db, 'watchlist', itemToRemove.id);
+        const watchlistRef = doc(db, "watchlist", itemToRemove.id);
         await deleteDoc(watchlistRef);
-        
+
         const updatedWatchlist = watchlist.filter(
           item => !(item.media_id === mediaId && item.media_type === mediaType)
         );
@@ -947,120 +1014,130 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       }
       // Analytics event
       trackEvent({
-        name: 'watchlist_remove',
+        name: "watchlist_remove",
         params: {
           media_type: mediaType,
           media_id: String(mediaId),
         },
       });
     } catch (error) {
-      console.error('Error removing from watchlist:', error);
+      console.error("Error removing from watchlist:", error);
       toast({
         title: "Error removing from watchlist",
         description: "There was a problem removing from your watchlist.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  const isInWatchlist = (mediaId: number, mediaType: 'movie' | 'tv'): boolean => {
-    return watchlist.some(item => item.media_id === mediaId && item.media_type === mediaType);
+  const isInWatchlist = (
+    mediaId: number,
+    mediaType: "movie" | "tv"
+  ): boolean => {
+    return watchlist.some(
+      item => item.media_id === mediaId && item.media_type === mediaType
+    );
   };
 
   const deleteWatchlistItem = async (id: string) => {
     if (!user) return;
-    
+
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Skipping Firestore delete.');
+        console.log("Delete rate limit exceeded. Skipping Firestore delete.");
         return;
       }
 
-      const watchlistRef = doc(db, 'watchlist', id);
+      const watchlistRef = doc(db, "watchlist", id);
       await deleteDoc(watchlistRef);
-      
+
       const updatedWatchlist = watchlist.filter(item => item.id !== id);
       setWatchlist(updatedWatchlist);
-      
+
       toast({
         title: "Item removed",
-        description: "The item has been removed from your watchlist."
+        description: "The item has been removed from your watchlist.",
       });
     } catch (error) {
-      console.error('Error deleting watchlist item:', error);
+      console.error("Error deleting watchlist item:", error);
       toast({
         title: "Error removing item",
-        description: "There was a problem removing the item from your watchlist.",
-        variant: "destructive"
+        description:
+          "There was a problem removing the item from your watchlist.",
+        variant: "destructive",
       });
     }
   };
 
   const deleteSelectedWatchlist = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
-    
+
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
-        console.log('Delete rate limit exceeded. Please try again later.');
+        console.log("Delete rate limit exceeded. Please try again later.");
         toast({
           title: "Rate limit exceeded",
-          description: "Too many operations in a short time. Please try again later.",
-          variant: "destructive"
+          description:
+            "Too many operations in a short time. Please try again later.",
+          variant: "destructive",
         });
         return;
       }
 
       const batch = writeBatch(db);
       ids.forEach(id => {
-        const watchlistRef = doc(db, 'watchlist', id);
+        const watchlistRef = doc(db, "watchlist", id);
         batch.delete(watchlistRef);
       });
-      
+
       await batch.commit();
-      
+
       const updatedWatchlist = watchlist.filter(item => !ids.includes(item.id));
       setWatchlist(updatedWatchlist);
-      
+
       toast({
         title: "Items removed",
-        description: `${ids.length} ${ids.length === 1 ? 'item has' : 'items have'} been removed from your watchlist.`
+        description: `${ids.length} ${ids.length === 1 ? "item has" : "items have"} been removed from your watchlist.`,
       });
     } catch (error) {
-      console.error('Error deleting watchlist items:', error);
+      console.error("Error deleting watchlist items:", error);
       toast({
         title: "Error removing items",
-        description: "There was a problem removing the items from your watchlist.",
-        variant: "destructive"
+        description:
+          "There was a problem removing the items from your watchlist.",
+        variant: "destructive",
       });
     }
   };
 
   return (
-    <WatchHistoryContext.Provider value={{
-      watchHistory,
-      favorites,
-      watchlist,
-      hasMore,
-      isLoading,
-      loadMore: () => fetchWatchHistory(false),
-      addToWatchHistory,
-      updateWatchPosition,
-      clearWatchHistory,
-      deleteWatchHistoryItem,
-      deleteSelectedWatchHistory,
-      deleteFavoriteItem,
-      deleteSelectedFavorites,
-      deleteWatchlistItem,
-      deleteSelectedWatchlist,
-      addToFavorites,
-      removeFromFavorites,
-      isInFavorites,
-      addToWatchlist,
-      removeFromWatchlist,
-      isInWatchlist
-    }}>
+    <WatchHistoryContext.Provider
+      value={{
+        watchHistory,
+        favorites,
+        watchlist,
+        hasMore,
+        isLoading,
+        loadMore: () => fetchWatchHistory(false),
+        addToWatchHistory,
+        updateWatchPosition,
+        clearWatchHistory,
+        deleteWatchHistoryItem,
+        deleteSelectedWatchHistory,
+        deleteFavoriteItem,
+        deleteSelectedFavorites,
+        deleteWatchlistItem,
+        deleteSelectedWatchlist,
+        addToFavorites,
+        removeFromFavorites,
+        isInFavorites,
+        addToWatchlist,
+        removeFromWatchlist,
+        isInWatchlist,
+      }}
+    >
       {children}
     </WatchHistoryContext.Provider>
   );

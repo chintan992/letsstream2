@@ -1,8 +1,14 @@
-import React, { Component, ReactNode } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import React, { Component, ReactNode } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -21,7 +27,7 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     };
   }
 
@@ -29,23 +35,27 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
     return {
       hasError: true,
       error,
-      errorInfo: null
+      errorInfo: null,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('BackupRestore Error Boundary caught an error:', error, errorInfo);
+    console.error(
+      "BackupRestore Error Boundary caught an error:",
+      error,
+      errorInfo
+    );
 
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
 
     // Log to analytics if available
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'exception', {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "exception", {
         description: `BackupRestore Error: ${error.message}`,
-        fatal: false
+        fatal: false,
       });
     }
   }
@@ -54,12 +64,12 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     });
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   render() {
@@ -69,11 +79,13 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <Card className="w-full max-w-2xl mx-auto">
+        <Card className="mx-auto w-full max-w-2xl">
           <CardHeader>
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              <CardTitle className="text-destructive">Something went wrong</CardTitle>
+              <CardTitle className="text-destructive">
+                Something went wrong
+              </CardTitle>
             </div>
             <CardDescription>
               The backup and restore feature encountered an unexpected error.
@@ -86,18 +98,19 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
               <AlertDescription>
                 <div className="mt-2 space-y-2">
                   <p className="font-mono text-sm">
-                    {this.state.error?.message || 'Unknown error occurred'}
+                    {this.state.error?.message || "Unknown error occurred"}
                   </p>
-                  {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-sm font-medium">
-                        Stack Trace (Development Only)
-                      </summary>
-                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto max-h-32">
-                        {this.state.error?.stack}
-                      </pre>
-                    </details>
-                  )}
+                  {process.env.NODE_ENV === "development" &&
+                    this.state.errorInfo && (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-sm font-medium">
+                          Stack Trace (Development Only)
+                        </summary>
+                        <pre className="mt-2 max-h-32 overflow-auto rounded bg-muted p-2 text-xs">
+                          {this.state.error?.stack}
+                        </pre>
+                      </details>
+                    )}
                 </div>
               </AlertDescription>
             </Alert>
@@ -115,7 +128,8 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
 
             <div className="text-sm text-muted-foreground">
               <p>
-                If this problem persists, please contact support with the error details above.
+                If this problem persists, please contact support with the error
+                details above.
               </p>
             </div>
           </CardContent>

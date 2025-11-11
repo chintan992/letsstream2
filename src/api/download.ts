@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 interface DownloadResult {
   title: string;
@@ -22,7 +22,9 @@ export const fetchDownloadLinks = async (
 ): Promise<DownloadResult[]> => {
   try {
     // Step 1: Get the base URL from the local proxy
-    const baseUrlResp = await axios.get<{ url: string }>('https://vd-src-worker.chintanr21.workers.dev/download');
+    const baseUrlResp = await axios.get<{ url: string }>(
+      "https://vd-src-worker.chintanr21.workers.dev/download"
+    );
     const baseUrl = baseUrlResp.data.url;
     let url = `${baseUrl}${encodeURIComponent(name.toLowerCase())}`;
     if (season !== undefined && episode !== undefined) {
@@ -32,7 +34,7 @@ export const fetchDownloadLinks = async (
     const response = await axios.get<DownloadResponse>(url);
     return response.data.results;
   } catch (error) {
-    console.error('Error fetching download links:', error);
+    console.error("Error fetching download links:", error);
     return [];
   }
 };

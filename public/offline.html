@@ -1,248 +1,270 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#3b82f6">
-    <meta name="description" content="You're currently offline - Let's Stream">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta
+      name="description"
+      content="You're currently offline - Let's Stream"
+    />
     <title>Offline - Let's Stream</title>
-    <link rel="icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/apple-icon-180.png">
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-icon-180.png" />
     <style>
-        :root {
-            color-scheme: dark;
-        }
-        
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #0f0f0f;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-        }
+      :root {
+        color-scheme: dark;
+      }
 
+      body {
+        margin: 0;
+        padding: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #0f0f0f;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+      }
+
+      .container {
+        padding: 2rem;
+        max-width: 600px;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h1 {
+        color: #3b82f6;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      p {
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+        color: #e5e7eb;
+      }
+
+      .status {
+        background: #1f2937;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        border: 1px solid #374151;
+      }
+
+      button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 auto;
+      }
+
+      button:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .cached-content {
+        background: #1f2937;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 2rem;
+        text-align: left;
+        border: 1px solid #374151;
+      }
+
+      .cached-content h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: #3b82f6;
+      }
+
+      .cached-content ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .cached-content li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #374151;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .cached-content li:last-child {
+        border-bottom: none;
+      }
+
+      @media (max-width: 640px) {
         .container {
-            padding: 2rem;
-            max-width: 600px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+          padding: 1rem;
         }
 
         h1 {
-            color: #3b82f6;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+          font-size: 1.5rem;
         }
-
-        p {
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
-            color: #e5e7eb;
-        }
-
-        .status {
-            background: #1f2937;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-            border: 1px solid #374151;
-        }
-
-        button {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.375rem;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 0 auto;
-        }
-
-        button:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            display: inline-block;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .cached-content {
-            background: #1f2937;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-top: 2rem;
-            text-align: left;
-            border: 1px solid #374151;
-        }
-
-        .cached-content h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: #3b82f6;
-        }
-
-        .cached-content ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .cached-content li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #374151;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .cached-content li:last-child {
-            border-bottom: none;
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="icon">📡</div>
-        <h1>You're Offline</h1>
-        <div class="status">
-            Connection Status: <span id="connectionStatus">Offline</span>
-        </div>
-        <p>It seems you've lost your internet connection. Don't worry - you can still access previously viewed content from the cache.</p>
-        <button onclick="retryConnection()">
-            <span>Try Again</span>
-            <span id="countdown"></span>
-        </button>
-        
-        <div class="cached-content">
-            <h2>Available Offline</h2>
-            <ul id="cachedContent">
-                <li>Loading cached content...</li>
-            </ul>
-        </div>
+      <div class="icon">📡</div>
+      <h1>You're Offline</h1>
+      <div class="status">
+        Connection Status: <span id="connectionStatus">Offline</span>
+      </div>
+      <p>
+        It seems you've lost your internet connection. Don't worry - you can
+        still access previously viewed content from the cache.
+      </p>
+      <button onclick="retryConnection()">
+        <span>Try Again</span>
+        <span id="countdown"></span>
+      </button>
+
+      <div class="cached-content">
+        <h2>Available Offline</h2>
+        <ul id="cachedContent">
+          <li>Loading cached content...</li>
+        </ul>
+      </div>
     </div>
 
     <script>
-        let countdownInterval;
-        const RETRY_DELAY = 5; // seconds
+      let countdownInterval;
+      const RETRY_DELAY = 5; // seconds
 
-        async function listCachedContent() {
-            if ('caches' in window) {
-                try {
-                    const cache = await caches.open('pages-cache');
-                    const keys = await cache.keys();
-                    const contentList = document.getElementById('cachedContent');
-                    
-                    if (keys.length === 0) {
-                        contentList.innerHTML = '<li>No cached content available</li>';
-                        return;
-                    }
+      async function listCachedContent() {
+        if ("caches" in window) {
+          try {
+            const cache = await caches.open("pages-cache");
+            const keys = await cache.keys();
+            const contentList = document.getElementById("cachedContent");
 
-                    contentList.innerHTML = keys
-                        .map(request => {
-                            const url = new URL(request.url);
-                            const path = url.pathname;
-                            if (path === '/') return '<li>📱 Home Page</li>';
-                            if (path.includes('/movie/')) return '<li>🎬 Movie Details</li>';
-                            if (path.includes('/tv/')) return '<li>📺 TV Show Details</li>';
-                            return null;
-                        })
-                        .filter(Boolean)
-                        .join('');
-                } catch (error) {
-                    console.error('Error listing cached content:', error);
-                }
+            if (keys.length === 0) {
+              contentList.innerHTML = "<li>No cached content available</li>";
+              return;
             }
-        }
 
-        function updateConnectionStatus() {
-            const status = document.getElementById('connectionStatus');
-            if (navigator.onLine) {
-                status.textContent = 'Back Online';
-                status.style.color = '#34d399';
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                status.textContent = 'Offline';
-                status.style.color = '#ef4444';
-            }
+            contentList.innerHTML = keys
+              .map(request => {
+                const url = new URL(request.url);
+                const path = url.pathname;
+                if (path === "/") return "<li>📱 Home Page</li>";
+                if (path.includes("/movie/"))
+                  return "<li>🎬 Movie Details</li>";
+                if (path.includes("/tv/")) return "<li>📺 TV Show Details</li>";
+                return null;
+              })
+              .filter(Boolean)
+              .join("");
+          } catch (error) {
+            console.error("Error listing cached content:", error);
+          }
         }
+      }
 
-        function startCountdown() {
-            let timeLeft = RETRY_DELAY;
-            const countdownEl = document.getElementById('countdown');
-            
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            countdownInterval = setInterval(() => {
-                countdownEl.textContent = `(${timeLeft}s)`;
-                timeLeft--;
-                
-                if (timeLeft < 0) {
-                    clearInterval(countdownInterval);
-                    countdownEl.textContent = '';
-                }
-            }, 1000);
+      function updateConnectionStatus() {
+        const status = document.getElementById("connectionStatus");
+        if (navigator.onLine) {
+          status.textContent = "Back Online";
+          status.style.color = "#34d399";
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          status.textContent = "Offline";
+          status.style.color = "#ef4444";
         }
+      }
 
-        function retryConnection() {
-            const button = document.querySelector('button');
-            button.disabled = true;
-            startCountdown();
-            
-            setTimeout(() => {
-                window.location.reload();
-                button.disabled = false;
-            }, RETRY_DELAY * 1000);
-        }
+      function startCountdown() {
+        let timeLeft = RETRY_DELAY;
+        const countdownEl = document.getElementById("countdown");
 
-        // Initialize
-        window.addEventListener('online', updateConnectionStatus);
-        window.addEventListener('offline', updateConnectionStatus);
-        updateConnectionStatus();
-        listCachedContent();
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        countdownInterval = setInterval(() => {
+          countdownEl.textContent = `(${timeLeft}s)`;
+          timeLeft--;
+
+          if (timeLeft < 0) {
+            clearInterval(countdownInterval);
+            countdownEl.textContent = "";
+          }
+        }, 1000);
+      }
+
+      function retryConnection() {
+        const button = document.querySelector("button");
+        button.disabled = true;
+        startCountdown();
+
+        setTimeout(() => {
+          window.location.reload();
+          button.disabled = false;
+        }, RETRY_DELAY * 1000);
+      }
+
+      // Initialize
+      window.addEventListener("online", updateConnectionStatus);
+      window.addEventListener("offline", updateConnectionStatus);
+      updateConnectionStatus();
+      listCachedContent();
     </script>
-</body>
+  </body>
 </html>

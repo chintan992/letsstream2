@@ -1,73 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import SportMatchGrid from '@/components/SportMatchGrid';
-import PageTransition from '@/components/PageTransition';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Sport } from '@/utils/sports-types';
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import SportMatchGrid from "@/components/SportMatchGrid";
+import PageTransition from "@/components/PageTransition";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Sport } from "@/utils/sports-types";
 import {
   getSportsList,
   getAllPopularMatches,
   getLiveMatches,
   getTodayMatches,
-  getMatchesBySport
-} from '@/utils/sports-api';
-import { useToast } from '@/components/ui/use-toast';
-import { useUserPreferences } from '@/hooks/user-preferences';
+  getMatchesBySport,
+} from "@/utils/sports-api";
+import { useToast } from "@/components/ui/use-toast";
+import { useUserPreferences } from "@/hooks/user-preferences";
 
 const Sports = () => {
-  const [activeTab, setActiveTab] = useState<string>('popular');
-  const [selectedSport, setSelectedSport] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>("popular");
+  const [selectedSport, setSelectedSport] = useState<string>("all");
   const { toast } = useToast();
   const { userPreferences } = useUserPreferences();
-  const accentColor = userPreferences?.accentColor || 'hsl(var(--accent))';
+  const accentColor = userPreferences?.accentColor || "hsl(var(--accent))";
 
   // Fetch sports list
   const {
     data: sportsList = [],
     isLoading: sportsLoading,
-    error: sportsError
+    error: sportsError,
   } = useQuery({
-    queryKey: ['sports-list'],
-    queryFn: getSportsList
+    queryKey: ["sports-list"],
+    queryFn: getSportsList,
   });
 
   // Fetch popular matches
-  const {
-    data: popularMatches = [],
-    isLoading: popularLoading
-  } = useQuery({
-    queryKey: ['sports-popular-matches'],
-    queryFn: getAllPopularMatches
+  const { data: popularMatches = [], isLoading: popularLoading } = useQuery({
+    queryKey: ["sports-popular-matches"],
+    queryFn: getAllPopularMatches,
   });
 
   // Fetch live matches
-  const {
-    data: liveMatches = [],
-    isLoading: liveLoading
-  } = useQuery({
-    queryKey: ['sports-live-matches'],
-    queryFn: getLiveMatches
+  const { data: liveMatches = [], isLoading: liveLoading } = useQuery({
+    queryKey: ["sports-live-matches"],
+    queryFn: getLiveMatches,
   });
 
   // Fetch today's matches
-  const {
-    data: todayMatches = [],
-    isLoading: todayLoading
-  } = useQuery({
-    queryKey: ['sports-today-matches'],
-    queryFn: getTodayMatches
+  const { data: todayMatches = [], isLoading: todayLoading } = useQuery({
+    queryKey: ["sports-today-matches"],
+    queryFn: getTodayMatches,
   });
 
   // Fetch sport-specific matches when a sport is selected
-  const {
-    data: sportMatches = [],
-    isLoading: sportMatchesLoading
-  } = useQuery({
-    queryKey: ['sports-matches', selectedSport],
+  const { data: sportMatches = [], isLoading: sportMatchesLoading } = useQuery({
+    queryKey: ["sports-matches", selectedSport],
     queryFn: () => getMatchesBySport(selectedSport),
-    enabled: selectedSport !== 'all'
+    enabled: selectedSport !== "all",
   });
 
   useEffect(() => {
@@ -75,7 +63,7 @@ const Sports = () => {
       toast({
         title: "Error",
         description: "Failed to load sports. Please try again later.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   }, [sportsError, toast]);
@@ -93,26 +81,29 @@ const Sports = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
 
-        <div className="pt-20 pb-12">
+        <div className="pb-12 pt-20">
           <div className="container mx-auto px-4 md:px-6">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-white mb-2">Sports</h1>
-              <p className="text-white/70">Stream live and upcoming sports events from around the world.</p>
+              <h1 className="mb-2 text-3xl font-bold text-white">Sports</h1>
+              <p className="text-white/70">
+                Stream live and upcoming sports events from around the world.
+              </p>
             </div>
 
             {/* Sports categories */}
             <div className="mb-8 overflow-x-auto pb-2">
-              <div className="flex space-x-2 min-w-max">
+              <div className="flex min-w-max space-x-2">
                 <button
-                  onClick={() => handleSportChange('all')}
-                  className={`px-4 py-2 rounded-full text-sm transition-colors ${
-                    selectedSport === 'all'
-                      ? 'text-white'
-                      : 'text-white/70 hover:text-white/90'
+                  onClick={() => handleSportChange("all")}
+                  className={`rounded-full px-4 py-2 text-sm transition-colors ${
+                    selectedSport === "all"
+                      ? "text-white"
+                      : "text-white/70 hover:text-white/90"
                   }`}
                   style={{
-                    backgroundColor: selectedSport === 'all' ? accentColor : 'transparent',
-                    border: `1px solid ${selectedSport === 'all' ? 'transparent' : 'rgba(255,255,255,0.2)'}`
+                    backgroundColor:
+                      selectedSport === "all" ? accentColor : "transparent",
+                    border: `1px solid ${selectedSport === "all" ? "transparent" : "rgba(255,255,255,0.2)"}`,
                   }}
                 >
                   All Sports
@@ -120,10 +111,10 @@ const Sports = () => {
 
                 {sportsLoading ? (
                   <div className="flex space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
+                    {[1, 2, 3, 4].map(i => (
                       <div
                         key={i}
-                        className="w-24 h-10 rounded-full bg-white/10 animate-pulse"
+                        className="h-10 w-24 animate-pulse rounded-full bg-white/10"
                       />
                     ))}
                   </div>
@@ -132,14 +123,17 @@ const Sports = () => {
                     <button
                       key={sport.id}
                       onClick={() => handleSportChange(sport.id)}
-                      className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                      className={`rounded-full px-4 py-2 text-sm transition-colors ${
                         selectedSport === sport.id
-                          ? 'text-white'
-                          : 'text-white/70 hover:text-white/90'
+                          ? "text-white"
+                          : "text-white/70 hover:text-white/90"
                       }`}
                       style={{
-                        backgroundColor: selectedSport === sport.id ? accentColor : 'transparent',
-                        border: `1px solid ${selectedSport === sport.id ? 'transparent' : 'rgba(255,255,255,0.2)'}`
+                        backgroundColor:
+                          selectedSport === sport.id
+                            ? accentColor
+                            : "transparent",
+                        border: `1px solid ${selectedSport === sport.id ? "transparent" : "rgba(255,255,255,0.2)"}`,
                       }}
                     >
                       {sport.name}
@@ -148,13 +142,13 @@ const Sports = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center mb-4">
-                <button className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20">
+              <div className="mb-4 flex items-center justify-between">
+                <button className="rounded-lg bg-white/10 px-4 py-2 text-white hover:bg-white/20">
                   Hide Filters
                 </button>
                 <div className="flex items-center space-x-2">
                   <label className="text-white/70">Sort by:</label>
-                  <select className="bg-white/10 text-white border-none rounded-lg">
+                  <select className="rounded-lg border-none bg-white/10 text-white">
                     <option value="time">Time</option>
                     <option value="relevance">Relevance</option>
                   </select>
@@ -167,18 +161,23 @@ const Sports = () => {
               <input
                 type="text"
                 placeholder="Search for matches..."
-                className="w-full px-4 py-2 rounded-lg bg-white/10 text-white border-none"
+                className="w-full rounded-lg border-none bg-white/10 px-4 py-2 text-white"
               />
             </div>
 
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8 bg-white/5">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="w-full"
+            >
+              <TabsList className="mb-8 grid w-full grid-cols-3 bg-white/5">
                 <TabsTrigger
                   value="popular"
                   className="data-[state=active]:text-white data-[state=active]:shadow"
                   style={{
-                    backgroundColor: activeTab === 'popular' ? accentColor : 'transparent'
+                    backgroundColor:
+                      activeTab === "popular" ? accentColor : "transparent",
                   }}
                 >
                   Popular
@@ -187,7 +186,8 @@ const Sports = () => {
                   value="live"
                   className="data-[state=active]:text-white data-[state=active]:shadow"
                   style={{
-                    backgroundColor: activeTab === 'live' ? accentColor : 'transparent'
+                    backgroundColor:
+                      activeTab === "live" ? accentColor : "transparent",
                   }}
                 >
                   Live
@@ -196,7 +196,8 @@ const Sports = () => {
                   value="all"
                   className="data-[state=active]:text-white data-[state=active]:shadow"
                   style={{
-                    backgroundColor: activeTab === 'all' ? accentColor : 'transparent'
+                    backgroundColor:
+                      activeTab === "all" ? accentColor : "transparent",
                   }}
                 >
                   All
@@ -205,45 +206,78 @@ const Sports = () => {
 
               <TabsContent value="popular">
                 {popularLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-4 md:px-8 py-6">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                      <div key={i} className="aspect-video rounded-lg bg-white/10 animate-pulse" />
+                  <div className="grid grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                      <div
+                        key={i}
+                        className="aspect-video animate-pulse rounded-lg bg-white/10"
+                      />
                     ))}
                   </div>
                 ) : (
                   <SportMatchGrid
-                    matches={activeTab === 'popular' && selectedSport === 'all' ? popularMatches : sportMatches}
-                    emptyMessage={activeTab === 'popular' && selectedSport === 'all' ? "No popular matches available at the moment." : `No popular ${sportsList.find(s => s.id === selectedSport)?.name || ''} matches available.`}
+                    matches={
+                      activeTab === "popular" && selectedSport === "all"
+                        ? popularMatches
+                        : sportMatches
+                    }
+                    emptyMessage={
+                      activeTab === "popular" && selectedSport === "all"
+                        ? "No popular matches available at the moment."
+                        : `No popular ${sportsList.find(s => s.id === selectedSport)?.name || ""} matches available.`
+                    }
                   />
                 )}
               </TabsContent>
 
               <TabsContent value="live">
                 {liveLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-4 md:px-8 py-6">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                      <div key={i} className="aspect-video rounded-lg bg-white/10 animate-pulse" />
+                  <div className="grid grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                      <div
+                        key={i}
+                        className="aspect-video animate-pulse rounded-lg bg-white/10"
+                      />
                     ))}
                   </div>
                 ) : (
                   <SportMatchGrid
-                    matches={activeTab === 'live' && selectedSport === 'all' ? liveMatches : sportMatches}
-                    emptyMessage={activeTab === 'live' && selectedSport === 'all' ? "No live matches available at the moment." : `No live ${sportsList.find(s => s.id === selectedSport)?.name || ''} matches right now.`}
+                    matches={
+                      activeTab === "live" && selectedSport === "all"
+                        ? liveMatches
+                        : sportMatches
+                    }
+                    emptyMessage={
+                      activeTab === "live" && selectedSport === "all"
+                        ? "No live matches available at the moment."
+                        : `No live ${sportsList.find(s => s.id === selectedSport)?.name || ""} matches right now.`
+                    }
                   />
                 )}
               </TabsContent>
 
               <TabsContent value="all">
                 {todayLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 px-4 md:px-8 py-6">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                      <div key={i} className="aspect-video rounded-lg bg-white/10 animate-pulse" />
+                  <div className="grid grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                      <div
+                        key={i}
+                        className="aspect-video animate-pulse rounded-lg bg-white/10"
+                      />
                     ))}
                   </div>
                 ) : (
                   <SportMatchGrid
-                    matches={activeTab === 'all' && selectedSport === 'all' ? todayMatches : sportMatches}
-                    emptyMessage={activeTab === 'all' && selectedSport === 'all' ? "No matches scheduled for today." : `No ${sportsList.find(s => s.id === selectedSport)?.name || ''} matches available.`}
+                    matches={
+                      activeTab === "all" && selectedSport === "all"
+                        ? todayMatches
+                        : sportMatches
+                    }
+                    emptyMessage={
+                      activeTab === "all" && selectedSport === "all"
+                        ? "No matches scheduled for today."
+                        : `No ${sportsList.find(s => s.id === selectedSport)?.name || ""} matches available.`
+                    }
                   />
                 )}
               </TabsContent>

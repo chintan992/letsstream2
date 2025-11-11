@@ -1,6 +1,5 @@
-
-import { swAnalytics } from './sw-analytics';
-import * as webVitals from 'web-vitals';
+import { swAnalytics } from "./sw-analytics";
+import * as webVitals from "web-vitals";
 
 type VitalMetric = {
   name: string;
@@ -17,7 +16,7 @@ class PerformanceMonitor {
   private reportedMetrics: Set<string> = new Set();
 
   private constructor() {
-    this.isEnabled = typeof window !== 'undefined' && 'performance' in window;
+    this.isEnabled = typeof window !== "undefined" && "performance" in window;
   }
 
   static getInstance(): PerformanceMonitor {
@@ -34,7 +33,7 @@ class PerformanceMonitor {
 
   endMeasurement(name: string, category: string) {
     if (!this.isEnabled || !this.marks[name]) return;
-    
+
     const duration = performance.now() - this.marks[name];
     delete this.marks[name];
 
@@ -43,7 +42,7 @@ class PerformanceMonitor {
       swAnalytics.trackPerformanceEvent({
         name: `${category}_${name}`,
         value: Math.round(duration),
-        type: 'custom'
+        type: "custom",
       });
     }
 
@@ -56,11 +55,13 @@ class PerformanceMonitor {
     this.reportedMetrics.add(metric.id);
 
     console.log(`Web Vital: ${metric.name} = ${metric.value}`);
-    
+
     swAnalytics.trackPerformanceEvent({
       name: metric.name,
-      value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
-      type: 'web-vital'
+      value: Math.round(
+        metric.name === "CLS" ? metric.value * 1000 : metric.value
+      ),
+      type: "web-vital",
     });
   }
 
@@ -77,43 +78,49 @@ class PerformanceMonitor {
 
     // Measure resource timing
     this.measureResourceTiming();
-    
+
     // Measure navigation timing
     this.measureNavigationTiming();
 
     // Report service worker activation time
-    if ('serviceWorker' in navigator) {
-      this.startMeasurement('swActivation');
+    if ("serviceWorker" in navigator) {
+      this.startMeasurement("swActivation");
       navigator.serviceWorker.ready.then(() => {
-        this.endMeasurement('swActivation', 'ServiceWorker');
+        this.endMeasurement("swActivation", "ServiceWorker");
       });
     }
-    
+
     // Check for service worker controller
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       if (navigator.serviceWorker.controller) {
         swAnalytics.trackPerformanceEvent({
-          name: 'ServiceWorkerStatus',
+          name: "ServiceWorkerStatus",
           value: 1, // 1 = active
-          type: 'sw-status'
+          type: "sw-status",
         });
       } else {
         const swListener = () => {
           swAnalytics.trackPerformanceEvent({
-            name: 'ServiceWorkerStatus',
+            name: "ServiceWorkerStatus",
             value: 1, // 1 = active
-            type: 'sw-status'
+            type: "sw-status",
           });
-          navigator.serviceWorker.removeEventListener('controllerchange', swListener);
+          navigator.serviceWorker.removeEventListener(
+            "controllerchange",
+            swListener
+          );
         };
-        
-        navigator.serviceWorker.addEventListener('controllerchange', swListener);
-        
+
+        navigator.serviceWorker.addEventListener(
+          "controllerchange",
+          swListener
+        );
+
         // Initial state (no controller)
         swAnalytics.trackPerformanceEvent({
-          name: 'ServiceWorkerStatus',
+          name: "ServiceWorkerStatus",
           value: 0, // 0 = not active
-          type: 'sw-status'
+          type: "sw-status",
         });
       }
     }
@@ -122,34 +129,38 @@ class PerformanceMonitor {
   measureResourceTiming() {
     if (!this.isEnabled) return;
 
-    new PerformanceObserver((entryList) => {
+    new PerformanceObserver(entryList => {
       for (const entry of entryList.getEntries()) {
         // Only measure resources that took longer than 1 second
         if (entry.duration > 1000) {
           swAnalytics.trackPerformanceEvent({
-            name: 'ResourceTiming',
+            name: "ResourceTiming",
             value: Math.round(entry.duration),
-            type: 'resource',
-            url: entry.name
+            type: "resource",
+            url: entry.name,
           });
         }
       }
-    }).observe({ entryTypes: ['resource'] });
+    }).observe({ entryTypes: ["resource"] });
   }
 
   measureNavigationTiming() {
     if (!this.isEnabled) return;
 
     try {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        "navigation"
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         // Time to First Byte (TTFB)
-        const ttfb = Math.round(navigation.responseStart - navigation.requestStart);
+        const ttfb = Math.round(
+          navigation.responseStart - navigation.requestStart
+        );
         if (ttfb > 0) {
           swAnalytics.trackPerformanceEvent({
-            name: 'TTFB',
+            name: "TTFB",
             value: ttfb,
-            type: 'navigation'
+            type: "navigation",
           });
         }
 
@@ -157,9 +168,9 @@ class PerformanceMonitor {
         const domInteractive = Math.round(navigation.domInteractive);
         if (domInteractive > 0) {
           swAnalytics.trackPerformanceEvent({
-            name: 'DOMInteractive',
+            name: "DOMInteractive",
             value: domInteractive,
-            type: 'navigation'
+            type: "navigation",
           });
         }
 
@@ -167,14 +178,14 @@ class PerformanceMonitor {
         const domComplete = Math.round(navigation.domComplete);
         if (domComplete > 0) {
           swAnalytics.trackPerformanceEvent({
-            name: 'DOMComplete',
+            name: "DOMComplete",
             value: domComplete,
-            type: 'navigation'
+            type: "navigation",
           });
         }
       }
     } catch (error) {
-      console.warn('Error measuring navigation timing:', error);
+      console.warn("Error measuring navigation timing:", error);
     }
   }
 }

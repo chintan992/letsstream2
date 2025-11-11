@@ -1,10 +1,16 @@
-
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getTVDetails, getTVRecommendations, getSeasonDetails, getTVTrailer, getTVCast, getTVEpisode } from '@/utils/api';
-import { TVDetails, Episode, Media, CastMember } from '@/utils/types';
-import { useWatchHistory } from '@/hooks/watch-history';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  getTVDetails,
+  getTVRecommendations,
+  getSeasonDetails,
+  getTVTrailer,
+  getTVCast,
+  getTVEpisode,
+} from "@/utils/api";
+import { TVDetails, Episode, Media, CastMember } from "@/utils/types";
+import { useWatchHistory } from "@/hooks/watch-history";
+import { useToast } from "@/hooks/use-toast";
 
 export const useTVDetails = (id: string | undefined) => {
   const [tvShow, setTVShow] = useState<TVDetails | null>(null);
@@ -12,16 +18,26 @@ export const useTVDetails = (id: string | undefined) => {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'episodes' | 'about' | 'cast' | 'reviews'>('episodes');
+  const [activeTab, setActiveTab] = useState<
+    "episodes" | "about" | "cast" | "reviews"
+  >("episodes");
   const [recommendations, setRecommendations] = useState<Media[]>([]);
   const [cast, setCast] = useState<CastMember[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
-  
+
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { watchHistory, addToFavorites, addToWatchlist, removeFromFavorites, removeFromWatchlist, isInFavorites, isInWatchlist } = useWatchHistory();
+  const {
+    watchHistory,
+    addToFavorites,
+    addToWatchlist,
+    removeFromFavorites,
+    removeFromWatchlist,
+    isInFavorites,
+    isInWatchlist,
+  } = useWatchHistory();
 
   useEffect(() => {
     const fetchTVData = async () => {
@@ -37,7 +53,7 @@ export const useTVDetails = (id: string | undefined) => {
         setIsLoading(false);
         return;
       }
-      
+
       try {
         setIsLoading(true);
         setError(null);
@@ -46,7 +62,7 @@ export const useTVDetails = (id: string | undefined) => {
           getTVRecommendations(tvId),
           getTVCast(tvId),
         ]);
-        
+
         if (!tvData) {
           setError("TV show not found");
           return;
@@ -55,7 +71,7 @@ export const useTVDetails = (id: string | undefined) => {
         setTVShow(tvData);
         setRecommendations(recommendationsData);
         setCast(castData);
-        
+
         if (tvData.seasons && tvData.seasons.length > 0) {
           const firstSeason = tvData.seasons.find(s => s.season_number > 0);
           if (firstSeason) {
@@ -63,28 +79,28 @@ export const useTVDetails = (id: string | undefined) => {
           }
         }
       } catch (error) {
-        console.error('Error fetching TV show data:', error);
+        console.error("Error fetching TV show data:", error);
         setError("Failed to load TV show data. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchTVData();
   }, [id]);
-  
+
   useEffect(() => {
     const fetchEpisodes = async () => {
       if (!tvShow || !selectedSeason) return;
-      
+
       try {
         const episodesData = await getSeasonDetails(tvShow.id, selectedSeason);
         setEpisodes(episodesData);
       } catch (error) {
-        console.error('Error fetching episodes:', error);
+        console.error("Error fetching episodes:", error);
       }
     };
-    
+
     fetchEpisodes();
   }, [tvShow, selectedSeason]);
 
@@ -95,21 +111,21 @@ export const useTVDetails = (id: string | undefined) => {
           const trailerData = await getTVTrailer(tvShow.id);
           setTrailerKey(trailerData);
         } catch (error) {
-          console.error('Error fetching trailer:', error);
+          console.error("Error fetching trailer:", error);
         }
       }
     };
-    
+
     fetchTrailer();
   }, [tvShow?.id]);
 
   useEffect(() => {
     if (tvShow?.id) {
-      setIsFavorite(isInFavorites(tvShow.id, 'tv'));
-      setIsInMyWatchlist(isInWatchlist(tvShow.id, 'tv'));
+      setIsFavorite(isInFavorites(tvShow.id, "tv"));
+      setIsInMyWatchlist(isInWatchlist(tvShow.id, "tv"));
     }
   }, [tvShow?.id, isInFavorites, isInWatchlist]);
-  
+
   const handlePlayEpisode = (seasonNumber: number, episodeNumber: number) => {
     if (tvShow) {
       navigate(`/watch/tv/${tvShow.id}/${seasonNumber}/${episodeNumber}`);
@@ -118,19 +134,19 @@ export const useTVDetails = (id: string | undefined) => {
 
   const handleToggleFavorite = () => {
     if (!tvShow) return;
-    
+
     if (isFavorite) {
-      removeFromFavorites(tvShow.id, 'tv');
+      removeFromFavorites(tvShow.id, "tv");
       setIsFavorite(false);
     } else {
       addToFavorites({
         media_id: tvShow.id,
-        media_type: 'tv',
+        media_type: "tv",
         title: tvShow.name,
         poster_path: tvShow.poster_path,
         backdrop_path: tvShow.backdrop_path,
         overview: tvShow.overview,
-        rating: tvShow.vote_average
+        rating: tvShow.vote_average,
       });
       setIsFavorite(true);
     }
@@ -138,49 +154,76 @@ export const useTVDetails = (id: string | undefined) => {
 
   const handleToggleWatchlist = () => {
     if (!tvShow) return;
-    
+
     if (isInMyWatchlist) {
-      removeFromWatchlist(tvShow.id, 'tv');
+      removeFromWatchlist(tvShow.id, "tv");
       setIsInMyWatchlist(false);
     } else {
       addToWatchlist({
         media_id: tvShow.id,
-        media_type: 'tv',
+        media_type: "tv",
         title: tvShow.name,
         poster_path: tvShow.poster_path,
         backdrop_path: tvShow.backdrop_path,
         overview: tvShow.overview,
-        rating: tvShow.vote_average
+        rating: tvShow.vote_average,
       });
       setIsInMyWatchlist(true);
     }
   };
 
-  const getLastWatchedEpisode = useCallback(async (): Promise<{ season: number; episode: number; progress: number; episodeTitle: string; episodeThumbnail: string | null; timeRemaining: number; watchPosition: number; duration: number } | null> => {
+  const getLastWatchedEpisode = useCallback(async (): Promise<{
+    season: number;
+    episode: number;
+    progress: number;
+    episodeTitle: string;
+    episodeThumbnail: string | null;
+    timeRemaining: number;
+    watchPosition: number;
+    duration: number;
+  } | null> => {
     if (!tvShow || !watchHistory.length) return null;
 
     const tvWatchHistory = watchHistory.filter(
-      item => item.media_id === tvShow.id && item.media_type === 'tv'
+      item => item.media_id === tvShow.id && item.media_type === "tv"
     );
 
     if (!tvWatchHistory.length) return null;
 
     const lastWatched = tvWatchHistory.reduce((latest, current) => {
-      return new Date(current.created_at) > new Date(latest.created_at) ? current : latest;
+      return new Date(current.created_at) > new Date(latest.created_at)
+        ? current
+        : latest;
     });
 
     try {
       // Fetch episode details
-      const episodeData = await getTVEpisode(tvShow.id, lastWatched.season, lastWatched.episode);
-      
+      const episodeData = await getTVEpisode(
+        tvShow.id,
+        lastWatched.season,
+        lastWatched.episode
+      );
+
       // Calculate time remaining
-      const timeRemaining = Math.max(0, lastWatched.duration - lastWatched.watch_position);
-      
+      const timeRemaining = Math.max(
+        0,
+        lastWatched.duration - lastWatched.watch_position
+      );
+
       // Guard for division by zero and clamp progress to [0, 100]
-      const progress = lastWatched.duration > 0
-        ? Math.min(100, Math.max(0, Math.round((lastWatched.watch_position / lastWatched.duration) * 100)))
-        : 0;
-      
+      const progress =
+        lastWatched.duration > 0
+          ? Math.min(
+              100,
+              Math.max(
+                0,
+                Math.round(
+                  (lastWatched.watch_position / lastWatched.duration) * 100
+                )
+              )
+            )
+          : 0;
+
       return {
         season: lastWatched.season,
         episode: lastWatched.episode,
@@ -189,25 +232,37 @@ export const useTVDetails = (id: string | undefined) => {
         episodeThumbnail: episodeData.still_path,
         timeRemaining,
         watchPosition: lastWatched.watch_position,
-        duration: lastWatched.duration
+        duration: lastWatched.duration,
       };
     } catch (error) {
-      console.error('Error fetching episode details:', error);
+      console.error("Error fetching episode details:", error);
       // Return basic data with fallback values if episode fetch fails
       // Guard for division by zero and clamp progress to [0, 100]
-      const progress = lastWatched.duration > 0
-        ? Math.min(100, Math.max(0, Math.round((lastWatched.watch_position / lastWatched.duration) * 100)))
-        : 0;
-        
+      const progress =
+        lastWatched.duration > 0
+          ? Math.min(
+              100,
+              Math.max(
+                0,
+                Math.round(
+                  (lastWatched.watch_position / lastWatched.duration) * 100
+                )
+              )
+            )
+          : 0;
+
       return {
         season: lastWatched.season,
         episode: lastWatched.episode,
         progress,
         episodeTitle: `Episode ${lastWatched.episode}`,
         episodeThumbnail: null,
-        timeRemaining: Math.max(0, lastWatched.duration - lastWatched.watch_position),
+        timeRemaining: Math.max(
+          0,
+          lastWatched.duration - lastWatched.watch_position
+        ),
         watchPosition: lastWatched.watch_position,
-        duration: lastWatched.duration
+        duration: lastWatched.duration,
       };
     }
   }, [tvShow, watchHistory]);
@@ -230,7 +285,7 @@ export const useTVDetails = (id: string | undefined) => {
     handleToggleFavorite,
     handleToggleWatchlist,
     getLastWatchedEpisode,
-    navigate
+    navigate,
   };
 };
 

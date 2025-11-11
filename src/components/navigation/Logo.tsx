@@ -1,8 +1,6 @@
-
-
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './Logo.module.css';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./Logo.module.css";
 
 /**
  * Neon & Retro logo for Let's Stream navigation bar.
@@ -13,13 +11,18 @@ const Logo: React.FC = () => {
   return (
     <div
       title="Let's Stream"
-      onClick={() => navigate('/')}
+      onClick={() => navigate("/")}
       className="cursor-pointer font-mono text-5xl font-bold"
     >
-      <span className={styles.flickerL + ' text-white'}>L</span>
-      <span className={styles.flickerS + ' text-white'} style={{ marginLeft: '-0.25em' }}>S</span>
+      <span className={styles.flickerL + " text-white"}>L</span>
+      <span
+        className={styles.flickerS + " text-white"}
+        style={{ marginLeft: "-0.25em" }}
+      >
+        S
+      </span>
     </div>
   );
-}
+};
 
 export default Logo;

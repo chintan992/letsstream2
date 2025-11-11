@@ -1,20 +1,23 @@
-
-import { useParams } from 'react-router-dom';
-import { ExternalLink, ChevronDown } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import Navbar from '@/components/Navbar';
-import { VideoPlayer } from '@/components/player/VideoPlayer';
-import VideoSourceSelector from '@/components/player/VideoSourceSelector';
-import EpisodeNavigation from '@/components/player/EpisodeNavigation';
-import EpisodeSidebar from '@/components/player/EpisodeSidebar';
-import MediaActions from '@/components/player/MediaActions';
-import { useMediaPlayer } from '@/hooks/use-media-player';
-import { videoSources } from '@/utils/video-sources';
-import { useAuth } from '@/hooks';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useParams } from "react-router-dom";
+import { ExternalLink, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import Navbar from "@/components/Navbar";
+import { VideoPlayer } from "@/components/player/VideoPlayer";
+import VideoSourceSelector from "@/components/player/VideoSourceSelector";
+import EpisodeNavigation from "@/components/player/EpisodeNavigation";
+import EpisodeSidebar from "@/components/player/EpisodeSidebar";
+import MediaActions from "@/components/player/MediaActions";
+import { useMediaPlayer } from "@/hooks/use-media-player";
+import { videoSources } from "@/utils/video-sources";
+import { useAuth } from "@/hooks";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Player = () => {
   const { id, season, episode, type } = useParams<{
@@ -26,7 +29,7 @@ const Player = () => {
   const { user } = useAuth();
   const [isEpisodeSidebarOpen, setIsEpisodeSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-  
+
   const {
     title,
     mediaType,
@@ -50,21 +53,21 @@ const Player = () => {
     toggleWatchlist,
     handlePlayerLoaded,
     handlePlayerError,
-    goBack
+    goBack,
   } = useMediaPlayer(id, season, episode, type);
 
-  const posterUrl = mediaDetails ? 
-    `https://image.tmdb.org/t/p/w1280${mediaDetails.backdrop_path}` 
+  const posterUrl = mediaDetails
+    ? `https://image.tmdb.org/t/p/w1280${mediaDetails.backdrop_path}`
     : undefined;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-background relative"
+      className="relative min-h-screen bg-background"
     >
-      <div className="fixed inset-0 bg-gradient-to-b from-background/95 to-background pointer-events-none" />
+      <div className="from-background/95 pointer-events-none fixed inset-0 bg-gradient-to-b to-background" />
 
       {/* Z-INDEX HIERARCHY:
          - Navbar & Sheet overlays: z-50 (highest - always visible)
@@ -92,9 +95,9 @@ const Player = () => {
         />
 
         {/* Desktop Layout: Video Player and Episode Sidebar side-by-side */}
-        {!isMobile && mediaType === 'tv' && episodes.length > 0 ? (
+        {!isMobile && mediaType === "tv" && episodes.length > 0 ? (
           <div className="flex flex-row gap-4 xl:gap-6">
-            <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px] z-10">
+            <div className="z-10 min-w-0 flex-1 lg:min-w-[560px] xl:min-w-[700px]">
               <VideoPlayer
                 isLoading={isLoading}
                 iframeUrl={iframeUrl}
@@ -104,7 +107,7 @@ const Player = () => {
                 onError={handlePlayerError}
               />
             </div>
-            <div className="h-[calc(9/16*56.25vw)] max-h-[80vh] min-h-[400px] w-[280px] md:w-80 lg:w-96 xl:w-[400px] flex-shrink-0">
+            <div className="h-[calc(9/16*56.25vw)] max-h-[80vh] min-h-[400px] w-[280px] flex-shrink-0 md:w-80 lg:w-96 xl:w-[400px]">
               <EpisodeSidebar
                 episodes={episodes}
                 currentEpisodeIndex={currentEpisodeIndex}
@@ -116,7 +119,7 @@ const Player = () => {
         ) : (
           <>
             {/* Video Player Section for Mobile or Non-TV content */}
-            <div className="flex-1 min-w-0 lg:min-w-[560px] xl:min-w-[700px] z-10">
+            <div className="z-10 min-w-0 flex-1 lg:min-w-[560px] xl:min-w-[700px]">
               <VideoPlayer
                 isLoading={isLoading}
                 iframeUrl={iframeUrl}
@@ -128,23 +131,29 @@ const Player = () => {
             </div>
 
             {/* Collapsible Episode Sidebar for Mobile/Tablet */}
-            {isMobile && mediaType === 'tv' && episodes.length > 0 && (
-              <Collapsible open={isEpisodeSidebarOpen} onOpenChange={setIsEpisodeSidebarOpen} className="mt-4">
+            {isMobile && mediaType === "tv" && episodes.length > 0 && (
+              <Collapsible
+                open={isEpisodeSidebarOpen}
+                onOpenChange={setIsEpisodeSidebarOpen}
+                className="mt-4"
+              >
                 <CollapsibleTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full bg-black/95 border border-white/10 backdrop-blur-sm p-4 rounded-lg flex items-center justify-between hover:bg-white/5 transition-all duration-300"
+                    className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/95 p-4 backdrop-blur-sm transition-all duration-300 hover:bg-white/5"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">Episodes</span>
-                      <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
+                      <span className="font-medium text-white">Episodes</span>
+                      <span className="rounded-full bg-white/10 px-2 py-1 text-xs text-white/60">
                         {episodes.length}
                       </span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-white/60 transition-transform duration-300 ${isEpisodeSidebarOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-4 w-4 text-white/60 transition-transform duration-300 ${isEpisodeSidebarOpen ? "rotate-180" : ""}`}
+                    />
                   </Button>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="mt-2 overflow-hidden data-[state=open]:animate-slide-down data-[state=closed]:animate-slide-up max-h-[60vh] overflow-y-auto">
+                <CollapsibleContent className="mt-2 max-h-[60vh] overflow-hidden overflow-y-auto data-[state=closed]:animate-slide-up data-[state=open]:animate-slide-down">
                   <EpisodeSidebar
                     episodes={episodes}
                     currentEpisodeIndex={currentEpisodeIndex}
@@ -158,7 +167,7 @@ const Player = () => {
         )}
 
         {/* Episode navigation moved below the player and sidebar */}
-        {mediaType === 'tv' && episodes.length > 0 && (
+        {mediaType === "tv" && episodes.length > 0 && (
           <div className="mt-6">
             <EpisodeNavigation
               episodes={episodes}
@@ -182,16 +191,20 @@ const Player = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-white">Video Sources</h3>
-                <p className="text-sm text-white/60">Select your preferred streaming source</p>
+                <h3 className="text-lg font-medium text-white">
+                  Video Sources
+                </h3>
+                <p className="text-sm text-white/60">
+                  Select your preferred streaming source
+                </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
+                className="border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10"
                 onClick={goToDetails}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 View Details
               </Button>
             </div>

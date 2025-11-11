@@ -1,8 +1,13 @@
-import { GoogleGenerativeAI, GenerateContentResult, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
-import { RateLimiter } from './rate-limiter';
-import env from '@/config/env';
-import { TV_SHOW_EXAMPLE, formatTVShowRequirements } from './tv-show-prompt';
-import { ChatbotMedia } from './types/chatbot-types';
+import {
+  GoogleGenerativeAI,
+  GenerateContentResult,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
+import { RateLimiter } from "./rate-limiter";
+import env from "@/config/env";
+import { TV_SHOW_EXAMPLE, formatTVShowRequirements } from "./tv-show-prompt";
+import { ChatbotMedia } from "./types/chatbot-types";
 
 // Types
 interface GeminiConfig {
@@ -16,22 +21,25 @@ interface GeminiConfig {
 }
 
 export interface GeminiChatMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: number;
 }
 
 export interface GeminiResponse {
   text: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
   error?: string;
 }
 
 // Custom error types
 class GeminiAPIError extends Error {
-  constructor(message: string, public code?: string) {
+  constructor(
+    message: string,
+    public code?: string
+  ) {
     super(message);
-    this.name = 'GeminiAPIError';
+    this.name = "GeminiAPIError";
   }
 }
 
@@ -53,9 +61,9 @@ const rateLimiter = RateLimiter.getInstance(
 );
 
 // Set specific limit for Gemini API
-rateLimiter.setLimit('gemini-api', {
+rateLimiter.setLimit("gemini-api", {
   maxRequests: DEFAULT_CONFIG.rateLimit.requestsPerMinute,
-  windowMs: 60 * 1000 // 1 minute in milliseconds
+  windowMs: 60 * 1000, // 1 minute in milliseconds
 });
 
 // Initialize the Google GenAI only if API key is available
@@ -74,24 +82,24 @@ async function withRetry<T>(
   delay: number = DEFAULT_CONFIG.retryDelay
 ): Promise<T> {
   let lastError: Error | null = null;
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
-      
+      lastError = error instanceof Error ? error : new Error("Unknown error");
+
       if (attempt === maxRetries) {
         throw new GeminiAPIError(
           `Operation failed after ${maxRetries} retries: ${lastError.message}`,
-          'RETRY_EXHAUSTED'
+          "RETRY_EXHAUSTED"
         );
       }
-      
+
       await sleep(delay * Math.pow(2, attempt));
     }
   }
-  
+
   throw lastError;
 }
 
@@ -158,32 +166,35 @@ const FALLBACK_RECOMMENDATIONS = [
   {
     title: "The Shawshank Redemption",
     year: "1994",
-    description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+    description:
+      "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
     type: "movie",
     tmdbId: 278,
     genres: ["Drama"],
-    rating: "IMDb: 9.3/10"
+    rating: "IMDb: 9.3/10",
   },
   {
     title: "The Dark Knight",
     year: "2008",
-    description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+    description:
+      "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
     type: "movie",
     tmdbId: 155,
     genres: ["Action", "Crime", "Drama", "Thriller"],
-    rating: "IMDb: 9.0/10"
+    rating: "IMDb: 9.0/10",
   },
   {
     title: "Breaking Bad",
     year: "2008",
-    description: "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
+    description:
+      "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
     type: "tv",
     tmdbId: 1396,
     genres: ["Drama", "Crime", "Thriller"],
     rating: "IMDb: 9.5/10",
     season: 1,
-    episode: 1
-  }
+    episode: 1,
+  },
 ];
 
 /**
@@ -195,54 +206,57 @@ const generateFallbackResponse = (query: string): string => {
   const lowerQuery = query.toLowerCase();
   let genre = "";
   let mood = "";
-  
+
   // Simple query analysis for fallback
   if (lowerQuery.includes("action")) genre = "action";
   else if (lowerQuery.includes("comedy")) genre = "comedy";
   else if (lowerQuery.includes("drama")) genre = "drama";
   else if (lowerQuery.includes("horror")) genre = "horror";
-  
-  if (lowerQuery.includes("happy") || lowerQuery.includes("uplifting")) mood = "uplifting";
+
+  if (lowerQuery.includes("happy") || lowerQuery.includes("uplifting"))
+    mood = "uplifting";
   else if (lowerQuery.includes("sad")) mood = "emotional";
   else if (lowerQuery.includes("scary")) mood = "tense";
-  
+
   // Filter recommendations based on simple query matching
   let relevantRecs = FALLBACK_RECOMMENDATIONS;
   if (genre) {
-    relevantRecs = relevantRecs.filter(rec => 
+    relevantRecs = relevantRecs.filter(rec =>
       rec.genres.some(g => g.toLowerCase().includes(genre))
     );
   }
-  
+
   // If nothing matched, use all recommendations
   if (relevantRecs.length === 0) {
     relevantRecs = FALLBACK_RECOMMENDATIONS;
   }
-  
+
   // Format the response using a simpler approach to avoid template literal issues
-  let responseText = "Here are some recommendations that might interest you:\n\n";
-  
+  let responseText =
+    "Here are some recommendations that might interest you:\n\n";
+
   // Build the recommendations string manually
   relevantRecs.forEach((rec, index) => {
     if (index > 0) {
       responseText += "\n\n"; // Add spacing between recommendations
     }
-    
+
     responseText += `${index + 1}. **${rec.title}** (${rec.year}) - ${rec.description}\n`;
-    responseText += `Genre: ${rec.genres.join(', ')}\n`;
+    responseText += `Genre: ${rec.genres.join(", ")}\n`;
     responseText += `Type: ${rec.type}\n`;
     responseText += `${rec.rating}\n`;
     responseText += `TMDB_ID: ${rec.tmdbId}`;
-    
+
     // Add TV show specific info if needed
-    if (rec.type === 'tv') {
+    if (rec.type === "tv") {
       responseText += `\nSeason: ${rec.season || 1}\n`;
       responseText += `Episode: ${rec.episode || 1}`;
     }
   });
-  
-  responseText += "\n\n(Note: I'm currently using a backup recommendation system. For more personalized recommendations, please try again later.)";
-  
+
+  responseText +=
+    "\n\n(Note: I'm currently using a backup recommendation system. For more personalized recommendations, please try again later.)";
+
   return responseText;
 };
 
@@ -258,62 +272,65 @@ export const sendMessageToGemini = async (
 ): Promise<GeminiResponse> => {
   // Track start time for performance monitoring
   const startTime = Date.now();
-  
+
   try {
     // Check if Gemini API is configured
     if (!genAI) {
-      console.log('API key not configured, using fallback system');
+      console.log("API key not configured, using fallback system");
       return {
         text: generateFallbackResponse(message),
-        status: 'success',
-        fallback: true
+        status: "success",
+        fallback: true,
       };
     }
 
     // Check rate limit using the specific Gemini API endpoint
-    const canProceed = await rateLimiter.isAllowed('https://generativelanguage.googleapis.com/v1/chat', 'gemini-api');
+    const canProceed = await rateLimiter.isAllowed(
+      "https://generativelanguage.googleapis.com/v1/chat",
+      "gemini-api"
+    );
     if (!canProceed) {
-      console.warn('Rate limit exceeded, using fallback system');
+      console.warn("Rate limit exceeded, using fallback system");
       return {
         text: generateFallbackResponse(message),
-        status: 'success',
+        status: "success",
         fallback: true,
-        error: 'RATE_LIMIT_EXCEEDED'
+        error: "RATE_LIMIT_EXCEEDED",
       };
     }
 
     // Get the chat model with enhanced safety settings
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash-lite',
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-lite",
       safetySettings: [
         {
           category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         },
         {
           category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         },
         {
           category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         },
         {
           category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
-        }
-      ]
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+      ],
     });
-    
+
     const chat = model.startChat({
       generationConfig: {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 1024,
-      }
+      },
     });
-    
+
     // Process chat history with improved handling
     if (chatHistory.length > 0) {
       // Add system prompt first if not present
@@ -321,21 +338,28 @@ export const sendMessageToGemini = async (
         try {
           await withRetry(() => chat.sendMessage(MOVIE_RECOMMENDATION_PROMPT));
         } catch (error) {
-          console.warn('Failed to send system prompt, continuing with chat history', error);
+          console.warn(
+            "Failed to send system prompt, continuing with chat history",
+            error
+          );
         }
       }
-      
+
       // Add only the most relevant historical messages to avoid context overflow
       // If we have many messages, only use the first one (system) and the most recent ones
-      const relevantHistory = chatHistory.length > 5 
-        ? [chatHistory[0], ...chatHistory.slice(-4)] 
-        : chatHistory;
-      
+      const relevantHistory =
+        chatHistory.length > 5
+          ? [chatHistory[0], ...chatHistory.slice(-4)]
+          : chatHistory;
+
       for (const msg of relevantHistory) {
         try {
           await withRetry(() => chat.sendMessage(msg));
         } catch (error) {
-          console.warn('Failed to send chat history message, continuing', error);
+          console.warn(
+            "Failed to send chat history message, continuing",
+            error
+          );
         }
       }
     } else {
@@ -343,59 +367,69 @@ export const sendMessageToGemini = async (
       try {
         await withRetry(() => chat.sendMessage(MOVIE_RECOMMENDATION_PROMPT));
       } catch (error) {
-        throw new GeminiAPIError('Failed to initialize chat with system prompt', 'SYSTEM_PROMPT_FAILED');
+        throw new GeminiAPIError(
+          "Failed to initialize chat with system prompt",
+          "SYSTEM_PROMPT_FAILED"
+        );
       }
     }
-    
+
     // Add timeout protection
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new GeminiAPIError('Request timed out', 'TIMEOUT')), 15000);
+      setTimeout(
+        () => reject(new GeminiAPIError("Request timed out", "TIMEOUT")),
+        15000
+      );
     });
-    
+
     // Send the user message with retry logic and timeout protection
     const result = await Promise.race([
       withRetry(() => chat.sendMessage(message)),
-      timeoutPromise
+      timeoutPromise,
     ]);
-    
+
     // Log performance metrics
     const responseTime = Date.now() - startTime;
     console.log(`API response time: ${responseTime}ms`);
-    
+
     return {
-      text: result.response.text() || 'No response generated.',
-      status: 'success',
-      responseTime
+      text: result.response.text() || "No response generated.",
+      status: "success",
+      responseTime,
     };
   } catch (error) {
-    console.error('Error communicating with Gemini API:', error);
-    
+    console.error("Error communicating with Gemini API:", error);
+
     // Enhanced error handling with graceful degradation
     if (error instanceof GeminiAPIError) {
       // For specific error types, use fallback system
-      if (['TIMEOUT', 'RETRY_EXHAUSTED', 'RATE_LIMIT_EXCEEDED'].includes(error.code || '')) {
-        console.log('Using fallback recommendation system due to API error');
+      if (
+        ["TIMEOUT", "RETRY_EXHAUSTED", "RATE_LIMIT_EXCEEDED"].includes(
+          error.code || ""
+        )
+      ) {
+        console.log("Using fallback recommendation system due to API error");
         return {
           text: generateFallbackResponse(message),
-          status: 'success',
+          status: "success",
           fallback: true,
-          error: error.code
+          error: error.code,
         };
       }
-      
+
       return {
         text: error.message,
-        status: 'error',
-        error: error.code
+        status: "error",
+        error: error.code,
       };
     }
-    
+
     // For unknown errors, use fallback system
     return {
       text: generateFallbackResponse(message),
-      status: 'success',
+      status: "success",
       fallback: true,
-      error: 'UNKNOWN_ERROR'
+      error: "UNKNOWN_ERROR",
     };
   }
 };
@@ -411,20 +445,26 @@ export const searchMedia = async (query: string): Promise<GeminiResponse> => {
     if (!genAI) {
       return {
         text: "Gemini API is not configured. Please add a valid API key in your .env file.",
-        status: 'error',
-        error: 'API_NOT_CONFIGURED'
+        status: "error",
+        error: "API_NOT_CONFIGURED",
       };
     }
-    
+
     // Check rate limit using the specific Gemini API endpoint
-    const canProceed = await rateLimiter.isAllowed('https://generativelanguage.googleapis.com/v1/generate', 'gemini-api');
+    const canProceed = await rateLimiter.isAllowed(
+      "https://generativelanguage.googleapis.com/v1/generate",
+      "gemini-api"
+    );
     if (!canProceed) {
-      throw new GeminiAPIError('Rate limit exceeded. Please try again later.', 'RATE_LIMIT_EXCEEDED');
+      throw new GeminiAPIError(
+        "Rate limit exceeded. Please try again later.",
+        "RATE_LIMIT_EXCEEDED"
+      );
     }
 
     // Use the models API for one-off content generation with retry logic
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const result = await withRetry<GenerateContentResult>(() => 
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const result = await withRetry<GenerateContentResult>(() =>
       model.generateContent(`Please search for movies or TV shows that match: "${query}".
         Provide up to 3 results with title, year, brief description, genre, and TMDB ID.
         For each result:
@@ -433,26 +473,26 @@ export const searchMedia = async (query: string): Promise<GeminiResponse> => {
         - For any TV show result, indicate which episode to start with
         Format each result in a clear, structured way that can be easily parsed.`)
     );
-    
+
     return {
-      text: result.response.text() || 'No results found.',
-      status: 'success'
+      text: result.response.text() || "No results found.",
+      status: "success",
     };
   } catch (error) {
-    console.error('Error searching media:', error);
-    
+    console.error("Error searching media:", error);
+
     if (error instanceof GeminiAPIError) {
       return {
         text: error.message,
-        status: 'error',
-        error: error.code
+        status: "error",
+        error: error.code,
       };
     }
-    
+
     return {
-      text: 'An unexpected error occurred while searching. Please try again later.',
-      status: 'error',
-      error: 'UNKNOWN_ERROR'
+      text: "An unexpected error occurred while searching. Please try again later.",
+      status: "error",
+      error: "UNKNOWN_ERROR",
     };
   }
 };
@@ -461,7 +501,7 @@ export const searchMedia = async (query: string): Promise<GeminiResponse> => {
 // Add fallback and response time to GeminiResponse type
 export interface GeminiResponse {
   text: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
   error?: string;
   fallback?: boolean;
   responseTime?: number;

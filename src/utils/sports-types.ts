@@ -1,4 +1,3 @@
-
 export interface Team {
   name: string;
   badge: string;

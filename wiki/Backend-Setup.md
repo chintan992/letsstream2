@@ -34,7 +34,7 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -43,21 +43,21 @@ service cloud.firestore {
     match /userPreferences/{userId} {
       allow read, write: if isOwner(userId);
     }
-    
+
     // Watch history
     match /watchHistory/{documentId} {
       allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
     }
-    
+
     // Favorites
     match /favorites/{documentId} {
       allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
     }
-    
+
     // Watchlist
     match /watchlist/{documentId} {
       allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;

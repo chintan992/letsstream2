@@ -20,14 +20,17 @@ export function useFeatureNotifications(): void {
         // Check if notifications are enabled in user preferences
         const userPreferencesRef = doc(db, "userPreferences", user.uid);
         const userPreferencesDoc = await getDoc(userPreferencesRef);
-        const userPreferences = userPreferencesDoc.data() as UserPreferences | undefined;
+        const userPreferences = userPreferencesDoc.data() as
+          | UserPreferences
+          | undefined;
 
         // If notifications are explicitly disabled, do not show any notifications
         if (userPreferences?.isNotificationsEnabled === false) {
           return;
         }
 
-        const lastSeenVersion = localStorage.getItem(`lastSeenFeature-${user.uid}`) || "0.0.0";
+        const lastSeenVersion =
+          localStorage.getItem(`lastSeenFeature-${user.uid}`) || "0.0.0";
         // Custom API feature notification logic removed
       } catch (error) {
         console.error("Error checking for new features:", error);

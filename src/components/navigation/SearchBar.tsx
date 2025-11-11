@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, ArrowRight, Film, Tv } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { Search, ArrowRight, Film, Tv } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { searchMedia } from '@/utils/api';
-import { Media } from '@/utils/types';
+import { searchMedia } from "@/utils/api";
+import { Media } from "@/utils/types";
 
 interface SearchBarProps {
   isMobile?: boolean;
@@ -15,14 +15,14 @@ interface SearchBarProps {
   onToggleExpand?: () => void;
 }
 
-const SearchBar = ({ 
-  isMobile = false, 
+const SearchBar = ({
+  isMobile = false,
   onSearch,
-  className = '',
+  className = "",
   expanded = false,
-  onToggleExpand
+  onToggleExpand,
 }: SearchBarProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchSuggestions, setSearchSuggestions] = useState<Media[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
@@ -32,15 +32,15 @@ const SearchBar = ({
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         if (onToggleExpand) onToggleExpand();
         else searchInputRef.current?.focus();
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [onToggleExpand]);
 
   useEffect(() => {
@@ -51,13 +51,16 @@ const SearchBar = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -68,7 +71,7 @@ const SearchBar = ({
           setSearchSuggestions(results.slice(0, 6));
           setShowSuggestions(true);
         } catch (error) {
-          console.error('Error fetching suggestions:', error);
+          console.error("Error fetching suggestions:", error);
         }
       } else {
         setSearchSuggestions([]);
@@ -84,7 +87,7 @@ const SearchBar = ({
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+      setSearchQuery("");
       setShowSuggestions(false);
       if (onSearch) onSearch();
       if (onToggleExpand) onToggleExpand();
@@ -99,7 +102,7 @@ const SearchBar = ({
 
   const handleSuggestionClick = (item: Media) => {
     navigate(`/${item.media_type}/${item.id}`);
-    setSearchQuery('');
+    setSearchQuery("");
     setShowSuggestions(false);
     if (onSearch) onSearch();
     if (onToggleExpand) onToggleExpand();
@@ -127,22 +130,25 @@ const SearchBar = ({
   }
 
   return (
-    <form onSubmit={handleSearch} className={`search-container ${isMobile ? 'w-full' : ''} ${className}`}>
+    <form
+      onSubmit={handleSearch}
+      className={`search-container ${isMobile ? "w-full" : ""} ${className}`}
+    >
       <div className="relative w-full">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-4 h-4 pointer-events-none" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-white/60" />
         <Input
           type="search"
           placeholder={isMobile ? "Search..." : "Search... (Press /)"}
-          className="search-input pl-10 pr-12 h-10" // Added explicit height
+          className="search-input h-10 pl-10 pr-12" // Added explicit height
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           ref={searchInputRef}
         />
 
         <Button
           type="submit"
           size="icon"
-          className="search-button absolute right-2.5 top-1/2 transform -translate-y-1/2" // Adjusted right position
+          className="search-button absolute right-2.5 top-1/2 -translate-y-1/2 transform" // Adjusted right position
           aria-label="Search"
         >
           <ArrowRight className="h-3.5 w-3.5" />
@@ -150,25 +156,30 @@ const SearchBar = ({
 
         {showSuggestions && searchSuggestions.length > 0 && (
           <div ref={suggestionsRef} className="search-suggestions">
-            {searchSuggestions.map((item) => (
+            {searchSuggestions.map(item => (
               <button
                 key={`${item.media_type}-${item.id}`}
                 className="suggestion-item"
                 onClick={() => handleSuggestionClick(item)}
               >
                 <span className="mr-2 flex-shrink-0">
-                  {item.media_type === 'movie' ?
-                    <Film className="h-4 w-4 text-white/70" /> :
+                  {item.media_type === "movie" ? (
+                    <Film className="h-4 w-4 text-white/70" />
+                  ) : (
                     <Tv className="h-4 w-4 text-white/70" />
-                  }
+                  )}
                 </span>
-                <span className="flex-1 text-left truncate">{item.title || item.name}</span>
-                <span className="ml-2 opacity-50 text-xs bg-white/10 px-1.5 py-0.5 rounded flex-shrink-0">Enter</span>
+                <span className="flex-1 truncate text-left">
+                  {item.title || item.name}
+                </span>
+                <span className="ml-2 flex-shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-xs opacity-50">
+                  Enter
+                </span>
               </button>
             ))}
             <button
               onClick={handleSearch}
-              className="suggestion-item font-medium text-white/90 justify-center" // Changed text-accent to text-white/90
+              className="suggestion-item justify-center font-medium text-white/90" // Changed text-accent to text-white/90
             >
               View all results for "{searchQuery}"
             </button>

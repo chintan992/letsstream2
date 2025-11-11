@@ -13,9 +13,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "tsc": "tsc --noEmit",
-    "format:check": "echo '[PLACEHOLDER] Formatting check - Prettier not configured'",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test:coverage": "mkdir -p coverage && echo 'No tests' > coverage/README.txt && echo '[PLACEHOLDER] Tests skipped - No test framework configured'",
-    "verify": "npm run tsc && npm run lint && npm run build"
+    "verify": "npm run tsc && npm run lint && npm run format && npm run build"
   },
   "dependencies": {
     "@docusaurus/core": "^3.8.0",
@@ -95,10 +96,14 @@
     "@vitejs/plugin-react-swc": "^4.2.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
+    "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",

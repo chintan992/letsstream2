@@ -1,4 +1,4 @@
-import { Media } from '@/utils/types';
+import { Media } from "@/utils/types";
 
 export interface ChatbotMedia extends Media {
   season_number?: number;
@@ -8,16 +8,12 @@ export interface ChatbotMedia extends Media {
 // Convert standard Media to ChatbotMedia
 export const toChatbotMedia = (media: Media): ChatbotMedia => {
   return {
-    ...media
+    ...media,
   };
 };
 
 // Convert ChatbotMedia to standard Media
 export const toMedia = (media: ChatbotMedia): Media => {
-  const {
-    season_number,
-    episode_number,
-    ...standardMedia
-  } = media;
+  const { season_number, episode_number, ...standardMedia } = media;
   return standardMedia;
 };

@@ -1,4 +1,3 @@
-
 {
   "name": "Let's Stream V2.0",
   "short_name": "Let's Stream",
@@ -6,12 +5,17 @@
   "start_url": "/",
   "id": "/",
   "display": "fullscreen",
-  "display_override": ["window-controls-overlay", "fullscreen", "browser", "standalone"],
+  "display_override": [
+    "window-controls-overlay",
+    "fullscreen",
+    "browser",
+    "standalone"
+  ],
   "orientation": "any",
   "background_color": "#0f0f0f",
   "theme_color": "#3b82f6",
   "icons": [
-     {
+    {
       "src": "icons/icon-48x48.png",
       "sizes": "48x48",
       "type": "image/png"

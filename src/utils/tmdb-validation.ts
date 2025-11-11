@@ -1,9 +1,9 @@
-import { Media } from '@/utils/types';
-import env from '@/config/env';
+import { Media } from "@/utils/types";
+import env from "@/config/env";
 
 interface TMDBValidationResult {
   isValid: boolean;
-  mediaType: 'movie' | 'tv' | null;
+  mediaType: "movie" | "tv" | null;
   tmdbId: number | null;
   error?: string;
 }
@@ -11,19 +11,22 @@ interface TMDBValidationResult {
 /**
  * Validates and verifies TMDB content existence and type
  */
-async function validateTMDBContent(mediaId: number, expectedType?: 'movie' | 'tv'): Promise<TMDBValidationResult> {
+async function validateTMDBContent(
+  mediaId: number,
+  expectedType?: "movie" | "tv"
+): Promise<TMDBValidationResult> {
   try {
     // First try the expected type if provided
     if (expectedType) {
       const response = await fetch(
         `https://api.themoviedb.org/3/${expectedType}/${mediaId}?api_key=${env.TMDB_API_KEY}`
       );
-      
+
       if (response.ok) {
         return {
           isValid: true,
           mediaType: expectedType,
-          tmdbId: mediaId
+          tmdbId: mediaId,
         };
       }
     }
@@ -36,8 +39,8 @@ async function validateTMDBContent(mediaId: number, expectedType?: 'movie' | 'tv
     if (movieResponse.ok) {
       return {
         isValid: true,
-        mediaType: 'movie',
-        tmdbId: mediaId
+        mediaType: "movie",
+        tmdbId: mediaId,
       };
     }
 
@@ -48,8 +51,8 @@ async function validateTMDBContent(mediaId: number, expectedType?: 'movie' | 'tv
     if (tvResponse.ok) {
       return {
         isValid: true,
-        mediaType: 'tv',
-        tmdbId: mediaId
+        mediaType: "tv",
+        tmdbId: mediaId,
       };
     }
 
@@ -57,16 +60,15 @@ async function validateTMDBContent(mediaId: number, expectedType?: 'movie' | 'tv
       isValid: false,
       mediaType: null,
       tmdbId: null,
-      error: 'Content not found in TMDB'
+      error: "Content not found in TMDB",
     };
-
   } catch (error) {
-    console.error('Error validating TMDB content:', error);
+    console.error("Error validating TMDB content:", error);
     return {
       isValid: false,
       mediaType: null,
       tmdbId: null,
-      error: 'Error validating content'
+      error: "Error validating content",
     };
   }
 }
@@ -75,14 +77,17 @@ async function validateTMDBContent(mediaId: number, expectedType?: 'movie' | 'tv
  * Determines the correct route for a media item
  */
 async function getMediaRoute(media: Media): Promise<string> {
-  const validation = await validateTMDBContent(media.id, media.media_type as 'movie' | 'tv');
-  
+  const validation = await validateTMDBContent(
+    media.id,
+    media.media_type as "movie" | "tv"
+  );
+
   if (!validation.isValid || !validation.mediaType) {
     console.error(`Invalid media route for ID ${media.id}:`, validation.error);
-    return '/not-found';
+    return "/not-found";
   }
 
-  if (validation.mediaType === 'movie') {
+  if (validation.mediaType === "movie") {
     return `/movie/${validation.tmdbId}`;
   } else {
     return `/tv/${validation.tmdbId}`;
@@ -93,11 +98,14 @@ async function getMediaRoute(media: Media): Promise<string> {
  * Determines the correct watch route for a media item
  */
 async function getWatchRoute(media: Media): Promise<string> {
-  const validation = await validateTMDBContent(media.id, media.media_type as 'movie' | 'tv');
-  
+  const validation = await validateTMDBContent(
+    media.id,
+    media.media_type as "movie" | "tv"
+  );
+
   if (!validation.isValid || !validation.mediaType) {
     console.error(`Invalid watch route for ID ${media.id}:`, validation.error);
-    return '/not-found';
+    return "/not-found";
   }
 
   return `/watch/${validation.mediaType}/${validation.tmdbId}`;
@@ -109,17 +117,18 @@ async function getWatchRoute(media: Media): Promise<string> {
 async function navigateToContent(
   media: Media,
   navigate: (path: string) => void,
-  type: 'details' | 'watch' = 'details'
+  type: "details" | "watch" = "details"
 ): Promise<void> {
   try {
-    const route = type === 'details' 
-      ? await getMediaRoute(media)
-      : await getWatchRoute(media);
-    
+    const route =
+      type === "details"
+        ? await getMediaRoute(media)
+        : await getWatchRoute(media);
+
     navigate(route);
   } catch (error) {
-    console.error('Error navigating to content:', error);
-    navigate('/not-found');
+    console.error("Error navigating to content:", error);
+    navigate("/not-found");
   }
 }
 
@@ -128,5 +137,5 @@ export {
   getMediaRoute,
   getWatchRoute,
   navigateToContent,
-  type TMDBValidationResult
+  type TMDBValidationResult,
 };

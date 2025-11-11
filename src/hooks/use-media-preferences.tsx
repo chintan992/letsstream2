@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks';
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/hooks";
 import {
   analyzeUserPreferences,
   calculateMediaStats,
   type MediaPreferenceStats,
   type MediaPreferencesResponse,
   type PreferenceTimePeriod,
-  type ContentPreference
-} from '@/utils/media-preferences';
+  type ContentPreference,
+} from "@/utils/media-preferences";
 
 interface UseMediaPreferencesOptions {
   period?: PreferenceTimePeriod;
@@ -22,11 +22,13 @@ interface UseMediaPreferencesReturn extends MediaPreferencesResponse {
   setTimePeriod: (period: PreferenceTimePeriod) => void;
 }
 
-export function useMediaPreferences(options: UseMediaPreferencesOptions = {}): UseMediaPreferencesReturn {
+export function useMediaPreferences(
+  options: UseMediaPreferencesOptions = {}
+): UseMediaPreferencesReturn {
   const {
-    period: initialPeriod = 'all',
+    period: initialPeriod = "all",
     autoRefresh = false,
-    refreshInterval = 5 * 60 * 1000 // 5 minutes
+    refreshInterval = 5 * 60 * 1000, // 5 minutes
   } = options;
 
   const { user } = useAuth();
@@ -47,8 +49,10 @@ export function useMediaPreferences(options: UseMediaPreferencesOptions = {}): U
       const preferences = await analyzeUserPreferences(user.uid, period);
       setStats(preferences);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load preferences');
-      console.error('Error loading media preferences:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load preferences"
+      );
+      console.error("Error loading media preferences:", err);
     } finally {
       setLoading(false);
     }
@@ -72,17 +76,23 @@ export function useMediaPreferences(options: UseMediaPreferencesOptions = {}): U
 
   const defaultResponse: MediaPreferencesResponse = {
     stats: {
-      movies: { total: 0, favorited: 0, watched: 0, completed: 0, avgWatchTime: 0 },
-      tv: { total: 0, favorited: 0, watched: 0, completed: 0, avgWatchTime: 0 }
+      movies: {
+        total: 0,
+        favorited: 0,
+        watched: 0,
+        completed: 0,
+        avgWatchTime: 0,
+      },
+      tv: { total: 0, favorited: 0, watched: 0, completed: 0, avgWatchTime: 0 },
     },
-    preference: 'balanced',
+    preference: "balanced",
     moviePercentage: 0,
     tvPercentage: 0,
     favoriteStats: { movies: 0, tv: 0 },
     completionStats: {
       movies: { total: 0, completed: 0, rate: 0 },
-      tv: { total: 0, completed: 0, rate: 0 }
-    }
+      tv: { total: 0, completed: 0, rate: 0 },
+    },
   };
 
   const response = stats ? calculateMediaStats(stats) : defaultResponse;
@@ -92,6 +102,6 @@ export function useMediaPreferences(options: UseMediaPreferencesOptions = {}): U
     loading,
     error,
     refresh: fetchPreferences,
-    setTimePeriod: setPeriod
+    setTimePeriod: setPeriod,
   };
 }

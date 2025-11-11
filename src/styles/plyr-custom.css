@@ -1,4 +1,3 @@
-
 /* Custom Plyr Styles */
 
 /* Make sure Plyr is responsive within container */
@@ -9,14 +8,22 @@
 
 /* Customize Plyr controls colors to match app theme */
 :root {
-  --plyr-color-main: hsl(var(--foreground)); /* Matches app's foreground color */
+  --plyr-color-main: hsl(
+    var(--foreground)
+  ); /* Matches app's foreground color */
   --plyr-video-control-color: hsl(var(--foreground));
-  --plyr-video-control-color-hover: hsl(var(--muted-foreground)); /* Lighter grey */
+  --plyr-video-control-color-hover: hsl(
+    var(--muted-foreground)
+  ); /* Lighter grey */
   --plyr-video-control-background-hover: hsl(var(--background) / 0.8);
   --plyr-audio-control-background-hover: hsl(var(--background) / 0.8);
   --plyr-video-control-radius: 4px;
-  --plyr-range-thumb-background: hsl(var(--foreground)); /* Matches app's foreground color */
-  --plyr-range-fill-background: hsl(var(--accent)); /* Use accent for better visibility */
+  --plyr-range-thumb-background: hsl(
+    var(--foreground)
+  ); /* Matches app's foreground color */
+  --plyr-range-fill-background: hsl(
+    var(--accent)
+  ); /* Use accent for better visibility */
 }
 
 /* Control spacing */
@@ -71,11 +78,11 @@
   .plyr--video .plyr__controls {
     padding: 8px;
   }
-  
+
   .plyr__time {
     display: none;
   }
-  
+
   .plyr__volume {
     max-width: 60px;
   }
