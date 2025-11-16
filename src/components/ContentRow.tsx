@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Media } from "@/utils/types";
 import MediaCard from "./MediaCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./ContentRow.module.css";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
+import { useHorizontalScrollRestoration } from "@/hooks";
 
 interface ContentRowProps {
   title: string;
@@ -12,6 +14,7 @@ interface ContentRowProps {
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   loadMoreRef?: React.RefObject<HTMLDivElement>;
+  rowId?: string; // Optional unique identifier for the row to ensure unique storage keys
 }
 
 const ContentRow = ({
@@ -21,17 +24,31 @@ const ContentRow = ({
   onLoadMore,
   isLoadingMore,
   loadMoreRef,
+  rowId,
 }: ContentRowProps) => {
+  const location = useLocation();
+
+  if (!media || media.length === 0) return null;
+
   const rowRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+
+  // Generate unique storage key for horizontal scroll restoration
+  const sanitizedTitle = encodeURIComponent(title);
+  const storageKey = rowId
+    ? `scroll-horizontal-${location.pathname}-${sanitizedTitle}-${rowId}`
+    : `scroll-horizontal-${location.pathname}-${sanitizedTitle}`;
+
+  // Initialize horizontal scroll restoration and get the save function
+  const { saveScrollPosition } = useHorizontalScrollRestoration(rowRef, storageKey);
 
   // Previous scroll position to detect direction and boundaries
   const lastScrollPosition = useRef(0);
   const scrollEndTimeout = useRef<NodeJS.Timeout | null>(null);
   const hasScrolledRecently = useRef(false);
 
-  // Handle scroll position to show/hide arrows
+  // Handle scroll position to show/hide arrows and save scroll position
   const handleScroll = () => {
     if (!rowRef.current) return;
 
@@ -76,6 +93,9 @@ const ContentRow = ({
     // Update arrow visibility
     setShowLeftArrow(scrollLeft > 0);
     setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
+
+    // Save scroll position for restoration using the hook's function
+    saveScrollPosition(true); // Mark as manual call from React event handler
   };
 
   // Scroll functions

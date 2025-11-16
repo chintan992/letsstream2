@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import ContentRow from "@/components/ContentRow";
 import Navbar from "@/components/Navbar";
@@ -22,6 +23,7 @@ const TVDetailsPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>("episodes");
+  const [isContentHydrated, setIsContentHydrated] = useState(false);
   const [lastWatchedEpisode, setLastWatchedEpisode] = useState<{
     season: number;
     episode: number;
@@ -34,6 +36,12 @@ const TVDetailsPage = () => {
   } | null>(null);
   const [isLastWatchedLoading, setIsLastWatchedLoading] = useState(false);
   const { user } = useAuth();
+
+  // Tab-aware scroll restoration with hydration tracking
+  useScrollRestoration({
+    storageKey: `scroll-tv-details-${activeTab}${activeTab === 'episodes' ? '-s' + selectedSeason : ''}`,
+    enabled: isContentHydrated,
+  });
 
   const {
     tvShow,
@@ -74,6 +82,74 @@ const TVDetailsPage = () => {
       fetchLastWatchedEpisode();
     }
   }, [tvShow, getLastWatchedEpisode]);
+
+  // Handle hydration tracking for different tabs
+  useEffect(() => {
+    let isCancelled = false;
+
+    const checkHydration = async () => {
+      if (isCancelled) return;
+
+      // Reset hydration status when tab changes or season changes (for episodes tab)
+      setIsContentHydrated(false);
+
+      // Add small delay to allow tab content to render
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (isCancelled) return;
+
+      let hydrated = false;
+
+      switch (activeTab) {
+        case 'episodes':
+          // Episodes tab is hydrated when episodes data is available for the selected season
+          hydrated = episodes && episodes.length > 0;
+          break;
+        case 'about':
+          // About tab is hydrated when tvShow data is available
+          hydrated = !!tvShow;
+          break;
+        case 'cast':
+          // Cast tab is hydrated when cast data is available
+          hydrated = !!tvShow && cast && cast.length > 0;
+          break;
+        case 'reviews':
+          // Reviews tab is considered hydrated immediately as ReviewSection handles its own loading
+          hydrated = true;
+          break;
+        case 'downloads':
+          // Downloads tab is considered hydrated immediately as it lazy loads on user action
+          hydrated = true;
+          break;
+        default:
+          hydrated = true;
+      }
+
+      if (!isCancelled) {
+        setIsContentHydrated(hydrated);
+      }
+    };
+
+    checkHydration();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeTab, selectedSeason, tvShow, episodes, cast]);
+
+  // Handle hydration tracking for episodes tab specifically
+  useEffect(() => {
+    if (activeTab === 'episodes' && episodes && episodes.length > 0) {
+      setIsContentHydrated(true);
+    }
+  }, [episodes, activeTab]);
+
+  // Handle hydration tracking for cast tab specifically
+  useEffect(() => {
+    if (activeTab === 'cast' && cast && cast.length > 0) {
+      setIsContentHydrated(true);
+    }
+  }, [cast, activeTab]);
 
   if (isLoading) {
     return (

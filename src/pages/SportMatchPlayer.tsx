@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
@@ -17,6 +18,7 @@ import { saveLocalData, getLocalData } from "@/utils/supabase";
 
 const SportMatchPlayer = () => {
   const { matchId } = useParams();
+  useScrollRestoration();
   const { toast } = useToast();
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);

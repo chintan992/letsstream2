@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { History, Clock, Trash2, Bookmark, Heart, Loader2 } from "lucide-react";
@@ -29,13 +30,59 @@ const WatchHistory = () => {
     isLoading,
     loadMore,
   } = useWatchHistory();
+  const [activeTab, setActiveTab] = useState<
+    "history" | "favorites" | "watchlist"
+  >("history");
+  const [isContentHydrated, setIsContentHydrated] = useState(false);
+
+  // Reset hydration state when tab changes and set it after content loads
+  useEffect(() => {
+    setIsContentHydrated(false);
+    const timer = setTimeout(() => {
+      // Set hydrated state based on the current tab's data availability
+      let isTabDataReady = false;
+      if (activeTab === "history") {
+        isTabDataReady = !isLoading && watchHistory.length > 0;
+      } else if (activeTab === "favorites") {
+        isTabDataReady = favorites.length > 0;
+      } else if (activeTab === "watchlist") {
+        isTabDataReady = watchlist.length > 0;
+      }
+
+      // Mark as hydrated when data is loaded for the active tab
+      setIsContentHydrated(isTabDataReady);
+    }, 100); // Small delay to ensure content renders
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [activeTab, isLoading, watchHistory.length, favorites.length, watchlist.length]);
+
+  // Update hydration state when data changes after initial check
+  useEffect(() => {
+    if (isContentHydrated) {
+      // Re-evaluate hydration state if data changes after being hydrated
+      let isTabDataReady = false;
+      if (activeTab === "history") {
+        isTabDataReady = !isLoading && watchHistory.length > 0;
+      } else if (activeTab === "favorites") {
+        isTabDataReady = favorites.length > 0;
+      } else if (activeTab === "watchlist") {
+        isTabDataReady = watchlist.length > 0;
+      }
+      setIsContentHydrated(isTabDataReady);
+    }
+  }, [activeTab, isLoading, watchHistory.length, favorites.length, watchlist.length, isContentHydrated]);
+
+  // Use tab-specific scroll restoration with hydration check
+  useScrollRestoration({
+    storageKey: `scroll-watch-history-${activeTab}`,
+    enabled: isContentHydrated,
+  });
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [activeTab, setActiveTab] = useState<
-    "history" | "favorites" | "watchlist"
-  >("history");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loader = useRef(null);
 
@@ -54,7 +101,8 @@ const WatchHistory = () => {
           target.isIntersecting &&
           hasMore &&
           !isLoadingMore &&
-          activeTab === "history"
+          activeTab === "history" &&
+          watchHistory.length > 0
         ) {
           handleLoadMore();
         }

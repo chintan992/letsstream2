@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Episode } from "@/utils/types";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { backdropSizes } from "@/utils/api";
+import { useElementScrollRestoration } from "@/hooks";
 
 /**
  * Z-INDEX STRATEGY:
@@ -30,7 +31,15 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const episodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Element scroll restoration with storage key based on showId and season
+  useElementScrollRestoration(
+    viewportRef,
+    `scroll-episode-sidebar-${showId}-${season}`,
+    { enabled: true, restoreDelay: 100, debounceMs: 150 }
+  );
 
   // Filter episodes based on search query
   const filteredEpisodes = useMemo(() => {
@@ -117,7 +126,7 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
       </div>
 
       {/* Episode List */}
-      <ScrollArea className="min-h-0 flex-1" scrollBarVariant="accent">
+      <ScrollArea className="min-h-0 flex-1" scrollBarVariant="accent" viewportRef={viewportRef}>
         <div className="space-y-4 p-4">
           {filteredEpisodes.length === 0 && searchQuery.length > 0 ? (
             <div className="px-4 py-12 text-center">

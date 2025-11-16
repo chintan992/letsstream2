@@ -18,6 +18,7 @@ A modern streaming platform built with React, TypeScript, and Firebase, featurin
 - 🔐 Firebase authentication and real-time data
 - 📺 Multi-source streaming support
 - 📱 Responsive design for all devices
+- 🔄 Advanced scroll restoration that remembers your position on every page
 
 ## Tech Stack
 
@@ -236,5 +237,40 @@ These manual updates may introduce compatibility issues that require additional 
 This project is for educational demonstration purposes.
 
 ## Privacy Policy
+
+## Scroll Restoration
+
+This app features advanced scroll restoration that remembers your position on every page, providing a native app-like experience.
+
+### Features
+- **Window Scroll**: Automatically saves and restores vertical scroll position on all pages
+- **Tab-Specific**: Each tab on a page (e.g., "Popular" vs "Top Rated") maintains its own scroll position
+- **Horizontal Scroll**: Content rows remember horizontal scroll position
+- **State Persistence**: Pagination progress, filters, and accumulated data are preserved
+- **Browser Navigation**: Works seamlessly with browser back/forward buttons
+
+### Configuration
+
+Scroll restoration is controlled by the `VITE_SCROLL_RESTORATION_MANUAL` environment variable in `.env`:
+
+```bash
+VITE_SCROLL_RESTORATION_MANUAL=true  # Enable custom scroll restoration
+VITE_SCROLL_RESTORATION_MANUAL=false # Use browser default (not recommended)
+```
+
+### Documentation
+
+For detailed information, see:
+- [Architecture Documentation](./docs/SCROLL_RESTORATION_ARCHITECTURE.md)
+- [Testing Guide](./docs/SCROLL_RESTORATION_TESTING_GUIDE.md)
+- [Troubleshooting](./docs/SCROLL_RESTORATION_TROUBLESHOOTING.md)
+- [User Guide](./docs/SCROLL_RESTORATION_USER_GUIDE.md)
+
+### Testing
+
+Run scroll restoration tests:
+```bash
+npm run test:scroll-restoration
+```
 
 See [Privacy Policy](./src/pages/PrivacyPolicy.tsx) for details about data collection and usage.

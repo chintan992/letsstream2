@@ -1,4 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from "react";
+import { useScrollRestoration } from "@/hooks";
 import {
   getTrending,
   getPopularMovies,
@@ -28,6 +29,27 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [contentVisible, setContentVisible] = useState(false);
   const [secondaryLoaded, setSecondaryLoaded] = useState(false);
+  const [isPageHydrated, setIsPageHydrated] = useState(false);
+
+  // Update hydration state when content is visible and loading is complete
+  useEffect(() => {
+    if (!isLoading && contentVisible) {
+      // Additional delay to ensure hero and primary content rows have rendered
+      const hydrationTimer = setTimeout(() => {
+        setIsPageHydrated(true);
+      }, 200); // Small delay to ensure layout is present
+
+      return () => clearTimeout(hydrationTimer);
+    } else if (isLoading) {
+      // Reset hydration when loading starts again
+      setIsPageHydrated(false);
+    }
+  }, [isLoading, contentVisible]);
+
+  // Use scroll restoration with hydration check
+  useScrollRestoration({
+    enabled: isPageHydrated,
+  });
 
   // Primary data fetch - critical for initial render
   useEffect(() => {

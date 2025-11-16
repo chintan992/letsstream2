@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { AlertTriangle, RefreshCw } from "lucide-react";
@@ -22,9 +23,35 @@ export interface LiveStream {
   stream_link: string;
 }
 
+// Define the interface for the persisted state
+interface LiveStreamsPageState {
+  activeTab: string;
+}
+
 const LiveStreams = () => {
-  const [activeTab, setActiveTab] = useState<string>("all");
+  // Use page state persistence hook
+  const [persistedState, setPersistedState] = usePageStatePersistence<LiveStreamsPageState>(
+    "live-streams-page-state",
+    {
+      activeTab: "all",
+    }
+  );
+
+  // Initialize state from persisted state
+  const [activeTab, setActiveTab] = useState<string>(persistedState.activeTab);
+
+  // Apply scroll restoration - since there's no complex data to restore, hydration is immediate
+  useScrollRestoration({ enabled: true });
+
   const { data, isLoading, isError, error, refetch } = useLiveStreams();
+
+  // Effect to update persisted state when state changes
+  useEffect(() => {
+    setPersistedState(prevState => ({
+      ...prevState,
+      activeTab,
+    }));
+  }, [activeTab, setPersistedState]);
 
   // Handle manual refresh
   const handleRefresh = () => {
@@ -98,7 +125,14 @@ const LiveStreams = () => {
             <Tabs
               defaultValue="all"
               value={activeTab}
-              onValueChange={setActiveTab}
+              onValueChange={(value) => {
+                setActiveTab(value);
+                // Update the persisted state when tab changes
+                setPersistedState(prevState => ({
+                  ...prevState,
+                  activeTab: value
+                }));
+              }}
               className="mb-6"
             >
               <TabsList className="bg-background/30 backdrop-blur-sm">

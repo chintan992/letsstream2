@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 import {
   useQuery,
   useQueryClient,
@@ -16,17 +17,102 @@ import { TrendingUp, ChevronDown } from "lucide-react";
 
 const ITEMS_PER_PAGE = 20;
 
+// Define the interface for the persisted state
+interface TrendingPageState {
+  timeWindow: "day" | "week";
+  page: number;
+  trendingIds: number[]; // Store only IDs to minimize storage
+}
+
 const Trending = () => {
-  const [timeWindow, setTimeWindow] = useState<"day" | "week">("week");
-  const [page, setPage] = useState(1);
+  // State for hydration tracking
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Use page state persistence hook
+  const [persistedState, setPersistedState] = usePageStatePersistence<TrendingPageState>(
+    "trending-page-state",
+    {
+      timeWindow: "week",
+      page: 1,
+      trendingIds: [],
+    }
+  );
+
+  // Initialize state from persisted state
+  const [timeWindow, setTimeWindow] = useState<"day" | "week">(persistedState.timeWindow);
+  const [page, setPage] = useState(persistedState.page);
   const queryClient = useQueryClient();
   const [allTrending, setAllTrending] = useState<Media[]>([]);
+
+  // Apply scroll restoration only after hydration
+  useScrollRestoration({ enabled: isHydrated });
 
   const trendingQuery = useQuery({
     queryKey: ["trending", timeWindow, page],
     queryFn: () => getTrending(timeWindow, page),
     placeholderData: keepPreviousData,
   });
+
+  // Effect to hydrate data from persisted state
+  useEffect(() => {
+    // Only run once on mount to restore from persistence
+    if (isHydrated || persistedState.trendingIds.length === 0) {
+      // If no persisted data or already hydrated, just mark as hydrated
+      if (!isHydrated) {
+        setIsHydrated(true);
+      }
+      return;
+    }
+
+    // Hydrate trending items if we have persisted IDs
+    if (persistedState.trendingIds.length > 0) {
+      // Fetch all pages needed to get all persisted items
+      const totalPagesNeeded = Math.ceil(persistedState.trendingIds.length / ITEMS_PER_PAGE);
+      for (let page = 1; page <= totalPagesNeeded; page++) {
+        queryClient.prefetchQuery({
+          queryKey: ["trending", timeWindow, page],
+          queryFn: () => getTrending(timeWindow, page),
+        });
+      }
+    }
+  }, [isHydrated, persistedState, timeWindow, queryClient]);
+
+  // Effect to restore trending items from cache once they're available
+  useEffect(() => {
+    if (persistedState.trendingIds.length > 0 && !isHydrated) {
+      // Check if all required pages are in cache
+      const totalPagesNeeded = Math.ceil(persistedState.trendingIds.length / ITEMS_PER_PAGE);
+      let allPagesCached = true;
+
+      for (let page = 1; page <= totalPagesNeeded; page++) {
+        if (!queryClient.getQueryData(["trending", timeWindow, page])) {
+          allPagesCached = false;
+          break;
+        }
+      }
+
+      if (allPagesCached) {
+        // Build the complete array from cached pages
+        let accumulatedItems: Media[] = [];
+        for (let page = 1; page <= totalPagesNeeded; page++) {
+          const pageData: any[] = queryClient.getQueryData(["trending", timeWindow, page]) || [];
+          const mappedItems = pageData.map(item => ({
+            ...item,
+            media_type: item.media_type as "movie" | "tv",
+          }));
+          accumulatedItems = [...accumulatedItems, ...mappedItems];
+        }
+
+        // Filter to only the items we need based on persisted IDs
+        const filteredItems = accumulatedItems.filter(
+          item => persistedState.trendingIds.includes(item.id)
+        );
+
+        setAllTrending(filteredItems);
+        setIsHydrated(true);
+      }
+    }
+  }, [persistedState.trendingIds, timeWindow, queryClient, isHydrated]);
 
   // Update accumulated trending items when new data arrives
   useEffect(() => {
@@ -53,8 +139,26 @@ const Trending = () => {
     }
   }, [page, timeWindow, queryClient, trendingQuery.data]);
 
+  // Effect to update persisted state when trending items change
+  useEffect(() => {
+    setPersistedState(prevState => ({
+      ...prevState,
+      timeWindow,
+      page,
+      trendingIds: allTrending.map(item => item.id),
+    }));
+  }, [timeWindow, page, allTrending, setPersistedState]);
+
   const handleShowMore = () => {
-    setPage(prev => prev + 1);
+    setPage(prev => {
+      const newPage = prev + 1;
+      // Update the persisted state when page changes
+      setPersistedState(prevState => ({
+        ...prevState,
+        page: newPage
+      }));
+      return newPage;
+    });
   };
 
   // Check if there are more items to load
@@ -65,6 +169,13 @@ const Trending = () => {
     setTimeWindow(value);
     setPage(1);
     setAllTrending([]);
+    // Update the persisted state when time window changes
+    setPersistedState(prevState => ({
+      ...prevState,
+      timeWindow: value,
+      page: 1, // Reset page to 1
+      trendingIds: [], // Clear the IDs since content will change
+    }));
   };
 
   // Convert Media[] to ExtendedMedia[] for MediaGrid

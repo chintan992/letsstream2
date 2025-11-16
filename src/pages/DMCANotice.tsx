@@ -1,7 +1,9 @@
 import { AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { useScrollRestoration } from "@/hooks";
 
 const DMCANotice = () => {
+  useScrollRestoration();
   return (
     <AnimatePresence mode="wait">
       <div className="container mx-auto flex justify-center p-4">

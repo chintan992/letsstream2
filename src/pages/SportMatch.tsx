@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
@@ -21,6 +22,7 @@ import { useUserPreferences } from "@/hooks/user-preferences";
 
 const SportMatch = () => {
   const { source, id } = useParams<{ source: string; id: string }>();
+  useScrollRestoration();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userPreferences } = useUserPreferences();

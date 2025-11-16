@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -16,12 +17,41 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useUserPreferences } from "@/hooks/user-preferences";
 
+// Define the interface for the persisted state
+interface SportsPageState {
+  activeTab: string;
+  selectedSport: string;
+}
+
 const Sports = () => {
-  const [activeTab, setActiveTab] = useState<string>("popular");
-  const [selectedSport, setSelectedSport] = useState<string>("all");
+  // Use page state persistence hook
+  const [persistedState, setPersistedState] = usePageStatePersistence<SportsPageState>(
+    "sports-page-state",
+    {
+      activeTab: "popular",
+      selectedSport: "all",
+    }
+  );
+
+  // Initialize state from persisted state
+  const [activeTab, setActiveTab] = useState<string>(persistedState.activeTab);
+  const [selectedSport, setSelectedSport] = useState<string>(persistedState.selectedSport);
+
+  // Apply scroll restoration - since there's no complex data to restore, hydration is immediate
+  useScrollRestoration({ enabled: true });
+
   const { toast } = useToast();
   const { userPreferences } = useUserPreferences();
   const accentColor = userPreferences?.accentColor || "hsl(var(--accent))";
+
+  // Effect to update persisted state when state changes
+  useEffect(() => {
+    setPersistedState(prevState => ({
+      ...prevState,
+      activeTab,
+      selectedSport,
+    }));
+  }, [activeTab, selectedSport, setPersistedState]);
 
   // Fetch sports list
   const {
@@ -70,10 +100,20 @@ const Sports = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+    // Update the persisted state when tab changes
+    setPersistedState(prevState => ({
+      ...prevState,
+      activeTab: value
+    }));
   };
 
   const handleSportChange = (sportId: string) => {
     setSelectedSport(sportId);
+    // Update the persisted state when sport changes
+    setPersistedState(prevState => ({
+      ...prevState,
+      selectedSport: sportId
+    }));
   };
 
   return (

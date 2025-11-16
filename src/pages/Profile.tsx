@@ -6,6 +6,7 @@ import {
   lazy,
   Suspense,
 } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -28,7 +29,26 @@ const BackupTab = lazy(() => import("../components/profile/BackupTab"));
 const Profile = () => {
   const { user } = useProfileData();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isTabHydrated, setIsTabHydrated] = useState(false);
   const navigate = useNavigate();
+
+  // Reset hydration state when tab changes and set it after a short timeout
+  useEffect(() => {
+    setIsTabHydrated(false);
+    const timer = setTimeout(() => {
+      setIsTabHydrated(true);
+    }, 100); // Small delay to ensure content has rendered
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [activeTab]);
+
+  // Use tab-specific scroll restoration with hydration check
+  useScrollRestoration({
+    storageKey: `scroll-profile-${activeTab}`,
+    enabled: isTabHydrated,
+  });
 
   useEffect(() => {
     // Redirect to home if not logged in

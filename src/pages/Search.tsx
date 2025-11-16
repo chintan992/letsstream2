@@ -35,6 +35,7 @@ import {
 import { Search as SearchIcon, X, Filter, ChevronDown } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import SearchSuggestions from "@/components/SearchSuggestions";
+import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 
 const RESULTS_PER_PAGE = 20;
 
@@ -47,22 +48,65 @@ interface ExtendedMedia extends Omit<Media, "id"> {
   duration?: number;
 }
 
+// Define the interface for the persisted state
+interface SearchPageState {
+  page: number;
+  mediaType: string;
+  sortBy: string;
+  advancedSearch: boolean;
+  resultIds: (string | number)[]; // Store only IDs to minimize storage
+  queryParam: string; // Store query to validate state matches current search
+}
+
 const Search = () => {
   const [searchParams] = useSearchParams();
+
+  // State for hydration tracking
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Use page state persistence hook based on search query
+  const searchQuery = searchParams.get("q") || "";
+  const storageKey = `search-state-${searchQuery}`;
+
+  const [persistedState, setPersistedState] = usePageStatePersistence<SearchPageState>(
+    storageKey,
+    {
+      page: 1,
+      mediaType: "all",
+      sortBy: "popularity",
+      advancedSearch: false,
+      resultIds: [],
+      queryParam: searchQuery,
+    }
+  );
+
+  // Initialize state from persisted state only if query matches
   const [allResults, setAllResults] = useState<ExtendedMedia[]>([]);
   const [displayedResults, setDisplayedResults] = useState<ExtendedMedia[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => {
+    // Only use persisted state if the query matches
+    return (searchQuery && searchQuery === persistedState.queryParam) ?
+           persistedState.page : 1;
+  });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [advancedSearch, setAdvancedSearch] = useState(false);
-  const [mediaType, setMediaType] = useState<string>(
-    searchParams.get("type") || "all"
-  );
-  const [sortBy, setSortBy] = useState<string>(
-    searchParams.get("sort") || "popularity"
-  );
+  const [advancedSearch, setAdvancedSearch] = useState(() => {
+    return (searchQuery && searchQuery === persistedState.queryParam) ?
+           persistedState.advancedSearch : false;
+  });
+  const [mediaType, setMediaType] = useState<string>(() => {
+    return (searchQuery && searchQuery === persistedState.queryParam) ?
+           persistedState.mediaType : (searchParams.get("type") || "all");
+  });
+  const [sortBy, setSortBy] = useState<string>(() => {
+    return (searchQuery && searchQuery === persistedState.queryParam) ?
+           persistedState.sortBy : (searchParams.get("sort") || "popularity");
+  });
+
+  // Apply scroll restoration only after hydration
+  useScrollRestoration({ enabled: isHydrated });
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -134,77 +178,160 @@ const Search = () => {
     [searchHistory]
   );
 
+  // State to track if we've already restored for this query
+  const [hasRestoredForQuery, setHasRestoredForQuery] = useState<string | null>(null);
+
+  // Effect to handle search results restoration
   useEffect(() => {
     const searchQuery = searchParams.get("q");
+
+    // If no search query, reset and mark as hydrated
     if (!searchQuery) {
       setAllResults([]);
       setDisplayedResults([]);
+      setHasRestoredForQuery(null);
+      setIsHydrated(true);
       return;
     }
 
-    const fetchSearchResults = async () => {
-      setIsLoading(true);
-      try {
-        const type = searchParams.get("type") || "all";
-        const sort = searchParams.get("sort") || "popularity";
+    // If we've already restored for this query, don't run again
+    if (hasRestoredForQuery === searchQuery && isHydrated) {
+      return;
+    }
 
-        const results = await searchMedia(searchQuery);
+    // Set the query being restored to prevent loops
+    setHasRestoredForQuery(searchQuery);
 
-        let filteredResults = results.map(item => ({
-          ...item,
-          id: item.id,
-          media_id: item.id,
-          media_type: item.media_type,
-          title: item.title || "",
-          name: item.name || "",
-          poster_path: item.poster_path,
-          backdrop_path: item.backdrop_path,
-          overview: item.overview,
-          vote_average: item.vote_average,
-          release_date: item.release_date,
-          first_air_date: item.first_air_date,
-          genre_ids: item.genre_ids,
-        })) as ExtendedMedia[];
+    // Check if we have persisted state for this query and if it's valid
+    if (searchQuery === persistedState.queryParam && persistedState.resultIds.length > 0) {
+      // Try to restore from persisted state
+      const fetchSearchResults = async () => {
+        setIsLoading(true);
+        try {
+          const results = await searchMedia(searchQuery);
 
-        if (type !== "all") {
-          filteredResults = filteredResults.filter(
-            item => item.media_type === type
+          let filteredResults = results.map(item => ({
+            ...item,
+            id: item.id,
+            media_id: item.id,
+            media_type: item.media_type,
+            title: item.title || "",
+            name: item.name || "",
+            poster_path: item.poster_path,
+            backdrop_path: item.backdrop_path,
+            overview: item.overview,
+            vote_average: item.vote_average,
+            release_date: item.release_date,
+            first_air_date: item.first_air_date,
+            genre_ids: item.genre_ids,
+          })) as ExtendedMedia[];
+
+          if (mediaType !== "all") {
+            filteredResults = filteredResults.filter(
+              item => item.media_type === mediaType
+            );
+          }
+
+          const sortedResults = [...filteredResults];
+          if (sortBy === "rating") {
+            sortedResults.sort((a, b) => b.vote_average - a.vote_average);
+          } else if (sortBy === "newest") {
+            sortedResults.sort((a, b) => {
+              const dateA = a.release_date || a.first_air_date || "";
+              const dateB = b.release_date || b.first_air_date || "";
+              return dateB.localeCompare(dateA);
+            });
+          }
+
+          // Filter to only the results that correspond to the persisted IDs
+          const restoredResults = sortedResults.filter(item =>
+            persistedState.resultIds.includes(item.id)
           );
+
+          setAllResults(restoredResults);
+
+          // Set displayed results based on the persisted page
+          const startIndex = (persistedState.page - 1) * RESULTS_PER_PAGE;
+          const endIndex = startIndex + RESULTS_PER_PAGE;
+          setDisplayedResults(restoredResults.slice(startIndex, endIndex));
+          setPage(persistedState.page);
+        } catch (error) {
+          console.error("Error fetching search results:", error);
+          // If restoration fails, fall back to fresh search
+          performNewSearch(searchQuery);
+        } finally {
+          setIsLoading(false);
+          setIsHydrated(true);
         }
+      };
 
-        const sortedResults = [...filteredResults];
-        if (sort === "rating") {
-          sortedResults.sort((a, b) => b.vote_average - a.vote_average);
-        } else if (sort === "newest") {
-          sortedResults.sort((a, b) => {
-            const dateA = a.release_date || a.first_air_date || "";
-            const dateB = b.release_date || b.first_air_date || "";
-            return dateB.localeCompare(dateA);
-          });
-        }
+      fetchSearchResults();
+    } else {
+      // Perform fresh search if no persisted state
+      performNewSearch(searchQuery);
+    }
 
-        setAllResults(sortedResults);
-        setDisplayedResults(sortedResults.slice(0, RESULTS_PER_PAGE));
-        setPage(1);
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-        setAllResults([]);
-        setDisplayedResults([]);
-        toast({
-          title: "Search Error",
-          description: "Failed to retrieve search results. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSearchResults();
     setQuery(searchQuery);
     setMediaType(searchParams.get("type") || "all");
     setSortBy(searchParams.get("sort") || "popularity");
-  }, [searchParams, toast]);
+  }, [searchParams, toast, mediaType, sortBy, persistedState.resultIds, persistedState.queryParam, hasRestoredForQuery, isHydrated]);
+
+  // Helper function to perform a new search
+  const performNewSearch = async (searchQuery: string) => {
+    setIsLoading(true);
+    try {
+      let results = await searchMedia(searchQuery);
+
+      let filteredResults = results.map(item => ({
+        ...item,
+        id: item.id,
+        media_id: item.id,
+        media_type: item.media_type,
+        title: item.title || "",
+        name: item.name || "",
+        poster_path: item.poster_path,
+        backdrop_path: item.backdrop_path,
+        overview: item.overview,
+        vote_average: item.vote_average,
+        release_date: item.release_date,
+        first_air_date: item.first_air_date,
+        genre_ids: item.genre_ids,
+      })) as ExtendedMedia[];
+
+      if (mediaType !== "all") {
+        filteredResults = filteredResults.filter(
+          item => item.media_type === mediaType
+        );
+      }
+
+      const sortedResults = [...filteredResults];
+      if (sortBy === "rating") {
+        sortedResults.sort((a, b) => b.vote_average - a.vote_average);
+      } else if (sortBy === "newest") {
+        sortedResults.sort((a, b) => {
+          const dateA = a.release_date || a.first_air_date || "";
+          const dateB = b.release_date || b.first_air_date || "";
+          return dateB.localeCompare(dateA);
+        });
+      }
+
+      setAllResults(sortedResults);
+      setDisplayedResults(sortedResults.slice(0, RESULTS_PER_PAGE));
+      setPage(1); // Reset to page 1 for new searches
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setAllResults([]);
+      setDisplayedResults([]);
+      toast({
+        title: "Search Error",
+        description: "Failed to retrieve search results. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+      setIsHydrated(true);
+    }
+  };
 
   const updateSearchHistory = useCallback((term: string) => {
     setSearchHistory(prev => {
@@ -213,6 +340,22 @@ const Search = () => {
       return newHistory;
     });
   }, []);
+
+  // Effect to update persisted state when results or search parameters change
+  useEffect(() => {
+    // Only update persisted state if we have search results
+    if (searchParams.get("q") && allResults.length > 0) {
+      setPersistedState(prevState => ({
+        ...prevState,
+        queryParam: searchParams.get("q") || "",
+        page,
+        mediaType,
+        sortBy,
+        advancedSearch,
+        resultIds: allResults.map(result => result.id),
+      }));
+    }
+  }, [searchParams, allResults, page, mediaType, sortBy, advancedSearch, setPersistedState]);
 
   const handleSearch = async (e?: React.FormEvent) => {
     triggerHapticFeedback(20);
@@ -304,13 +447,26 @@ const Search = () => {
     const nextResults = allResults.slice(0, nextPage * RESULTS_PER_PAGE);
     setDisplayedResults(nextResults);
     setPage(nextPage);
+    // Update the persisted state when page changes
+    setPersistedState(prevState => ({
+      ...prevState,
+      page: nextPage
+    }));
   };
 
   const hasMoreResults = allResults.length > displayedResults.length;
 
   const toggleAdvancedSearch = () => {
     triggerHapticFeedback(20);
-    setAdvancedSearch(!advancedSearch);
+    setAdvancedSearch(prev => {
+      const newAdvancedSearch = !prev;
+      // Update the persisted state when advanced search changes
+      setPersistedState(prevState => ({
+        ...prevState,
+        advancedSearch: newAdvancedSearch
+      }));
+      return newAdvancedSearch;
+    });
   };
 
   const clearSearchHistory = () => {
@@ -402,7 +558,17 @@ const Search = () => {
                     <label className="mb-2 block text-sm text-white/70">
                       Media Type
                     </label>
-                    <Select value={mediaType} onValueChange={setMediaType}>
+                    <Select
+                      value={mediaType}
+                      onValueChange={(value) => {
+                        setMediaType(value);
+                        // Update the persisted state when media type changes
+                        setPersistedState(prevState => ({
+                          ...prevState,
+                          mediaType: value
+                        }));
+                      }}
+                    >
                       <SelectTrigger className="border-white/10 bg-white/10 text-white">
                         <SelectValue placeholder="Select media type" />
                       </SelectTrigger>
@@ -424,7 +590,17 @@ const Search = () => {
                     <label className="mb-2 block text-sm text-white/70">
                       Sort By
                     </label>
-                    <Select value={sortBy} onValueChange={setSortBy}>
+                    <Select
+                      value={sortBy}
+                      onValueChange={(value) => {
+                        setSortBy(value);
+                        // Update the persisted state when sort changes
+                        setPersistedState(prevState => ({
+                          ...prevState,
+                          sortBy: value
+                        }));
+                      }}
+                    >
                       <SelectTrigger className="border-white/10 bg-white/10 text-white">
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>

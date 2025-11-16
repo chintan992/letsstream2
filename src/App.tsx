@@ -30,18 +30,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Analytics wrapper component
-function AnalyticsWrapper({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-
-  useEffect(() => {
-    // Track page view on route change
-    trackPageView(location.pathname);
-  }, [location]);
-
-  return <>{children}</>;
-}
-
 function App() {
   const isDevelopment = import.meta.env.DEV;
   const [swUpdateAvailable, setSwUpdateAvailable] = React.useState(false);
@@ -108,20 +96,18 @@ function App() {
                   <WatchHistoryProvider>
                     <UserProfileProvider>
                       <ChatbotProvider>
-                        <AnalyticsWrapper>
-                          <FeatureNotificationsListener />
-                          {swUpdateAvailable && (
-                            <ServiceWorkerUpdateNotification
-                              onAcceptUpdate={handleSwUpdateAccept}
-                              onDismiss={() => setSwUpdateAvailable(false)}
-                            />
-                          )}
-                          {isDevelopment && <ServiceWorkerDebugPanel />}
-                          <AppRoutes />
-                          <ChatbotButton />
-                          <ChatbotWindow />
-                          <ProactiveSuggestions />
-                        </AnalyticsWrapper>
+                        <FeatureNotificationsListener />
+                        {swUpdateAvailable && (
+                          <ServiceWorkerUpdateNotification
+                            onAcceptUpdate={handleSwUpdateAccept}
+                            onDismiss={() => setSwUpdateAvailable(false)}
+                          />
+                        )}
+                        {isDevelopment && <ServiceWorkerDebugPanel />}
+                        <AppRoutes />
+                        <ChatbotButton />
+                        <ChatbotWindow />
+                        <ProactiveSuggestions />
                       </ChatbotProvider>
                     </UserProfileProvider>
                   </WatchHistoryProvider>

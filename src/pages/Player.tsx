@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { ExternalLink, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -26,6 +27,13 @@ const Player = () => {
     episode?: string;
     type: string;
   }>();
+
+  // Derive storage key based on media type and id
+  const scrollStorageKey = type === 'tv' && season
+    ? `scroll-player-tv-${id}-${season}`
+    : `scroll-player-movie-${id}`;
+
+  useScrollRestoration({ storageKey: scrollStorageKey, enabled: true });
   const { user } = useAuth();
   const [isEpisodeSidebarOpen, setIsEpisodeSidebarOpen] = useState(false);
   const isMobile = useIsMobile();

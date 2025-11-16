@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageStatePersistence } from "@/hooks";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getPopularTVShows,
@@ -13,12 +14,20 @@ import useFilteredShows from "../hooks/useFilteredShows";
 
 const ITEMS_PER_PAGE = 20;
 
+// Define the interface for the persisted state
+interface TabContentState {
+  page: number;
+  showIds: number[];
+}
+
 interface TabContentProps {
   type: "popular" | "top_rated" | "trending";
   viewMode: "grid" | "list";
   sortBy: "default" | "name" | "first_air_date" | "rating";
   genreFilter: string;
   platformFilters: string[];
+  onHydrationComplete?: () => void;  // Callback to notify parent when hydration is complete
+  setClearState?: (clearState: () => void) => void; // Callback to register clearState function with parent
 }
 
 const TabContent = ({
@@ -27,10 +36,33 @@ const TabContent = ({
   sortBy,
   genreFilter,
   platformFilters,
+  onHydrationComplete,
+  setClearState,
 }: TabContentProps) => {
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
+
+  // State for hydration tracking
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Use page state persistence hook with type-specific key
+  const [persistedState, setPersistedState, clearPersistedState] = usePageStatePersistence<TabContentState>(
+    `tv-${type}-state`,
+    {
+      page: 1,
+      showIds: [],
+    }
+  );
+
+  // Initialize state from persisted state
+  const [page, setPage] = useState(persistedState.page);
   const [allShows, setAllShows] = useState<Media[]>([]);
+
+  // Register the clearState function with parent on mount
+  useEffect(() => {
+    if (setClearState) {
+      setClearState(clearPersistedState);
+    }
+  }, [setClearState, clearPersistedState]);
 
   // Determine which query to use based on type
   const getQueryFn = () => {
@@ -66,6 +98,107 @@ const TabContent = ({
     platformFilters
   );
 
+  // Effect to hydrate data from persisted state
+  useEffect(() => {
+    // Only run once on mount to restore from persistence
+    if (isHydrated || persistedState.showIds.length === 0) {
+      // If no persisted data or already hydrated, just mark as hydrated
+      if (!isHydrated) {
+        setIsHydrated(true);
+        if (onHydrationComplete) {
+          onHydrationComplete();
+        }
+      }
+      return;
+    }
+
+    // Hydrate shows if we have persisted IDs
+    if (persistedState.showIds.length > 0) {
+      // Fetch all pages needed to get all persisted shows
+      const totalPagesNeeded = Math.ceil(persistedState.showIds.length / ITEMS_PER_PAGE);
+      for (let pageNum = 1; pageNum <= totalPagesNeeded; pageNum++) {
+        queryClient.prefetchQuery({
+          queryKey: [
+            type === "popular"
+              ? "popularTV"
+              : type === "top_rated"
+                ? "topRatedTV"
+                : "trendingTV",
+            pageNum,
+          ],
+          queryFn: () => {
+            switch (type) {
+              case "popular":
+                return getPopularTVShows(pageNum);
+              case "top_rated":
+                return getTopRatedTVShows(pageNum);
+              case "trending":
+                return getTrendingTVShows("week", pageNum);
+              default:
+                return getPopularTVShows(pageNum);
+            }
+          },
+        });
+      }
+    }
+  }, [isHydrated, persistedState, type, queryClient]);
+
+  // Effect to restore shows from cache once they're available
+  useEffect(() => {
+    if (persistedState.showIds.length > 0 && !isHydrated) {
+      // Check if all required pages are in cache
+      const totalPagesNeeded = Math.ceil(persistedState.showIds.length / ITEMS_PER_PAGE);
+      let allPagesCached = true;
+
+      for (let pageNum = 1; pageNum <= totalPagesNeeded; pageNum++) {
+        if (!queryClient.getQueryData([
+          type === "popular"
+            ? "popularTV"
+            : type === "top_rated"
+              ? "topRatedTV"
+              : "trendingTV",
+          pageNum,
+        ])) {
+          allPagesCached = false;
+          break;
+        }
+      }
+
+      if (allPagesCached) {
+        // Build the complete array from cached pages
+        let accumulatedShows: Media[] = [];
+        for (let pageNum = 1; pageNum <= totalPagesNeeded; pageNum++) {
+          const pageData: any[] = queryClient.getQueryData([
+            type === "popular"
+              ? "popularTV"
+              : type === "top_rated"
+                ? "topRatedTV"
+                : "trendingTV",
+            pageNum,
+          ]) || [];
+          const mappedShows = pageData.map(show => ({
+            ...show,
+            id: show.id || show.media_id || 0,
+            media_id: show.id || show.media_id || 0,
+            media_type: "tv" as "tv",
+          }));
+          accumulatedShows = [...accumulatedShows, ...mappedShows];
+        }
+
+        // Filter to only the shows we need based on persisted IDs
+        const filteredShows = accumulatedShows.filter(
+          show => persistedState.showIds.includes(show.id)
+        );
+
+        setAllShows(filteredShows);
+        setIsHydrated(true);
+        if (onHydrationComplete) {
+          onHydrationComplete();
+        }
+      }
+    }
+  }, [persistedState.showIds, type, queryClient, isHydrated, onHydrationComplete]);
+
   // Effect to update the collection of all shows when new data is fetched
   useEffect(() => {
     if (showsQuery.data) {
@@ -85,6 +218,15 @@ const TabContent = ({
       });
     }
   }, [showsQuery.data, type]);
+
+  // Effect to update persisted state when shows change
+  useEffect(() => {
+    setPersistedState(prevState => ({
+      ...prevState,
+      page,
+      showIds: allShows.map(show => show.id),
+    }));
+  }, [page, allShows, setPersistedState]);
 
   // Prefetch next page
   useEffect(() => {
@@ -148,7 +290,17 @@ const TabContent = ({
       />
       {hasMoreShows && (
         <ShowMoreButton
-          onClick={() => setPage(prev => prev + 1)}
+          onClick={() => {
+            setPage(prev => {
+              const newPage = prev + 1;
+              // Update the persisted state when page changes
+              setPersistedState(prevState => ({
+                ...prevState,
+                page: newPage
+              }));
+              return newPage;
+            });
+          }}
           isLoading={showsQuery.isFetching}
         />
       )}

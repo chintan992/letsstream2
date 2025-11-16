@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   getMovieDetails,
@@ -40,6 +41,7 @@ const MovieDetailsPage = () => {
   const [backdropLoaded, setBackdropLoaded] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("about");
+  const [isContentHydrated, setIsContentHydrated] = useState(false);
   const [recommendations, setRecommendations] = useState<Media[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [cast, setCast] = useState<CastMember[]>([]);
@@ -54,6 +56,12 @@ const MovieDetailsPage = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
   const navigate = useNavigate();
+
+  // Tab-aware scroll restoration with hydration tracking
+  useScrollRestoration({
+    storageKey: `scroll-movie-details-${activeTab}`,
+    enabled: isContentHydrated,
+  });
   const isMobile = useIsMobile();
   const { triggerHaptic } = useHaptic();
   const { user } = useAuth();
@@ -122,6 +130,55 @@ const MovieDetailsPage = () => {
       setIsInMyWatchlist(isInWatchlist(movie.id, "movie"));
     }
   }, [movie?.id, isInFavorites, isInWatchlist]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const checkHydration = async () => {
+      if (isCancelled) return;
+
+      // Reset hydration status when tab changes
+      setIsContentHydrated(false);
+
+      // Add small delay to allow tab content to render
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (isCancelled) return;
+
+      let hydrated = false;
+
+      switch (activeTab) {
+        case 'about':
+          // About tab is hydrated when movie data is available and backdrop/logo loaded
+          hydrated = !!movie && backdropLoaded && (movie.logo_path ? logoLoaded : true);
+          break;
+        case 'cast':
+          // Cast tab is hydrated when cast data is loaded
+          hydrated = cast.length > 0;
+          break;
+        case 'reviews':
+          // Reviews tab is considered hydrated immediately as ReviewSection handles its own loading
+          hydrated = true;
+          break;
+        case 'downloads':
+          // Downloads tab is considered hydrated immediately as it lazy loads on user action
+          hydrated = true;
+          break;
+        default:
+          hydrated = true;
+      }
+
+      if (!isCancelled) {
+        setIsContentHydrated(hydrated);
+      }
+    };
+
+    checkHydration();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeTab, movie, backdropLoaded, logoLoaded, cast.length]);
 
   const handlePlayMovie = () => {
     if (movie) {

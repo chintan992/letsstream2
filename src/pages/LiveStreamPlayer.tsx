@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useScrollRestoration } from "@/hooks";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, ExternalLink, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { LiveStream } from "@/pages/LiveStreams";
 
 const LiveStreamPlayer = () => {
   const { id } = useParams<{ id: string }>();
+  useScrollRestoration();
   const location = useLocation();
   const navigate = useNavigate();
 
