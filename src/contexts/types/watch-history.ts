@@ -11,10 +11,22 @@ export interface WatchHistoryItem {
   backdrop_path: string;
   overview?: string;
   rating?: number;
+  // For movies: these remain as is
+  // For TV shows: these track the latest episode watched
   season?: number;
   episode?: number;
+  last_watched_at?: string; // Timestamp of latest episode watched
+  // Progress tracking for the latest episode
   watch_position: number;
   duration: number;
+  // For TV shows: track all episodes watched
+  episodes_watched?: Array<{
+    season: number;
+    episode: number;
+    watch_position: number;
+    duration: number;
+    watched_at: string;
+  }>;
   created_at: string;
   preferred_source: string;
 }

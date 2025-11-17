@@ -196,6 +196,12 @@ export const useTVDetails = (id: string | undefined) => {
         : latest;
     });
 
+    // Check if lastWatched and its season/episode exist before proceeding
+    if (!lastWatched || lastWatched.season === undefined || lastWatched.episode === undefined) {
+      // If no specific season/episode data (e.g., from old entries), return null
+      return null;
+    }
+
     try {
       // Fetch episode details
       const episodeData = await getTVEpisode(
@@ -225,10 +231,10 @@ export const useTVDetails = (id: string | undefined) => {
           : 0;
 
       return {
-        season: lastWatched.season,
-        episode: lastWatched.episode,
+        season: lastWatched.season || 0,
+        episode: lastWatched.episode || 0,
         progress,
-        episodeTitle: episodeData.name || `Episode ${lastWatched.episode}`,
+        episodeTitle: episodeData.name || `Episode ${lastWatched.episode || 0}`,
         episodeThumbnail: episodeData.still_path,
         timeRemaining,
         watchPosition: lastWatched.watch_position,
@@ -252,10 +258,10 @@ export const useTVDetails = (id: string | undefined) => {
           : 0;
 
       return {
-        season: lastWatched.season,
-        episode: lastWatched.episode,
+        season: lastWatched.season || 0,
+        episode: lastWatched.episode || 0,
         progress,
-        episodeTitle: `Episode ${lastWatched.episode}`,
+        episodeTitle: `Episode ${lastWatched.episode || 0}`,
         episodeThumbnail: null,
         timeRemaining: Math.max(
           0,

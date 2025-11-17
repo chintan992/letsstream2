@@ -53,8 +53,10 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
     const uniqueMediaMap = new Map<string, WatchHistoryItem>();
 
     validItems.forEach(item => {
-      // Create a unique key for each media, including season and episode for TV shows
-      const key = `${item.media_type}-${item.media_id}${item.media_type === "tv" ? `-s${item.season}-e${item.episode}` : ""}`;
+      // Create a unique key for each media
+      // For movies: media_type-media_id
+      // For TV shows: media_type-media_id (only one entry per show now)
+      const key = `${item.media_type}-${item.media_id}`;
 
       // If we haven't seen this item yet, or if this item is more recent than what we have, update the map
       if (

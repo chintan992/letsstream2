@@ -37,12 +37,6 @@ const TVDetailsPage = () => {
   const [isLastWatchedLoading, setIsLastWatchedLoading] = useState(false);
   const { user } = useAuth();
 
-  // Tab-aware scroll restoration with hydration tracking
-  useScrollRestoration({
-    storageKey: `scroll-tv-details-${activeTab}${activeTab === 'episodes' ? '-s' + selectedSeason : ''}`,
-    enabled: isContentHydrated,
-  });
-
   const {
     tvShow,
     episodes,
@@ -60,6 +54,12 @@ const TVDetailsPage = () => {
     handleToggleWatchlist,
     getLastWatchedEpisode,
   } = useTVDetails(id);
+
+  // Tab-aware scroll restoration with hydration tracking
+  useScrollRestoration({
+    storageKey: `scroll-tv-details-${activeTab}${activeTab === 'episodes' ? '-s' + selectedSeason : ''}`,
+    enabled: isContentHydrated,
+  });
 
   // Fetch last watched episode when tvShow changes
   useEffect(() => {
