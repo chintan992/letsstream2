@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
-// ...existing code...
+import { useEffect, useRef, useMemo } from "react";
+import { memo } from "react";
 
 /**
  * Z-INDEX STRATEGY:
@@ -18,7 +18,7 @@ interface VideoPlayerProps {
   onError: (error: string) => void;
 }
 
-const VideoPlayer = ({
+const VideoPlayerComponent = ({
   isLoading,
   iframeUrl,
   title,
@@ -28,10 +28,6 @@ const VideoPlayer = ({
 }: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // ...existing code...
-
-  // ...existing code...
-
   const handleIframeError = () => {
     onError("Failed to load iframe content");
   };
@@ -40,6 +36,22 @@ const VideoPlayer = ({
     if (!iframeUrl) return;
     onLoaded();
   };
+
+  // Memoize the iframe element to prevent re-renders on orientation changes
+  const iframeElement = useMemo(() => (
+    <iframe
+      key={iframeUrl}
+      ref={iframeRef}
+      src={iframeUrl}
+      className="h-full w-full"
+      allowFullScreen
+      allow="autoplay; encrypted-media; picture-in-picture"
+      referrerPolicy="no-referrer"
+      loading="lazy"
+      onLoad={handleIframeLoad}
+      onError={handleIframeError}
+    />
+  ), [iframeUrl]); // Only re-create iframe when iframeUrl changes
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg shadow-2xl">
@@ -59,21 +71,18 @@ const VideoPlayer = ({
         transition={{ duration: 0.5 }}
         className="h-full w-full"
       >
-        <iframe
-          key={iframeUrl}
-          ref={iframeRef}
-          src={iframeUrl}
-          className="h-full w-full"
-          allowFullScreen
-          allow="autoplay; encrypted-media; picture-in-picture"
-          referrerPolicy="no-referrer"
-          loading="lazy"
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-        />
+        {iframeElement}
       </motion.div>
     </div>
   );
 };
+
+const VideoPlayer = memo(VideoPlayerComponent, (prevProps, nextProps) => {
+  // Only re-render if iframeUrl changes, not on other prop changes like orientation
+  return prevProps.iframeUrl === nextProps.iframeUrl &&
+         prevProps.isLoading === nextProps.isLoading &&
+         prevProps.title === nextProps.title &&
+         prevProps.poster === nextProps.poster;
+});
 
 export { VideoPlayer };
