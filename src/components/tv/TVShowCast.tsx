@@ -16,30 +16,36 @@ export const TVShowCast = ({ cast }: TVShowCastProps) => {
           {cast.map(member => (
             <div
               key={member.id}
-              className="w-32 min-w-[7.5rem] flex-shrink-0 text-center sm:w-28 sm:min-w-[6.5rem]"
+              className="w-36 min-w-[9rem] flex-shrink-0 text-center transition-transform duration-300 hover:scale-105"
             >
-              {member.profile_path ? (
-                <img
-                  src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
-                  alt={member.name}
-                  className="mx-auto mb-2 h-32 w-24 rounded-lg object-cover sm:h-28 sm:w-20"
-                />
-              ) : (
-                <div className="mx-auto mb-2 flex h-32 w-24 items-center justify-center rounded-lg bg-white/10 text-xs text-white/60 sm:h-28 sm:w-20">
-                  No Image
+              <div className="group relative">
+                {member.profile_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
+                    alt={member.name}
+                    className="mx-auto mb-3 h-40 w-28 rounded-2xl object-cover shadow-lg group-hover:shadow-xl"
+                  />
+                ) : (
+                  <div className="mx-auto mb-3 flex h-40 w-28 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-900/30 to-accent/30 shadow-lg group-hover:shadow-xl">
+                    <span className="text-white/50 text-sm">No Image</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-3">
+                  <p className="text-white text-sm font-medium truncate w-full">{member.name}</p>
                 </div>
-              )}
-              <p className="max-w-full truncate text-sm font-medium text-white/90 sm:text-xs">
+              </div>
+
+              <p className="max-w-full truncate text-base font-bold text-white mb-1">
                 {member.name}
               </p>
-              <p className="max-w-full truncate text-xs text-white/60">
+              <p className="max-w-full truncate text-sm text-white/80 italic">
                 {member.character}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-white/70">No cast information available.</div>
+        <div className="text-white/70 text-center py-8">No cast information available.</div>
       )}
     </div>
   );

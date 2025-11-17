@@ -10,13 +10,17 @@ import TVShowHeader from "@/components/tv/TVShowHeader";
 import TVShowEpisodes from "@/components/tv/TVShowEpisodes";
 import TVShowAbout from "@/components/tv/TVShowAbout";
 import TVShowCast from "@/components/tv/TVShowCast";
+import TVShowCreators from "@/components/tv/TVShowCreators";
+import TVShowImages from "@/components/tv/TVShowImages";
+import TVShowKeywords from "@/components/tv/TVShowKeywords";
+import TVShowNetworks from "@/components/tv/TVShowNetworks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTVDetails } from "@/hooks/use-tv-details";
 import { DownloadSection } from "@/components/DownloadSection";
 import { TVDownloadSection } from "@/components/tv/TVDownloadSection";
 import { useAuth } from "@/hooks";
 
-type TabType = "episodes" | "about" | "cast" | "reviews" | "downloads";
+type TabType = "episodes" | "about" | "cast" | "reviews" | "downloads" | "creators" | "images" | "keywords" | "networks";
 
 const TVDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +57,12 @@ const TVDetailsPage = () => {
     handleToggleFavorite,
     handleToggleWatchlist,
     getLastWatchedEpisode,
+    creators,
+    images,
+    keywords,
+    networks,
+    contentRatings,
+    guestStars,
   } = useTVDetails(id);
 
   // Tab-aware scroll restoration with hydration tracking
@@ -220,100 +230,154 @@ const TVDetailsPage = () => {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="hide-scrollbar mb-6 flex overflow-x-auto border-b border-white/10 pb-1">
-          <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "episodes"
-                ? "border-b-2 border-accent text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("episodes")}
-          >
-            Episodes
-          </button>
-          <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "about"
-                ? "border-b-2 border-accent text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("about")}
-          >
-            About
-          </button>
-          <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "cast"
-                ? "border-b-2 border-accent text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("cast")}
-          >
-            Cast
-          </button>
-          <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "reviews"
-                ? "border-b-2 border-accent text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("reviews")}
-          >
-            Reviews
-          </button>
-          <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "downloads"
-                ? "border-b-2 border-accent text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-            onClick={() => setActiveTab("downloads")}
-            style={{ display: user ? undefined : "none" }}
-          >
-            Downloads
-          </button>
+        <div className="hide-scrollbar mb-8 flex overflow-x-auto pb-2">
+          <div className="flex space-x-1">
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "episodes"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("episodes")}
+            >
+              Episodes
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "about"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("about")}
+            >
+              About
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "cast"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("cast")}
+            >
+              Cast
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "creators"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("creators")}
+            >
+              Creators
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "reviews"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("reviews")}
+            >
+              Reviews
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "keywords"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("keywords")}
+            >
+              Keywords
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "networks"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("networks")}
+            >
+              Networks
+            </button>
+            <button
+              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                activeTab === "images"
+                  ? "bg-accent text-white shadow-lg shadow-accent/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+              onClick={() => setActiveTab("images")}
+            >
+              Images
+            </button>
+            {user && (
+              <button
+                className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                  activeTab === "downloads"
+                    ? "bg-accent text-white shadow-lg shadow-accent/20"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
+                }`}
+                onClick={() => setActiveTab("downloads")}
+              >
+                Downloads
+              </button>
+            )}
+          </div>
         </div>
 
-        {activeTab === "episodes" && (
-          <TVShowEpisodes
-            seasons={tvShow.seasons}
-            episodes={episodes}
-            selectedSeason={selectedSeason}
-            onSeasonChange={setSelectedSeason}
-            onPlayEpisode={handlePlayEpisode}
-          />
-        )}
-
-        {activeTab === "about" && <TVShowAbout tvShow={tvShow} />}
-
-        {activeTab === "cast" && <TVShowCast cast={cast} />}
-
-        {activeTab === "reviews" && (
-          <div className="mb-8">
-            <h2 className="mb-6 text-2xl font-bold text-white">User Reviews</h2>
-            <ReviewSection mediaId={parseInt(id!, 10)} mediaType="tv" />
-          </div>
-        )}
-
-        {activeTab === "downloads" && (
-          <div className="mb-8">
-            <h2 className="mb-6 text-2xl font-bold text-white">
-              Download Episodes
-            </h2>
-            <TVDownloadSection
-              tvShowName={tvShow.name}
+        <div className="transition-all duration-300 ease-in-out">
+          {activeTab === "episodes" && (
+            <TVShowEpisodes
               seasons={tvShow.seasons}
-              episodesBySeason={Object.fromEntries(
-                tvShow.seasons.map(season => [
-                  season.season_number,
-                  (episodes || []).filter(
-                    ep => ep.season_number === season.season_number
-                  ),
-                ])
-              )}
+              episodes={episodes}
+              selectedSeason={selectedSeason}
+              onSeasonChange={setSelectedSeason}
+              onPlayEpisode={handlePlayEpisode}
+              guestStars={guestStars}
             />
-          </div>
-        )}
+          )}
+
+          {activeTab === "about" && <TVShowAbout tvShow={tvShow} />}
+
+          {activeTab === "cast" && <TVShowCast cast={cast} />}
+
+          {activeTab === "creators" && <TVShowCreators creators={creators} />}
+
+          {activeTab === "reviews" && (
+            <div className="mb-8">
+              <h2 className="mb-6 text-2xl font-bold text-white">User Reviews</h2>
+              <ReviewSection mediaId={parseInt(id!, 10)} mediaType="tv" />
+            </div>
+          )}
+
+          {activeTab === "keywords" && <TVShowKeywords keywords={keywords} />}
+
+          {activeTab === "networks" && <TVShowNetworks networks={networks} />}
+
+          {activeTab === "images" && <TVShowImages images={images} tvShowName={tvShow?.name || 'TV Show'} />}
+
+          {activeTab === "downloads" && (
+            <div className="mb-8">
+              <h2 className="mb-6 text-2xl font-bold text-white">
+                Download Episodes
+              </h2>
+              <TVDownloadSection
+                tvShowName={tvShow.name}
+                seasons={tvShow.seasons}
+                episodesBySeason={Object.fromEntries(
+                  tvShow.seasons.map(season => [
+                    season.season_number,
+                    (episodes || []).filter(
+                      ep => ep.season_number === season.season_number
+                    ),
+                  ])
+                )}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {recommendations.length > 0 && (

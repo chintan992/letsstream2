@@ -7,6 +7,12 @@ import {
   getTVTrailer,
   getTVCast,
   getTVEpisode,
+  getTVShowCreators,
+  getTVShowImages,
+  getTVShowKeywords,
+  getTVShowNetworks,
+  getTVShowContentRatings,
+  getTVEpisodeWithGuests,
 } from "@/utils/api";
 import { TVDetails, Episode, Media, CastMember } from "@/utils/types";
 import { useWatchHistory } from "@/hooks/watch-history";
@@ -26,6 +32,12 @@ export const useTVDetails = (id: string | undefined) => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
+  const [creators, setCreators] = useState<any[]>([]);
+  const [images, setImages] = useState<any>(null);
+  const [keywords, setKeywords] = useState<any[]>([]);
+  const [networks, setNetworks] = useState<any[]>([]);
+  const [contentRatings, setContentRatings] = useState<any[]>([]);
+  const [guestStars, setGuestStars] = useState<any[]>([]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -57,10 +69,15 @@ export const useTVDetails = (id: string | undefined) => {
       try {
         setIsLoading(true);
         setError(null);
-        const [tvData, recommendationsData, castData] = await Promise.all([
+        const [tvData, recommendationsData, castData, creatorsData, imagesData, keywordsData, networksData, contentRatingsData] = await Promise.all([
           getTVDetails(tvId),
           getTVRecommendations(tvId),
           getTVCast(tvId),
+          getTVShowCreators(tvId),
+          getTVShowImages(tvId),
+          getTVShowKeywords(tvId),
+          getTVShowNetworks(tvId),
+          getTVShowContentRatings(tvId),
         ]);
 
         if (!tvData) {
@@ -71,6 +88,11 @@ export const useTVDetails = (id: string | undefined) => {
         setTVShow(tvData);
         setRecommendations(recommendationsData);
         setCast(castData);
+        setCreators(creatorsData);
+        setImages(imagesData);
+        setKeywords(keywordsData);
+        setNetworks(networksData);
+        setContentRatings(contentRatingsData);
 
         if (tvData.seasons && tvData.seasons.length > 0) {
           const firstSeason = tvData.seasons.find(s => s.season_number > 0);
@@ -96,6 +118,26 @@ export const useTVDetails = (id: string | undefined) => {
       try {
         const episodesData = await getSeasonDetails(tvShow.id, selectedSeason);
         setEpisodes(episodesData);
+
+        // Fetch guest stars for the episodes in the selected season
+        if (episodesData.length > 0) {
+          const guestStarsPromises = episodesData.map(episode =>
+            getTVEpisodeWithGuests(tvShow.id, selectedSeason, episode.episode_number)
+          );
+
+          const episodesWithCredits = await Promise.all(guestStarsPromises);
+
+          // Create a mapping of episode numbers to their guest stars
+          const episodeGuestStarsMap: Record<number, any[]> = {};
+          episodesWithCredits.forEach((episodeData, index) => {
+            if (episodeData && episodeData.credits && episodeData.credits.guest_stars) {
+              const episodeNumber = episodesData[index].episode_number;
+              episodeGuestStarsMap[episodeNumber] = episodeData.credits.guest_stars;
+            }
+          });
+
+          setGuestStars(episodeGuestStarsMap);
+        }
       } catch (error) {
         console.error("Error fetching episodes:", error);
       }
@@ -292,6 +334,12 @@ export const useTVDetails = (id: string | undefined) => {
     handleToggleWatchlist,
     getLastWatchedEpisode,
     navigate,
+    creators,
+    images,
+    keywords,
+    networks,
+    contentRatings,
+    guestStars,
   };
 };
 

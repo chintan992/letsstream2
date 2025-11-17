@@ -177,6 +177,11 @@ const WatchHistory = () => {
     duration: item.duration,
     created_at: item.created_at,
     docId: item.id, // Store document ID separately for deletion
+    // TV show specific info
+    season: item.season,
+    episode: item.episode,
+    last_watched_at: item.last_watched_at,
+    episodes_watched: item.episodes_watched,
   }));
 
   // Convert favorites to Media format

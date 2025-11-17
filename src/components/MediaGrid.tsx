@@ -15,6 +15,16 @@ interface ExtendedMedia extends Omit<Media, "id"> {
   created_at?: string;
   watch_position?: number;
   duration?: number;
+  season?: number;
+  episode?: number;
+  last_watched_at?: string;
+  episodes_watched?: Array<{
+    season: number;
+    episode: number;
+    watch_position: number;
+    duration: number;
+    watched_at: string;
+  }>;
 }
 
 interface MediaGridProps {
@@ -207,7 +217,38 @@ const MediaGrid = ({
                     )}
                   </div>
                   {renderTimestamp(mediaItem)}
-                  <p className="line-clamp-2 text-sm text-white/70">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {mediaItem.media_type === "tv" && (
+                      <span className="rounded bg-accent/20 px-2 py-1 text-xs font-medium">
+                        S{mediaItem.season} E{mediaItem.episode}
+                      </span>
+                    )}
+                    {mediaItem.media_type === "movie" && (
+                      <span className="rounded bg-gray-700/50 px-2 py-1 text-xs font-medium">
+                        Movie
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Show additional episode information for TV shows */}
+                  {mediaItem.media_type === "tv" && mediaItem.episodes_watched && mediaItem.episodes_watched.length > 0 && (
+                    <div className="mt-2">
+                      <div className="text-xs text-white/70">Episodes watched: {mediaItem.episodes_watched.length}</div>
+                      {mediaItem.episodes_watched.slice(0, 3).map((ep, idx) => (
+                        <span
+                          key={`${ep.season}-${ep.episode}-${idx}`}
+                          className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
+                        >
+                          S{ep.season}E{ep.episode}
+                        </span>
+                      ))}
+                      {mediaItem.episodes_watched.length > 3 && (
+                        <span className="text-xs text-white/50">+{mediaItem.episodes_watched.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
+
+                  <p className="mt-2 line-clamp-2 text-sm text-white/70">
                     {mediaItem.overview}
                   </p>
                 </div>

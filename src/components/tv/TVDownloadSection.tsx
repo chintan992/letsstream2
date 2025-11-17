@@ -35,11 +35,11 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="mb-4 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-        <div>
-          <label className="mb-1 block text-sm text-white/80">Season</label>
+      <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center bg-gradient-to-br from-white/5 to-white/10 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-lg">
+        <div className="w-full sm:w-auto">
+          <label className="mb-2 block text-sm font-medium text-white">Season</label>
           <select
-            className="rounded border border-white/10 bg-[#23272f] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent shadow-sm transition-all duration-300 hover:border-accent/50"
             value={selectedSeason}
             onChange={e => {
               triggerHapticFeedback(15);
@@ -53,10 +53,10 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
             ))}
           </select>
         </div>
-        <div>
-          <label className="mb-1 block text-sm text-white/80">Episode</label>
+        <div className="w-full sm:w-auto">
+          <label className="mb-2 block text-sm font-medium text-white">Episode</label>
           <select
-            className="rounded border border-white/10 bg-[#23272f] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent shadow-sm transition-all duration-300 hover:border-accent/50"
             value={selectedEpisode}
             onChange={e => {
               triggerHapticFeedback(15);

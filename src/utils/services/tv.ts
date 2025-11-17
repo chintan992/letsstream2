@@ -174,9 +174,76 @@ function formatTVDetails(show: TMDBTVDetailsResult): TVDetails {
     number_of_seasons: show.number_of_seasons || 0,
     seasons: show.seasons || [],
     production_companies: show.production_companies || [],
+    created_by: show.created_by || [],
     certification: "", // Set by parent function after content ratings lookup
     logo_path: null, // Set by parent function after image lookup
   };
+}
+
+// Get TV show creators
+export async function getTVShowCreators(id: number): Promise<any[]> {
+  try {
+    const response = await tmdb.get<{ created_by: any[] }>(`/tv/${id}`);
+    return response.data.created_by || [];
+  } catch (error) {
+    console.error(`Error fetching creators for TV show ${id}:`, error);
+    return [];
+  }
+}
+
+// Get TV show images
+export async function getTVShowImages(id: number): Promise<any> {
+  try {
+    const response = await tmdb.get<any>(`/tv/${id}/images`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching images for TV show ${id}:`, error);
+    return { backdrops: [], posters: [] };
+  }
+}
+
+// Get TV show keywords
+export async function getTVShowKeywords(id: number): Promise<any[]> {
+  try {
+    const response = await tmdb.get<{ results: any[] }>(`/tv/${id}/keywords`);
+    return response.data.results || [];
+  } catch (error) {
+    console.error(`Error fetching keywords for TV show ${id}:`, error);
+    return [];
+  }
+}
+
+// Get TV show networks
+export async function getTVShowNetworks(id: number): Promise<any[]> {
+  try {
+    const response = await tmdb.get<any>(`/tv/${id}`);
+    return response.data.networks || [];
+  } catch (error) {
+    console.error(`Error fetching networks for TV show ${id}:`, error);
+    return [];
+  }
+}
+
+// Get TV show content ratings
+export async function getTVShowContentRatings(id: number): Promise<any> {
+  try {
+    const response = await tmdb.get<any>(`/tv/${id}/content_ratings`);
+    return response.data.results || [];
+  } catch (error) {
+    console.error(`Error fetching content ratings for TV show ${id}:`, error);
+    return [];
+  }
+}
+
+// Get TV show external IDs
+export async function getTVShowExternalIds(id: number): Promise<any> {
+  try {
+    const response = await tmdb.get<any>(`/tv/${id}/external_ids`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching external IDs for TV show ${id}:`, error);
+    return {};
+  }
 }
 
 // Get TV show season details
@@ -195,5 +262,25 @@ export async function getSeasonDetails(
       error
     );
     return [];
+  }
+}
+
+// Get episode details with guest stars
+export async function getTVEpisodeWithGuests(
+  id: number,
+  seasonNumber: number,
+  episodeNumber: number
+): Promise<any> {
+  try {
+    const response = await tmdb.get<any>(
+      `/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?append_to_response=credits`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching episode with guests for TV ${id}, S${seasonNumber}, E${episodeNumber}:`,
+      error
+    );
+    return null;
   }
 }

@@ -84,20 +84,20 @@ export const TVShowHeader = ({
 
       <div className="details-gradient absolute inset-0" />
 
-      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 lg:p-16">
-        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 md:flex-row">
-          <div className="hidden w-48 flex-shrink-0 overflow-hidden rounded-lg shadow-lg md:block xl:w-64">
+      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-12">
+        <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 md:flex-row">
+          <div className="hidden w-40 flex-shrink-0 overflow-hidden rounded-xl shadow-2xl md:block lg:w-52">
             {" "}
             <img
               src={getImageUrl(tvShow.poster_path, posterSizes.medium)}
               alt={tvShow.name || "TV show poster"}
-              className="h-auto w-full"
+              className="h-auto w-full rounded-xl"
             />
           </div>
 
           <div className="flex-1 animate-slide-up">
             {tvShow.logo_path ? (
-              <div className="relative mx-auto mb-4 w-full max-w-[300px] transition-all duration-300 ease-in-out hover:scale-105 md:max-w-[400px] lg:max-w-[500px]">
+              <div className="relative mb-4 w-full max-w-[300px] transition-all duration-300 ease-in-out hover:scale-105 md:max-w-[350px] lg:max-w-[450px]">
                 {!logoLoaded && (
                   <div className="image-skeleton absolute inset-0 rounded-lg bg-background" />
                 )}
@@ -105,7 +105,7 @@ export const TVShowHeader = ({
                 <img
                   src={getImageUrl(tvShow.logo_path, backdropSizes.original)}
                   alt={tvShow.name}
-                  className={`h-auto w-full object-contain drop-shadow-lg filter transition-opacity duration-700 ease-in-out ${logoLoaded ? "opacity-100" : "opacity-0"}`}
+                  className={`h-auto w-full object-contain drop-shadow-xl filter transition-opacity duration-700 ease-in-out ${logoLoaded ? "opacity-100" : "opacity-0"}`}
                   onLoad={() => setLogoLoaded(true)}
                 />
               </div>
@@ -116,14 +116,14 @@ export const TVShowHeader = ({
             )}
 
             {tvShow.tagline && (
-              <p className="mb-4 text-lg italic text-white/70">
+              <p className="mb-4 text-lg italic text-white/80">
                 {tvShow.tagline}
               </p>
             )}
 
-            <div className="mb-6 flex flex-wrap items-center gap-4">
+            <div className="mb-6 flex flex-wrap items-center gap-3 md:gap-4">
               {tvShow.certification && (
-                <div className="flex items-center rounded bg-white/20 px-2 py-1">
+                <div className="flex items-center rounded-lg bg-white/15 px-2.5 py-1.5 backdrop-blur-sm">
                   <Shield className="mr-1 h-4 w-4 text-white" />
                   <span className="text-sm font-medium text-white">
                     {tvShow.certification}
@@ -152,10 +152,10 @@ export const TVShowHeader = ({
               )}
 
               <div className="flex flex-wrap gap-2">
-                {tvShow.genres.map(genre => (
+                {tvShow.genres.slice(0, 3).map(genre => (
                   <span
                     key={genre.id}
-                    className="rounded bg-white/10 px-2 py-1 text-xs text-white/80"
+                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm"
                   >
                     {genre.name}
                   </span>
@@ -163,14 +163,16 @@ export const TVShowHeader = ({
               </div>
             </div>
 
-            <p className="mb-6 text-white/80">{tvShow.overview}</p>
+            <p className="mb-6 text-white/90 max-w-3xl leading-relaxed">
+              {tvShow.overview}
+            </p>
 
             <div className="flex flex-wrap gap-3">
               {/* Show "Start from Beginning" button only when there's no last watched episode */}
               {!lastWatchedEpisode && !isLastWatchedLoading && (
                 <Button
                   onClick={() => onPlayEpisode(1, 1)}
-                  className="hover:bg-accent/80 flex items-center bg-accent text-white"
+                  className="hover:bg-accent/90 flex items-center bg-accent text-white shadow-lg shadow-accent/30 transition-all duration-300 hover:shadow-xl hover:shadow-accent/40"
                 >
                   <Play className="mr-2 h-4 w-4" />
                   Start from Beginning
@@ -181,7 +183,7 @@ export const TVShowHeader = ({
               {isLastWatchedLoading ? (
                 // Loading skeleton for continue watching card
                 <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-                  <div className="flex min-w-[280px] max-w-[400px] animate-pulse items-center gap-3 rounded-lg border border-white/20 bg-black/50 p-3 backdrop-blur-sm">
+                  <div className="flex min-w-[280px] max-w-[400px] animate-pulse items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 backdrop-blur-sm shadow-lg">
                     <div className="bg-muted/20 relative h-16 w-24 flex-shrink-0 overflow-hidden rounded">
                       <div className="bg-muted/30 h-full w-full rounded" />
                     </div>
@@ -214,10 +216,10 @@ export const TVShowHeader = ({
                         lastWatchedEpisode.episode
                       )
                     }
-                    className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-lg border border-white/20 bg-black/50 p-3 backdrop-blur-sm transition-all duration-300"
+                    className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 backdrop-blur-sm transition-all duration-300 shadow-lg"
                   >
                     {/* Episode Thumbnail */}
-                    <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded bg-card">
+                    <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-card">
                       {lastWatchedEpisode.episodeThumbnail ? (
                         <img
                           src={getImageUrl(
@@ -228,8 +230,8 @@ export const TVShowHeader = ({
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-muted">
-                          <Play className="h-6 w-6 text-muted-foreground" />
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-900/50 to-accent/50">
+                          <Play className="h-6 w-6 text-white/60" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/10" />
@@ -237,13 +239,13 @@ export const TVShowHeader = ({
 
                     {/* Episode Details */}
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 text-xs text-white/70">
+                      <div className="mb-1 text-xs font-medium text-accent">
                         Continue Watching
                       </div>
                       <div className="mb-1 truncate text-sm font-medium text-white">
                         {lastWatchedEpisode.episodeTitle}
                       </div>
-                      <div className="mb-2 text-xs text-white/60">
+                      <div className="mb-2 text-xs text-white/70">
                         S{lastWatchedEpisode.season}, E
                         {lastWatchedEpisode.episode}
                       </div>
@@ -252,9 +254,9 @@ export const TVShowHeader = ({
                       <div className="relative">
                         <Progress
                           value={lastWatchedEpisode.progress}
-                          className="mb-1 h-1"
+                          className="mb-1 h-1.5 rounded-full overflow-hidden"
                         />
-                        <div className="flex items-center justify-between text-xs text-white/60">
+                        <div className="flex items-center justify-between text-xs text-white/70">
                           <span>{lastWatchedEpisode.progress}%</span>
                           <span className="flex items-center">
                             <Clock className="mr-1 h-3 w-3" />
@@ -271,7 +273,7 @@ export const TVShowHeader = ({
                   <Button
                     onClick={() => onPlayEpisode(1, 1)}
                     variant="outline"
-                    className="flex items-center whitespace-nowrap border-white/20 text-white hover:bg-white/10"
+                    className="flex items-center whitespace-nowrap border-white/20 text-white hover:bg-white/10 shadow-sm"
                   >
                     <Play className="mr-2 h-4 w-4" />
                     Start from Beginning
@@ -283,26 +285,26 @@ export const TVShowHeader = ({
                 onClick={onToggleFavorite}
                 variant="outline"
                 className={cn(
-                  "border-white/20",
+                  "border-white/20 shadow-sm",
                   isFavorite
-                    ? "bg-accent text-white"
-                    : "bg-black/50 text-white hover:bg-black/70"
+                    ? "bg-gradient-to-r from-accent to-accent/80 text-white border-accent"
+                    : "bg-black/50 text-white hover:bg-white/10"
                 )}
               >
                 <Heart
                   className={cn("mr-2 h-4 w-4", isFavorite && "fill-current")}
                 />
-                {isFavorite ? "In Favorites" : "Add to Favorites"}
+                {isFavorite ? "Favorited" : "Add to Favorites"}
               </Button>
 
               <Button
                 onClick={onToggleWatchlist}
                 variant="outline"
                 className={cn(
-                  "border-white/20",
+                  "border-white/20 shadow-sm",
                   isInWatchlist
-                    ? "bg-accent text-white"
-                    : "bg-black/50 text-white hover:bg-black/70"
+                    ? "bg-gradient-to-r from-accent to-accent/80 text-white border-accent"
+                    : "bg-black/50 text-white hover:bg-white/10"
                 )}
               >
                 <Bookmark

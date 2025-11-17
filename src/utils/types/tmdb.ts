@@ -62,6 +62,39 @@ export interface TMDBMovieDetailsResult extends TMDBMovieResult {
   };
 }
 
+interface CrewMember {
+  id: number;
+  credit_id: string;
+  name: string;
+  gender: number;
+  profile_path: string | null;
+  department: string;
+  job: string;
+}
+
+export interface TMDBMovieDetailsResult extends TMDBMovieResult {
+  runtime: number;
+  genres: Genre[];
+  status: string;
+  tagline: string;
+  budget: number;
+  revenue: number;
+  production_companies: Company[];
+  production_countries: Array<{iso_3166_1: string; name: string}>;
+  release_dates?: {
+    results: Array<{
+      iso_3166_1: string;
+      release_dates: Array<{
+        certification: string;
+      }>;
+    }>;
+  };
+  credits?: {
+    cast: any[];
+    crew: CrewMember[];
+  };
+}
+
 export interface TMDBTVDetailsResult extends TMDBTVResult {
   episode_run_time: number[];
   genres: Genre[];
@@ -78,6 +111,7 @@ export interface TMDBTVDetailsResult extends TMDBTVResult {
     episode_count: number;
   }>;
   production_companies: Company[];
+  created_by: CrewMember[];
   content_ratings?: {
     results: Array<{
       iso_3166_1: string;

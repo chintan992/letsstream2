@@ -19,6 +19,7 @@ interface TVShowEpisodesProps {
   selectedSeason: number;
   onSeasonChange: (season: number) => void;
   onPlayEpisode: (seasonNumber: number, episodeNumber: number) => void;
+  guestStars?: Record<number, any[]>;
 }
 
 // A throttle function to prevent too many scroll events
@@ -45,6 +46,7 @@ export const TVShowEpisodes = ({
   selectedSeason,
   onSeasonChange,
   onPlayEpisode,
+  guestStars,
 }: TVShowEpisodesProps) => {
   // Track watched episodes progress
   const [watchProgress, setWatchProgress] = useState<Record<number, number>>(
@@ -276,15 +278,15 @@ export const TVShowEpisodes = ({
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-2xl font-bold text-white">Seasons & Episodes</h2>
-        <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-sm text-white/90">
+        <div className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-white/90 border border-white/10 backdrop-blur-sm">
           {episodes.length} episodes
         </div>
       </div>
 
-      <div className="relative mb-8 rounded-lg border border-white/5 bg-black/40 p-4 shadow-lg backdrop-blur-sm">
-        <div className="mb-4 text-sm font-medium text-white">
+      <div className="relative mb-8 rounded-2xl border border-white/5 bg-black/40 p-5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
+        <div className="mb-4 text-sm font-medium text-white/90">
           Select Season:
         </div>
 
@@ -295,7 +297,7 @@ export const TVShowEpisodes = ({
             <>
               <button
                 onClick={() => scrollSeasons("left")}
-                className="hover:bg-accent/80 absolute -left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white/80 shadow-md transition-colors hover:text-white"
+                className="hover:bg-accent/80 absolute -left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white/80 shadow-lg transition-all duration-300 hover:text-white backdrop-blur-sm"
                 aria-label="Previous seasons"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -303,7 +305,7 @@ export const TVShowEpisodes = ({
 
               <button
                 onClick={() => scrollSeasons("right")}
-                className="hover:bg-accent/80 absolute -right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white/80 shadow-md transition-colors hover:text-white"
+                className="hover:bg-accent/80 absolute -right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white/80 shadow-lg transition-all duration-300 hover:text-white backdrop-blur-sm"
                 aria-label="Next seasons"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -314,7 +316,7 @@ export const TVShowEpisodes = ({
           {/* Horizontal season list */}
           <div
             ref={seasonSelectorRef}
-            className={`flex gap-3 ${showAllSeasons ? "flex-wrap justify-center" : "scrollbar-hide overflow-x-auto scroll-smooth pb-3 pt-1"} ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+            className={`flex gap-4 ${showAllSeasons ? "flex-wrap justify-center" : "scrollbar-hide overflow-x-auto scroll-smooth pb-3 pt-1"} ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -339,38 +341,38 @@ export const TVShowEpisodes = ({
                   key={season.id}
                   data-season={season.season_number}
                   onClick={() => onSeasonChange(season.season_number)}
-                  className={`flex flex-shrink-0 flex-col items-center overflow-hidden rounded-lg shadow-md transition-all ${
+                  className={`flex flex-shrink-0 flex-col items-center overflow-hidden rounded-xl shadow-lg transition-all duration-300 ${
                     isActive
-                      ? "ring-accent/80 scale-[1.02] transform bg-black/60 ring-1"
-                      : "bg-black/50 hover:scale-[1.02] hover:bg-black/70"
-                  } ${showAllSeasons ? "w-[120px]" : "w-[180px]"}`}
+                      ? "ring-accent/80 scale-105 transform bg-gradient-to-b from-accent/20 to-accent/10 ring-2"
+                      : "bg-black/60 hover:scale-105 hover:bg-black/70"
+                  } ${showAllSeasons ? "w-[130px]" : "w-[180px]"} backdrop-blur-sm`}
                   style={{
                     scrollSnapAlign: showAllSeasons ? "none" : "center",
                   }}
                   aria-pressed={isActive}
                 >
-                  <div className="w-full border-b border-white/5 bg-black/60 px-3 py-1.5 text-center">
-                    <span className="text-sm font-medium text-white/90">
+                  <div className="w-full border-b border-white/10 bg-black/40 px-3 py-2 text-center">
+                    <span className="text-sm font-medium text-white">
                       Season {season.season_number}
                     </span>
                   </div>
 
                   <div className="flex w-full flex-col items-center p-3">
                     <div
-                      className={`relative mb-2 flex h-10 w-10 items-center justify-center rounded-full ${
+                      className={`relative mb-2 flex h-12 w-12 items-center justify-center rounded-full ${
                         isActive
-                          ? "bg-accent ring-1 ring-white/20"
+                          ? "bg-gradient-to-br from-accent to-accent/80 ring-1 ring-white/20 shadow-lg"
                           : progress === 100
-                            ? "bg-green-500/90"
+                            ? "bg-gradient-to-br from-green-500/80 to-green-600/80"
                             : progress > 0
-                              ? "bg-amber-500/90"
-                              : "border border-white/10 bg-black/40"
+                              ? "bg-gradient-to-br from-amber-500/80 to-amber-600/80"
+                              : "border border-white/20 bg-black/50 shadow-sm"
                       }`}
                     >
                       {progress === 100 ? (
                         <Check className="h-5 w-5 text-white" />
                       ) : (
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm font-bold text-white">
                           {season.season_number}
                         </span>
                       )}
@@ -379,7 +381,7 @@ export const TVShowEpisodes = ({
                       {progress > 0 && progress < 100 && (
                         <svg
                           viewBox="0 0 36 36"
-                          className="absolute inset-0 h-10 w-10 -rotate-90"
+                          className="absolute inset-0 h-12 w-12 -rotate-90"
                         >
                           <circle
                             cx="18"
@@ -402,7 +404,7 @@ export const TVShowEpisodes = ({
                       </span>
 
                       {progress > 0 && progress < 100 && (
-                        <span className="mt-1 inline-block rounded-full border border-white/10 bg-black/50 px-2 py-0.5 text-xs text-white/90">
+                        <span className="mt-1 inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/90 border border-white/10">
                           {progress}% watched
                         </span>
                       )}
@@ -417,12 +419,12 @@ export const TVShowEpisodes = ({
         {/* Season information */}
         {filteredSeasons.length > 0 && (
           <div className="mt-6 border-t border-white/10 pt-4 text-sm text-white/80">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-white">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="font-bold text-lg text-white">
                 Season {selectedSeason}
               </span>
               {watchProgress[selectedSeason] > 0 && (
-                <span className="bg-accent/80 rounded-full px-2 py-0.5 text-xs text-white">
+                <span className="bg-gradient-to-r from-accent to-accent/80 rounded-full px-3 py-1 text-xs text-white font-medium shadow-sm shadow-accent/20">
                   {watchProgress[selectedSeason]}% watched
                 </span>
               )}
@@ -431,7 +433,7 @@ export const TVShowEpisodes = ({
               // Display season air date or overview if available
               filteredSeasons.find(s => s.season_number === selectedSeason)
                 ?.overview && (
-                <p className="mt-2">
+                <p className="mt-3 text-white/70 leading-relaxed">
                   {
                     filteredSeasons.find(
                       s => s.season_number === selectedSeason
@@ -444,14 +446,14 @@ export const TVShowEpisodes = ({
         )}
       </div>
 
-      <h3 className="mb-4 text-xl font-medium text-white">Episodes</h3>
+      <h3 className="mb-5 text-xl font-bold text-white">Episodes</h3>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2">
         {episodes.length > 0 ? (
           episodes.map(episode => (
             <div
               key={episode.id}
-              className="flex h-full flex-col overflow-hidden rounded-lg border border-white/5 bg-black/50 shadow-md backdrop-blur-sm"
+              className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/5 bg-black/50 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:border-white/10"
             >
               <div className="relative">
                 {episode.still_path ? (
@@ -461,39 +463,57 @@ export const TVShowEpisodes = ({
                     className="h-48 w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-48 w-full items-center justify-center bg-black/60">
-                    <span className="text-white/30">No image available</span>
+                  <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-purple-900/30 to-accent/30">
+                    <span className="text-white/40 text-lg">No image</span>
                   </div>
                 )}
 
-                <div className="absolute right-2 top-2 rounded-full border border-white/10 bg-black/70 px-2 py-1 text-xs font-medium text-white/90">
+                <div className="absolute right-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
                   Episode {episode.episode_number}
                 </div>
 
                 {episode.vote_average > 0 && (
-                  <div className="absolute bottom-2 right-2 flex items-center rounded-full border border-white/10 bg-black/70 px-2 py-1 text-xs text-amber-400">
+                  <div className="absolute bottom-3 right-3 flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs text-amber-400 backdrop-blur-sm">
                     <Star className="mr-1 h-3 w-3 fill-amber-400" />
                     {episode.vote_average.toFixed(1)}
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-1 flex-col p-4">
+              <div className="flex flex-1 flex-col p-5">
                 <div className="flex-1">
-                  <h3 className="mb-1 text-lg font-medium text-white">
+                  <h3 className="mb-2 text-xl font-bold text-white">
                     {episode.name}
                   </h3>
 
                   {episode.air_date && (
-                    <div className="mb-3 flex items-center text-xs text-white/60">
-                      <Calendar className="mr-1 h-3 w-3" />
+                    <div className="mb-3 flex items-center text-sm text-white/70">
+                      <Calendar className="mr-2 h-4 w-4" />
                       {formatDate(episode.air_date)}
                     </div>
                   )}
 
-                  <p className="mb-3 line-clamp-3 text-sm text-white/70">
+                  <p className="mb-4 line-clamp-3 text-white/80 leading-relaxed">
                     {episode.overview || "No overview available."}
                   </p>
+
+                  {guestStars && typeof guestStars === 'object' && guestStars && guestStars[episode.episode_number] && Array.isArray(guestStars[episode.episode_number]) && guestStars[episode.episode_number].length > 0 && (
+                    <div className="mb-3">
+                      <h4 className="text-sm font-medium text-accent mb-1">Guest Stars:</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {guestStars[episode.episode_number]
+                          .slice(0, 3)
+                          .map((star: any, idx: number) => (
+                            <span
+                              key={idx}
+                              className="text-xs bg-white/10 rounded-full px-2 py-0.5 text-white/90"
+                            >
+                              {star.name}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <Button
@@ -501,17 +521,17 @@ export const TVShowEpisodes = ({
                     onPlayEpisode(episode.season_number, episode.episode_number)
                   }
                   size="sm"
-                  className="hover:bg-accent/80 flex w-full items-center justify-center bg-accent text-white shadow-sm"
+                  className="hover:bg-accent/90 flex w-full items-center justify-center bg-accent text-white shadow-lg shadow-accent/30 transition-all duration-300 hover:shadow-xl hover:shadow-accent/40 py-5"
                 >
-                  <Play className="mr-1 h-3 w-3" />
+                  <Play className="mr-2 h-4 w-4" />
                   Play Episode
                 </Button>
               </div>
             </div>
           ))
         ) : (
-          <div className="col-span-2 rounded-lg border border-white/5 bg-black/50 py-8 text-center text-white/80 shadow-md backdrop-blur-sm">
-            <p>No episodes available for Season {selectedSeason}.</p>
+          <div className="col-span-2 rounded-2xl border border-white/5 bg-black/50 py-12 text-center text-white/80 shadow-xl backdrop-blur-sm">
+            <p className="text-lg mb-4">No episodes available for Season {selectedSeason}.</p>
             {filteredSeasons.length > 0 &&
               selectedSeason !== filteredSeasons[0].season_number && (
                 <Button
@@ -519,7 +539,7 @@ export const TVShowEpisodes = ({
                   onClick={() =>
                     onSeasonChange(filteredSeasons[0].season_number)
                   }
-                  className="hover:bg-accent/10 hover:border-accent/20 mt-3 border-white/10 text-white/90"
+                  className="hover:bg-accent/10 hover:border-accent/20 mt-3 border-white/10 text-white/90 shadow-sm"
                 >
                   View Season {filteredSeasons[0].season_number}
                 </Button>

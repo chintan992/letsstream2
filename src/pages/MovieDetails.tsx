@@ -8,10 +8,12 @@ import {
   backdropSizes,
   posterSizes,
   getMovieCast,
+  getMovieImages,
 } from "@/utils/api";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { MovieDetails, Media, CastMember } from "@/utils/types";
 import { Button } from "@/components/ui/button";
+import { downloadTMDBImage } from "@/utils/image-download";
 import Navbar from "@/components/Navbar";
 import ContentRow from "@/components/ContentRow";
 import ReviewSection from "@/components/ReviewSection";
@@ -24,6 +26,7 @@ import {
   Shield,
   Heart,
   Bookmark,
+  Download,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWatchHistory } from "@/hooks/watch-history";
@@ -31,7 +34,7 @@ import { DownloadSection } from "@/components/DownloadSection";
 import { useAuth } from "@/hooks";
 import { useHaptic } from "@/hooks/useHaptic";
 
-type TabType = "about" | "cast" | "reviews" | "downloads";
+type TabType = "about" | "cast" | "reviews" | "downloads" | "images";
 
 const MovieDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +48,8 @@ const MovieDetailsPage = () => {
   const [recommendations, setRecommendations] = useState<Media[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [cast, setCast] = useState<CastMember[]>([]);
+  const [images, setImages] = useState<any>(null);
+  const [downloadingImage, setDownloadingImage] = useState<string | null>(null);
   const {
     addToFavorites,
     addToWatchlist,
@@ -84,10 +89,11 @@ const MovieDetailsPage = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const [movieData, recommendationsData, castData] = await Promise.all([
+        const [movieData, recommendationsData, castData, imagesData] = await Promise.all([
           getMovieDetails(movieId),
           getMovieRecommendations(movieId),
           getMovieCast(movieId),
+          getMovieImages(movieId),
         ]);
 
         if (!movieData) {
@@ -98,6 +104,7 @@ const MovieDetailsPage = () => {
         setMovie(movieData);
         setRecommendations(recommendationsData);
         setCast(castData);
+        setImages(imagesData);
       } catch (error) {
         console.error("Error fetching movie data:", error);
         setError("Failed to load movie data. Please try again.");
@@ -155,6 +162,10 @@ const MovieDetailsPage = () => {
         case 'cast':
           // Cast tab is hydrated when cast data is loaded
           hydrated = cast.length > 0;
+          break;
+        case 'images':
+          // Images tab is hydrated when images data is loaded
+          hydrated = !!images && images.backdrops && images.posters;
           break;
         case 'reviews':
           // Reviews tab is considered hydrated immediately as ReviewSection handles its own loading
@@ -458,6 +469,19 @@ const MovieDetailsPage = () => {
           </button>
           <button
             className={`whitespace-nowrap px-4 py-2 font-medium ${
+              activeTab === "images"
+                ? "border-b-2 border-accent text-white"
+                : "text-white/60 hover:text-white"
+            }`}
+            onClick={() => {
+              triggerHaptic();
+              setActiveTab("images");
+            }}
+          >
+            Images
+          </button>
+          <button
+            className={`whitespace-nowrap px-4 py-2 font-medium ${
               activeTab === "reviews"
                 ? "border-b-2 border-accent text-white"
                 : "text-white/60 hover:text-white"
@@ -533,7 +557,7 @@ const MovieDetailsPage = () => {
                           <img
                             src={getImageUrl(
                               company.logo_path,
-                              posterSizes.small
+                              posterSizes.medium
                             )}
                             alt={company.name}
                             className="max-h-full max-w-full"
@@ -552,6 +576,38 @@ const MovieDetailsPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Directors */}
+            {movie.directors && movie.directors.length > 0 && (
+              <div className="mt-8">
+                <h3 className="mb-4 text-xl font-semibold text-white">
+                  Directors
+                </h3>
+                <div className="flex flex-wrap gap-6">
+                  {movie.directors.map(director => (
+                    <div key={director.id} className="text-center">
+                      {director.profile_path ? (
+                        <div className="mb-2 flex h-20 w-28 items-center justify-center rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 p-4 backdrop-blur-sm shadow-lg">
+                          <img
+                            src={getImageUrl(director.profile_path, posterSizes.medium)}
+                            alt={director.name}
+                            className="max-h-full max-w-full object-contain rounded-full"
+                          />
+                        </div>
+                      ) : (
+                        <div className="mb-2 flex h-20 w-28 items-center justify-center rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 p-4 backdrop-blur-sm shadow-lg">
+                          <span className="text-center text-sm text-white/70">
+                            {director.name}
+                          </span>
+                        </div>
+                      )}
+                      <p className="font-bold text-white">{director.name}</p>
+                      <p className="text-sm text-white/70">Director</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         ) : activeTab === "cast" ? (
           <div className="mb-8">
@@ -562,7 +618,7 @@ const MovieDetailsPage = () => {
                   <div key={member.id} className="w-32 text-center">
                     {member.profile_path ? (
                       <img
-                        src={getImageUrl(member.profile_path, "w185")}
+                        src={getImageUrl(member.profile_path, posterSizes.medium)}
                         alt={member.name}
                         className="mx-auto mb-2 h-32 w-24 rounded-lg object-cover"
                       />
@@ -584,6 +640,141 @@ const MovieDetailsPage = () => {
               <div className="text-white/70">
                 No cast information available.
               </div>
+            )}
+          </div>
+        ) : activeTab === "images" ? (
+          <div className="mb-8">
+            <h2 className="mb-6 text-2xl font-bold text-white">Images</h2>
+            {images && images.posters && images.backdrops ? (
+              <div>
+                <div className="mb-6 flex border-b border-white/10">
+                  <button
+                    className={`px-4 py-2 font-medium ${
+                      true // Default to backdrops
+                        ? "border-b-2 border-accent text-white"
+                        : "text-white/60 hover:text-white"
+                    }`}
+                    onClick={() => {}} // Will add sub-tab functionality if needed
+                  >
+                    Backdrops ({images.backdrops.length})
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-medium ${
+                      false // Default to backdrops
+                        ? "border-b-2 border-accent text-white"
+                        : "text-white/60 hover:text-white"
+                    }`}
+                    onClick={() => {}} // Placeholder for sub-tab
+                  >
+                    Posters ({images.posters.length})
+                  </button>
+                </div>
+
+                {/* Show backdrops */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {images.backdrops.map((image: any, index: number) => (
+                    <div key={`backdrop-${index}`} className="group relative overflow-hidden rounded-xl">
+                      <img
+                        src={getImageUrl(image.file_path, backdropSizes.small)}
+                        alt={`Backdrop ${index + 1}`}
+                        className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      {image.vote_average > 0 && (
+                        <div className="absolute top-2 right-2 bg-black/70 px-1.5 py-0.5 rounded text-xs text-white">
+                          {image.vote_average.toFixed(1)}
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={async () => {
+                            const imageId = `backdrop-${image.file_path}`;
+                            setDownloadingImage(imageId);
+
+                            try {
+                              await downloadTMDBImage(image.file_path, 'backdrop', movie?.title || 'Movie');
+                            } catch (error) {
+                              console.error('Error downloading backdrop:', error);
+                            } finally {
+                              setDownloadingImage(null);
+                            }
+                          }}
+                          disabled={downloadingImage === `backdrop-${image.file_path}`}
+                          className="bg-accent hover:bg-accent/90 text-white shadow-lg"
+                        >
+                          {downloadingImage === `backdrop-${image.file_path}` ? (
+                            <span className="flex items-center">
+                              <span className="h-3 w-3 rounded-full bg-white animate-ping mr-2"></span>
+                              Downloading...
+                            </span>
+                          ) : (
+                            <span className="flex items-center">
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </span>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Show posters - separated section */}
+                <div className="mt-8">
+                  <h3 className="mb-4 text-xl font-semibold text-white">Posters</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {images.posters.map((image: any, index: number) => (
+                      <div key={`poster-${index}`} className="group relative overflow-hidden rounded-xl">
+                        <img
+                          src={getImageUrl(image.file_path, posterSizes.medium)}
+                          alt={`Poster ${index + 1}`}
+                          className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                        {image.vote_average > 0 && (
+                          <div className="absolute top-2 right-2 bg-black/70 px-1.5 py-0.5 rounded text-xs text-white">
+                            {image.vote_average.toFixed(1)}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={async () => {
+                              const imageId = `poster-${image.file_path}`;
+                              setDownloadingImage(imageId);
+
+                              try {
+                                await downloadTMDBImage(image.file_path, 'poster', movie?.title || 'Movie');
+                              } catch (error) {
+                                console.error('Error downloading poster:', error);
+                              } finally {
+                                setDownloadingImage(null);
+                              }
+                            }}
+                            disabled={downloadingImage === `poster-${image.file_path}`}
+                            className="bg-accent hover:bg-accent/90 text-white shadow-lg"
+                          >
+                            {downloadingImage === `poster-${image.file_path}` ? (
+                              <span className="flex items-center">
+                                <span className="h-3 w-3 rounded-full bg-white animate-ping mr-2"></span>
+                                Downloading...
+                              </span>
+                            ) : (
+                              <span className="flex items-center">
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-white/70">No images available.</div>
             )}
           </div>
         ) : activeTab === "downloads" ? (

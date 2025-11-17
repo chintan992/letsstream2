@@ -75,7 +75,7 @@ export async function getMovieDetails(
   try {
     const [detailsResponse, imagesResponse] = await Promise.all([
       tmdb.get<TMDBMovieDetailsResult>(
-        `/movie/${id}?append_to_response=release_dates`
+        `/movie/${id}?append_to_response=release_dates,credits`
       ),
       tmdb.get<MovieImagesResponse>(`/movie/${id}/images`),
     ]);
@@ -115,6 +115,11 @@ export async function getMovieDetails(
       media_type: "movie",
     });
 
+    // Extract directors from crew
+    const directors = detailsData.credits?.crew?.filter(person =>
+      person.job === 'Director' && person.department === 'Directing'
+    ) || [];
+
     return {
       ...formattedData,
       title: formattedData.title || detailsData.title || "Unknown Movie",
@@ -127,6 +132,7 @@ export async function getMovieDetails(
       budget: detailsData.budget || 0,
       revenue: detailsData.revenue || 0,
       production_companies: detailsData.production_companies || [],
+      directors: directors,
       certification: certification,
       logo_path: bestLogo ? bestLogo.file_path : null,
     };
@@ -164,8 +170,24 @@ export async function validateMovieId(tmdbId: number): Promise<boolean> {
   }
 }
 
+// Get movie images
+export async function getMovieImages(id: number): Promise<any> {
+  try {
+    const response = await tmdb.get<any>(`/movie/${id}/images`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching images for movie ${id}:`, error);
+    return { backdrops: [], posters: [] };
+  }
+}
+
 function formatMovieDetails(movie: TMDBMovieDetailsResult): MovieDetails {
   const formattedData = formatMediaResult({ ...movie, media_type: "movie" });
+
+  // Extract directors from crew
+  const directors = movie.credits?.crew?.filter(person =>
+    person.job === 'Director' && person.department === 'Directing'
+  ) || [];
 
   return {
     ...formattedData,
@@ -178,6 +200,7 @@ function formatMovieDetails(movie: TMDBMovieDetailsResult): MovieDetails {
     budget: movie.budget || 0,
     revenue: movie.revenue || 0,
     production_companies: movie.production_companies || [],
+    directors: directors,
     certification: "", // Set by parent function after release dates lookup
     logo_path: null, // Set by parent function after image lookup
   };

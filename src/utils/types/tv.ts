@@ -1,5 +1,15 @@
 import { Media, Genre, Company } from "../types";
 
+interface Creator {
+  id: number;
+  credit_id: string;
+  name: string;
+  gender: number;
+  profile_path: string | null;
+  department: string;
+  job: string;
+}
+
 export interface TVDetails extends Omit<Media, "name" | "first_air_date"> {
   name: string; // Make name required for TV shows
   first_air_date: string; // Make first_air_date required for TV shows
@@ -20,4 +30,5 @@ export interface TVDetails extends Omit<Media, "name" | "first_air_date"> {
   production_companies: Company[];
   certification: string;
   logo_path: string | null;
+  created_by: Creator[]; // Add the created_by field
 }
