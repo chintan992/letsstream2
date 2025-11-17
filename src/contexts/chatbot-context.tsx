@@ -155,13 +155,13 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
     setIsLoading(true);
 
     try {
-      // Get chat history with increased context window (last 10 messages instead of 5)
-      const chatHistory = messages.slice(-10).map(msg => msg.text);
+      // Get chat history with optimized context window (last 8 messages max to prevent overflow)
+      const chatHistory = messages.slice(-8).map(msg => msg.text);
 
       // Enhanced message formatting with more context
       const formattedMessage = `
         ${userMessage}
-        
+
         Current context:
         - Time of day: ${timeOfDay}
         - Day of week: ${dayOfWeek}
@@ -211,8 +211,14 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
     setIsLoading(true);
 
     try {
+      // Get recent chat history for context (limit to 6 messages to prevent overflow)
+      const chatHistory = messages.slice(-6).map(msg => msg.text);
+
       const formattedQuery = `
         Search for: ${query}
+
+        Previous conversation context:
+        ${chatHistory.length > 0 ? chatHistory.join("\n") : "No previous conversation"}
 
         When responding with search results, please format them as follows:
         1. **Title** (Year) - Brief description about the content.
@@ -275,7 +281,7 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
         })
       );
 
-      // Create detailed feedback message for the AI
+      // Create detailed feedback message for the AI (without adding to chat display)
       const ratingMessage = `
         I rated the recommendation "${ratedMessage.text.substring(0, 50)}..." as ${rating}/5.
         ${feedbackText ? `Feedback: ${feedbackText}` : ""}
@@ -285,9 +291,11 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
 
       console.log("Sending rating feedback:", rating, feedbackText);
 
-      // Send feedback to AI with full conversation context
+      // Send feedback to AI with full conversation context (but don't add to visible messages)
       const messageTexts = messages.map(msg => msg.text);
 
+      // Only send rating feedback to improve future recommendations
+      // Don't add this as a visible chat message to avoid cluttering the conversation
       sendMessageToGemini(ratingMessage, messageTexts).catch(error => {
         console.error("Error sending rating to Gemini:", error);
       });

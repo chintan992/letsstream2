@@ -462,8 +462,28 @@ export const searchMedia = async (query: string): Promise<GeminiResponse> => {
       );
     }
 
-    // Use the models API for one-off content generation with retry logic
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Use the same model as sendMessageToGemini for consistency
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-lite",
+      safetySettings: [
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+      ],
+    });
     const result = await withRetry<GenerateContentResult>(() =>
       model.generateContent(`Please search for movies or TV shows that match: "${query}".
         Provide up to 3 results with title, year, brief description, genre, and TMDB ID.

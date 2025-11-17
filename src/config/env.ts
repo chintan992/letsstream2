@@ -5,12 +5,11 @@ interface EnvConfig {
   NODE_ENV: "development" | "production" | "test";
 }
 
-// For development/demo purposes, using mock values
-// In production, these would come from environment variables
+// Extract environment variables from Vite environment
 const env: EnvConfig = {
-  GEMINI_API_KEY: "",
-  TMDB_API_KEY: "",
-  NODE_ENV: "development", // or 'development', 'test'
+  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY || "",
+  TMDB_API_KEY: import.meta.env.VITE_TMDB_API_KEY || "",
+  NODE_ENV: import.meta.env.NODE_ENV || "development",
 };
 
 export default env;
