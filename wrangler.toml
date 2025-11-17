@@ -1,0 +1,20 @@
+name = "lets-stream-v2"
+compatibility_date = "2024-11-17"
+
+# Cloudflare Pages configuration
+[env.production]
+account_id = ""
+# Add your account ID here
+
+# Environment variables for production
+[vars]
+# Add your environment variables here
+# These would be set in the Cloudflare Dashboard during deployment
+# FIREBASE_API_KEY = ""
+# FIREBASE_AUTH_DOMAIN = ""
+# FIREBASE_PROJECT_ID = ""
+# etc.
+
+# You can also define different environments
+[env.development]
+account_id = ""

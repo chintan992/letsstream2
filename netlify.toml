@@ -1,7 +1,9 @@
+# Build configuration for both Netlify and Cloudflare Pages
 [build]
   command = "npm run build"
   publish = "dist"
 
+# Netlify redirects
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -9,3 +11,6 @@
 
 [build.environment]
   NODE_VERSION = "18"
+
+# These settings also work for Cloudflare Pages deployment
+# Cloudflare Pages will use the same build command and output directory

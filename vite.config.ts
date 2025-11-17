@@ -86,6 +86,10 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
+    outDir: "dist",
+    emptyOutDir: true,
+    // Cloudflare Pages specific output configuration
+    cssCodeSplit: false, // Recommended for Cloudflare Pages
   },
   plugins: [
     react(),
