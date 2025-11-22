@@ -126,7 +126,11 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
       </div>
 
       {/* Episode List */}
-      <ScrollArea className="min-h-0 flex-1" scrollBarVariant="accent" viewportRef={viewportRef}>
+      <ScrollArea
+        className="min-h-0 flex-1"
+        scrollBarVariant="accent"
+        viewportRef={viewportRef}
+      >
         <div className="space-y-4 p-4">
           {filteredEpisodes.length === 0 && searchQuery.length > 0 ? (
             <div className="px-4 py-12 text-center">

@@ -60,11 +60,15 @@ const PWAInstallPrompt = ({
   const [cardDismissed, setCardDismissed] = useState(false);
 
   // Pick up the global deferred prompt if available (fixes timing issues)
-  useEffect(() => {
+  const updateDeferredPrompt = useCallback(() => {
     if (!deferredPrompt && window.__deferredPWAInstallPrompt) {
       setDeferredPrompt(window.__deferredPWAInstallPrompt);
     }
   }, [deferredPrompt]);
+
+  useEffect(() => {
+    updateDeferredPrompt();
+  }, [updateDeferredPrompt]);
 
   // Prevent multiple toasts
   // Prevent multiple toasts

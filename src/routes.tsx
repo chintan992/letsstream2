@@ -32,19 +32,20 @@ const ContentRemoval = lazy(() => import("./pages/ContentRemoval"));
 const DMCANotice = lazy(() => import("./pages/DMCANotice"));
 
 export default function AppRoutes() {
-  const enableManualRestoration = import.meta.env.VITE_SCROLL_RESTORATION_MANUAL === 'true';
+  const enableManualRestoration =
+    import.meta.env.VITE_SCROLL_RESTORATION_MANUAL === "true";
 
   useEffect(() => {
     // Set scroll restoration to manual to prevent browser's default behavior
     // Only enable this after all pages have integrated useScrollRestoration
-    if (enableManualRestoration && 'scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
+    if (enableManualRestoration && "scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
     }
 
     // Cleanup on unmount
     return () => {
-      if (enableManualRestoration && 'scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'auto';
+      if (enableManualRestoration && "scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "auto";
       }
     };
   }, [enableManualRestoration]);

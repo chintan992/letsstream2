@@ -36,6 +36,16 @@ import { useHaptic } from "@/hooks/useHaptic";
 
 type TabType = "about" | "cast" | "reviews" | "downloads" | "images";
 
+interface Image {
+  file_path: string;
+  vote_average: number;
+}
+
+interface Images {
+  backdrops: Image[];
+  posters: Image[];
+}
+
 const MovieDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetails | null>(null);
@@ -48,8 +58,11 @@ const MovieDetailsPage = () => {
   const [recommendations, setRecommendations] = useState<Media[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [cast, setCast] = useState<CastMember[]>([]);
-  const [images, setImages] = useState<any>(null);
+  const [images, setImages] = useState<Images | null>(null);
   const [downloadingImage, setDownloadingImage] = useState<string | null>(null);
+  const [activeImageTab, setActiveImageTab] = useState<"backdrops" | "posters">(
+    "backdrops"
+  );
   const {
     addToFavorites,
     addToWatchlist,
@@ -89,12 +102,13 @@ const MovieDetailsPage = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const [movieData, recommendationsData, castData, imagesData] = await Promise.all([
-          getMovieDetails(movieId),
-          getMovieRecommendations(movieId),
-          getMovieCast(movieId),
-          getMovieImages(movieId),
-        ]);
+        const [movieData, recommendationsData, castData, imagesData] =
+          await Promise.all([
+            getMovieDetails(movieId),
+            getMovieRecommendations(movieId),
+            getMovieCast(movieId),
+            getMovieImages(movieId),
+          ]);
 
         if (!movieData) {
           setError("Movie not found");
@@ -155,23 +169,24 @@ const MovieDetailsPage = () => {
       let hydrated = false;
 
       switch (activeTab) {
-        case 'about':
+        case "about":
           // About tab is hydrated when movie data is available and backdrop/logo loaded
-          hydrated = !!movie && backdropLoaded && (movie.logo_path ? logoLoaded : true);
+          hydrated =
+            !!movie && backdropLoaded && (movie.logo_path ? logoLoaded : true);
           break;
-        case 'cast':
+        case "cast":
           // Cast tab is hydrated when cast data is loaded
           hydrated = cast.length > 0;
           break;
-        case 'images':
+        case "images":
           // Images tab is hydrated when images data is loaded
           hydrated = !!images && images.backdrops && images.posters;
           break;
-        case 'reviews':
+        case "reviews":
           // Reviews tab is considered hydrated immediately as ReviewSection handles its own loading
           hydrated = true;
           break;
-        case 'downloads':
+        case "downloads":
           // Downloads tab is considered hydrated immediately as it lazy loads on user action
           hydrated = true;
           break;
@@ -587,15 +602,18 @@ const MovieDetailsPage = () => {
                   {movie.directors.map(director => (
                     <div key={director.id} className="text-center">
                       {director.profile_path ? (
-                        <div className="mb-2 flex h-20 w-28 items-center justify-center rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 p-4 backdrop-blur-sm shadow-lg">
+                        <div className="mb-2 flex h-20 w-28 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-4 shadow-lg backdrop-blur-sm">
                           <img
-                            src={getImageUrl(director.profile_path, posterSizes.medium)}
+                            src={getImageUrl(
+                              director.profile_path,
+                              posterSizes.medium
+                            )}
                             alt={director.name}
-                            className="max-h-full max-w-full object-contain rounded-full"
+                            className="max-h-full max-w-full rounded-full object-contain"
                           />
                         </div>
                       ) : (
-                        <div className="mb-2 flex h-20 w-28 items-center justify-center rounded-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/10 p-4 backdrop-blur-sm shadow-lg">
+                        <div className="mb-2 flex h-20 w-28 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-4 shadow-lg backdrop-blur-sm">
                           <span className="text-center text-sm text-white/70">
                             {director.name}
                           </span>
@@ -618,7 +636,10 @@ const MovieDetailsPage = () => {
                   <div key={member.id} className="w-32 text-center">
                     {member.profile_path ? (
                       <img
-                        src={getImageUrl(member.profile_path, posterSizes.medium)}
+                        src={getImageUrl(
+                          member.profile_path,
+                          posterSizes.medium
+                        )}
                         alt={member.name}
                         className="mx-auto mb-2 h-32 w-24 rounded-lg object-cover"
                       />
@@ -650,119 +671,84 @@ const MovieDetailsPage = () => {
                 <div className="mb-6 flex border-b border-white/10">
                   <button
                     className={`px-4 py-2 font-medium ${
-                      true // Default to backdrops
+                      activeImageTab === "backdrops"
                         ? "border-b-2 border-accent text-white"
                         : "text-white/60 hover:text-white"
                     }`}
-                    onClick={() => {}} // Will add sub-tab functionality if needed
+                    onClick={() => setActiveImageTab("backdrops")}
                   >
                     Backdrops ({images.backdrops.length})
                   </button>
                   <button
                     className={`px-4 py-2 font-medium ${
-                      false // Default to backdrops
+                      activeImageTab === "posters"
                         ? "border-b-2 border-accent text-white"
                         : "text-white/60 hover:text-white"
                     }`}
-                    onClick={() => {}} // Placeholder for sub-tab
+                    onClick={() => setActiveImageTab("posters")}
                   >
                     Posters ({images.posters.length})
                   </button>
                 </div>
 
-                {/* Show backdrops */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {images.backdrops.map((image: any, index: number) => (
-                    <div key={`backdrop-${index}`} className="group relative overflow-hidden rounded-xl">
-                      <img
-                        src={getImageUrl(image.file_path, backdropSizes.small)}
-                        alt={`Backdrop ${index + 1}`}
-                        className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                      {image.vote_average > 0 && (
-                        <div className="absolute top-2 right-2 bg-black/70 px-1.5 py-0.5 rounded text-xs text-white">
-                          {image.vote_average.toFixed(1)}
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={async () => {
-                            const imageId = `backdrop-${image.file_path}`;
-                            setDownloadingImage(imageId);
-
-                            try {
-                              await downloadTMDBImage(image.file_path, 'backdrop', movie?.title || 'Movie');
-                            } catch (error) {
-                              console.error('Error downloading backdrop:', error);
-                            } finally {
-                              setDownloadingImage(null);
-                            }
-                          }}
-                          disabled={downloadingImage === `backdrop-${image.file_path}`}
-                          className="bg-accent hover:bg-accent/90 text-white shadow-lg"
-                        >
-                          {downloadingImage === `backdrop-${image.file_path}` ? (
-                            <span className="flex items-center">
-                              <span className="h-3 w-3 rounded-full bg-white animate-ping mr-2"></span>
-                              Downloading...
-                            </span>
-                          ) : (
-                            <span className="flex items-center">
-                              <Download className="h-4 w-4 mr-1" />
-                              Download
-                            </span>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Show posters - separated section */}
-                <div className="mt-8">
-                  <h3 className="mb-4 text-xl font-semibold text-white">Posters</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {images.posters.map((image: any, index: number) => (
-                      <div key={`poster-${index}`} className="group relative overflow-hidden rounded-xl">
+                {activeImageTab === "backdrops" && (
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {images.backdrops.map((image, index) => (
+                      <div
+                        key={`backdrop-${index}`}
+                        className="group relative overflow-hidden rounded-xl"
+                      >
                         <img
-                          src={getImageUrl(image.file_path, posterSizes.medium)}
-                          alt={`Poster ${index + 1}`}
-                          className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
+                          src={getImageUrl(
+                            image.file_path,
+                            backdropSizes.small
+                          )}
+                          alt={`Backdrop ${index + 1}`}
+                          className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                         {image.vote_average > 0 && (
-                          <div className="absolute top-2 right-2 bg-black/70 px-1.5 py-0.5 rounded text-xs text-white">
+                          <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
                             {image.vote_average.toFixed(1)}
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                           <Button
                             variant="secondary"
                             size="sm"
                             onClick={async () => {
-                              const imageId = `poster-${image.file_path}`;
+                              const imageId = `backdrop-${image.file_path}`;
                               setDownloadingImage(imageId);
 
                               try {
-                                await downloadTMDBImage(image.file_path, 'poster', movie?.title || 'Movie');
+                                await downloadTMDBImage(
+                                  image.file_path,
+                                  "backdrop",
+                                  movie?.title || "Movie"
+                                );
                               } catch (error) {
-                                console.error('Error downloading poster:', error);
+                                console.error(
+                                  "Error downloading backdrop:",
+                                  error
+                                );
                               } finally {
                                 setDownloadingImage(null);
                               }
                             }}
-                            disabled={downloadingImage === `poster-${image.file_path}`}
-                            className="bg-accent hover:bg-accent/90 text-white shadow-lg"
+                            disabled={
+                              downloadingImage ===
+                              `backdrop-${image.file_path}`
+                            }
+                            className="hover:bg-accent/90 bg-accent text-white shadow-lg"
                           >
-                            {downloadingImage === `poster-${image.file_path}` ? (
+                            {downloadingImage ===
+                            `backdrop-${image.file_path}` ? (
                               <span className="flex items-center">
-                                <span className="h-3 w-3 rounded-full bg-white animate-ping mr-2"></span>
+                                <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
                                 Downloading...
                               </span>
                             ) : (
                               <span className="flex items-center">
-                                <Download className="h-4 w-4 mr-1" />
+                                <Download className="mr-1 h-4 w-4" />
                                 Download
                               </span>
                             )}
@@ -771,7 +757,74 @@ const MovieDetailsPage = () => {
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
+
+                {activeImageTab === "posters" && (
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {images.posters.map((image, index) => (
+                      <div
+                        key={`poster-${index}`}
+                        className="group relative overflow-hidden rounded-xl"
+                      >
+                        <img
+                          src={getImageUrl(
+                            image.file_path,
+                            posterSizes.medium
+                          )}
+                          alt={`Poster ${index + 1}`}
+                          className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                        {image.vote_average > 0 && (
+                          <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
+                            {image.vote_average.toFixed(1)}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={async () => {
+                              const imageId = `poster-${image.file_path}`;
+                              setDownloadingImage(imageId);
+
+                              try {
+                                await downloadTMDBImage(
+                                  image.file_path,
+                                  "poster",
+                                  movie?.title || "Movie"
+                                );
+                              } catch (error) {
+                                console.error(
+                                  "Error downloading poster:",
+                                  error
+                                );
+                              } finally {
+                                setDownloadingImage(null);
+                              }
+                            }}
+                            disabled={
+                              downloadingImage === `poster-${image.file_path}`
+                            }
+                            className="hover:bg-accent/90 bg-accent text-white shadow-lg"
+                          >
+                            {downloadingImage ===
+                            `poster-${image.file_path}` ? (
+                              <span className="flex items-center">
+                                <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
+                                Downloading...
+                              </span>
+                            ) : (
+                              <span className="flex items-center">
+                                <Download className="mr-1 h-4 w-4" />
+                                Download
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-white/70">No images available.</div>

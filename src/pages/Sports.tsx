@@ -25,17 +25,17 @@ interface SportsPageState {
 
 const Sports = () => {
   // Use page state persistence hook
-  const [persistedState, setPersistedState] = usePageStatePersistence<SportsPageState>(
-    "sports-page-state",
-    {
+  const [persistedState, setPersistedState] =
+    usePageStatePersistence<SportsPageState>("sports-page-state", {
       activeTab: "popular",
       selectedSport: "all",
-    }
-  );
+    });
 
   // Initialize state from persisted state
   const [activeTab, setActiveTab] = useState<string>(persistedState.activeTab);
-  const [selectedSport, setSelectedSport] = useState<string>(persistedState.selectedSport);
+  const [selectedSport, setSelectedSport] = useState<string>(
+    persistedState.selectedSport
+  );
 
   // Apply scroll restoration - since there's no complex data to restore, hydration is immediate
   useScrollRestoration({ enabled: true });
@@ -103,7 +103,7 @@ const Sports = () => {
     // Update the persisted state when tab changes
     setPersistedState(prevState => ({
       ...prevState,
-      activeTab: value
+      activeTab: value,
     }));
   };
 
@@ -112,7 +112,7 @@ const Sports = () => {
     // Update the persisted state when sport changes
     setPersistedState(prevState => ({
       ...prevState,
-      selectedSport: sportId
+      selectedSport: sportId,
     }));
   };
 

@@ -18,6 +18,38 @@ import { TVDetails, Episode, Media, CastMember } from "@/utils/types";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { useToast } from "@/hooks/use-toast";
 
+interface Creator {
+  id: number;
+  name: string;
+}
+
+interface Images {
+  backdrops: { file_path: string }[];
+  posters: { file_path: string }[];
+}
+
+interface Keyword {
+  id: number;
+  name: string;
+}
+
+interface Network {
+  id: number;
+  name: string;
+  logo_path: string;
+  origin_country: string;
+}
+
+interface ContentRating {
+  iso_3166_1: string;
+  rating: string;
+}
+
+interface GuestStar {
+  id: number;
+  name: string;
+}
+
 export const useTVDetails = (id: string | undefined) => {
   const [tvShow, setTVShow] = useState<TVDetails | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -32,12 +64,12 @@ export const useTVDetails = (id: string | undefined) => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
-  const [creators, setCreators] = useState<any[]>([]);
-  const [images, setImages] = useState<any>(null);
-  const [keywords, setKeywords] = useState<any[]>([]);
-  const [networks, setNetworks] = useState<any[]>([]);
-  const [contentRatings, setContentRatings] = useState<any[]>([]);
-  const [guestStars, setGuestStars] = useState<any[]>([]);
+  const [creators, setCreators] = useState<Creator[]>([]);
+  const [images, setImages] = useState<Images | null>(null);
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [networks, setNetworks] = useState<Network[]>([]);
+  const [contentRatings, setContentRatings] = useState<ContentRating[]>([]);
+  const [guestStars, setGuestStars] = useState<GuestStar[]>([]);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -69,7 +101,16 @@ export const useTVDetails = (id: string | undefined) => {
       try {
         setIsLoading(true);
         setError(null);
-        const [tvData, recommendationsData, castData, creatorsData, imagesData, keywordsData, networksData, contentRatingsData] = await Promise.all([
+        const [
+          tvData,
+          recommendationsData,
+          castData,
+          creatorsData,
+          imagesData,
+          keywordsData,
+          networksData,
+          contentRatingsData,
+        ] = await Promise.all([
           getTVDetails(tvId),
           getTVRecommendations(tvId),
           getTVCast(tvId),
@@ -122,7 +163,11 @@ export const useTVDetails = (id: string | undefined) => {
         // Fetch guest stars for the episodes in the selected season
         if (episodesData.length > 0) {
           const guestStarsPromises = episodesData.map(episode =>
-            getTVEpisodeWithGuests(tvShow.id, selectedSeason, episode.episode_number)
+            getTVEpisodeWithGuests(
+              tvShow.id,
+              selectedSeason,
+              episode.episode_number
+            )
           );
 
           const episodesWithCredits = await Promise.all(guestStarsPromises);
@@ -130,9 +175,14 @@ export const useTVDetails = (id: string | undefined) => {
           // Create a mapping of episode numbers to their guest stars
           const episodeGuestStarsMap: Record<number, any[]> = {};
           episodesWithCredits.forEach((episodeData, index) => {
-            if (episodeData && episodeData.credits && episodeData.credits.guest_stars) {
+            if (
+              episodeData &&
+              episodeData.credits &&
+              episodeData.credits.guest_stars
+            ) {
               const episodeNumber = episodesData[index].episode_number;
-              episodeGuestStarsMap[episodeNumber] = episodeData.credits.guest_stars;
+              episodeGuestStarsMap[episodeNumber] =
+                episodeData.credits.guest_stars;
             }
           });
 
@@ -239,7 +289,11 @@ export const useTVDetails = (id: string | undefined) => {
     });
 
     // Check if lastWatched and its season/episode exist before proceeding
-    if (!lastWatched || lastWatched.season === undefined || lastWatched.episode === undefined) {
+    if (
+      !lastWatched ||
+      lastWatched.season === undefined ||
+      lastWatched.episode === undefined
+    ) {
       // If no specific season/episode data (e.g., from old entries), return null
       return null;
     }

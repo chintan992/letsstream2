@@ -116,7 +116,11 @@ export function ServiceWorkerDebugPanel() {
       addEvent("Controller", "Service worker controller changed");
     };
 
-    checkRegistration();
+    const initializePanel = () => {
+      checkRegistration();
+    };
+
+    initializePanel();
 
     if (registration) {
       registration.addEventListener("statechange", handleStateChange);

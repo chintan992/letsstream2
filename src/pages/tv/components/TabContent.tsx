@@ -26,7 +26,7 @@ interface TabContentProps {
   sortBy: "default" | "name" | "first_air_date" | "rating";
   genreFilter: string;
   platformFilters: string[];
-  onHydrationComplete?: () => void;  // Callback to notify parent when hydration is complete
+  onHydrationComplete?: () => void; // Callback to notify parent when hydration is complete
   setClearState?: (clearState: () => void) => void; // Callback to register clearState function with parent
 }
 
@@ -45,13 +45,11 @@ const TabContent = ({
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Use page state persistence hook with type-specific key
-  const [persistedState, setPersistedState, clearPersistedState] = usePageStatePersistence<TabContentState>(
-    `tv-${type}-state`,
-    {
+  const [persistedState, setPersistedState, clearPersistedState] =
+    usePageStatePersistence<TabContentState>(`tv-${type}-state`, {
       page: 1,
       showIds: [],
-    }
-  );
+    });
 
   // Initialize state from persisted state
   const [page, setPage] = useState(persistedState.page);
@@ -115,7 +113,9 @@ const TabContent = ({
     // Hydrate shows if we have persisted IDs
     if (persistedState.showIds.length > 0) {
       // Fetch all pages needed to get all persisted shows
-      const totalPagesNeeded = Math.ceil(persistedState.showIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.showIds.length / ITEMS_PER_PAGE
+      );
       for (let pageNum = 1; pageNum <= totalPagesNeeded; pageNum++) {
         queryClient.prefetchQuery({
           queryKey: [
@@ -147,18 +147,22 @@ const TabContent = ({
   useEffect(() => {
     if (persistedState.showIds.length > 0 && !isHydrated) {
       // Check if all required pages are in cache
-      const totalPagesNeeded = Math.ceil(persistedState.showIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.showIds.length / ITEMS_PER_PAGE
+      );
       let allPagesCached = true;
 
       for (let pageNum = 1; pageNum <= totalPagesNeeded; pageNum++) {
-        if (!queryClient.getQueryData([
-          type === "popular"
-            ? "popularTV"
-            : type === "top_rated"
-              ? "topRatedTV"
-              : "trendingTV",
-          pageNum,
-        ])) {
+        if (
+          !queryClient.getQueryData([
+            type === "popular"
+              ? "popularTV"
+              : type === "top_rated"
+                ? "topRatedTV"
+                : "trendingTV",
+            pageNum,
+          ])
+        ) {
           allPagesCached = false;
           break;
         }
@@ -168,26 +172,27 @@ const TabContent = ({
         // Build the complete array from cached pages
         let accumulatedShows: Media[] = [];
         for (let pageNum = 1; pageNum <= totalPagesNeeded; pageNum++) {
-          const pageData: any[] = queryClient.getQueryData([
-            type === "popular"
-              ? "popularTV"
-              : type === "top_rated"
-                ? "topRatedTV"
-                : "trendingTV",
-            pageNum,
-          ]) || [];
+          const pageData: any[] =
+            queryClient.getQueryData([
+              type === "popular"
+                ? "popularTV"
+                : type === "top_rated"
+                  ? "topRatedTV"
+                  : "trendingTV",
+              pageNum,
+            ]) || [];
           const mappedShows = pageData.map(show => ({
             ...show,
             id: show.id || show.media_id || 0,
             media_id: show.id || show.media_id || 0,
-            media_type: "tv" as "tv",
+            media_type: "tv" as const,
           }));
           accumulatedShows = [...accumulatedShows, ...mappedShows];
         }
 
         // Filter to only the shows we need based on persisted IDs
-        const filteredShows = accumulatedShows.filter(
-          show => persistedState.showIds.includes(show.id)
+        const filteredShows = accumulatedShows.filter(show =>
+          persistedState.showIds.includes(show.id)
         );
 
         setAllShows(filteredShows);
@@ -197,7 +202,13 @@ const TabContent = ({
         }
       }
     }
-  }, [persistedState.showIds, type, queryClient, isHydrated, onHydrationComplete]);
+  }, [
+    persistedState.showIds,
+    type,
+    queryClient,
+    isHydrated,
+    onHydrationComplete,
+  ]);
 
   // Effect to update the collection of all shows when new data is fetched
   useEffect(() => {
@@ -211,7 +222,7 @@ const TabContent = ({
               ...show,
               id: show.id || show.media_id || 0,
               media_id: show.id || show.media_id || 0,
-              media_type: "tv" as "tv",
+              media_type: "tv" as const,
             };
           });
         return [...prev, ...newShows];
@@ -296,7 +307,7 @@ const TabContent = ({
               // Update the persisted state when page changes
               setPersistedState(prevState => ({
                 ...prevState,
-                page: newPage
+                page: newPage,
               }));
               return newPage;
             });

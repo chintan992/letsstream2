@@ -1,8 +1,8 @@
 // TypeScript declarations for browser APIs
 
 interface Window {
-  webkitSpeechRecognition: any;
-  SpeechRecognition: any;
+  webkitSpeechRecognition: typeof SpeechRecognition;
+  SpeechRecognition: typeof SpeechRecognition;
 }
 
 interface Navigator {

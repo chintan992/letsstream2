@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
 export interface ElementScrollRestorationOptions {
   enabled?: boolean;
@@ -12,17 +12,24 @@ export const useElementScrollRestoration = (
   storageKey: string,
   options: ElementScrollRestorationOptions = {}
 ) => {
-  const { enabled = true, restoreDelay = 50, maxRestoreDelay = 2000, debounceMs = 100 } = options;
+  const {
+    enabled = true,
+    restoreDelay = 50,
+    maxRestoreDelay = 2000,
+    debounceMs = 100,
+  } = options;
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const maxRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Non-debounced helper to save scroll position immediately
   const saveScrollPositionImmediate = useCallback(() => {
     if (!enabled || !elementRef.current) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined') {
+      if (typeof sessionStorage !== "undefined") {
         const position = elementRef.current.scrollTop;
         sessionStorage.setItem(storageKey, position.toString());
       }
@@ -49,7 +56,7 @@ export const useElementScrollRestoration = (
     if (!enabled || !elementRef.current) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined') {
+      if (typeof sessionStorage !== "undefined") {
         const savedPosition = sessionStorage.getItem(storageKey);
 
         if (savedPosition !== null) {
@@ -78,7 +85,9 @@ export const useElementScrollRestoration = (
 
             // Set up fallback timeout in case content takes longer to load
             maxRestoreTimeoutRef.current = setTimeout(() => {
-              console.warn(`Element scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`);
+              console.warn(
+                `Element scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`
+              );
               if (elementRef.current) {
                 elementRef.current.scrollTop = position;
               }
@@ -114,7 +123,9 @@ export const useElementScrollRestoration = (
 
           // Set up fallback timeout in case content takes longer to load
           maxRestoreTimeoutRef.current = setTimeout(() => {
-            console.warn(`Element scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`);
+            console.warn(
+              `Element scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`
+            );
             if (elementRef.current) {
               elementRef.current.scrollTop = 0;
             }
@@ -161,16 +172,18 @@ export const useElementScrollRestoration = (
 
     // Add scroll event listener to save position (debounced) when element is available
     let scrollListenerAttached = false;
-    
+
     const attachScrollListener = () => {
       if (elementRef.current && !scrollListenerAttached) {
-        elementRef.current.addEventListener('scroll', saveScrollPosition, { passive: true });
+        elementRef.current.addEventListener("scroll", saveScrollPosition, {
+          passive: true,
+        });
         scrollListenerAttached = true;
       }
     };
 
     attachScrollListener();
-    
+
     // Poll for element availability
     const intervalId = setInterval(() => {
       if (elementRef.current && !scrollListenerAttached) {
@@ -179,16 +192,16 @@ export const useElementScrollRestoration = (
     }, 100);
 
     // Add beforeunload listener to save position on page refresh (immediate)
-    window.addEventListener('beforeunload', saveScrollPositionImmediate);
+    window.addEventListener("beforeunload", saveScrollPositionImmediate);
 
     // Clean up on unmount
     return () => {
       if (elementRef.current && scrollListenerAttached) {
-        elementRef.current.removeEventListener('scroll', saveScrollPosition);
+        elementRef.current.removeEventListener("scroll", saveScrollPosition);
         scrollListenerAttached = false;
       }
       clearInterval(intervalId);
-      window.removeEventListener('beforeunload', saveScrollPositionImmediate);
+      window.removeEventListener("beforeunload", saveScrollPositionImmediate);
 
       // Clear timeouts
       if (debounceTimeoutRef.current) {
@@ -204,5 +217,14 @@ export const useElementScrollRestoration = (
       // Save current position before unmounting (immediate)
       saveScrollPositionImmediate();
     };
-  }, [enabled, restoreDelay, debounceMs, storageKey, saveScrollPosition, saveScrollPositionImmediate, restoreScrollPosition, elementRef]);
+  }, [
+    enabled,
+    restoreDelay,
+    debounceMs,
+    storageKey,
+    saveScrollPosition,
+    saveScrollPositionImmediate,
+    restoreScrollPosition,
+    elementRef,
+  ]);
 };

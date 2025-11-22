@@ -68,17 +68,15 @@ const Search = () => {
   const searchQuery = searchParams.get("q") || "";
   const storageKey = `search-state-${searchQuery}`;
 
-  const [persistedState, setPersistedState] = usePageStatePersistence<SearchPageState>(
-    storageKey,
-    {
+  const [persistedState, setPersistedState] =
+    usePageStatePersistence<SearchPageState>(storageKey, {
       page: 1,
       mediaType: "all",
       sortBy: "popularity",
       advancedSearch: false,
       resultIds: [],
       queryParam: searchQuery,
-    }
-  );
+    });
 
   // Initialize state from persisted state only if query matches
   const [allResults, setAllResults] = useState<ExtendedMedia[]>([]);
@@ -87,22 +85,26 @@ const Search = () => {
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [page, setPage] = useState(() => {
     // Only use persisted state if the query matches
-    return (searchQuery && searchQuery === persistedState.queryParam) ?
-           persistedState.page : 1;
+    return searchQuery && searchQuery === persistedState.queryParam
+      ? persistedState.page
+      : 1;
   });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [advancedSearch, setAdvancedSearch] = useState(() => {
-    return (searchQuery && searchQuery === persistedState.queryParam) ?
-           persistedState.advancedSearch : false;
+    return searchQuery && searchQuery === persistedState.queryParam
+      ? persistedState.advancedSearch
+      : false;
   });
   const [mediaType, setMediaType] = useState<string>(() => {
-    return (searchQuery && searchQuery === persistedState.queryParam) ?
-           persistedState.mediaType : (searchParams.get("type") || "all");
+    return searchQuery && searchQuery === persistedState.queryParam
+      ? persistedState.mediaType
+      : searchParams.get("type") || "all";
   });
   const [sortBy, setSortBy] = useState<string>(() => {
-    return (searchQuery && searchQuery === persistedState.queryParam) ?
-           persistedState.sortBy : (searchParams.get("sort") || "popularity");
+    return searchQuery && searchQuery === persistedState.queryParam
+      ? persistedState.sortBy
+      : searchParams.get("sort") || "popularity";
   });
 
   // Apply scroll restoration only after hydration
@@ -179,7 +181,9 @@ const Search = () => {
   );
 
   // State to track if we've already restored for this query
-  const [hasRestoredForQuery, setHasRestoredForQuery] = useState<string | null>(null);
+  const [hasRestoredForQuery, setHasRestoredForQuery] = useState<string | null>(
+    null
+  );
 
   // Effect to handle search results restoration
   useEffect(() => {
@@ -203,7 +207,10 @@ const Search = () => {
     setHasRestoredForQuery(searchQuery);
 
     // Check if we have persisted state for this query and if it's valid
-    if (searchQuery === persistedState.queryParam && persistedState.resultIds.length > 0) {
+    if (
+      searchQuery === persistedState.queryParam &&
+      persistedState.resultIds.length > 0
+    ) {
       // Try to restore from persisted state
       const fetchSearchResults = async () => {
         setIsLoading(true);
@@ -274,13 +281,22 @@ const Search = () => {
     setQuery(searchQuery);
     setMediaType(searchParams.get("type") || "all");
     setSortBy(searchParams.get("sort") || "popularity");
-  }, [searchParams, toast, mediaType, sortBy, persistedState.resultIds, persistedState.queryParam, hasRestoredForQuery, isHydrated]);
+  }, [
+    searchParams,
+    toast,
+    mediaType,
+    sortBy,
+    persistedState.resultIds,
+    persistedState.queryParam,
+    hasRestoredForQuery,
+    isHydrated,
+  ]);
 
   // Helper function to perform a new search
   const performNewSearch = async (searchQuery: string) => {
     setIsLoading(true);
     try {
-      let results = await searchMedia(searchQuery);
+      const results = await searchMedia(searchQuery);
 
       let filteredResults = results.map(item => ({
         ...item,
@@ -355,7 +371,15 @@ const Search = () => {
         resultIds: allResults.map(result => result.id),
       }));
     }
-  }, [searchParams, allResults, page, mediaType, sortBy, advancedSearch, setPersistedState]);
+  }, [
+    searchParams,
+    allResults,
+    page,
+    mediaType,
+    sortBy,
+    advancedSearch,
+    setPersistedState,
+  ]);
 
   const handleSearch = async (e?: React.FormEvent) => {
     triggerHapticFeedback(20);
@@ -450,7 +474,7 @@ const Search = () => {
     // Update the persisted state when page changes
     setPersistedState(prevState => ({
       ...prevState,
-      page: nextPage
+      page: nextPage,
     }));
   };
 
@@ -463,7 +487,7 @@ const Search = () => {
       // Update the persisted state when advanced search changes
       setPersistedState(prevState => ({
         ...prevState,
-        advancedSearch: newAdvancedSearch
+        advancedSearch: newAdvancedSearch,
       }));
       return newAdvancedSearch;
     });
@@ -560,12 +584,12 @@ const Search = () => {
                     </label>
                     <Select
                       value={mediaType}
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         setMediaType(value);
                         // Update the persisted state when media type changes
                         setPersistedState(prevState => ({
                           ...prevState,
-                          mediaType: value
+                          mediaType: value,
                         }));
                       }}
                     >
@@ -592,12 +616,12 @@ const Search = () => {
                     </label>
                     <Select
                       value={sortBy}
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         setSortBy(value);
                         // Update the persisted state when sort changes
                         setPersistedState(prevState => ({
                           ...prevState,
-                          sortBy: value
+                          sortBy: value,
                         }));
                       }}
                     >

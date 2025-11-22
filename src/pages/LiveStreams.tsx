@@ -30,12 +30,10 @@ interface LiveStreamsPageState {
 
 const LiveStreams = () => {
   // Use page state persistence hook
-  const [persistedState, setPersistedState] = usePageStatePersistence<LiveStreamsPageState>(
-    "live-streams-page-state",
-    {
+  const [persistedState, setPersistedState] =
+    usePageStatePersistence<LiveStreamsPageState>("live-streams-page-state", {
       activeTab: "all",
-    }
-  );
+    });
 
   // Initialize state from persisted state
   const [activeTab, setActiveTab] = useState<string>(persistedState.activeTab);
@@ -125,12 +123,12 @@ const LiveStreams = () => {
             <Tabs
               defaultValue="all"
               value={activeTab}
-              onValueChange={(value) => {
+              onValueChange={value => {
                 setActiveTab(value);
                 // Update the persisted state when tab changes
                 setPersistedState(prevState => ({
                   ...prevState,
-                  activeTab: value
+                  activeTab: value,
                 }));
               }}
               className="mb-6"

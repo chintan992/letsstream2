@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 
 export interface ScrollRestorationOptions {
   enabled?: boolean;
@@ -9,26 +9,30 @@ export interface ScrollRestorationOptions {
   storageKey?: string;
 }
 
-export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => {
+export const useScrollRestoration = (
+  options: ScrollRestorationOptions = {}
+) => {
   const {
     enabled = true,
     restoreDelay = 50,
     maxRestoreDelay = 2000,
     debounceMs = 100,
-    storageKey = 'scroll-positions',
+    storageKey = "scroll-positions",
   } = options;
 
   const location = useLocation();
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const maxRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Non-debounced helper to save scroll position immediately
   const saveScrollPositionImmediate = useCallback(() => {
     if (!enabled) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined') {
+      if (typeof sessionStorage !== "undefined") {
         const key = `${storageKey}-${location.pathname}`;
         const position = window.scrollY;
         sessionStorage.setItem(key, position.toString());
@@ -56,7 +60,7 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
     if (!enabled) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined') {
+      if (typeof sessionStorage !== "undefined") {
         const key = `${storageKey}-${location.pathname}`;
         const savedPosition = sessionStorage.getItem(key);
 
@@ -74,7 +78,8 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
             // Set up normal restore timeout
             restoreTimeoutRef.current = setTimeout(() => {
               // Ensure position doesn't exceed document height
-              const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+              const maxScroll =
+                document.documentElement.scrollHeight - window.innerHeight;
               const safePosition = Math.min(position, maxScroll);
               window.scrollTo(0, safePosition);
 
@@ -87,9 +92,12 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
 
             // Set up fallback timeout in case content takes longer to load
             maxRestoreTimeoutRef.current = setTimeout(() => {
-              console.warn(`Scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`);
+              console.warn(
+                `Scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`
+              );
               // Ensure position doesn't exceed document height
-              const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+              const maxScroll =
+                document.documentElement.scrollHeight - window.innerHeight;
               const safePosition = Math.min(position, maxScroll);
               window.scrollTo(0, safePosition);
 
@@ -122,7 +130,9 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
 
           // Set up fallback timeout in case content takes longer to load
           maxRestoreTimeoutRef.current = setTimeout(() => {
-            console.warn(`Scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`);
+            console.warn(
+              `Scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`
+            );
             window.scrollTo(0, 0);
 
             // Clear the normal restore timeout since fallback executed
@@ -147,10 +157,10 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
     if (!enabled) return;
 
     // Add scroll event listener to save position (debounced)
-    window.addEventListener('scroll', saveScrollPosition, { passive: true });
+    window.addEventListener("scroll", saveScrollPosition, { passive: true });
 
     // Add beforeunload listener to save position on page refresh (immediate)
-    window.addEventListener('beforeunload', saveScrollPositionImmediate);
+    window.addEventListener("beforeunload", saveScrollPositionImmediate);
 
     // Restore scroll position on component mount
     restoreScrollPosition();
@@ -161,8 +171,8 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
       saveScrollPositionImmediate();
 
       // Remove event listeners
-      window.removeEventListener('scroll', saveScrollPosition);
-      window.removeEventListener('beforeunload', saveScrollPositionImmediate);
+      window.removeEventListener("scroll", saveScrollPosition);
+      window.removeEventListener("beforeunload", saveScrollPositionImmediate);
 
       // Clear timeouts
       if (debounceTimeoutRef.current) {
@@ -175,5 +185,14 @@ export const useScrollRestoration = (options: ScrollRestorationOptions = {}) => 
         clearTimeout(maxRestoreTimeoutRef.current);
       }
     };
-  }, [location.pathname, enabled, restoreDelay, debounceMs, storageKey, saveScrollPosition, saveScrollPositionImmediate, restoreScrollPosition]);
+  }, [
+    location.pathname,
+    enabled,
+    restoreDelay,
+    debounceMs,
+    storageKey,
+    saveScrollPosition,
+    saveScrollPositionImmediate,
+    restoreScrollPosition,
+  ]);
 };

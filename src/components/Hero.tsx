@@ -135,6 +135,18 @@ const Hero = ({ media, className = "" }: HeroProps) => {
     }
   }, [filteredMedia, currentIndex, preloadImage]);
 
+  const pauseAutoRotation = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const restartAutoRotation = () => {
+    pauseAutoRotation();
+    startAutoRotation();
+  };
+  
   // Auto-rotation control
   const toggleAutoRotation = () => {
     triggerHapticFeedback(20);
@@ -276,18 +288,6 @@ const Hero = ({ media, className = "" }: HeroProps) => {
       preloadNextImage();
     }, 10000); // Increased from 8 seconds for more time to appreciate each media
   }, [filteredMedia.length, goToNext, preloadNextImage]);
-
-  const pauseAutoRotation = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
-
-  const restartAutoRotation = () => {
-    pauseAutoRotation();
-    startAutoRotation();
-  };
 
   // Initialize and clean up auto rotation
   useEffect(() => {

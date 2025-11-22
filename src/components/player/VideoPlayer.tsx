@@ -38,20 +38,23 @@ const VideoPlayerComponent = ({
   };
 
   // Memoize the iframe element to prevent re-renders on orientation changes
-  const iframeElement = useMemo(() => (
-    <iframe
-      key={iframeUrl}
-      ref={iframeRef}
-      src={iframeUrl}
-      className="h-full w-full"
-      allowFullScreen
-      allow="autoplay; encrypted-media; picture-in-picture"
-      referrerPolicy="no-referrer"
-      loading="lazy"
-      onLoad={handleIframeLoad}
-      onError={handleIframeError}
-    />
-  ), [iframeUrl]); // Only re-create iframe when iframeUrl changes
+  const iframeElement = useMemo(
+    () => (
+      <iframe
+        key={iframeUrl}
+        ref={iframeRef}
+        src={iframeUrl}
+        className="h-full w-full"
+        allowFullScreen
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerPolicy="no-referrer"
+        loading="lazy"
+        onLoad={handleIframeLoad}
+        onError={handleIframeError}
+      />
+    ),
+    [iframeUrl, handleIframeError, handleIframeLoad]
+  ); // Only re-create iframe when iframeUrl changes
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg shadow-2xl">
@@ -79,10 +82,12 @@ const VideoPlayerComponent = ({
 
 const VideoPlayer = memo(VideoPlayerComponent, (prevProps, nextProps) => {
   // Only re-render if iframeUrl changes, not on other prop changes like orientation
-  return prevProps.iframeUrl === nextProps.iframeUrl &&
-         prevProps.isLoading === nextProps.isLoading &&
-         prevProps.title === nextProps.title &&
-         prevProps.poster === nextProps.poster;
+  return (
+    prevProps.iframeUrl === nextProps.iframeUrl &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.title === nextProps.title &&
+    prevProps.poster === nextProps.poster
+  );
 });
 
 export { VideoPlayer };

@@ -80,7 +80,7 @@ export interface TMDBMovieDetailsResult extends TMDBMovieResult {
   budget: number;
   revenue: number;
   production_companies: Company[];
-  production_countries: Array<{iso_3166_1: string; name: string}>;
+  production_countries: Array<{ iso_3166_1: string; name: string }>;
   release_dates?: {
     results: Array<{
       iso_3166_1: string;

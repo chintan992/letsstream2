@@ -16,7 +16,7 @@ export function AnalyticsWrapper({ children }: AnalyticsWrapperProps) {
     const currentScroll = window.scrollY;
     if (currentScroll > 0 && prevPathnameRef.current !== location.pathname) {
       try {
-        if (typeof sessionStorage !== 'undefined') {
+        if (typeof sessionStorage !== "undefined") {
           const key = `scroll-positions-${prevPathnameRef.current}`;
           sessionStorage.setItem(key, currentScroll.toString());
         }

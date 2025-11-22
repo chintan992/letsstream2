@@ -29,17 +29,17 @@ const Trending = () => {
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Use page state persistence hook
-  const [persistedState, setPersistedState] = usePageStatePersistence<TrendingPageState>(
-    "trending-page-state",
-    {
+  const [persistedState, setPersistedState] =
+    usePageStatePersistence<TrendingPageState>("trending-page-state", {
       timeWindow: "week",
       page: 1,
       trendingIds: [],
-    }
-  );
+    });
 
   // Initialize state from persisted state
-  const [timeWindow, setTimeWindow] = useState<"day" | "week">(persistedState.timeWindow);
+  const [timeWindow, setTimeWindow] = useState<"day" | "week">(
+    persistedState.timeWindow
+  );
   const [page, setPage] = useState(persistedState.page);
   const queryClient = useQueryClient();
   const [allTrending, setAllTrending] = useState<Media[]>([]);
@@ -67,7 +67,9 @@ const Trending = () => {
     // Hydrate trending items if we have persisted IDs
     if (persistedState.trendingIds.length > 0) {
       // Fetch all pages needed to get all persisted items
-      const totalPagesNeeded = Math.ceil(persistedState.trendingIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.trendingIds.length / ITEMS_PER_PAGE
+      );
       for (let page = 1; page <= totalPagesNeeded; page++) {
         queryClient.prefetchQuery({
           queryKey: ["trending", timeWindow, page],
@@ -81,7 +83,9 @@ const Trending = () => {
   useEffect(() => {
     if (persistedState.trendingIds.length > 0 && !isHydrated) {
       // Check if all required pages are in cache
-      const totalPagesNeeded = Math.ceil(persistedState.trendingIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.trendingIds.length / ITEMS_PER_PAGE
+      );
       let allPagesCached = true;
 
       for (let page = 1; page <= totalPagesNeeded; page++) {
@@ -95,7 +99,8 @@ const Trending = () => {
         // Build the complete array from cached pages
         let accumulatedItems: Media[] = [];
         for (let page = 1; page <= totalPagesNeeded; page++) {
-          const pageData: any[] = queryClient.getQueryData(["trending", timeWindow, page]) || [];
+          const pageData: any[] =
+            queryClient.getQueryData(["trending", timeWindow, page]) || [];
           const mappedItems = pageData.map(item => ({
             ...item,
             media_type: item.media_type as "movie" | "tv",
@@ -104,8 +109,8 @@ const Trending = () => {
         }
 
         // Filter to only the items we need based on persisted IDs
-        const filteredItems = accumulatedItems.filter(
-          item => persistedState.trendingIds.includes(item.id)
+        const filteredItems = accumulatedItems.filter(item =>
+          persistedState.trendingIds.includes(item.id)
         );
 
         setAllTrending(filteredItems);
@@ -155,7 +160,7 @@ const Trending = () => {
       // Update the persisted state when page changes
       setPersistedState(prevState => ({
         ...prevState,
-        page: newPage
+        page: newPage,
       }));
       return newPage;
     });

@@ -21,6 +21,17 @@ interface State {
   errorInfo: React.ErrorInfo | null;
 }
 
+interface CustomWindow extends Window {
+  gtag?: (
+    event: string,
+    action: string,
+    params: {
+      description: string;
+      fatal: boolean;
+    }
+  ) => void;
+}
+
 export class BackupRestoreErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -52,8 +63,8 @@ export class BackupRestoreErrorBoundary extends Component<Props, State> {
     });
 
     // Log to analytics if available
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "exception", {
+    if (typeof window !== "undefined" && (window as CustomWindow).gtag) {
+      (window as CustomWindow).gtag?.("event", "exception", {
         description: `BackupRestore Error: ${error.message}`,
         fatal: false,
       });

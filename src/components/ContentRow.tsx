@@ -27,9 +27,6 @@ const ContentRow = ({
   rowId,
 }: ContentRowProps) => {
   const location = useLocation();
-
-  if (!media || media.length === 0) return null;
-
   const rowRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -41,12 +38,17 @@ const ContentRow = ({
     : `scroll-horizontal-${location.pathname}-${sanitizedTitle}`;
 
   // Initialize horizontal scroll restoration and get the save function
-  const { saveScrollPosition } = useHorizontalScrollRestoration(rowRef, storageKey);
+  const { saveScrollPosition } = useHorizontalScrollRestoration(
+    rowRef,
+    storageKey
+  );
 
   // Previous scroll position to detect direction and boundaries
   const lastScrollPosition = useRef(0);
   const scrollEndTimeout = useRef<NodeJS.Timeout | null>(null);
   const hasScrolledRecently = useRef(false);
+
+  if (!media || media.length === 0) return null;
 
   // Handle scroll position to show/hide arrows and save scroll position
   const handleScroll = () => {
@@ -112,8 +114,6 @@ const ContentRow = ({
     const scrollAmount = rowRef.current.clientWidth * 0.75;
     rowRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
   };
-
-  if (!media || media.length === 0) return null;
 
   return (
     <div className={styles.container}>

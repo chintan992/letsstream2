@@ -26,26 +26,30 @@ export const TVShowCast = ({ cast }: TVShowCastProps) => {
                     className="mx-auto mb-3 h-40 w-28 rounded-2xl object-cover shadow-lg group-hover:shadow-xl"
                   />
                 ) : (
-                  <div className="mx-auto mb-3 flex h-40 w-28 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-900/30 to-accent/30 shadow-lg group-hover:shadow-xl">
-                    <span className="text-white/50 text-sm">No Image</span>
+                  <div className="to-accent/30 mx-auto mb-3 flex h-40 w-28 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-900/30 shadow-lg group-hover:shadow-xl">
+                    <span className="text-sm text-white/50">No Image</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-3">
-                  <p className="text-white text-sm font-medium truncate w-full">{member.name}</p>
+                <div className="absolute inset-0 flex items-end justify-center rounded-2xl bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <p className="w-full truncate text-sm font-medium text-white">
+                    {member.name}
+                  </p>
                 </div>
               </div>
 
-              <p className="max-w-full truncate text-base font-bold text-white mb-1">
+              <p className="mb-1 max-w-full truncate text-base font-bold text-white">
                 {member.name}
               </p>
-              <p className="max-w-full truncate text-sm text-white/80 italic">
+              <p className="max-w-full truncate text-sm italic text-white/80">
                 {member.character}
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-white/70 text-center py-8">No cast information available.</div>
+        <div className="py-8 text-center text-white/70">
+          No cast information available.
+        </div>
       )}
     </div>
   );

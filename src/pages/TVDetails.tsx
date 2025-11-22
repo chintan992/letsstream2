@@ -20,7 +20,16 @@ import { DownloadSection } from "@/components/DownloadSection";
 import { TVDownloadSection } from "@/components/tv/TVDownloadSection";
 import { useAuth } from "@/hooks";
 
-type TabType = "episodes" | "about" | "cast" | "reviews" | "downloads" | "creators" | "images" | "keywords" | "networks";
+type TabType =
+  | "episodes"
+  | "about"
+  | "cast"
+  | "reviews"
+  | "downloads"
+  | "creators"
+  | "images"
+  | "keywords"
+  | "networks";
 
 const TVDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -67,7 +76,7 @@ const TVDetailsPage = () => {
 
   // Tab-aware scroll restoration with hydration tracking
   useScrollRestoration({
-    storageKey: `scroll-tv-details-${activeTab}${activeTab === 'episodes' ? '-s' + selectedSeason : ''}`,
+    storageKey: `scroll-tv-details-${activeTab}${activeTab === "episodes" ? "-s" + selectedSeason : ""}`,
     enabled: isContentHydrated,
   });
 
@@ -111,23 +120,23 @@ const TVDetailsPage = () => {
       let hydrated = false;
 
       switch (activeTab) {
-        case 'episodes':
+        case "episodes":
           // Episodes tab is hydrated when episodes data is available for the selected season
           hydrated = episodes && episodes.length > 0;
           break;
-        case 'about':
+        case "about":
           // About tab is hydrated when tvShow data is available
           hydrated = !!tvShow;
           break;
-        case 'cast':
+        case "cast":
           // Cast tab is hydrated when cast data is available
           hydrated = !!tvShow && cast && cast.length > 0;
           break;
-        case 'reviews':
+        case "reviews":
           // Reviews tab is considered hydrated immediately as ReviewSection handles its own loading
           hydrated = true;
           break;
-        case 'downloads':
+        case "downloads":
           // Downloads tab is considered hydrated immediately as it lazy loads on user action
           hydrated = true;
           break;
@@ -149,14 +158,14 @@ const TVDetailsPage = () => {
 
   // Handle hydration tracking for episodes tab specifically
   useEffect(() => {
-    if (activeTab === 'episodes' && episodes && episodes.length > 0) {
+    if (activeTab === "episodes" && episodes && episodes.length > 0) {
       setIsContentHydrated(true);
     }
   }, [episodes, activeTab]);
 
   // Handle hydration tracking for cast tab specifically
   useEffect(() => {
-    if (activeTab === 'cast' && cast && cast.length > 0) {
+    if (activeTab === "cast" && cast && cast.length > 0) {
       setIsContentHydrated(true);
     }
   }, [cast, activeTab]);
@@ -233,80 +242,80 @@ const TVDetailsPage = () => {
         <div className="hide-scrollbar mb-8 flex overflow-x-auto pb-2">
           <div className="flex space-x-1">
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "episodes"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("episodes")}
             >
               Episodes
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "about"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("about")}
             >
               About
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "cast"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("cast")}
             >
               Cast
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "creators"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("creators")}
             >
               Creators
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "reviews"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("reviews")}
             >
               Reviews
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "keywords"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("keywords")}
             >
               Keywords
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "networks"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("networks")}
             >
               Networks
             </button>
             <button
-              className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+              className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                 activeTab === "images"
-                  ? "bg-accent text-white shadow-lg shadow-accent/20"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               onClick={() => setActiveTab("images")}
             >
@@ -314,10 +323,10 @@ const TVDetailsPage = () => {
             </button>
             {user && (
               <button
-                className={`whitespace-nowrap px-5 py-3 font-medium rounded-lg transition-all duration-300 ${
+                className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${
                   activeTab === "downloads"
-                    ? "bg-accent text-white shadow-lg shadow-accent/20"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
+                    ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
                 onClick={() => setActiveTab("downloads")}
               >
@@ -347,7 +356,9 @@ const TVDetailsPage = () => {
 
           {activeTab === "reviews" && (
             <div className="mb-8">
-              <h2 className="mb-6 text-2xl font-bold text-white">User Reviews</h2>
+              <h2 className="mb-6 text-2xl font-bold text-white">
+                User Reviews
+              </h2>
               <ReviewSection mediaId={parseInt(id!, 10)} mediaType="tv" />
             </div>
           )}
@@ -356,7 +367,12 @@ const TVDetailsPage = () => {
 
           {activeTab === "networks" && <TVShowNetworks networks={networks} />}
 
-          {activeTab === "images" && <TVShowImages images={images} tvShowName={tvShow?.name || 'TV Show'} />}
+          {activeTab === "images" && (
+            <TVShowImages
+              images={images}
+              tvShowName={tvShow?.name || "TV Show"}
+            />
+          )}
 
           {activeTab === "downloads" && (
             <div className="mb-8">

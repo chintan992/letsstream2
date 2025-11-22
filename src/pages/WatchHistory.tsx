@@ -56,7 +56,13 @@ const WatchHistory = () => {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [activeTab, isLoading, watchHistory.length, favorites.length, watchlist.length]);
+  }, [
+    activeTab,
+    isLoading,
+    watchHistory.length,
+    favorites.length,
+    watchlist.length,
+  ]);
 
   // Update hydration state when data changes after initial check
   useEffect(() => {
@@ -72,7 +78,14 @@ const WatchHistory = () => {
       }
       setIsContentHydrated(isTabDataReady);
     }
-  }, [activeTab, isLoading, watchHistory.length, favorites.length, watchlist.length, isContentHydrated]);
+  }, [
+    activeTab,
+    isLoading,
+    watchHistory.length,
+    favorites.length,
+    watchlist.length,
+    isContentHydrated,
+  ]);
 
   // Use tab-specific scroll restoration with hydration check
   useScrollRestoration({

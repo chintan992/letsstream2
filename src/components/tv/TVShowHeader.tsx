@@ -163,7 +163,7 @@ export const TVShowHeader = ({
               </div>
             </div>
 
-            <p className="mb-6 text-white/90 max-w-3xl leading-relaxed">
+            <p className="mb-6 max-w-3xl leading-relaxed text-white/90">
               {tvShow.overview}
             </p>
 
@@ -172,7 +172,7 @@ export const TVShowHeader = ({
               {!lastWatchedEpisode && !isLastWatchedLoading && (
                 <Button
                   onClick={() => onPlayEpisode(1, 1)}
-                  className="hover:bg-accent/90 flex items-center bg-accent text-white shadow-lg shadow-accent/30 transition-all duration-300 hover:shadow-xl hover:shadow-accent/40"
+                  className="hover:bg-accent/90 shadow-accent/30 hover:shadow-accent/40 flex items-center bg-accent text-white shadow-lg transition-all duration-300 hover:shadow-xl"
                 >
                   <Play className="mr-2 h-4 w-4" />
                   Start from Beginning
@@ -183,7 +183,7 @@ export const TVShowHeader = ({
               {isLastWatchedLoading ? (
                 // Loading skeleton for continue watching card
                 <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
-                  <div className="flex min-w-[280px] max-w-[400px] animate-pulse items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 backdrop-blur-sm shadow-lg">
+                  <div className="flex min-w-[280px] max-w-[400px] animate-pulse items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 shadow-lg backdrop-blur-sm">
                     <div className="bg-muted/20 relative h-16 w-24 flex-shrink-0 overflow-hidden rounded">
                       <div className="bg-muted/30 h-full w-full rounded" />
                     </div>
@@ -216,7 +216,7 @@ export const TVShowHeader = ({
                         lastWatchedEpisode.episode
                       )
                     }
-                    className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 backdrop-blur-sm transition-all duration-300 shadow-lg"
+                    className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
                   >
                     {/* Episode Thumbnail */}
                     <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-card">
@@ -230,7 +230,7 @@ export const TVShowHeader = ({
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-900/50 to-accent/50">
+                        <div className="to-accent/50 flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-900/50">
                           <Play className="h-6 w-6 text-white/60" />
                         </div>
                       )}
@@ -254,7 +254,7 @@ export const TVShowHeader = ({
                       <div className="relative">
                         <Progress
                           value={lastWatchedEpisode.progress}
-                          className="mb-1 h-1.5 rounded-full overflow-hidden"
+                          className="mb-1 h-1.5 overflow-hidden rounded-full"
                         />
                         <div className="flex items-center justify-between text-xs text-white/70">
                           <span>{lastWatchedEpisode.progress}%</span>
@@ -273,7 +273,7 @@ export const TVShowHeader = ({
                   <Button
                     onClick={() => onPlayEpisode(1, 1)}
                     variant="outline"
-                    className="flex items-center whitespace-nowrap border-white/20 text-white hover:bg-white/10 shadow-sm"
+                    className="flex items-center whitespace-nowrap border-white/20 text-white shadow-sm hover:bg-white/10"
                   >
                     <Play className="mr-2 h-4 w-4" />
                     Start from Beginning
@@ -287,7 +287,7 @@ export const TVShowHeader = ({
                 className={cn(
                   "border-white/20 shadow-sm",
                   isFavorite
-                    ? "bg-gradient-to-r from-accent to-accent/80 text-white border-accent"
+                    ? "to-accent/80 border-accent bg-gradient-to-r from-accent text-white"
                     : "bg-black/50 text-white hover:bg-white/10"
                 )}
               >
@@ -303,7 +303,7 @@ export const TVShowHeader = ({
                 className={cn(
                   "border-white/20 shadow-sm",
                   isInWatchlist
-                    ? "bg-gradient-to-r from-accent to-accent/80 text-white border-accent"
+                    ? "to-accent/80 border-accent bg-gradient-to-r from-accent text-white"
                     : "bg-black/50 text-white hover:bg-white/10"
                 )}
               >

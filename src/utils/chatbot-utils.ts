@@ -43,7 +43,9 @@ const extractMediaItems = (text: string): ParsedMediaItem[] => {
 
     if (
       items.length === 0 ||
-      (items.length === 1 && !items[0].includes("(") && !items[0].includes("**"))
+      (items.length === 1 &&
+        !items[0].includes("(") &&
+        !items[0].includes("**"))
     ) {
       const titleYearPattern =
         /(?:\*\*)?([^*\n(]+)(?:\*\*)?\s*\((\d{4}(?:-\d{4}|\s*-\s*Present)?)\)/g;
@@ -74,7 +76,8 @@ const extractMediaItems = (text: string): ParsedMediaItem[] => {
           };
 
           // Extract description (text after the title until next section)
-          const titleEndIndex = item.indexOf(titleMatch[0]) + titleMatch[0].length;
+          const titleEndIndex =
+            item.indexOf(titleMatch[0]) + titleMatch[0].length;
           let descriptionText = item.substring(titleEndIndex).trim();
 
           // Remove any prefix dash or colon

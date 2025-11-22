@@ -8,7 +8,7 @@ interface TVShowsTabsProps {
   sortBy: "default" | "name" | "first_air_date" | "rating";
   genreFilter: string;
   platformFilters: string[];
-  onTabHydrated?: (tab: string) => void;  // Callback to notify parent when a tab is hydrated
+  onTabHydrated?: (tab: string) => void; // Callback to notify parent when a tab is hydrated
   setTabClearState?: (tab: string, clearState: () => void) => void; // Callback to register clearState function for each tab
 }
 
@@ -56,7 +56,9 @@ const TVShowsTabs = ({
           genreFilter={genreFilter}
           platformFilters={platformFilters}
           onHydrationComplete={() => onTabHydrated && onTabHydrated("popular")}
-          setClearState={(clearState) => setTabClearState && setTabClearState("popular", clearState)}
+          setClearState={clearState =>
+            setTabClearState && setTabClearState("popular", clearState)
+          }
         />
       </TabsContent>
 
@@ -70,8 +72,12 @@ const TVShowsTabs = ({
           sortBy={sortBy}
           genreFilter={genreFilter}
           platformFilters={platformFilters}
-          onHydrationComplete={() => onTabHydrated && onTabHydrated("top_rated")}
-          setClearState={(clearState) => setTabClearState && setTabClearState("top_rated", clearState)}
+          onHydrationComplete={() =>
+            onTabHydrated && onTabHydrated("top_rated")
+          }
+          setClearState={clearState =>
+            setTabClearState && setTabClearState("top_rated", clearState)
+          }
         />
       </TabsContent>
 
@@ -86,7 +92,9 @@ const TVShowsTabs = ({
           genreFilter={genreFilter}
           platformFilters={platformFilters}
           onHydrationComplete={() => onTabHydrated && onTabHydrated("trending")}
-          setClearState={(clearState) => setTabClearState && setTabClearState("trending", clearState)}
+          setClearState={clearState =>
+            setTabClearState && setTabClearState("trending", clearState)
+          }
         />
       </TabsContent>
     </Tabs>

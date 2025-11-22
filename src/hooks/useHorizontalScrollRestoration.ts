@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
 export interface HorizontalScrollRestorationOptions {
   enabled?: boolean;
@@ -12,17 +12,24 @@ export const useHorizontalScrollRestoration = (
   storageKey: string,
   options: HorizontalScrollRestorationOptions = {}
 ) => {
-  const { enabled = true, restoreDelay = 50, maxRestoreDelay = 2000, debounceMs = 100 } = options;
+  const {
+    enabled = true,
+    restoreDelay = 50,
+    maxRestoreDelay = 2000,
+    debounceMs = 100,
+  } = options;
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const maxRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Non-debounced helper to save scroll position immediately
   const saveScrollPositionImmediate = useCallback(() => {
     if (!enabled || !elementRef.current) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined') {
+      if (typeof sessionStorage !== "undefined") {
         const position = elementRef.current.scrollLeft;
         sessionStorage.setItem(storageKey, position.toString());
       }
@@ -32,27 +39,30 @@ export const useHorizontalScrollRestoration = (
   }, [enabled, elementRef, storageKey]);
 
   // Debounced function to save scroll position
-  const saveScrollPosition = useCallback((manualCall = false) => {
-    if (!enabled || !elementRef.current) return;
+  const saveScrollPosition = useCallback(
+    (manualCall = false) => {
+      if (!enabled || !elementRef.current) return;
 
-    // If called manually (from external onScroll), ignore if not enabled
-    if (manualCall && !enabled) return;
+      // If called manually (from external onScroll), ignore if not enabled
+      if (manualCall && !enabled) return;
 
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
 
-    debounceTimeoutRef.current = setTimeout(() => {
-      saveScrollPositionImmediate();
-    }, debounceMs);
-  }, [enabled, elementRef, debounceMs, saveScrollPositionImmediate]);
+      debounceTimeoutRef.current = setTimeout(() => {
+        saveScrollPositionImmediate();
+      }, debounceMs);
+    },
+    [enabled, elementRef, debounceMs, saveScrollPositionImmediate]
+  );
 
   // Function to restore scroll position
   const restoreScrollPosition = useCallback(() => {
     if (!enabled || !elementRef.current) return;
 
     try {
-      if (typeof sessionStorage !== 'undefined') {
+      if (typeof sessionStorage !== "undefined") {
         const savedPosition = sessionStorage.getItem(storageKey);
 
         if (savedPosition !== null) {
@@ -81,7 +91,9 @@ export const useHorizontalScrollRestoration = (
 
             // Set up fallback timeout in case content takes longer to load
             maxRestoreTimeoutRef.current = setTimeout(() => {
-              console.warn(`Horizontal scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`);
+              console.warn(
+                `Horizontal scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`
+              );
               if (elementRef.current) {
                 elementRef.current.scrollLeft = position;
               }
@@ -117,7 +129,9 @@ export const useHorizontalScrollRestoration = (
 
           // Set up fallback timeout in case content takes longer to load
           maxRestoreTimeoutRef.current = setTimeout(() => {
-            console.warn(`Horizontal scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`);
+            console.warn(
+              `Horizontal scroll restoration fallback: restoring after ${maxRestoreDelay}ms due to slow content loading`
+            );
             if (elementRef.current) {
               elementRef.current.scrollLeft = 0;
             }
@@ -163,11 +177,11 @@ export const useHorizontalScrollRestoration = (
     }
 
     // Add beforeunload listener to save position on page refresh (immediate)
-    window.addEventListener('beforeunload', saveScrollPositionImmediate);
+    window.addEventListener("beforeunload", saveScrollPositionImmediate);
 
     // Clean up on unmount
     return () => {
-      window.removeEventListener('beforeunload', saveScrollPositionImmediate);
+      window.removeEventListener("beforeunload", saveScrollPositionImmediate);
 
       // Clear timeouts
       if (debounceTimeoutRef.current) {
@@ -183,8 +197,20 @@ export const useHorizontalScrollRestoration = (
       // Save current position before unmounting (immediate)
       saveScrollPositionImmediate();
     };
-  }, [enabled, restoreDelay, debounceMs, storageKey, saveScrollPositionImmediate, restoreScrollPosition, elementRef]);
+  }, [
+    enabled,
+    restoreDelay,
+    debounceMs,
+    storageKey,
+    saveScrollPositionImmediate,
+    restoreScrollPosition,
+    elementRef,
+  ]);
 
   // Return both restoration function and debounced save function
-  return { saveScrollPosition, restoreScrollPosition, saveScrollPositionImmediate };
+  return {
+    saveScrollPosition,
+    restoreScrollPosition,
+    saveScrollPositionImmediate,
+  };
 };

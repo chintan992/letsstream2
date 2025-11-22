@@ -243,6 +243,7 @@ This project is for educational demonstration purposes.
 This app features advanced scroll restoration that remembers your position on every page, providing a native app-like experience.
 
 ### Features
+
 - **Window Scroll**: Automatically saves and restores vertical scroll position on all pages
 - **Tab-Specific**: Each tab on a page (e.g., "Popular" vs "Top Rated") maintains its own scroll position
 - **Horizontal Scroll**: Content rows remember horizontal scroll position
@@ -261,6 +262,7 @@ VITE_SCROLL_RESTORATION_MANUAL=false # Use browser default (not recommended)
 ### Documentation
 
 For detailed information, see:
+
 - [Architecture Documentation](./docs/SCROLL_RESTORATION_ARCHITECTURE.md)
 - [Testing Guide](./docs/SCROLL_RESTORATION_TESTING_GUIDE.md)
 - [Troubleshooting](./docs/SCROLL_RESTORATION_TROUBLESHOOTING.md)
@@ -269,6 +271,7 @@ For detailed information, see:
 ### Testing
 
 Run scroll restoration tests:
+
 ```bash
 npm run test:scroll-restoration
 ```

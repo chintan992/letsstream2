@@ -7,6 +7,14 @@
 // We're defining this for reference - it would be implemented in a backend framework
 // like Express, Next.js API routes, etc.
 
+interface ResponseWriter {
+  status: (code: number) => ResponseWriter;
+  send: (body: unknown) => ResponseWriter;
+  setHeader: (key: string, value: string) => void;
+  write: (chunk: unknown) => void;
+  end: () => void;
+}
+
 /**
  * Handler for proxying requests to external resources
  *
@@ -23,7 +31,7 @@
 export async function proxyHandler(
   url: string,
   headersStr: string | undefined,
-  responseWriter: any
+  responseWriter: ResponseWriter
 ): Promise<void> {
   if (!url) {
     responseWriter.status(400).send({ error: "URL is required" });
@@ -86,16 +94,16 @@ export async function proxyHandler(
     await pump();
   } catch (error) {
     console.error("Proxy error:", error);
-    responseWriter.status(500).send({ error: error.message });
+    responseWriter.status(500).send({ error: (error as Error).message });
   }
 }
 
 /**
  * Handler for OPTIONS requests (CORS preflight)
  */
-export function optionsHandler(responseWriter: any): void {
+export function optionsHandler(responseWriter: ResponseWriter): void {
   responseWriter.setHeader("Access-Control-Allow-Origin", "*");
-  responseWriter.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  responseWriter.setHeader("Access-control-Allow-Methods", "GET, OPTIONS");
   responseWriter.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"

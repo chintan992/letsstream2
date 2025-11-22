@@ -60,6 +60,10 @@ interface ChatbotProviderProps {
   children: ReactNode;
 }
 
+interface CustomWindow extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
   children,
 }) => {
@@ -97,7 +101,7 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
         try {
           // Simple notification sound using Web Audio API
           const audioCtx = new (window.AudioContext ||
-            (window as any).webkitAudioContext)();
+            (window as CustomWindow).webkitAudioContext)();
           const oscillator = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
 

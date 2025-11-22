@@ -41,29 +41,35 @@ const TVShowsPage = () => {
   });
 
   // Use page state persistence hook
-  const [persistedState, setPersistedState] = usePageStatePersistence<TVShowsPageState>(
-    "tv-shows-page-state",
-    {
+  const [persistedState, setPersistedState] =
+    usePageStatePersistence<TVShowsPageState>("tv-shows-page-state", {
       activeTab: "popular",
       genreFilter: "all",
       sortBy: "default",
       viewMode: "grid",
       platformFilters: [],
       showPlatformBar: false,
-    }
-  );
+    });
 
   // Initialize state from persisted state
-  const [activeTab, setActiveTab] = useState<"popular" | "top_rated" | "trending">(
-    persistedState.activeTab
+  const [activeTab, setActiveTab] = useState<
+    "popular" | "top_rated" | "trending"
+  >(persistedState.activeTab);
+  const [genreFilter, setGenreFilter] = useState<string>(
+    persistedState.genreFilter
   );
-  const [genreFilter, setGenreFilter] = useState<string>(persistedState.genreFilter);
-  const [sortBy, setSortBy] = useState<"default" | "name" | "first_air_date" | "rating">(
-    persistedState.sortBy
+  const [sortBy, setSortBy] = useState<
+    "default" | "name" | "first_air_date" | "rating"
+  >(persistedState.sortBy);
+  const [viewMode, setViewMode] = useState<"grid" | "list">(
+    persistedState.viewMode
   );
-  const [viewMode, setViewMode] = useState<"grid" | "list">(persistedState.viewMode);
-  const [platformFilters, setPlatformFilters] = useState<string[]>(persistedState.platformFilters);
-  const [showPlatformBar, setShowPlatformBar] = useState(persistedState.showPlatformBar);
+  const [platformFilters, setPlatformFilters] = useState<string[]>(
+    persistedState.platformFilters
+  );
+  const [showPlatformBar, setShowPlatformBar] = useState(
+    persistedState.showPlatformBar
+  );
 
   // Apply scroll restoration only after hydrations are complete
   useScrollRestoration({ enabled: isHydrated });
@@ -93,14 +99,25 @@ const TVShowsPage = () => {
       platformFilters,
       showPlatformBar,
     }));
-  }, [activeTab, genreFilter, sortBy, viewMode, platformFilters, showPlatformBar, setPersistedState]);
+  }, [
+    activeTab,
+    genreFilter,
+    sortBy,
+    viewMode,
+    platformFilters,
+    showPlatformBar,
+    setPersistedState,
+  ]);
 
   // Effect to clear accumulated data when filters change
   useEffect(() => {
     // When filters change significantly, clear the persisted state for all tabs
-    if (persistedState.genreFilter !== genreFilter ||
-        persistedState.sortBy !== sortBy ||
-        JSON.stringify(persistedState.platformFilters) !== JSON.stringify(platformFilters)) {
+    if (
+      persistedState.genreFilter !== genreFilter ||
+      persistedState.sortBy !== sortBy ||
+      JSON.stringify(persistedState.platformFilters) !==
+        JSON.stringify(platformFilters)
+    ) {
       // Clear the persisted states for all tabs
       Object.values(clearTabStateRef.current).forEach(clearState => {
         clearState();
@@ -119,7 +136,7 @@ const TVShowsPage = () => {
     // Update the persisted state when tab changes
     setPersistedState(prevState => ({
       ...prevState,
-      activeTab: tabValue
+      activeTab: tabValue,
     }));
     void trackMediaPreference("tv", "browse");
   };
@@ -130,7 +147,7 @@ const TVShowsPage = () => {
       // Update the persisted state when view mode changes
       setPersistedState(prevState => ({
         ...prevState,
-        viewMode: newViewMode
+        viewMode: newViewMode,
       }));
       return newViewMode;
     });
@@ -142,7 +159,7 @@ const TVShowsPage = () => {
       // Update the persisted state when platform bar visibility changes
       setPersistedState(prevState => ({
         ...prevState,
-        showPlatformBar: newShowPlatformBar
+        showPlatformBar: newShowPlatformBar,
       }));
       return newShowPlatformBar;
     });
@@ -156,28 +173,28 @@ const TVShowsPage = () => {
           <TVShowsHeader />
           <TVShowsFilters
             sortBy={sortBy}
-            onSortChange={(value) => {
+            onSortChange={value => {
               setSortBy(value);
               // Update the persisted state when sort changes
               setPersistedState(prevState => ({
                 ...prevState,
-                sortBy: value
+                sortBy: value,
               }));
             }}
             genreFilter={genreFilter}
-            onGenreChange={(value) => {
+            onGenreChange={value => {
               setGenreFilter(value);
               // The effect for genre filter changes will handle the persisted state update
             }}
             viewMode={viewMode}
             toggleViewMode={toggleViewMode}
             platformFilters={platformFilters}
-            setPlatformFilters={(filters) => {
+            setPlatformFilters={filters => {
               setPlatformFilters(filters);
               // Update the persisted state when platform filters change
               setPersistedState(prevState => ({
                 ...prevState,
-                platformFilters: filters
+                platformFilters: filters,
               }));
             }}
             showPlatformBar={showPlatformBar}
@@ -193,7 +210,7 @@ const TVShowsPage = () => {
             onTabHydrated={(tab: string) => {
               setHydratedTabs(prev => ({
                 ...prev,
-                [tab]: true
+                [tab]: true,
               }));
             }}
             setTabClearState={(tab: string, clearState: () => void) => {

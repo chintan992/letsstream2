@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, browserSessionPersistence } from "firebase/auth";
+import { getAuth, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import {
   getFirestore,
@@ -52,8 +52,11 @@ if (existingApps.length > 0) {
 }
 
 export const auth = getAuth(app);
-// Set Firebase Auth persistence to browser session instead of local storage for better security
-auth.setPersistence(browserSessionPersistence);
+// Set Firebase Auth persistence to local storage to keep users logged in across browser sessions
+auth.setPersistence(browserLocalPersistence).catch(error => {
+  console.error("Failed to set local persistence, falling back to session:", error);
+  auth.setPersistence(browserSessionPersistence);
+});
 
 // Initialize analytics only if it's supported in the current environment
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;

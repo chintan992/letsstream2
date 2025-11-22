@@ -26,14 +26,19 @@ const PreferencesTab = lazy(
 );
 const BackupTab = lazy(() => import("../components/profile/BackupTab"));
 
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center py-8">
+    <Loader2 className="h-6 w-6 animate-spin text-accent" />
+  </div>
+);
+
 const Profile = () => {
   const { user } = useProfileData();
   const [activeTab, setActiveTab] = useState("overview");
   const [isTabHydrated, setIsTabHydrated] = useState(false);
   const navigate = useNavigate();
 
-  // Reset hydration state when tab changes and set it after a short timeout
-  useEffect(() => {
+  const updateTabHydration = useCallback(() => {
     setIsTabHydrated(false);
     const timer = setTimeout(() => {
       setIsTabHydrated(true);
@@ -42,7 +47,13 @@ const Profile = () => {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [activeTab]);
+  }, []);
+
+  // Reset hydration state when tab changes and set it after a short timeout
+  useEffect(() => {
+    const cleanup = updateTabHydration();
+    return cleanup;
+  }, [activeTab, updateTabHydration]);
 
   // Use tab-specific scroll restoration with hydration check
   useScrollRestoration({
@@ -66,12 +77,6 @@ const Profile = () => {
       </div>
     );
   }
-
-  const LoadingFallback = () => (
-    <div className="flex items-center justify-center py-8">
-      <Loader2 className="h-6 w-6 animate-spin text-accent" />
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-background pb-16">

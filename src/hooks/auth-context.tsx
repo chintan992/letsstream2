@@ -7,18 +7,12 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
-  getIdToken,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext, AuthContextType } from "@/contexts/auth";
-import {
-  storeSecureToken,
-  retrieveSecureToken,
-  removeSecureToken,
-  validateToken,
-} from "@/utils/token-storage";
+
 import {
   getAuthErrorConfig,
   formatAuthError,
@@ -33,16 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
-        // Get the current token and store it securely
-        try {
-          const token = await getIdToken(user);
-          storeSecureToken("firebase_token", token);
-        } catch (error) {
-          console.error("Error getting user token:", error);
-        }
-      } else {
-        // Remove token when user signs out
-        removeSecureToken("firebase_token");
+        // User is signed in
       }
       setUser(user);
       setLoading(false);
@@ -224,8 +209,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("logout function called");
     try {
       await signOut(auth);
-      // Remove the secure token from session storage
-      removeSecureToken("firebase_token");
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
@@ -254,23 +237,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
-// Function to refresh the Firebase Auth token and update secure storage
-const refreshToken = async () => {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const token = await user.getIdToken(true); // Force refresh
-      storeSecureToken("firebase_token", token);
-      console.log("Token refreshed and stored securely");
-    }
-  } catch (error) {
-    console.error("Error refreshing token:", error);
-  }
-};
-
-// Set interval to refresh token every 30 minutes
-setInterval(refreshToken, 30 * 60 * 1000);
 
 // Helper function to retry operations with exponential backoff
 const retryWithBackoff = async <T,>(
@@ -302,26 +268,4 @@ const retryWithBackoff = async <T,>(
   throw new Error("Max retries reached");
 };
 
-// Function to get the current stored token
-export const getCurrentToken = async (): Promise<string | null> => {
-  // First check if we have a stored token
-  const storedToken = retrieveSecureToken("firebase_token");
-  if (storedToken) {
-    return storedToken;
-  }
 
-  // If not, get a fresh token from Firebase if user is authenticated
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      const token = await getIdToken(user);
-      storeSecureToken("firebase_token", token);
-      return token;
-    } catch (error) {
-      console.error("Error getting fresh token:", error);
-      return null;
-    }
-  }
-
-  return null;
-};

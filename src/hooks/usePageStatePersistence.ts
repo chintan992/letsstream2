@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 /**
  * Type definition for the setState function that can accept either a new state
@@ -45,20 +45,29 @@ function usePageStatePersistence<T>(
   initialState: T,
   options?: UsePageStatePersistenceOptions<T>
 ): [T, SetStateAction<T>, () => void] {
-  const { validate, debounceTime = 100, maxEntries = 10, onQuotaWarning } = options || {};
+  const {
+    validate,
+    debounceTime = 100,
+    maxEntries = 10,
+    onQuotaWarning,
+  } = options || {};
   const [state, setState] = useState<T>(() => {
     try {
       const item = window.sessionStorage.getItem(key);
       if (item) {
         const parsedItem = JSON.parse(item);
         // Check if the stored item has the new format with data and timestamp
-        const stateToValidate = parsedItem.data !== undefined ? parsedItem.data : parsedItem;
+        const stateToValidate =
+          parsedItem.data !== undefined ? parsedItem.data : parsedItem;
         if (!validate || validate(stateToValidate)) {
           return stateToValidate;
         }
       }
     } catch (error) {
-      console.warn(`Failed to restore state from sessionStorage with key: ${key}`, error);
+      console.warn(
+        `Failed to restore state from sessionStorage with key: ${key}`,
+        error
+      );
     }
     return initialState;
   });
@@ -85,86 +94,117 @@ function usePageStatePersistence<T>(
   }, []);
 
   // Function to clean up old entries for key prefix
-  const cleanupOldEntries = useCallback((keyPrefix: string) => {
-    try {
-      // Get all keys that match the prefix
-      const matchingKeys: string[] = [];
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const key = sessionStorage.key(i);
-        if (key && key.startsWith(keyPrefix)) {
-          matchingKeys.push(key);
+  const cleanupOldEntries = useCallback(
+    (keyPrefix: string) => {
+      try {
+        // Get all keys that match the prefix
+        const matchingKeys: string[] = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && key.startsWith(keyPrefix)) {
+            matchingKeys.push(key);
+          }
         }
-      }
 
-      // Sort keys by timestamp if they contain timestamps (format key-timestamp)
-      // Otherwise, just keep the first maxEntries keys
-      if (maxEntries > 0 && matchingKeys.length > maxEntries) {
-        // Remove oldest entries
-        const keysToRemove = matchingKeys.slice(0, matchingKeys.length - maxEntries);
-        keysToRemove.forEach(k => {
-          sessionStorage.removeItem(k);
-        });
-        console.log(`Cleaned up ${keysToRemove.length} old entries for prefix: ${keyPrefix}`);
+        // Sort keys by timestamp if they contain timestamps (format key-timestamp)
+        // Otherwise, just keep the first maxEntries keys
+        if (maxEntries > 0 && matchingKeys.length > maxEntries) {
+          // Remove oldest entries
+          const keysToRemove = matchingKeys.slice(
+            0,
+            matchingKeys.length - maxEntries
+          );
+          keysToRemove.forEach(k => {
+            sessionStorage.removeItem(k);
+          });
+          console.log(
+            `Cleaned up ${keysToRemove.length} old entries for prefix: ${keyPrefix}`
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `Failed to cleanup old entries for prefix: ${keyPrefix}`,
+          error
+        );
       }
-    } catch (error) {
-      console.warn(`Failed to cleanup old entries for prefix: ${keyPrefix}`, error);
-    }
-  }, [maxEntries]);
+    },
+    [maxEntries]
+  );
 
   // Function to save state to sessionStorage with quota error handling
-  const saveState = useCallback((stateToSave: T) => {
-    try {
-      // Check storage usage and warn if needed
-      const usage = getSessionStorageUsage();
-      if (usage > 0.8 && onQuotaWarning) {
-        onQuotaWarning(usage);
-      }
-
-      const serializedState = JSON.stringify({
-        data: stateToSave,
-        timestamp: Date.now()
-      });
-
-      window.sessionStorage.setItem(key, serializedState);
-
-      // Clean up old entries for this key's prefix if needed
-      const keyPrefix = key.split('-').slice(0, -1).join('-') || key; // Remove the last part if it looks like an id
-      cleanupOldEntries(keyPrefix);
-    } catch (error) {
-      if (error instanceof DOMException && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
-        console.warn(`SessionStorage quota exceeded for key: ${key}, attempting cleanup...`);
-
-        // Attempt to clean up old entries
-        const keyPrefix = key.split('-').slice(0, -1).join('-') || key;
-        cleanupOldEntries(keyPrefix);
-
-        try {
-          // Try saving again after cleanup
-          const serializedState = JSON.stringify({
-            data: stateToSave,
-            timestamp: Date.now()
-          });
-          window.sessionStorage.setItem(key, serializedState);
-          console.log(`Successfully saved state after cleanup for key: ${key}`);
-        } catch (retryError) {
-          console.error(`Failed to save state after cleanup for key: ${key}`, retryError);
+  const saveState = useCallback(
+    (stateToSave: T) => {
+      try {
+        // Check storage usage and warn if needed
+        const usage = getSessionStorageUsage();
+        if (usage > 0.8 && onQuotaWarning) {
+          onQuotaWarning(usage);
         }
-      } else {
-        console.warn(`Failed to save state to sessionStorage with key: ${key}`, error);
+
+        const serializedState = JSON.stringify({
+          data: stateToSave,
+          timestamp: Date.now(),
+        });
+
+        window.sessionStorage.setItem(key, serializedState);
+
+        // Clean up old entries for this key's prefix if needed
+        const keyPrefix = key.split("-").slice(0, -1).join("-") || key; // Remove the last part if it looks like an id
+        cleanupOldEntries(keyPrefix);
+      } catch (error) {
+        if (
+          error instanceof DOMException &&
+          (error.name === "QuotaExceededError" ||
+            error.name === "NS_ERROR_DOM_QUOTA_REACHED")
+        ) {
+          console.warn(
+            `SessionStorage quota exceeded for key: ${key}, attempting cleanup...`
+          );
+
+          // Attempt to clean up old entries
+          const keyPrefix = key.split("-").slice(0, -1).join("-") || key;
+          cleanupOldEntries(keyPrefix);
+
+          try {
+            // Try saving again after cleanup
+            const serializedState = JSON.stringify({
+              data: stateToSave,
+              timestamp: Date.now(),
+            });
+            window.sessionStorage.setItem(key, serializedState);
+            console.log(
+              `Successfully saved state after cleanup for key: ${key}`
+            );
+          } catch (retryError) {
+            console.error(
+              `Failed to save state after cleanup for key: ${key}`,
+              retryError
+            );
+          }
+        } else {
+          console.warn(
+            `Failed to save state to sessionStorage with key: ${key}`,
+            error
+          );
+        }
       }
-    }
-  }, [key, getSessionStorageUsage, onQuotaWarning, cleanupOldEntries]);
+    },
+    [key, getSessionStorageUsage, onQuotaWarning, cleanupOldEntries]
+  );
 
   // Debounced version of saveState
-  const debouncedSaveState = useCallback((stateToSave: T) => {
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-    }
+  const debouncedSaveState = useCallback(
+    (stateToSave: T) => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+      }
 
-    timeoutIdRef.current = setTimeout(() => {
-      saveState(stateToSave);
-    }, debounceTime);
-  }, [saveState, debounceTime]);
+      timeoutIdRef.current = setTimeout(() => {
+        saveState(stateToSave);
+      }, debounceTime);
+    },
+    [saveState, debounceTime]
+  );
 
   // Cleanup function to clear timeout
   const cleanup = useCallback(() => {
@@ -193,10 +233,10 @@ function usePageStatePersistence<T>(
       saveState(state);
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [state, saveState]);
 
@@ -205,14 +245,18 @@ function usePageStatePersistence<T>(
     try {
       window.sessionStorage.removeItem(key);
     } catch (error) {
-      console.warn(`Failed to clear state from sessionStorage with key: ${key}`, error);
+      console.warn(
+        `Failed to clear state from sessionStorage with key: ${key}`,
+        error
+      );
     }
   }, [key]);
 
   // Set state function that also triggers persistence via the debounced effect
-  const setStateAndPersist = useCallback<SetStateAction<T>>((newState) => {
+  const setStateAndPersist = useCallback<SetStateAction<T>>(newState => {
     setState(prevState => {
-      const newStateValue = typeof newState === 'function' ? newState(prevState) : newState;
+      const newStateValue =
+        typeof newState === "function" ? newState(prevState) : newState;
       return newStateValue;
     });
   }, []);

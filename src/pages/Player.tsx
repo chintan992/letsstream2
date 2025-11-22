@@ -29,9 +29,10 @@ const Player = () => {
   }>();
 
   // Derive storage key based on media type and id
-  const scrollStorageKey = type === 'tv' && season
-    ? `scroll-player-tv-${id}-${season}`
-    : `scroll-player-movie-${id}`;
+  const scrollStorageKey =
+    type === "tv" && season
+      ? `scroll-player-tv-${id}-${season}`
+      : `scroll-player-movie-${id}`;
 
   useScrollRestoration({ storageKey: scrollStorageKey, enabled: true });
   const { user } = useAuth();

@@ -116,9 +116,10 @@ export async function getMovieDetails(
     });
 
     // Extract directors from crew
-    const directors = detailsData.credits?.crew?.filter(person =>
-      person.job === 'Director' && person.department === 'Directing'
-    ) || [];
+    const directors =
+      detailsData.credits?.crew?.filter(
+        person => person.job === "Director" && person.department === "Directing"
+      ) || [];
 
     return {
       ...formattedData,
@@ -185,9 +186,10 @@ function formatMovieDetails(movie: TMDBMovieDetailsResult): MovieDetails {
   const formattedData = formatMediaResult({ ...movie, media_type: "movie" });
 
   // Extract directors from crew
-  const directors = movie.credits?.crew?.filter(person =>
-    person.job === 'Director' && person.department === 'Directing'
-  ) || [];
+  const directors =
+    movie.credits?.crew?.filter(
+      person => person.job === "Director" && person.department === "Directing"
+    ) || [];
 
   return {
     ...formattedData,

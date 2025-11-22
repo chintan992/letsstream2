@@ -49,7 +49,7 @@ export const deduplicateWatchHistory = (
             episode: item.episode || 0,
             watch_position: item.watch_position,
             duration: item.duration,
-            watched_at: item.created_at
+            watched_at: item.created_at,
           });
         }
 
@@ -64,26 +64,34 @@ export const deduplicateWatchHistory = (
           existingItem.watch_position = item.watch_position;
           existingItem.duration = item.duration;
           existingItem.created_at = item.created_at;
-          if (!existingItem.last_watched_at || currentDateTime > new Date(existingItem.last_watched_at).getTime()) {
+          if (
+            !existingItem.last_watched_at ||
+            currentDateTime > new Date(existingItem.last_watched_at).getTime()
+          ) {
             existingItem.last_watched_at = item.created_at;
           }
           existingItem.preferred_source = item.preferred_source;
         }
 
         // Keep track of the most recent episode as the "current" one for display purposes
-        if (!existingItem.last_watched_at || currentDateTime > new Date(existingItem.last_watched_at).getTime()) {
+        if (
+          !existingItem.last_watched_at ||
+          currentDateTime > new Date(existingItem.last_watched_at).getTime()
+        ) {
           existingItem.last_watched_at = item.created_at;
         }
       } else {
         // First time seeing this TV show, create entry with episode tracking
         const newItem = { ...item };
-        newItem.episodes_watched = [{
-          season: item.season || 0,
-          episode: item.episode || 0,
-          watch_position: item.watch_position,
-          duration: item.duration,
-          watched_at: item.created_at
-        }];
+        newItem.episodes_watched = [
+          {
+            season: item.season || 0,
+            episode: item.episode || 0,
+            watch_position: item.watch_position,
+            duration: item.duration,
+            watched_at: item.created_at,
+          },
+        ];
         if (!newItem.last_watched_at) {
           newItem.last_watched_at = item.created_at;
         }
@@ -159,14 +167,16 @@ export const filterWatchHistoryDuplicates = (
       // Initialize episodes_watched for new TV show entry
       const newTVItem = {
         ...newItem,
-        episodes_watched: [{
-          season: newItem.season || 0,
-          episode: newItem.episode || 0,
-          watch_position: newItem.watch_position,
-          duration: newItem.duration,
-          watched_at: newItem.created_at
-        }],
-        last_watched_at: newItem.created_at
+        episodes_watched: [
+          {
+            season: newItem.season || 0,
+            episode: newItem.episode || 0,
+            watch_position: newItem.watch_position,
+            duration: newItem.duration,
+            watched_at: newItem.created_at,
+          },
+        ],
+        last_watched_at: newItem.created_at,
       };
       return { items: [newTVItem, ...watchHistory] };
     }
@@ -201,7 +211,7 @@ export const filterWatchHistoryDuplicates = (
         episode: newItem.episode || 0,
         watch_position: newItem.watch_position,
         duration: newItem.duration,
-        watched_at: newItem.created_at
+        watched_at: newItem.created_at,
       });
     }
 
@@ -217,11 +227,17 @@ export const filterWatchHistoryDuplicates = (
       updatedItem.created_at = newItem.created_at;
       updatedItem.last_watched_at = newItem.created_at;
       updatedItem.preferred_source = newItem.preferred_source;
-    } else if (!updatedItem.last_watched_at || newDateTime > new Date(updatedItem.last_watched_at).getTime()) {
+    } else if (
+      !updatedItem.last_watched_at ||
+      newDateTime > new Date(updatedItem.last_watched_at).getTime()
+    ) {
       updatedItem.last_watched_at = newItem.created_at;
     }
 
-    return { items: [updatedItem, ...filteredItems], existingItem: updatedItem };
+    return {
+      items: [updatedItem, ...filteredItems],
+      existingItem: updatedItem,
+    };
   } else {
     // For movies, keep the original behavior
     return { items: [newItem, ...filteredItems], existingItem };
@@ -258,7 +274,15 @@ export const findEpisodeInHistory = (
   historyItem: WatchHistoryItem,
   season: number,
   episode: number
-): { season: number; episode: number; watch_position: number; duration: number; watched_at: string } | undefined => {
+):
+  | {
+      season: number;
+      episode: number;
+      watch_position: number;
+      duration: number;
+      watched_at: string;
+    }
+  | undefined => {
   if (!historyItem.episodes_watched) return undefined;
 
   return historyItem.episodes_watched.find(
@@ -291,7 +315,7 @@ export const updateEpisodeInHistory = (
     updatedItem.episodes_watched[episodeIndex] = {
       ...updatedItem.episodes_watched[episodeIndex],
       watch_position,
-      duration
+      duration,
     };
   } else {
     // Add new episode
@@ -300,7 +324,7 @@ export const updateEpisodeInHistory = (
       episode,
       watch_position,
       duration,
-      watched_at: new Date().toISOString()
+      watched_at: new Date().toISOString(),
     });
   }
 

@@ -35,11 +35,13 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center bg-gradient-to-br from-white/5 to-white/10 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-lg">
+      <div className="mb-6 flex flex-col items-start gap-4 rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-5 shadow-lg backdrop-blur-sm sm:flex-row sm:items-center">
         <div className="w-full sm:w-auto">
-          <label className="mb-2 block text-sm font-medium text-white">Season</label>
+          <label className="mb-2 block text-sm font-medium text-white">
+            Season
+          </label>
           <select
-            className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent shadow-sm transition-all duration-300 hover:border-accent/50"
+            className="hover:border-accent/50 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
             value={selectedSeason}
             onChange={e => {
               triggerHapticFeedback(15);
@@ -54,9 +56,11 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
           </select>
         </div>
         <div className="w-full sm:w-auto">
-          <label className="mb-2 block text-sm font-medium text-white">Episode</label>
+          <label className="mb-2 block text-sm font-medium text-white">
+            Episode
+          </label>
           <select
-            className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-accent shadow-sm transition-all duration-300 hover:border-accent/50"
+            className="hover:border-accent/50 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
             value={selectedEpisode}
             onChange={e => {
               triggerHapticFeedback(15);

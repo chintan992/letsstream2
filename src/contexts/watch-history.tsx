@@ -439,7 +439,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         const historySnapshot = await getDocs(historyQuery);
         const tvEpisodes = historySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         })) as WatchHistoryItem[];
 
         if (tvEpisodes.length === 0) return;
@@ -459,7 +459,8 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
           // Find most recent episode to use as base for consolidated entry
           const mostRecentEpisode = episodes.reduce((mostRecent, current) => {
-            return new Date(current.created_at).getTime() > new Date(mostRecent.created_at).getTime()
+            return new Date(current.created_at).getTime() >
+              new Date(mostRecent.created_at).getTime()
               ? current
               : mostRecent;
           });
@@ -472,11 +473,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
               episode: episode.episode || 0,
               watch_position: episode.watch_position,
               duration: episode.duration,
-              watched_at: episode.created_at
+              watched_at: episode.created_at,
             })),
             last_watched_at: mostRecentEpisode.created_at,
             // Update to point to the main episode that will become the consolidated one
-            id: mostRecentEpisode.id
+            id: mostRecentEpisode.id,
           };
 
           // Update the most recent episode's document with consolidated data
@@ -484,7 +485,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           await setDoc(mainEpisodeRef, consolidatedEntry, { merge: true });
 
           // Delete the other episodes
-          const otherEpisodes = episodes.filter(ep => ep.id !== mostRecentEpisode.id);
+          const otherEpisodes = episodes.filter(
+            ep => ep.id !== mostRecentEpisode.id
+          );
           if (otherEpisodes.length > 0) {
             const deleteBatch = writeBatch(db);
             otherEpisodes.forEach(episode => {
@@ -536,9 +539,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     const mediaId = media.id;
     const title = media.title || media.name || "";
     // For the mediaKey, we'll use different logic for TV shows vs movies
-    const mediaKey = mediaType === "tv"
-      ? `${mediaId}-${mediaType}`
-      : `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
+    const mediaKey =
+      mediaType === "tv"
+        ? `${mediaId}-${mediaType}`
+        : `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
 
     const now = Date.now();
     const lastUpdate = lastUpdateTimestamps.get(mediaKey) || 0;
@@ -659,9 +663,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     // For the mediaKey, we'll use different logic for TV shows vs movies
-    const mediaKey = mediaType === "tv"
-      ? `${mediaId}-${mediaType}`
-      : `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
+    const mediaKey =
+      mediaType === "tv"
+        ? `${mediaId}-${mediaType}`
+        : `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
 
     const now = Date.now();
     const lastUpdate = lastUpdateTimestamps.get(mediaKey) || 0;
@@ -674,9 +679,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
     try {
       const existingItem = watchHistory.find(
-        item =>
-          item.media_id === mediaId &&
-          item.media_type === mediaType
+        item => item.media_id === mediaId && item.media_type === mediaType
       );
 
       const canExecute = await writeRateLimiter.canExecute();
@@ -685,7 +688,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         if (existingItem) {
           // For TV shows, update the specific episode in the episodes_watched array
           let updatedItem;
-          if (mediaType === "tv" && season !== undefined && episode !== undefined) {
+          if (
+            mediaType === "tv" &&
+            season !== undefined &&
+            episode !== undefined
+          ) {
             updatedItem = updateEpisodeInHistory(
               existingItem,
               season,
@@ -718,7 +725,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         let updatedItem;
         let progressDifference = 0;
 
-        if (mediaType === "tv" && season !== undefined && episode !== undefined) {
+        if (
+          mediaType === "tv" &&
+          season !== undefined &&
+          episode !== undefined
+        ) {
           // For TV shows, update the specific episode in the episodes_watched array
           updatedItem = updateEpisodeInHistory(
             existingItem,
@@ -729,11 +740,19 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           );
 
           // Calculate progress difference for the specific episode
-          const episodeData = findEpisodeInHistory(existingItem, season, episode);
+          const episodeData = findEpisodeInHistory(
+            existingItem,
+            season,
+            episode
+          );
           if (episodeData) {
-            progressDifference = Math.abs(episodeData.watch_position - position);
+            progressDifference = Math.abs(
+              episodeData.watch_position - position
+            );
           } else {
-            progressDifference = Math.abs(existingItem.watch_position - position);
+            progressDifference = Math.abs(
+              existingItem.watch_position - position
+            );
           }
         } else {
           // For movies or TV shows without specific season/episode, update the main entry
@@ -765,7 +784,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         };
 
         watchPositionQueue.set(mediaKey, {
-          data: { historyRef, updatedItemData: { ...updatedItemData, watch_position: position } },
+          data: {
+            historyRef,
+            updatedItemData: { ...updatedItemData, watch_position: position },
+          },
           timestamp: now,
         });
 

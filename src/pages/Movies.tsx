@@ -48,12 +48,12 @@ const Movies = () => {
   const [isTopRatedHydrated, setIsTopRatedHydrated] = useState(false);
 
   // Determine if the active tab is hydrated
-  const isHydrated = activeTab === "popular" ? isPopularHydrated : isTopRatedHydrated;
+  const isHydrated =
+    activeTab === "popular" ? isPopularHydrated : isTopRatedHydrated;
 
   // Use page state persistence hook
-  const [persistedState, setPersistedState, clearPersistedState] = usePageStatePersistence<MoviesPageState>(
-    "movies-page-state",
-    {
+  const [persistedState, setPersistedState, clearPersistedState] =
+    usePageStatePersistence<MoviesPageState>("movies-page-state", {
       activeTab: "popular",
       popularPage: 1,
       topRatedPage: 1,
@@ -61,27 +61,35 @@ const Movies = () => {
       genreFilter: "all",
       viewMode: "grid",
       popularMovieIds: [],
-      topRatedMovieIds: []
-    }
-  );
+      topRatedMovieIds: [],
+    });
 
   // Initialize state from persisted state, but only if filters match
   const urlParams = new URLSearchParams(window.location.search);
-  const urlGenre = urlParams.get('genre') || 'all';
-  const urlSortBy = urlParams.get('sort') as "default" | "title" | "release_date" | "rating" || "default";
+  const urlGenre = urlParams.get("genre") || "all";
+  const urlSortBy =
+    (urlParams.get("sort") as
+      | "default"
+      | "title"
+      | "release_date"
+      | "rating") || "default";
 
   // Validate if persisted state matches current URL filters
   const shouldUsePersistedState =
     persistedState.genreFilter === urlGenre &&
     persistedState.sortBy === urlSortBy;
 
-  const [activeTab, setActiveTab] = useState<"popular" | "top_rated">("popular");
+  const [activeTab, setActiveTab] = useState<"popular" | "top_rated">(
+    "popular"
+  );
   const [popularPage, setPopularPage] = useState(1);
   const [topRatedPage, setTopRatedPage] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [allPopularMovies, setAllPopularMovies] = useState<Media[]>([]);
   const [allTopRatedMovies, setAllTopRatedMovies] = useState<Media[]>([]);
-  const [sortBy, setSortBy] = useState<"default" | "title" | "release_date" | "rating">("default");
+  const [sortBy, setSortBy] = useState<
+    "default" | "title" | "release_date" | "rating"
+  >("default");
   const [genreFilter, setGenreFilter] = useState<string>(urlGenre);
 
   // Apply state from persisted state if filters match
@@ -116,9 +124,17 @@ const Movies = () => {
   // Effect to hydrate data for popular movies from persisted state
   useEffect(() => {
     // Only run if filters match and we haven't hydrated yet
-    if (!shouldUsePersistedState || isPopularHydrated || persistedState.popularMovieIds.length === 0) {
+    if (
+      !shouldUsePersistedState ||
+      isPopularHydrated ||
+      persistedState.popularMovieIds.length === 0
+    ) {
       // If filters don't match or no persisted data or already hydrated, just mark as hydrated if needed
-      if ((persistedState.popularMovieIds.length === 0 || !shouldUsePersistedState) && !isPopularHydrated) {
+      if (
+        (persistedState.popularMovieIds.length === 0 ||
+          !shouldUsePersistedState) &&
+        !isPopularHydrated
+      ) {
         setIsPopularHydrated(true);
       }
       return;
@@ -127,7 +143,9 @@ const Movies = () => {
     // Hydrate popular movies if we have persisted IDs
     if (persistedState.popularMovieIds.length > 0) {
       // Fetch all pages needed to get all persisted movies
-      const totalPagesNeeded = Math.ceil(persistedState.popularMovieIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.popularMovieIds.length / ITEMS_PER_PAGE
+      );
       for (let page = 1; page <= totalPagesNeeded; page++) {
         queryClient.prefetchQuery({
           queryKey: ["popularMovies", page],
@@ -135,13 +153,24 @@ const Movies = () => {
         });
       }
     }
-  }, [isPopularHydrated, persistedState.popularMovieIds, queryClient, shouldUsePersistedState]);
+  }, [
+    isPopularHydrated,
+    persistedState.popularMovieIds,
+    queryClient,
+    shouldUsePersistedState,
+  ]);
 
   // Effect to restore popular movies from cache once they're available
   useEffect(() => {
-    if (persistedState.popularMovieIds.length > 0 && !isPopularHydrated && shouldUsePersistedState) {
+    if (
+      persistedState.popularMovieIds.length > 0 &&
+      !isPopularHydrated &&
+      shouldUsePersistedState
+    ) {
       // Check if all required pages are in cache
-      const totalPagesNeeded = Math.ceil(persistedState.popularMovieIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.popularMovieIds.length / ITEMS_PER_PAGE
+      );
       let allPagesCached = true;
 
       for (let page = 1; page <= totalPagesNeeded; page++) {
@@ -155,7 +184,8 @@ const Movies = () => {
         // Build the complete array from cached pages
         let accumulatedMovies: Media[] = [];
         for (let page = 1; page <= totalPagesNeeded; page++) {
-          const pageData: any[] = queryClient.getQueryData(["popularMovies", page]) || [];
+          const pageData: Media[] =
+            queryClient.getQueryData(["popularMovies", page]) || [];
           const mappedMovies = pageData.map(movie => ({
             ...movie,
             id: movie.id || movie.media_id || 0,
@@ -166,22 +196,35 @@ const Movies = () => {
         }
 
         // Filter to only the movies we need based on persisted IDs
-        const filteredMovies = accumulatedMovies.filter(
-          movie => persistedState.popularMovieIds.includes(movie.id)
+        const filteredMovies = accumulatedMovies.filter(movie =>
+          persistedState.popularMovieIds.includes(movie.id)
         );
 
         setAllPopularMovies(filteredMovies);
         setIsPopularHydrated(true);
       }
     }
-  }, [persistedState.popularMovieIds, queryClient, isPopularHydrated, shouldUsePersistedState]);
+  }, [
+    persistedState.popularMovieIds,
+    queryClient,
+    isPopularHydrated,
+    shouldUsePersistedState,
+  ]);
 
   // Effect to hydrate data for top rated movies from persisted state
   useEffect(() => {
     // Only run if filters match and we haven't hydrated yet
-    if (!shouldUsePersistedState || isTopRatedHydrated || persistedState.topRatedMovieIds.length === 0) {
+    if (
+      !shouldUsePersistedState ||
+      isTopRatedHydrated ||
+      persistedState.topRatedMovieIds.length === 0
+    ) {
       // If filters don't match or no persisted data or already hydrated, just mark as hydrated if needed
-      if ((persistedState.topRatedMovieIds.length === 0 || !shouldUsePersistedState) && !isTopRatedHydrated) {
+      if (
+        (persistedState.topRatedMovieIds.length === 0 ||
+          !shouldUsePersistedState) &&
+        !isTopRatedHydrated
+      ) {
         setIsTopRatedHydrated(true);
       }
       return;
@@ -190,7 +233,9 @@ const Movies = () => {
     // Hydrate top rated movies if we have persisted IDs
     if (persistedState.topRatedMovieIds.length > 0) {
       // Fetch all pages needed to get all persisted movies
-      const totalPagesNeeded = Math.ceil(persistedState.topRatedMovieIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.topRatedMovieIds.length / ITEMS_PER_PAGE
+      );
       for (let page = 1; page <= totalPagesNeeded; page++) {
         queryClient.prefetchQuery({
           queryKey: ["topRatedMovies", page],
@@ -198,13 +243,24 @@ const Movies = () => {
         });
       }
     }
-  }, [isTopRatedHydrated, persistedState.topRatedMovieIds, queryClient, shouldUsePersistedState]);
+  }, [
+    isTopRatedHydrated,
+    persistedState.topRatedMovieIds,
+    queryClient,
+    shouldUsePersistedState,
+  ]);
 
   // Effect to restore top rated movies from cache once they're available
   useEffect(() => {
-    if (persistedState.topRatedMovieIds.length > 0 && !isTopRatedHydrated && shouldUsePersistedState) {
+    if (
+      persistedState.topRatedMovieIds.length > 0 &&
+      !isTopRatedHydrated &&
+      shouldUsePersistedState
+    ) {
       // Check if all required pages are in cache
-      const totalPagesNeeded = Math.ceil(persistedState.topRatedMovieIds.length / ITEMS_PER_PAGE);
+      const totalPagesNeeded = Math.ceil(
+        persistedState.topRatedMovieIds.length / ITEMS_PER_PAGE
+      );
       let allPagesCached = true;
 
       for (let page = 1; page <= totalPagesNeeded; page++) {
@@ -218,7 +274,8 @@ const Movies = () => {
         // Build the complete array from cached pages
         let accumulatedMovies: Media[] = [];
         for (let page = 1; page <= totalPagesNeeded; page++) {
-          const pageData: any[] = queryClient.getQueryData(["topRatedMovies", page]) || [];
+          const pageData: Media[] =
+            queryClient.getQueryData(["topRatedMovies", page]) || [];
           const mappedMovies = pageData.map(movie => ({
             ...movie,
             id: movie.id || movie.media_id || 0,
@@ -229,15 +286,20 @@ const Movies = () => {
         }
 
         // Filter to only the movies we need based on persisted IDs
-        const filteredMovies = accumulatedMovies.filter(
-          movie => persistedState.topRatedMovieIds.includes(movie.id)
+        const filteredMovies = accumulatedMovies.filter(movie =>
+          persistedState.topRatedMovieIds.includes(movie.id)
         );
 
         setAllTopRatedMovies(filteredMovies);
         setIsTopRatedHydrated(true);
       }
     }
-  }, [persistedState.topRatedMovieIds, queryClient, isTopRatedHydrated, shouldUsePersistedState]);
+  }, [
+    persistedState.topRatedMovieIds,
+    queryClient,
+    isTopRatedHydrated,
+    shouldUsePersistedState,
+  ]);
 
   useEffect(() => {
     if (popularMoviesQuery.data) {
@@ -290,7 +352,17 @@ const Movies = () => {
       popularMovieIds: allPopularMovies.map(movie => movie.id),
       topRatedMovieIds: allTopRatedMovies.map(movie => movie.id),
     }));
-  }, [activeTab, popularPage, topRatedPage, sortBy, genreFilter, viewMode, allPopularMovies, allTopRatedMovies, setPersistedState]);
+  }, [
+    activeTab,
+    popularPage,
+    topRatedPage,
+    sortBy,
+    genreFilter,
+    viewMode,
+    allPopularMovies,
+    allTopRatedMovies,
+    setPersistedState,
+  ]);
 
   // Effect to clear accumulated data when filters change significantly
   useEffect(() => {
@@ -304,7 +376,7 @@ const Movies = () => {
         ...prevState,
         genreFilter,
         popularMovieIds: [], // Clear the IDs
-        topRatedMovieIds: [] // Clear the IDs
+        topRatedMovieIds: [], // Clear the IDs
       }));
     }
   }, [genreFilter, persistedState.genreFilter, setPersistedState]);
@@ -366,7 +438,7 @@ const Movies = () => {
       // Update the persisted state when page changes
       setPersistedState(prevState => ({
         ...prevState,
-        popularPage: newPage
+        popularPage: newPage,
       }));
       return newPage;
     });
@@ -378,7 +450,7 @@ const Movies = () => {
       // Update the persisted state when page changes
       setPersistedState(prevState => ({
         ...prevState,
-        topRatedPage: newPage
+        topRatedPage: newPage,
       }));
       return newPage;
     });
@@ -390,7 +462,7 @@ const Movies = () => {
       // Update the persisted state when view mode changes
       setPersistedState(prevState => ({
         ...prevState,
-        viewMode: newViewMode
+        viewMode: newViewMode,
       }));
       return newViewMode;
     });
@@ -401,7 +473,7 @@ const Movies = () => {
     // Update the persisted state with the new active tab
     setPersistedState(prevState => ({
       ...prevState,
-      activeTab: value
+      activeTab: value,
     }));
     await trackMediaPreference("movie", "select");
   };
@@ -435,7 +507,7 @@ const Movies = () => {
                   // Update the persisted state when sort changes
                   setPersistedState(prevState => ({
                     ...prevState,
-                    sortBy: value
+                    sortBy: value,
                   }));
                 }}
               >
@@ -450,10 +522,13 @@ const Movies = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={genreFilter} onValueChange={(value) => {
-                setGenreFilter(value);
-                // The effect for genre filter changes will handle the persisted state update
-              }}>
+              <Select
+                value={genreFilter}
+                onValueChange={value => {
+                  setGenreFilter(value);
+                  // The effect for genre filter changes will handle the persisted state update
+                }}
+              >
                 <SelectTrigger className="w-[180px] border-white/10 bg-transparent text-white">
                   <SelectValue placeholder="Filter by Genre" />
                 </SelectTrigger>
