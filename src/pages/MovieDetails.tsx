@@ -313,9 +313,8 @@ const MovieDetailsPage = () => {
         <img
           src={getImageUrl(movie.backdrop_path, backdropSizes.original)}
           alt={movie.title || "Movie backdrop"}
-          className={`h-full w-full object-cover transition-opacity duration-700 ${
-            backdropLoaded ? "opacity-100" : "opacity-0"
-          }`}
+          className={`h-full w-full object-cover transition-opacity duration-700 ${backdropLoaded ? "opacity-100" : "opacity-0"
+            }`}
           onLoad={() => setBackdropLoaded(true)}
         />
 
@@ -457,11 +456,10 @@ const MovieDetailsPage = () => {
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6 flex border-b border-white/10">
           <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "about"
+            className={`whitespace-nowrap px-4 py-2 font-medium ${activeTab === "about"
                 ? "border-b-2 border-accent text-white"
                 : "text-white/60 hover:text-white"
-            }`}
+              }`}
             onClick={() => {
               triggerHaptic();
               setActiveTab("about");
@@ -470,11 +468,10 @@ const MovieDetailsPage = () => {
             About
           </button>
           <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "cast"
+            className={`whitespace-nowrap px-4 py-2 font-medium ${activeTab === "cast"
                 ? "border-b-2 border-accent text-white"
                 : "text-white/60 hover:text-white"
-            }`}
+              }`}
             onClick={() => {
               triggerHaptic();
               setActiveTab("cast");
@@ -483,11 +480,10 @@ const MovieDetailsPage = () => {
             Cast
           </button>
           <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "images"
+            className={`whitespace-nowrap px-4 py-2 font-medium ${activeTab === "images"
                 ? "border-b-2 border-accent text-white"
                 : "text-white/60 hover:text-white"
-            }`}
+              }`}
             onClick={() => {
               triggerHaptic();
               setActiveTab("images");
@@ -496,11 +492,10 @@ const MovieDetailsPage = () => {
             Images
           </button>
           <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "reviews"
+            className={`whitespace-nowrap px-4 py-2 font-medium ${activeTab === "reviews"
                 ? "border-b-2 border-accent text-white"
                 : "text-white/60 hover:text-white"
-            }`}
+              }`}
             onClick={() => {
               triggerHaptic();
               setActiveTab("reviews");
@@ -509,11 +504,10 @@ const MovieDetailsPage = () => {
             Reviews
           </button>
           <button
-            className={`whitespace-nowrap px-4 py-2 font-medium ${
-              activeTab === "downloads"
+            className={`whitespace-nowrap px-4 py-2 font-medium ${activeTab === "downloads"
                 ? "border-b-2 border-accent text-white"
                 : "text-white/60 hover:text-white"
-            }`}
+              }`}
             onClick={() => {
               triggerHaptic();
               setActiveTab("downloads");
@@ -670,21 +664,19 @@ const MovieDetailsPage = () => {
               <div>
                 <div className="mb-6 flex border-b border-white/10">
                   <button
-                    className={`px-4 py-2 font-medium ${
-                      activeImageTab === "backdrops"
+                    className={`px-4 py-2 font-medium ${activeImageTab === "backdrops"
                         ? "border-b-2 border-accent text-white"
                         : "text-white/60 hover:text-white"
-                    }`}
+                      }`}
                     onClick={() => setActiveImageTab("backdrops")}
                   >
                     Backdrops ({images.backdrops.length})
                   </button>
                   <button
-                    className={`px-4 py-2 font-medium ${
-                      activeImageTab === "posters"
+                    className={`px-4 py-2 font-medium ${activeImageTab === "posters"
                         ? "border-b-2 border-accent text-white"
                         : "text-white/60 hover:text-white"
-                    }`}
+                      }`}
                     onClick={() => setActiveImageTab("posters")}
                   >
                     Posters ({images.posters.length})
@@ -741,7 +733,7 @@ const MovieDetailsPage = () => {
                             className="hover:bg-accent/90 bg-accent text-white shadow-lg"
                           >
                             {downloadingImage ===
-                            `backdrop-${image.file_path}` ? (
+                              `backdrop-${image.file_path}` ? (
                               <span className="flex items-center">
                                 <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
                                 Downloading...
@@ -808,7 +800,7 @@ const MovieDetailsPage = () => {
                             className="hover:bg-accent/90 bg-accent text-white shadow-lg"
                           >
                             {downloadingImage ===
-                            `poster-${image.file_path}` ? (
+                              `poster-${image.file_path}` ? (
                               <span className="flex items-center">
                                 <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
                                 Downloading...
@@ -830,22 +822,21 @@ const MovieDetailsPage = () => {
               <div className="text-white/70">No images available.</div>
             )}
           </div>
+        ) : activeTab === "reviews" ? (
+          <div className="mb-8">
+            <h2 className="mb-6 text-2xl font-bold text-white">User Reviews</h2>
+            <ReviewSection mediaId={movie.id} mediaType="movie" />
+          </div>
         ) : activeTab === "downloads" ? (
           <div className="mb-8">
-            <h2 className="mb-6 text-2xl font-bold text-white">
-              Download Movie
-            </h2>
-            {movie && <DownloadSection mediaName={movie.title} />}
+            <h2 className="mb-6 text-2xl font-bold text-white">Download</h2>
+            <DownloadSection
+              mediaName={movie.title}
+              mediaType="movie"
+              tmdbId={movie.id}
+            />
           </div>
-        ) : (
-          /* Reviews section */
-          <div className="mb-8">
-            <h3 className="mb-4 text-xl font-semibold text-white">
-              User Reviews
-            </h3>
-            <ReviewSection mediaId={parseInt(id!, 10)} mediaType="movie" />
-          </div>
-        )}
+        ) : null}
       </div>
 
       {/* Recommendations Section */}

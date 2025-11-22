@@ -1,128 +1,100 @@
 import React from "react";
-import {
-  triggerHapticFeedback,
-  triggerSuccessHaptic,
-} from "@/utils/haptic-feedback";
-import { Download } from "lucide-react";
+import { triggerHapticFeedback } from "@/utils/haptic-feedback";
+import { Download, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { extractQualityTags } from "@/utils/quality-tags";
-import { fetchDownloadLinks } from "@/api/download";
-
-interface DownloadLink {
-  title: string;
-  size: string;
-  download_url: string;
-  file_id: string;
-}
 
 interface DownloadSectionProps {
   mediaName: string;
+  mediaType: "movie" | "tv";
+  tmdbId: number;
   season?: number;
   episode?: number;
+  children?: React.ReactNode;
 }
 
 export const DownloadSection: React.FC<DownloadSectionProps> = ({
   mediaName,
+  mediaType,
+  tmdbId,
   season,
   episode,
+  children,
 }) => {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [downloadLinks, setDownloadLinks] = React.useState<DownloadLink[]>([]);
-  const [error, setError] = React.useState<string | null>(null);
-
-  const fetchLinks = React.useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    triggerHapticFeedback(20);
-    try {
-      const links = await fetchDownloadLinks(mediaName, season, episode);
-      setDownloadLinks(links);
-      if (links.length > 0) {
-        triggerSuccessHaptic();
-      }
-    } catch (err) {
-      setError("Failed to fetch download links");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+  const getDownloadUrl = () => {
+    if (mediaType === "movie") {
+      return `https://dl.vidsrc.vip/movie/${tmdbId}`;
     }
-  }, [mediaName, season, episode]);
+    if (mediaType === "tv" && season && episode) {
+      return `https://dl.vidsrc.vip/tv/${tmdbId}/${season}/${episode}`;
+    }
+    return "#";
+  };
 
-  if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
-  }
-
-  if (!downloadLinks.length && !isLoading) {
-    return (
-      <div className="flex flex-col items-center gap-4 p-6">
-        <Button onClick={fetchLinks} variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Show Download Links
-        </Button>
-      </div>
-    );
-  }
+  const handleDownload = () => {
+    triggerHapticFeedback(25);
+    const url = getDownloadUrl();
+    if (url !== "#") {
+      window.open(url, "_blank");
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {isLoading ? (
-        <div className="flex justify-center p-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {downloadLinks.map(link => {
-            const qualityTags = extractQualityTags(link.title);
-            return (
-              <div
-                key={link.file_id}
-                className="group relative flex min-h-[140px] flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#181c24] to-[#23272f] p-4 shadow-xl transition-transform hover:scale-[1.025] hover:shadow-2xl sm:p-5"
+    <div className="w-full max-w-3xl mx-auto">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-6 shadow-xl backdrop-blur-sm sm:p-8">
+        {/* Background Glow */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-accent/5 blur-3xl" />
+
+        <div className="relative z-10 flex flex-col items-center gap-8 text-center">
+          <div className="space-y-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 ring-1 ring-accent/20">
+              <Download className="h-8 w-8 text-accent" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-white">
+                Download {mediaType === "movie" ? "Movie" : "Episode"}
+              </h3>
+              <p className="mx-auto max-w-lg text-base text-white/60">
+                Click below to open the download page for <span className="font-medium text-white">{mediaName}</span>
+                {mediaType === "tv" && season && episode && (
+                  <span> (S{season}:E{episode})</span>
+                )}
+                .
+              </p>
+            </div>
+          </div>
+
+          {children && (
+            <div className="w-full max-w-2xl rounded-xl bg-black/20 p-4 ring-1 ring-white/5">
+              {children}
+            </div>
+          )}
+
+          <div className="w-full space-y-4">
+            <div className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-2xl">
+              <iframe
+                src={getDownloadUrl()}
+                className="h-[600px] w-full border-0"
+                title="Download Page"
+                allowFullScreen
+              />
+            </div>
+
+            <div className="flex justify-center">
+              <Button
+                onClick={handleDownload}
+                variant="link"
+                className="text-white/60 hover:text-white"
+                size="sm"
               >
-                {/* Cinematic Glow */}
-                <div className="bg-accent/10 pointer-events-none absolute -inset-1 z-0 opacity-0 blur-lg transition-opacity group-hover:opacity-100" />
-
-                {/* File Title */}
-                <div className="relative z-10 mb-1 line-clamp-2 break-all font-mono text-xs text-white/90 sm:text-sm">
-                  {link.title}
-                </div>
-
-                {/* Quality Tags */}
-                <div className="relative z-10 mb-1 flex flex-wrap gap-2">
-                  {qualityTags.map(tag => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className="border-accent bg-black/40 px-2 py-0.5 text-xs text-accent"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* File Size & Download Button */}
-                <div className="relative z-10 mt-auto flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
-                  <span className="mb-1 rounded bg-black/30 px-2 py-1 text-xs font-semibold tracking-wide text-white/70 shadow sm:mb-0">
-                    {link.size}
-                  </span>
-                  <Button
-                    onClick={() => {
-                      triggerHapticFeedback(25);
-                      window.open(link.download_url, "_blank");
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="to-accent/80 hover:from-accent/80 w-full border-none bg-gradient-to-r from-accent text-white shadow-lg hover:to-accent sm:w-auto"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open in new tab
+              </Button>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

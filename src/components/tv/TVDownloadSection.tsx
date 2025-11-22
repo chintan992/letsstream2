@@ -4,6 +4,7 @@ import { DownloadSection } from "@/components/DownloadSection";
 
 interface TVDownloadSectionProps {
   tvShowName: string;
+  tmdbId: number;
   seasons: Array<{
     season_number: number;
     name: string;
@@ -17,6 +18,7 @@ interface TVDownloadSectionProps {
 
 export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
   tvShowName,
+  tmdbId,
   seasons,
   episodesBySeason,
 }) => {
@@ -34,14 +36,20 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
   }, [selectedSeason, episodesBySeason]);
 
   return (
-    <div className="space-y-6">
-      <div className="mb-6 flex flex-col items-start gap-4 rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-5 shadow-lg backdrop-blur-sm sm:flex-row sm:items-center">
-        <div className="w-full sm:w-auto">
-          <label className="mb-2 block text-sm font-medium text-white">
+    <DownloadSection
+      mediaName={tvShowName}
+      mediaType="tv"
+      tmdbId={tmdbId}
+      season={selectedSeason}
+      episode={selectedEpisode}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
+        <div className="w-full sm:w-64">
+          <label className="mb-2 block text-sm font-medium text-white/80 text-left">
             Season
           </label>
           <select
-            className="hover:border-accent/50 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full appearance-none rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             value={selectedSeason}
             onChange={e => {
               triggerHapticFeedback(15);
@@ -55,12 +63,12 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
             ))}
           </select>
         </div>
-        <div className="w-full sm:w-auto">
-          <label className="mb-2 block text-sm font-medium text-white">
+        <div className="w-full sm:w-64">
+          <label className="mb-2 block text-sm font-medium text-white/80 text-left">
             Episode
           </label>
           <select
-            className="hover:border-accent/50 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full appearance-none rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             value={selectedEpisode}
             onChange={e => {
               triggerHapticFeedback(15);
@@ -77,11 +85,6 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
           </select>
         </div>
       </div>
-      <DownloadSection
-        mediaName={tvShowName}
-        season={selectedSeason}
-        episode={selectedEpisode}
-      />
-    </div>
+    </DownloadSection>
   );
 };
