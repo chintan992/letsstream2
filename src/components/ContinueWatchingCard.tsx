@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
-import { Play, Clock, Info } from "lucide-react";
+import { Play, Clock, Info, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -10,8 +10,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { WatchHistoryItem } from "@/contexts/types/watch-history";
-import { formatDistanceToNow } from "date-fns";
-import React from "react";
+import React, { useState } from "react";
+import { formatLastWatched, formatTimeRemaining } from "@/utils/format";
 
 interface ContinueWatchingCardProps {
   item: WatchHistoryItem;
@@ -22,32 +22,21 @@ interface ContinueWatchingCardProps {
   ) => void;
 }
 
-const formatLastWatched = (dateString: string) => {
-  if (!dateString) return "Recently";
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime()) || date > new Date()) {
-      return "Recently";
-    }
-    return formatDistanceToNow(date, { addSuffix: true });
-  } catch {
-    return "Recently";
-  }
-};
-
-const formatTimeRemaining = (position: number, duration: number) => {
-  if (!duration) return "";
-  const remaining = Math.max(0, duration - position);
-  const minutes = Math.floor(remaining / 60);
-  const seconds = Math.floor(remaining % 60);
-  return `${minutes}:${seconds.toString().padStart(2, "0")} remaining`;
-};
-
 const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
   item,
   onContinueWatching,
   onNavigateToDetails,
 }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      triggerHapticFeedback(25);
+      onContinueWatching(item);
+    }
+  };
+
   return (
     <motion.div
       className="hover:border-accent/70 group relative aspect-video w-[280px] flex-none cursor-pointer overflow-hidden rounded-xl border border-transparent bg-card transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl md:w-[300px]"
@@ -58,15 +47,25 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
         triggerHapticFeedback(25); // Stronger feedback for main action
         onContinueWatching(item);
       }}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
       style={{
         boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
       }}
     >
-      <img
-        src={`https://image.tmdb.org/t/p/w500${item.backdrop_path}`}
-        alt={item.title}
-        className="h-full w-full object-cover transition-transform group-hover:scale-110 group-hover:brightness-110"
-      />
+      {!imageError && item.backdrop_path ? (
+        <img
+          src={`https://image.tmdb.org/t/p/w500${item.backdrop_path}`}
+          alt={item.title}
+          className="h-full w-full object-cover transition-transform group-hover:scale-110 group-hover:brightness-110"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+          <ImageOff className="h-12 w-12 opacity-50" />
+        </div>
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent backdrop-blur-sm" />
       <div className="absolute bottom-4 left-4 right-4 z-10">
         <div className="mb-1 flex items-start justify-between">
@@ -81,6 +80,7 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
                   size="icon"
                   className="hover:bg-accent/80 -mt-1 h-7 w-7 rounded-full bg-black/30 transition-colors"
                   onClick={e => {
+                    e.stopPropagation();
                     triggerHapticFeedback(15); // Light feedback for info button
                     onNavigateToDetails(e, item);
                   }}
@@ -107,7 +107,11 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
         </div>
         <div className="relative mb-3">
           <Progress
-            value={(item.watch_position / item.duration) * 100}
+            value={
+              item.duration > 0
+                ? (item.watch_position / item.duration) * 100
+                : 0
+            }
             className="h-1.5 rounded-full bg-white/10"
           />
           <div className="mt-1 text-right text-xs text-white/70">
@@ -127,3 +131,4 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
 };
 
 export default ContinueWatchingCard;
+

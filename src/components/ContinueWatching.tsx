@@ -1,22 +1,14 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { WatchHistoryItem } from "@/contexts/types/watch-history";
-import { Play, Clock, ChevronLeft, ChevronRight, Info } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { formatDistanceToNow } from "date-fns";
+import { Clock } from "lucide-react";
 import ContinueWatchingCard from "./ContinueWatchingCard";
 import ScrollArrow from "./ScrollArrow";
+import { useContinueWatching } from "@/hooks/useContinueWatching";
 
 interface ContinueWatchingProps {
   maxItems?: number;
@@ -34,46 +26,8 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
   const rowRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Filter and deduplicate watch history
-  const processedHistory = useMemo(() => {
-    if (watchHistory.length === 0) return [];
-
-    // First, filter out invalid dates
-    const validItems = watchHistory.filter(item => {
-      if (!item.created_at) return false;
-      try {
-        const date = new Date(item.created_at);
-        return !isNaN(date.getTime());
-      } catch {
-        return false;
-      }
-    });
-
-    // Create a map to store the most recent item for each unique media
-    const uniqueMediaMap = new Map<string, WatchHistoryItem>();
-
-    validItems.forEach(item => {
-      // Create a unique key for each media
-      // For movies: media_type-media_id
-      // For TV shows: media_type-media_id (only one entry per show now)
-      const key = `${item.media_type}-${item.media_id}`;
-
-      // If we haven't seen this item yet, or if this item is more recent than what we have, update the map
-      if (
-        !uniqueMediaMap.has(key) ||
-        new Date(item.created_at) >
-          new Date(uniqueMediaMap.get(key)!.created_at)
-      ) {
-        uniqueMediaMap.set(key, item);
-      }
-    });
-
-    // Convert the map values back to an array and sort by most recent
-    return Array.from(uniqueMediaMap.values()).sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-  }, [watchHistory]);
+  // Filter and deduplicate watch history using custom hook
+  const processedHistory = useContinueWatching(watchHistory);
 
   useEffect(() => {
     setContinuableItems(processedHistory.slice(0, maxItems));
@@ -99,33 +53,6 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
     triggerHapticFeedback(15);
     const scrollAmount = rowRef.current.clientWidth * 0.75;
     rowRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  };
-
-  const formatLastWatched = (dateString: string) => {
-    if (!dateString) return "Recently";
-
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime()) || date > new Date()) {
-        return "Recently";
-      }
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch {
-      return "Recently";
-    }
-  };
-
-  const formatProgress = (position: number, duration: number) => {
-    if (!duration) return "0%";
-    return `${Math.round((position / duration) * 100)}%`;
-  };
-
-  const formatTimeRemaining = (position: number, duration: number) => {
-    if (!duration) return "";
-    const remaining = Math.max(0, duration - position);
-    const minutes = Math.floor(remaining / 60);
-    const seconds = Math.floor(remaining % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")} remaining`;
   };
 
   if (!user || continuableItems.length === 0) {
@@ -206,3 +133,4 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
 };
 
 export default ContinueWatching;
+
