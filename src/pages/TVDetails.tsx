@@ -243,8 +243,8 @@ const TVDetailsPage = () => {
           <div className="flex space-x-1">
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "episodes"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("episodes")}
             >
@@ -252,8 +252,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "about"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("about")}
             >
@@ -261,8 +261,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "cast"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("cast")}
             >
@@ -270,8 +270,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "creators"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("creators")}
             >
@@ -279,8 +279,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "reviews"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("reviews")}
             >
@@ -288,8 +288,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "keywords"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("keywords")}
             >
@@ -297,8 +297,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "networks"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("networks")}
             >
@@ -306,8 +306,8 @@ const TVDetailsPage = () => {
             </button>
             <button
               className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "images"
-                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               onClick={() => setActiveTab("images")}
             >
@@ -316,8 +316,8 @@ const TVDetailsPage = () => {
             {user && (
               <button
                 className={`whitespace-nowrap rounded-lg px-5 py-3 font-medium transition-all duration-300 ${activeTab === "downloads"
-                    ? "shadow-accent/20 bg-accent text-white shadow-lg"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                  ? "shadow-accent/20 bg-accent text-white shadow-lg"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
                   }`}
                 onClick={() => setActiveTab("downloads")}
               >
@@ -374,6 +374,8 @@ const TVDetailsPage = () => {
                 tvShowName={tvShow.name}
                 tmdbId={tvShow.id}
                 seasons={tvShow.seasons}
+                selectedSeason={selectedSeason}
+                onSeasonChange={setSelectedSeason}
                 episodesBySeason={Object.fromEntries(
                   tvShow.seasons.map(season => [
                     season.season_number,

@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
-import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 import TVShowsTabs from "./components/TVShowsTabs";
 import TVShowsHeader from "./components/TVShowsHeader";
 import TVShowsFilters from "./components/TVShowsFilters";
-import { useToast } from "@/hooks/use-toast";
 import { trackMediaPreference } from "@/lib/analytics";
-import { Media } from "@/utils/types";
 
 // Define the interface for the persisted state
 interface TVShowsPageState {
@@ -24,21 +21,6 @@ interface TVShowsPageState {
 
 const TVShowsPage = () => {
   const navigate = useNavigate();
-
-  // State for hydration tracking for all tabs
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [hydratedTabs, setHydratedTabs] = useState<Record<string, boolean>>({
-    popular: false,
-    top_rated: false,
-    trending: false,
-  });
-
-  // Refs to store clearState functions from each tab
-  const clearTabStateRef = useRef<Record<string, () => void>>({
-    popular: () => {},
-    top_rated: () => {},
-    trending: () => {},
-  });
 
   // Use page state persistence hook
   const [persistedState, setPersistedState] =
@@ -71,22 +53,13 @@ const TVShowsPage = () => {
     persistedState.showPlatformBar
   );
 
-  // Apply scroll restoration only after hydrations are complete
-  useScrollRestoration({ enabled: isHydrated });
+  // Apply scroll restoration
+  useScrollRestoration();
 
   // Track initial page visit
   useEffect(() => {
     void trackMediaPreference("tv", "browse");
   }, []);
-
-  // Effect to update hydration status based on tab hydration
-  useEffect(() => {
-    // Check if the currently active tab is hydrated
-    const isActiveTabHydrated = hydratedTabs[activeTab];
-    if (isActiveTabHydrated && !isHydrated) {
-      setIsHydrated(true);
-    }
-  }, [hydratedTabs, activeTab, isHydrated]);
 
   // Effect to update persisted state when state changes
   useEffect(() => {
@@ -108,27 +81,6 @@ const TVShowsPage = () => {
     showPlatformBar,
     setPersistedState,
   ]);
-
-  // Effect to clear accumulated data when filters change
-  useEffect(() => {
-    // When filters change significantly, clear the persisted state for all tabs
-    if (
-      persistedState.genreFilter !== genreFilter ||
-      persistedState.sortBy !== sortBy ||
-      JSON.stringify(persistedState.platformFilters) !==
-        JSON.stringify(platformFilters)
-    ) {
-      // Clear the persisted states for all tabs
-      Object.values(clearTabStateRef.current).forEach(clearState => {
-        clearState();
-      });
-    }
-  }, [genreFilter, sortBy, platformFilters, persistedState]);
-
-  const handleShowSelect = async (show: Media) => {
-    await trackMediaPreference("tv", "select");
-    navigate(`/tv/${show.id}`);
-  };
 
   const handleTabChange = (value: string) => {
     const tabValue = value as "popular" | "top_rated" | "trending";
@@ -207,15 +159,6 @@ const TVShowsPage = () => {
             sortBy={sortBy}
             genreFilter={genreFilter}
             platformFilters={platformFilters}
-            onTabHydrated={(tab: string) => {
-              setHydratedTabs(prev => ({
-                ...prev,
-                [tab]: true,
-              }));
-            }}
-            setTabClearState={(tab: string, clearState: () => void) => {
-              clearTabStateRef.current[tab] = clearState;
-            }}
           />
         </main>
         <Footer />

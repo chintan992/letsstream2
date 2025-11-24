@@ -14,6 +14,8 @@ interface TVDownloadSectionProps {
     number,
     Array<{ episode_number: number; name: string }>
   >;
+  selectedSeason: number;
+  onSeasonChange: (season: number) => void;
 }
 
 export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
@@ -21,10 +23,9 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
   tmdbId,
   seasons,
   episodesBySeason,
+  selectedSeason,
+  onSeasonChange,
 }) => {
-  const [selectedSeason, setSelectedSeason] = useState<number>(
-    seasons[0]?.season_number || 1
-  );
   const [selectedEpisode, setSelectedEpisode] = useState<number>(
     episodesBySeason[selectedSeason]?.[0]?.episode_number || 1
   );
@@ -53,7 +54,7 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
             value={selectedSeason}
             onChange={e => {
               triggerHapticFeedback(15);
-              setSelectedSeason(Number(e.target.value));
+              onSeasonChange(Number(e.target.value));
             }}
           >
             {seasons.map(season => (

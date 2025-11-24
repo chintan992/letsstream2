@@ -74,6 +74,7 @@ export const DownloadSection: React.FC<DownloadSectionProps> = ({
           <div className="w-full space-y-4">
             <div className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-2xl">
               <iframe
+                key={getDownloadUrl()}
                 src={getDownloadUrl()}
                 className="h-[600px] w-full border-0"
                 title="Download Page"
