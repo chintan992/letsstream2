@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 import PWAInstallPrompt from "./PWAInstallPrompt";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,10 +21,15 @@ const Navbar = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Show install prompt after a delay
-    setTimeout(() => {
-      setShowInstallPrompt(true);
-    }, 5000); // 5 seconds delay
+    // Show install prompt after a delay, but only if not shown recently in this session
+    const hasSeenPrompt = sessionStorage.getItem("pwaPromptShown");
+    if (!hasSeenPrompt) {
+      const timer = setTimeout(() => {
+        setShowInstallPrompt(true);
+        sessionStorage.setItem("pwaPromptShown", "true");
+      }, 5000); // 5 seconds delay
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   useEffect(() => {
@@ -36,7 +41,7 @@ const Navbar = () => {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -60,9 +65,8 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
-        isScrolled ? "nav-scrolled" : "nav-transparent"
-      }`}
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${isScrolled ? "nav-scrolled" : "nav-transparent"
+        }`}
     >
       {/* z-50: Ensures navbar stays above all page content including modals and overlays */}
       <div className="container mx-auto px-4 py-3">
@@ -104,8 +108,9 @@ const Navbar = () => {
                     toggleSearch();
                   }}
                   className="mr-2 text-white hover:bg-white/10"
+                  aria-label="Close search"
                 >
-                  <Menu className="h-6 w-6" />
+                  <X className="h-6 w-6" />
                 </Button>
                 <SearchBar
                   isMobile
