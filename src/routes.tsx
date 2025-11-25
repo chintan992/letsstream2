@@ -15,7 +15,6 @@ const Search = lazy(() => import("./pages/Search"));
 const WatchHistory = lazy(() => import("./pages/WatchHistory"));
 const MovieDetails = lazy(() => import("./pages/MovieDetails"));
 const TVDetails = lazy(() => import("./pages/TVDetails"));
-const SportMatch = lazy(() => import("./pages/SportMatch"));
 const SportMatchPlayer = lazy(() => import("./pages/SportMatchPlayer"));
 const Player = lazy(() => import("./pages/Player"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -76,7 +75,6 @@ export default function AppRoutes() {
           <Route path="/tv" element={<TVShowsPage />} />
           <Route path="/tv/:id" element={<TVDetails />} />
           <Route path="/sports" element={<Sports />} />
-          <Route path="/sports/:id" element={<SportMatch />} />
           <Route path="/sports/player/:id" element={<SportMatchPlayer />} />
           <Route path="/watch/:type/:id" element={<Player />} />
           <Route

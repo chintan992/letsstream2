@@ -114,47 +114,26 @@ const SOURCES = [
   "intel",
 ];
 
-export const getMatchStreams = async (
-  source: string | null,
+export const getStreamsBySource = async (
+  source: string,
   id: string
 ): Promise<Stream[]> => {
-  if (source) {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/stream/${source}/${id}`
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/stream/${source}/${id}`
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch streams for match: ${id} from source: ${source}`
       );
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch streams for match: ${id} from source: ${source}`
-        );
-      }
-      return await response.json();
-    } catch (error) {
-      console.error(
-        `Error fetching streams for match ${id} from source ${source}:`,
-        error
-      );
-      return [];
     }
-  } else {
-    const allStreams = [];
-    for (const src of SOURCES) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/stream/${src}/${id}`);
-        if (response.ok) {
-          const streams = await response.json();
-          allStreams.push(...streams);
-        } else {
-          console.warn(`No streams found for source ${src} and match ${id}`);
-        }
-      } catch (error) {
-        console.error(
-          `Error fetching streams for match ${id} from source ${src}:`,
-          error
-        );
-      }
-    }
-    return allStreams;
+    return await response.json();
+  } catch (error) {
+    console.error(
+      `Error fetching streams for match ${id} from source ${source}:`,
+      error
+    );
+    return [];
   }
 };
 
@@ -255,7 +234,7 @@ export const getMatchStreamsById = async (matchId: string): Promise<Stream[]> =>
 
     for (const source of match.sources) {
       try {
-        const streams = await getMatchStreams(source.source, source.id);
+        const streams = await getStreamsBySource(source.source, source.id);
         allStreams.push(...streams);
       } catch (error) {
         console.warn(`Failed to fetch streams from source ${source.source}:`, error);

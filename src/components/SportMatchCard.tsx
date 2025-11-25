@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { APIMatch } from "@/utils/sports-types";
 import { getMatchPosterUrl, getTeamBadgeUrl } from "@/utils/sports-api";
-import { formatDistanceToNow, format } from "date-fns";
-import { Clock, Tv } from "lucide-react";
+import { format } from "date-fns";
+import { Tv, Heart, PlayCircle, Calendar, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useUserPreferences } from "@/hooks/user-preferences";
+import { useCountdown, formatCountdown } from "@/hooks/use-countdown";
+import { useFavoriteMatches } from "@/hooks/use-favorite-matches";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface SportMatchCardProps {
   match: APIMatch;
@@ -17,114 +21,210 @@ interface SportMatchCardProps {
 const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
   const { userPreferences } = useUserPreferences();
   const accentColor = userPreferences?.accentColor || "hsl(var(--accent))";
+  const { isFavorite, toggleFavorite } = useFavoriteMatches();
+  const [isHovered, setIsHovered] = useState(false);
 
-  const isLive = new Date().getTime() - match.date < 3 * 60 * 60 * 1000; // Consider live if started less than 3 hours ago
   const matchTime = new Date(match.date);
+  const countdown = useCountdown(matchTime);
+  const isUpcoming = !countdown.isLive && !countdown.isPast;
+  const favorited = isFavorite(match.id);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite({
+      id: match.id,
+      title: match.title,
+      category: match.category,
+      date: match.date,
+    });
+  };
+
+  const cardVariants = {
+    initial: {
+      scale: 1,
+      boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+    },
+    hover: {
+      scale: 1.03,
+      translateY: -5,
+      boxShadow: `0 15px 30px ${accentColor}30`,
+    },
+  };
 
   return (
     <Link
       to={`/sports/player/${match.id}`}
-      className={cn(
-        "block transform transition-all duration-300 hover:-translate-y-1",
-        className
-      )}
+      className={cn("group block relative h-full", className)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <Card className="bg-card/80 h-full overflow-hidden border-white/10 shadow-md backdrop-blur-sm hover:shadow-lg">
-        <div className="relative aspect-video">
-          {match.poster ? (
-            <img
-              src={getMatchPosterUrl(match.poster)}
-              alt={match.title}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-r from-gray-800 to-gray-900">
-              <span className="text-lg text-white">{match.category}</span>
-            </div>
-          )}
-
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-          {isLive && (
-            <Badge
-              className="absolute right-2 top-2 bg-red-600 hover:bg-red-700"
-              style={{ background: accentColor }}
-            >
-              <span className="mr-1 inline-block h-2 w-2 animate-pulse rounded-full bg-white"></span>
-              LIVE
-            </Badge>
-          )}
-
-          {match.popular && !isLive && (
-            <Badge
-              className="absolute right-2 top-2"
-              style={{ background: accentColor }}
-            >
-              Popular
-            </Badge>
-          )}
-        </div>
-
-        <CardContent className="p-4">
-          <h3 className="mb-2 line-clamp-2 font-semibold text-white">
-            {match.title}
-          </h3>
-
-          {match.teams ? (
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center">
-                <img
-                  src={getTeamBadgeUrl(match.teams.home.badge)}
-                  alt={match.teams.home.name}
-                  className="mr-2 h-6 w-6 object-contain"
-                  loading="lazy"
-                />
-                <span className="max-w-[80px] truncate text-sm text-white/80">
-                  {match.teams.home.name}
-                </span>
+      <motion.div
+        variants={cardVariants}
+        initial="initial"
+        whileHover="hover"
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="h-full"
+      >
+        <Card
+          className="h-full overflow-hidden border-white/10 bg-black/30 backdrop-blur-xl shadow-lg transition-all duration-300"
+        >
+          {/* Image Container */}
+          <div className="relative aspect-video overflow-hidden">
+            {match.poster ? (
+              <motion.img
+                src={getMatchPosterUrl(match.poster)}
+                alt={match.title}
+                className="h-full w-full object-cover"
+                whileHover={{ scale: 1.1, filter: "brightness(1.1)" }}
+                transition={{ duration: 0.4 }}
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+                <Trophy className="h-12 w-12 text-white/10" />
               </div>
+            )}
 
-              <div className="text-xs text-white/50">VS</div>
+            {/* Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-              <div className="flex items-center">
-                <span className="max-w-[80px] truncate text-sm text-white/80">
-                  {match.teams.away.name}
-                </span>
-                <img
-                  src={getTeamBadgeUrl(match.teams.away.badge)}
-                  alt={match.teams.away.name}
-                  className="ml-2 h-6 w-6 object-contain"
-                  loading="lazy"
-                />
+            {/* Hover Overlay with Play Button */}
+            <div className={cn(
+              "absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[3px] transition-all duration-300",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}>
+              <motion.div
+                className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-white backdrop-blur-md border border-white/20"
+                style={{ boxShadow: `0 0 20px ${accentColor}40` }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={isHovered ? { scale: 1, opacity: 1 } : {}}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <PlayCircle className="h-5 w-5 fill-white text-transparent" />
+                <span className="font-medium">Watch Now</span>
+              </motion.div>
+            </div>
+
+            {/* Top Badges */}
+            <div className="absolute left-3 top-3 right-3 flex justify-between items-start z-20">
+              <Badge
+                variant="outline"
+                className="bg-black/50 backdrop-blur-lg border-white/10 text-xs font-medium text-white/90 uppercase tracking-wider"
+              >
+                {match.category}
+              </Badge>
+
+              <div className="flex flex-col gap-2 items-end">
+                {countdown.isLive && (
+                  <Badge
+                    className="relative overflow-hidden font-bold border-none px-3 py-1 text-sm"
+                    style={{
+                      background: `radial-gradient(circle, #ff6b6b, #ef4444)`,
+                      boxShadow: "0 0 15px rgba(239, 68, 68, 0.6), inset 0 0 5px rgba(255,255,255,0.3)",
+                      textShadow: "0 1px 2px rgba(0,0,0,0.3)"
+                    }}
+                  >
+                    <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-white" />
+                    LIVE
+                  </Badge>
+                )}
+
+                {match.popular && !countdown.isLive && (
+                  <Badge
+                    className="font-semibold border-none bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg text-sm px-3 py-1"
+                  >
+                    🔥 Popular
+                  </Badge>
+                )}
               </div>
             </div>
-          ) : (
-            <div className="mb-3 text-sm text-white/80">{match.category}</div>
-          )}
 
-          <div className="flex items-center justify-between text-xs text-white/60">
-            <div className="flex items-center">
-              <Clock className="mr-1 h-3 w-3" />
-              {isLive ? (
-                <span>
-                  Started {formatDistanceToNow(matchTime, { addSuffix: true })}
-                </span>
+            {/* Favorite Button */}
+            <Button
+              onClick={handleFavoriteClick}
+              size="icon"
+              variant="ghost"
+              className={cn(
+                "absolute right-3 bottom-3 h-9 w-9 rounded-full backdrop-blur-md transition-all duration-300 z-20",
+                favorited
+                  ? "bg-red-500 text-white shadow-lg hover:bg-red-600 scale-110"
+                  : "bg-black/40 text-white/70 hover:bg-black/60 hover:text-white border border-white/10",
+              )}
+            >
+              <Heart
+                className={cn("h-4 w-4 transition-all duration-300", favorited && "fill-current")}
+              />
+            </Button>
+          </div>
+
+          <CardContent className="p-4 relative">
+            {/* Teams / Title */}
+            <div className="mb-4 min-h-[6rem]">
+              {match.teams?.home && match.teams?.away ? (
+                <div className="relative flex items-center justify-center">
+                  {/* Home Team */}
+                  <div className="flex-1 flex flex-col items-center text-center gap-2">
+                    <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
+                      <img
+                        src={getTeamBadgeUrl(match.teams.home.badge)}
+                        alt={match.teams.home.name}
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                    <span className="line-clamp-2 text-sm font-semibold text-white/90">
+                      {match.teams.home.name}
+                    </span>
+                  </div>
+
+                  {/* VS Divider */}
+                  <div className="flex-shrink-0 px-2">
+                    <span className="text-xl font-bold text-white/40">VS</span>
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="flex-1 flex flex-col items-center text-center gap-2">
+                     <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
+                      <img
+                        src={getTeamBadgeUrl(match.teams.away.badge)}
+                        alt={match.teams.away.name}
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                    <span className="line-clamp-2 text-sm font-semibold text-white/90">
+                      {match.teams.away.name}
+                    </span>
+                  </div>
+
+                </div>
               ) : (
-                <span>{format(matchTime, "MMM d, yyyy - h:mm a")}</span>
+                <h3 className="line-clamp-2 text-lg font-bold text-white leading-snug flex items-center h-full">
+                  {match.title}
+                </h3>
               )}
             </div>
 
-            <div className="flex items-center">
-              <Tv className="mr-1 h-3 w-3" />
-              <span>
-                {match.sources.length}{" "}
-                {match.sources.length === 1 ? "source" : "sources"}
-              </span>
+            {/* Footer Info */}
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+              <div className="flex items-center gap-2 text-xs text-white/60">
+                <Calendar className="h-3.5 w-3.5" />
+                <span className={cn("font-medium", isUpcoming && countdown.hours < 24 && "text-amber-400")}>
+                  {isUpcoming
+                    ? formatCountdown(countdown)
+                    : format(matchTime, "MMM d, h:mm a")}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs font-medium text-white/50 bg-white/5 px-2 py-1 rounded-md">
+                <Tv className="h-3 w-3" />
+                <span>{match.sources.length} Sources</span>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Link>
   );
 };

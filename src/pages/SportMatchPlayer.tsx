@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { swMonitor } from "@/utils/sw-monitor";
 import { saveLocalData, getLocalData } from "@/utils/supabase";
 
@@ -20,7 +21,7 @@ const SportMatchPlayer = () => {
   const { id: matchId } = useParams();
   useScrollRestoration();
   const { toast } = useToast();
-  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
   const [loadAttempts, setLoadAttempts] = useState(0);
   const [cachedStreams, setCachedStreams] = useState(null);
@@ -66,29 +67,27 @@ const SportMatchPlayer = () => {
       saveLocalData(`sport-streams-${matchId}`, streams, 30 * 60 * 1000); // Cache for 30 minutes
 
       // Set initial source if not already set
-      if (!selectedSource) {
-        const initialSource = streams[0]?.source || null;
-        setSelectedSource(initialSource);
+      if (!selectedStreamId) {
+        const initialStreamId = streams[0]?.id || null;
+        setSelectedStreamId(initialStreamId);
       }
     }
-  }, [streams, matchId, selectedSource]);
+  }, [streams, matchId, selectedStreamId]);
 
-  const handleSourceChange = source => {
-    setSelectedSource(source);
+  const handleStreamChange = (streamId: string, sourceName: string) => {
+    setSelectedStreamId(streamId);
     setIsPlayerLoaded(false); // Reset player loaded state when changing source
     setLoadAttempts(0); // Reset load attempts counter
 
     toast({
       title: "Source changed",
-      description: `Switched to ${source}`,
+      description: `Switched to ${sourceName}`,
       duration: 2000,
     });
   };
 
-  const embedUrl =
-    streams && selectedSource
-      ? streams.find(s => s.source === selectedSource)?.embedUrl
-      : "";
+  const selectedStream = streams?.find(s => s.id === selectedStreamId);
+  const embedUrl = selectedStream?.embedUrl || "";
 
   // Handle iframe load event
   const handleIframeLoad = () => {
@@ -188,21 +187,32 @@ const SportMatchPlayer = () => {
             </div>
 
             {/* Source Selection Dropdown */}
-            {streams && streams.length > 1 && (
+            {streams && streams.length > 0 && (
               <div className="mb-4 flex items-center gap-4">
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md bg-white/10 px-4 py-2 text-white">
-                    {selectedSource
-                      ? `Source: ${selectedSource}`
+                  <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md bg-white/10 px-4 py-2 text-white hover:bg-white/20 transition-colors">
+                    {selectedStream
+                      ? `${selectedStream.source} (Stream ${selectedStream.streamNo}) ${selectedStream.hd ? "HD" : ""}`
                       : "Select Source"}
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="border border-white/20 bg-background">
-                    {streams.map(stream => (
+                  <DropdownMenuContent className="border border-white/20 bg-background max-h-[300px] overflow-y-auto">
+                    {streams.map((stream, index) => (
                       <DropdownMenuItem
-                        key={stream.source}
-                        onSelect={() => handleSourceChange(stream.source)}
+                        key={`${stream.source}-${stream.id}-${index}`} // Use composite key to ensure uniqueness
+                        onSelect={() => handleStreamChange(stream.id, stream.source)}
+                        className={cn(
+                          "cursor-pointer",
+                          selectedStreamId === stream.id && "bg-accent text-white focus:bg-accent focus:text-white"
+                        )}
                       >
-                        {stream.source}
+                        <span className="flex items-center gap-2">
+                          {stream.source} (Stream {stream.streamNo})
+                          {stream.hd && (
+                            <span className="rounded bg-white/20 px-1 py-0.5 text-[10px] font-bold text-white">
+                              HD
+                            </span>
+                          )}
+                        </span>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -210,9 +220,15 @@ const SportMatchPlayer = () => {
 
                 <div className="text-sm text-white/50">
                   {isPlayerLoaded ? (
-                    <span className="text-green-400">✓ Stream loaded</span>
+                    <span className="text-green-400 flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-400"></span>
+                      Stream loaded
+                    </span>
                   ) : embedUrl ? (
-                    <span className="animate-pulse">Loading stream...</span>
+                    <span className="animate-pulse flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-400"></span>
+                      Loading stream...
+                    </span>
                   ) : null}
                 </div>
               </div>
@@ -222,7 +238,7 @@ const SportMatchPlayer = () => {
             <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
               {embedUrl ? (
                 <iframe
-                  key={`${selectedSource}-${loadAttempts}`}
+                  key={`${selectedStreamId}-${loadAttempts}`}
                   src={embedUrl}
                   width="100%"
                   height="100%"
@@ -250,16 +266,14 @@ const SportMatchPlayer = () => {
             </div>
 
             {/* Stream info */}
-            {selectedSource && (
+            {selectedStream && (
               <div className="mt-4 rounded-md bg-white/5 p-4">
                 <h3 className="mb-2 text-lg font-medium text-white">
                   Stream Information
                 </h3>
                 <p className="text-sm text-white/70">
-                  Source: {selectedSource} • Quality:{" "}
-                  {streams?.find(s => s.source === selectedSource)?.hd
-                    ? "HD"
-                    : "SD"}{" "}
+                  Source: {selectedStream.source} • Quality:{" "}
+                  {selectedStream.hd ? "HD" : "SD"}{" "}
                   • Status: {isPlayerLoaded ? "Ready" : "Loading"}
                 </p>
                 <p className="mt-1 text-xs text-white/50">
