@@ -1,6 +1,6 @@
 import { APIMatch, Sport, Stream } from "./sports-types";
 
-const API_BASE_URL = "https://streamed.su";
+const API_BASE_URL = "https://streamed.pk";
 
 export const getSportsList = async (): Promise<Sport[]> => {
   try {
@@ -102,7 +102,17 @@ export const getLiveMatches = async (): Promise<APIMatch[]> => {
   }
 };
 
-const SOURCES = ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot"];
+const SOURCES = [
+  "alpha",
+  "bravo",
+  "charlie",
+  "delta",
+  "echo",
+  "foxtrot",
+  "golf",
+  "hotel",
+  "intel",
+];
 
 export const getMatchStreams = async (
   source: string | null,
@@ -158,8 +168,103 @@ export const getMatchPosterUrl = (posterId: string) => {
   if (!posterId) {
     return DEFAULT_POSTER_URL;
   }
-  if (posterId.startsWith("http")) {
-    return `${API_BASE_URL}/api/images/${encodeURIComponent(posterId)}.webp`;
+
+  // If it's already a full HTTP URL, return it as-is
+  if (posterId.startsWith("http://") || posterId.startsWith("https://")) {
+    return posterId;
   }
-  return `${API_BASE_URL}/api/images/poster/${posterId}.webp`;
+
+  // If it's already a proxy path, prepend the base URL
+  if (posterId.startsWith("/api/images/proxy/")) {
+    return `${API_BASE_URL}${posterId}`;
+  }
+
+  // Otherwise, treat it as a poster ID and use the proxy endpoint
+  return `${API_BASE_URL}/api/images/proxy/${posterId}.webp`;
+};
+
+export const getPopularLiveMatches = async (): Promise<APIMatch[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/matches/live/popular`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch popular live matches");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching popular live matches:", error);
+    return [];
+  }
+};
+
+export const getPopularTodayMatches = async (): Promise<APIMatch[]> => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/matches/all-today/popular`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch popular today matches");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching popular today matches:", error);
+    return [];
+  }
+};
+
+export const getMatchById = async (matchId: string): Promise<APIMatch | null> => {
+  try {
+    // Try to find the match in all matches
+    const allMatches = await getAllMatches();
+    const match = allMatches.find(m => m.id === matchId);
+
+    if (match) {
+      return match;
+    }
+
+    // If not found in all matches, try live matches
+    const liveMatches = await getLiveMatches();
+    const liveMatch = liveMatches.find(m => m.id === matchId);
+
+    if (liveMatch) {
+      return liveMatch;
+    }
+
+    // If still not found, try today's matches
+    const todayMatches = await getTodayMatches();
+    const todayMatch = todayMatches.find(m => m.id === matchId);
+
+    return todayMatch || null;
+  } catch (error) {
+    console.error(`Error fetching match ${matchId}:`, error);
+    return null;
+  }
+};
+
+export const getMatchStreamsById = async (matchId: string): Promise<Stream[]> => {
+  try {
+    // First, get the match details to access the sources array
+    const match = await getMatchById(matchId);
+
+    if (!match || !match.sources || match.sources.length === 0) {
+      console.warn(`No sources found for match ${matchId}`);
+      return [];
+    }
+
+    // Fetch streams from all available sources
+    const allStreams: Stream[] = [];
+
+    for (const source of match.sources) {
+      try {
+        const streams = await getMatchStreams(source.source, source.id);
+        allStreams.push(...streams);
+      } catch (error) {
+        console.warn(`Failed to fetch streams from source ${source.source}:`, error);
+      }
+    }
+
+    return allStreams;
+  } catch (error) {
+    console.error(`Error fetching streams for match ${matchId}:`, error);
+    return [];
+  }
 };

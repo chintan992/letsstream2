@@ -39,15 +39,15 @@ export const DownloadSection: React.FC<DownloadSectionProps> = ({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="mx-auto w-full max-w-3xl">
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-6 shadow-xl backdrop-blur-sm sm:p-8">
         {/* Background Glow */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-accent/5 blur-3xl" />
+        <div className="bg-accent/10 pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl" />
+        <div className="bg-accent/5 pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex flex-col items-center gap-8 text-center">
           <div className="space-y-4">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 ring-1 ring-accent/20">
+            <div className="bg-accent/10 ring-accent/20 mx-auto flex h-16 w-16 items-center justify-center rounded-full ring-1">
               <Download className="h-8 w-8 text-accent" />
             </div>
 
@@ -56,9 +56,13 @@ export const DownloadSection: React.FC<DownloadSectionProps> = ({
                 Download {mediaType === "movie" ? "Movie" : "Episode"}
               </h3>
               <p className="mx-auto max-w-lg text-base text-white/60">
-                Click below to open the download page for <span className="font-medium text-white">{mediaName}</span>
+                Click below to open the download page for{" "}
+                <span className="font-medium text-white">{mediaName}</span>
                 {mediaType === "tv" && season && episode && (
-                  <span> (S{season}:E{episode})</span>
+                  <span>
+                    {" "}
+                    (S{season}:E{episode})
+                  </span>
                 )}
                 .
               </p>

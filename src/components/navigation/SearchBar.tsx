@@ -213,8 +213,9 @@ const SearchBar = ({
                 {searchSuggestions.map((item, index) => (
                   <button
                     key={`${item.media_type}-${item.id}`}
-                    className={`suggestion-item ${index === selectedIndex ? "bg-white/10" : ""
-                      }`}
+                    className={`suggestion-item ${
+                      index === selectedIndex ? "bg-white/10" : ""
+                    }`}
                     onClick={() => handleSuggestionClick(item)}
                   >
                     <span className="mr-2 flex-shrink-0">

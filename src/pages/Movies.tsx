@@ -83,13 +83,7 @@ const Movies = () => {
       genreFilter,
       viewMode,
     }));
-  }, [
-    activeTab,
-    sortBy,
-    genreFilter,
-    viewMode,
-    setPersistedState,
-  ]);
+  }, [activeTab, sortBy, genreFilter, viewMode, setPersistedState]);
 
   const toggleViewMode = () => {
     setViewMode(prev => {

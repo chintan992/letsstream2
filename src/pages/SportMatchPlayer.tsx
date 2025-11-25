@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
-import { getMatchStreams } from "@/utils/sports-api";
+import { getMatchStreamsById, getMatchById } from "@/utils/sports-api";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -17,7 +17,7 @@ import { swMonitor } from "@/utils/sw-monitor";
 import { saveLocalData, getLocalData } from "@/utils/supabase";
 
 const SportMatchPlayer = () => {
-  const { matchId } = useParams();
+  const { id: matchId } = useParams();
   useScrollRestoration();
   const { toast } = useToast();
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
@@ -35,15 +35,29 @@ const SportMatchPlayer = () => {
     loadCachedData();
   }, [matchId]);
 
+  // Fetch match details
+  const {
+    data: match,
+    isLoading: matchLoading,
+    error: matchError,
+  } = useQuery({
+    queryKey: ["match-details", matchId],
+    queryFn: () => getMatchById(matchId!),
+    enabled: !!matchId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch streams using the new function
   const {
     data: streams,
-    isLoading,
-    error,
+    isLoading: streamsLoading,
+    error: streamsError,
   } = useQuery({
     queryKey: ["match-streams", matchId],
-    queryFn: () => getMatchStreams(null, matchId),
-    placeholderData: cachedStreams, // Use cached data as placeholder
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    queryFn: () => getMatchStreamsById(matchId!),
+    enabled: !!matchId,
+    placeholderData: cachedStreams,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Cache streams when we get them
@@ -114,12 +128,15 @@ const SportMatchPlayer = () => {
     }
   };
 
+  const isLoading = matchLoading || streamsLoading;
+  const error = matchError || streamsError;
+
   if (isLoading && !cachedStreams) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center text-white">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-t-2 border-accent"></div>
-          <p>Loading video player...</p>
+          <p>Loading match and streams...</p>
         </div>
       </div>
     );
@@ -141,6 +158,19 @@ const SportMatchPlayer = () => {
     );
   }
 
+  if (!match) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="max-w-md p-6 text-center text-white">
+          <h2 className="mb-4 text-2xl font-bold">Match Not Found</h2>
+          <p className="text-white/70">
+            The match you're looking for could not be found.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
@@ -150,9 +180,11 @@ const SportMatchPlayer = () => {
           <div className="container mx-auto px-4 md:px-6">
             <div className="mb-8">
               <h1 className="mb-2 text-3xl font-bold text-white">
-                Sport Match Player
+                {match.title}
               </h1>
-              <p className="text-white/70">Watch the match: {matchId}</p>
+              <p className="text-white/70">
+                {match.category} • {new Date(match.date).toLocaleString()}
+              </p>
             </div>
 
             {/* Source Selection Dropdown */}

@@ -131,4 +131,3 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
 };
 
 export default ContinueWatchingCard;
-

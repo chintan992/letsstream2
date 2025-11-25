@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
@@ -6,13 +6,16 @@ import Footer from "@/components/Footer";
 import SportMatchGrid from "@/components/SportMatchGrid";
 import PageTransition from "@/components/PageTransition";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sport } from "@/utils/sports-types";
+import { Sport, APIMatch } from "@/utils/sports-types";
 import {
   getSportsList,
   getAllPopularMatches,
   getLiveMatches,
   getTodayMatches,
   getMatchesBySport,
+  getPopularMatchesBySport,
+  getPopularLiveMatches,
+  getPopularTodayMatches,
 } from "@/utils/sports-api";
 import { useToast } from "@/components/ui/use-toast";
 import { useUserPreferences } from "@/hooks/user-preferences";
@@ -36,6 +39,9 @@ const Sports = () => {
   const [selectedSport, setSelectedSport] = useState<string>(
     persistedState.selectedSport
   );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"time" | "relevance">("time");
+  const [showFilters, setShowFilters] = useState<boolean>(true);
 
   // Apply scroll restoration - since there's no complex data to restore, hydration is immediate
   useScrollRestoration({ enabled: true });
@@ -61,31 +67,46 @@ const Sports = () => {
   } = useQuery({
     queryKey: ["sports-list"],
     queryFn: getSportsList,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Fetch popular matches
   const { data: popularMatches = [], isLoading: popularLoading } = useQuery({
     queryKey: ["sports-popular-matches"],
     queryFn: getAllPopularMatches,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
   // Fetch live matches
   const { data: liveMatches = [], isLoading: liveLoading } = useQuery({
     queryKey: ["sports-live-matches"],
     queryFn: getLiveMatches,
+    staleTime: 30 * 1000, // 30 seconds for live data
   });
 
   // Fetch today's matches
   const { data: todayMatches = [], isLoading: todayLoading } = useQuery({
     queryKey: ["sports-today-matches"],
     queryFn: getTodayMatches,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
-  // Fetch sport-specific matches when a sport is selected
-  const { data: sportMatches = [], isLoading: sportMatchesLoading } = useQuery({
-    queryKey: ["sports-matches", selectedSport],
+  // Fetch sport-specific popular matches
+  const { data: sportPopularMatches = [], isLoading: sportPopularLoading } =
+    useQuery({
+      queryKey: ["sports-popular-matches", selectedSport],
+      queryFn: () => getPopularMatchesBySport(selectedSport),
+      enabled: selectedSport !== "all",
+      staleTime: 2 * 60 * 1000,
+    });
+
+  // Fetch sport-specific all matches
+  const { data: sportAllMatches = [], isLoading: sportAllLoading } = useQuery({
+    queryKey: ["sports-all-matches", selectedSport],
     queryFn: () => getMatchesBySport(selectedSport),
     enabled: selectedSport !== "all",
+    staleTime: 2 * 60 * 1000,
   });
 
   useEffect(() => {
@@ -115,6 +136,87 @@ const Sports = () => {
       selectedSport: sportId,
     }));
   };
+
+  // Helper function to filter and sort matches
+  const filterAndSortMatches = (matches: APIMatch[]) => {
+    let filtered = matches;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        match =>
+          match.title.toLowerCase().includes(query) ||
+          match.category.toLowerCase().includes(query) ||
+          match.teams?.home?.name.toLowerCase().includes(query) ||
+          match.teams?.away?.name.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply sport filter if a specific sport is selected
+    if (selectedSport !== "all") {
+      filtered = filtered.filter(match => match.category === selectedSport);
+    }
+
+    // Apply sorting
+    if (sortOrder === "time") {
+      filtered = [...filtered].sort((a, b) => a.date - b.date);
+    } else {
+      // Sort by relevance (popular first, then by date)
+      filtered = [...filtered].sort((a, b) => {
+        if (a.popular && !b.popular) return -1;
+        if (!a.popular && b.popular) return 1;
+        return a.date - b.date;
+      });
+    }
+
+    return filtered;
+  };
+
+  // Compute the matches to display based on active tab and selected sport
+  const displayedMatches = useMemo(() => {
+    let matches: APIMatch[] = [];
+
+    if (activeTab === "popular") {
+      matches = selectedSport === "all" ? popularMatches : sportPopularMatches;
+    } else if (activeTab === "live") {
+      matches = liveMatches;
+    } else {
+      // "all" tab
+      matches = selectedSport === "all" ? todayMatches : sportAllMatches;
+    }
+
+    return filterAndSortMatches(matches);
+  }, [
+    activeTab,
+    selectedSport,
+    popularMatches,
+    sportPopularMatches,
+    liveMatches,
+    todayMatches,
+    sportAllMatches,
+    searchQuery,
+    sortOrder,
+  ]);
+
+  // Determine loading state
+  const isLoading = useMemo(() => {
+    if (activeTab === "popular") {
+      return selectedSport === "all" ? popularLoading : sportPopularLoading;
+    } else if (activeTab === "live") {
+      return liveLoading;
+    } else {
+      return selectedSport === "all" ? todayLoading : sportAllLoading;
+    }
+  }, [
+    activeTab,
+    selectedSport,
+    popularLoading,
+    sportPopularLoading,
+    liveLoading,
+    todayLoading,
+    sportAllLoading,
+  ]);
 
   return (
     <PageTransition>
@@ -182,18 +284,40 @@ const Sports = () => {
                 )}
               </div>
 
-              <div className="mb-4 flex items-center justify-between">
-                <button className="rounded-lg bg-white/10 px-4 py-2 text-white hover:bg-white/20">
-                  Hide Filters
-                </button>
-                <div className="flex items-center space-x-2">
-                  <label className="text-white/70">Sort by:</label>
-                  <select className="rounded-lg border-none bg-white/10 text-white">
-                    <option value="time">Time</option>
-                    <option value="relevance">Relevance</option>
-                  </select>
+              {showFilters && (
+                <div className="mb-4 flex items-center justify-between">
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="rounded-lg bg-white/10 px-4 py-2 text-white hover:bg-white/20"
+                  >
+                    Hide Filters
+                  </button>
+                  <div className="flex items-center space-x-2">
+                    <label className="text-white/70">Sort by:</label>
+                    <select
+                      value={sortOrder}
+                      onChange={e =>
+                        setSortOrder(e.target.value as "time" | "relevance")
+                      }
+                      className="rounded-lg border-none bg-white/10 px-3 py-1 text-white"
+                    >
+                      <option value="time">Time</option>
+                      <option value="relevance">Relevance</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {!showFilters && (
+                <div className="mb-4">
+                  <button
+                    onClick={() => setShowFilters(true)}
+                    className="rounded-lg bg-white/10 px-4 py-2 text-white hover:bg-white/20"
+                  >
+                    Show Filters
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Search Bar */}
@@ -201,7 +325,9 @@ const Sports = () => {
               <input
                 type="text"
                 placeholder="Search for matches..."
-                className="w-full rounded-lg border-none bg-white/10 px-4 py-2 text-white"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border-none bg-white/10 px-4 py-2 text-white placeholder:text-white/50"
               />
             </div>
 
@@ -245,7 +371,7 @@ const Sports = () => {
               </TabsList>
 
               <TabsContent value="popular">
-                {popularLoading ? (
+                {isLoading ? (
                   <div className="grid grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                       <div
@@ -256,13 +382,9 @@ const Sports = () => {
                   </div>
                 ) : (
                   <SportMatchGrid
-                    matches={
-                      activeTab === "popular" && selectedSport === "all"
-                        ? popularMatches
-                        : sportMatches
-                    }
+                    matches={displayedMatches}
                     emptyMessage={
-                      activeTab === "popular" && selectedSport === "all"
+                      selectedSport === "all"
                         ? "No popular matches available at the moment."
                         : `No popular ${sportsList.find(s => s.id === selectedSport)?.name || ""} matches available.`
                     }
@@ -271,7 +393,7 @@ const Sports = () => {
               </TabsContent>
 
               <TabsContent value="live">
-                {liveLoading ? (
+                {isLoading ? (
                   <div className="grid grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                       <div
@@ -282,13 +404,9 @@ const Sports = () => {
                   </div>
                 ) : (
                   <SportMatchGrid
-                    matches={
-                      activeTab === "live" && selectedSport === "all"
-                        ? liveMatches
-                        : sportMatches
-                    }
+                    matches={displayedMatches}
                     emptyMessage={
-                      activeTab === "live" && selectedSport === "all"
+                      selectedSport === "all"
                         ? "No live matches available at the moment."
                         : `No live ${sportsList.find(s => s.id === selectedSport)?.name || ""} matches right now.`
                     }
@@ -297,7 +415,7 @@ const Sports = () => {
               </TabsContent>
 
               <TabsContent value="all">
-                {todayLoading ? (
+                {isLoading ? (
                   <div className="grid grid-cols-1 gap-4 px-4 py-6 sm:grid-cols-2 md:grid-cols-3 md:gap-6 md:px-8 lg:grid-cols-4 xl:grid-cols-5">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                       <div
@@ -308,13 +426,9 @@ const Sports = () => {
                   </div>
                 ) : (
                   <SportMatchGrid
-                    matches={
-                      activeTab === "all" && selectedSport === "all"
-                        ? todayMatches
-                        : sportMatches
-                    }
+                    matches={displayedMatches}
                     emptyMessage={
-                      activeTab === "all" && selectedSport === "all"
+                      selectedSport === "all"
                         ? "No matches scheduled for today."
                         : `No ${sportsList.find(s => s.id === selectedSport)?.name || ""} matches available.`
                     }

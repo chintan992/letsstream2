@@ -133,4 +133,3 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
 };
 
 export default ContinueWatching;
-

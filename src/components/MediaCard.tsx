@@ -162,7 +162,7 @@ const MediaCard = React.memo(
                   imageError
                     ? "/placeholder.svg"
                     : getImageUrl(media.poster_path, posterSizes.medium) ||
-                    "/placeholder.svg"
+                      "/placeholder.svg"
                 }
                 alt={media.title || media.name || "Media Poster"}
                 className={cn(
@@ -188,7 +188,7 @@ const MediaCard = React.memo(
       >
         <Link
           to={detailPath}
-          className="block h-full w-full focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+          className="block h-full w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           onClick={handleClick}
           aria-label={`View details for ${media.title || media.name}`}
         >
@@ -204,7 +204,7 @@ const MediaCard = React.memo(
                 imageError
                   ? "/placeholder.svg"
                   : getImageUrl(media.poster_path, posterSizes.medium) ||
-                  "/placeholder.svg"
+                    "/placeholder.svg"
               }
               alt={media.title || media.name || "Media Poster"}
               className={cn(
@@ -223,9 +223,7 @@ const MediaCard = React.memo(
               </p>
               <div className="mt-2 flex justify-center gap-2">
                 <PlayButtonWithWillChange />
-                <div
-                  className="glass flex items-center gap-1 rounded px-3 py-1 text-xs text-white transition-colors hover:bg-white/20"
-                >
+                <div className="glass flex items-center gap-1 rounded px-3 py-1 text-xs text-white transition-colors hover:bg-white/20">
                   <Info size={12} /> Details
                 </div>
               </div>

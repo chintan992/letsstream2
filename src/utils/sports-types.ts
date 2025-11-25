@@ -4,8 +4,8 @@ export interface Team {
 }
 
 export interface Teams {
-  home: Team;
-  away: Team;
+  home?: Team;
+  away?: Team;
 }
 
 export interface MatchSource {

@@ -146,7 +146,7 @@ const Hero = ({ media, className = "" }: HeroProps) => {
     pauseAutoRotation();
     startAutoRotation();
   };
-  
+
   // Auto-rotation control
   const toggleAutoRotation = () => {
     triggerHapticFeedback(20);
