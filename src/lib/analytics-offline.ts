@@ -1,4 +1,5 @@
 // This file handles offline analytics events and syncs them when online
+import { getAnalyticsInstance } from "./firebase";
 import { Analytics, AnalyticsCallOptions, logEvent } from "firebase/analytics";
 import { AnalyticsEvent } from "./analytics";
 
@@ -122,9 +123,7 @@ class OfflineAnalyticsQueue {
 
   private async sendEvent(event: QueuedAnalyticsEvent): Promise<void> {
     try {
-      const analytics = await import("./firebase").then(m =>
-        m.getAnalyticsInstance()
-      );
+      const analytics = await getAnalyticsInstance();
       if (!analytics) {
         throw new Error("Analytics not initialized");
       }
