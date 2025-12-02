@@ -122,6 +122,7 @@ const Player = () => {
                 currentEpisodeIndex={currentEpisodeIndex}
                 showId={id ? parseInt(id, 10) : 0}
                 season={season ? parseInt(season, 10) : 1}
+                seasons={(mediaDetails as any)?.seasons || []}
               />
             </div>
           </div>
@@ -168,6 +169,7 @@ const Player = () => {
                     currentEpisodeIndex={currentEpisodeIndex}
                     showId={id ? parseInt(id, 10) : 0}
                     season={season ? parseInt(season, 10) : 1}
+                    seasons={(mediaDetails as any)?.seasons || []}
                   />
                 </CollapsibleContent>
               </Collapsible>

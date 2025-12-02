@@ -8,6 +8,14 @@ import { Episode } from "@/utils/types";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { backdropSizes } from "@/utils/api";
 import { useElementScrollRestoration } from "@/hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Season } from "@/utils/types";
 
 /**
  * Z-INDEX STRATEGY:
@@ -21,6 +29,7 @@ interface EpisodeSidebarProps {
   currentEpisodeIndex: number;
   showId: number | string;
   season: number | string;
+  seasons?: Season[];
 }
 
 export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
@@ -28,6 +37,7 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   currentEpisodeIndex,
   showId,
   season,
+  seasons = [],
 }) => {
   const navigate = useNavigate();
   const episodeRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -93,12 +103,49 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
     <div className="z-10 flex h-full w-full flex-col border border-white/10 bg-black/95">
       {/* Header */}
       <div className="flex-shrink-0 border-b border-white/10 p-4">
-        <div className="flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Episodes</h2>
           <span className="rounded-full bg-white/10 px-2 py-1 text-xs text-white/60">
             {filteredEpisodes.length}
           </span>
         </div>
+
+        {seasons.length > 0 && (
+          <Select
+            value={season.toString()}
+            onValueChange={value => {
+              const selectedSeason = seasons.find(
+                s => s.season_number.toString() === value
+              );
+              if (selectedSeason) {
+                // Navigate to the first episode of the selected season
+                // We don't know the episode count or first episode number here without fetching,
+                // but usually it starts at 1. A safer bet might be to just navigate to the season
+                // and let the page handle fetching/redirecting, or assume episode 1.
+                // The current routing structure seems to require episode number: /watch/tv/:id/:season/:episode
+                // So we'll default to episode 1.
+                navigate(`/watch/tv/${showId}/${selectedSeason.season_number}/1`);
+              }
+            }}
+          >
+            <SelectTrigger className="w-full border-white/10 bg-white/5 text-white">
+              <SelectValue placeholder="Select Season" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px] border-white/10 bg-black/95 text-white backdrop-blur-xl">
+              {seasons
+                .filter(s => s.season_number > 0) // Filter out "Specials" (season 0) if desired, or keep them. Usually season 0 is specials.
+                .map(s => (
+                  <SelectItem
+                    key={s.id}
+                    value={s.season_number.toString()}
+                    className="focus:bg-white/10 focus:text-white"
+                  >
+                    Season {s.season_number}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* Search Bar */}
