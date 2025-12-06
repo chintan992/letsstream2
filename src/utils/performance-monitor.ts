@@ -9,11 +9,22 @@ type VitalMetric = {
   entries: PerformanceEntry[];
 };
 
+export interface WebVitalData {
+  name: string;
+  value: number;
+  rating: "good" | "needs-improvement" | "poor";
+  timestamp: number;
+}
+
+type WebVitalsSubscriber = (vitals: WebVitalData[]) => void;
+
 class PerformanceMonitor {
   private static instance: PerformanceMonitor;
   private marks: Record<string, number> = {};
   private isEnabled: boolean;
   private reportedMetrics: Set<string> = new Set();
+  private webVitalsData: Map<string, WebVitalData> = new Map();
+  private subscribers: Set<WebVitalsSubscriber> = new Set();
 
   private constructor() {
     this.isEnabled = typeof window !== "undefined" && "performance" in window;
@@ -49,12 +60,47 @@ class PerformanceMonitor {
     return duration;
   }
 
+  private getRating(
+    name: string,
+    value: number
+  ): "good" | "needs-improvement" | "poor" {
+    // Thresholds based on web.dev recommendations
+    const thresholds: Record<string, [number, number]> = {
+      CLS: [0.1, 0.25],
+      FID: [100, 300],
+      LCP: [2500, 4000],
+      TTFB: [800, 1800],
+      FCP: [1800, 3000],
+      INP: [200, 500],
+    };
+
+    const [good, poor] = thresholds[name] || [0, 0];
+    if (value <= good) return "good";
+    if (value <= poor) return "needs-improvement";
+    return "poor";
+  }
+
+  private notifySubscribers() {
+    const vitals = this.getWebVitals();
+    this.subscribers.forEach(subscriber => subscriber(vitals));
+  }
+
   private reportWebVital(metric: VitalMetric) {
     // Avoid duplicate reporting for the same metric ID
     if (this.reportedMetrics.has(metric.id)) return;
     this.reportedMetrics.add(metric.id);
 
     console.log(`Web Vital: ${metric.name} = ${metric.value}`);
+
+    // Store the web vital data for the debug panel
+    const vitalData: WebVitalData = {
+      name: metric.name,
+      value: metric.name === "CLS" ? metric.value * 1000 : metric.value,
+      rating: this.getRating(metric.name, metric.value),
+      timestamp: Date.now(),
+    };
+    this.webVitalsData.set(metric.name, vitalData);
+    this.notifySubscribers();
 
     swAnalytics.trackPerformanceEvent({
       name: metric.name,
@@ -63,6 +109,21 @@ class PerformanceMonitor {
       ),
       type: "web-vital",
     });
+  }
+
+  getWebVitals(): WebVitalData[] {
+    return Array.from(this.webVitalsData.values());
+  }
+
+  subscribeToWebVitals(callback: WebVitalsSubscriber): () => void {
+    this.subscribers.add(callback);
+    // Immediately call with current data
+    callback(this.getWebVitals());
+    return () => this.unsubscribeFromWebVitals(callback);
+  }
+
+  unsubscribeFromWebVitals(callback: WebVitalsSubscriber) {
+    this.subscribers.delete(callback);
   }
 
   initializeMonitoring() {

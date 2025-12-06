@@ -108,9 +108,17 @@ class ServiceWorkerAnalytics {
     return totalRequests ? (metrics.successes / totalRequests) * 100 : 0;
   }
 
-  private async getWebVitals() {
-    // Implementation of web vitals collection
-    return {};
+  private async getWebVitals(): Promise<Record<string, number>> {
+    // Dynamically import to avoid circular dependencies
+    const { performanceMonitor } = await import("./performance-monitor");
+    const vitals = performanceMonitor.getWebVitals();
+    return vitals.reduce(
+      (acc, vital) => {
+        acc[vital.name] = vital.value;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }
 
   trackEvent(event: AnalyticsEvent) {

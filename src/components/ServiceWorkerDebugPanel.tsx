@@ -9,6 +9,10 @@ import {
   RefreshCcw,
   WifiOff,
   Activity,
+  Trash2,
+  RotateCcw,
+  Download,
+  XCircle,
 } from "lucide-react";
 import {
   Select,
@@ -17,13 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-
-interface WebVitalMetric {
-  name: string;
-  value: number;
-  rating: "good" | "needs-improvement" | "poor";
-  timestamp?: number;
-}
+import { swMonitor } from "@/utils/sw-monitor";
+import {
+  performanceMonitor,
+  type WebVitalData,
+} from "@/utils/performance-monitor";
+import { cn } from "@/lib/utils";
 
 interface ServiceWorkerEvent {
   type: string;
@@ -41,9 +44,8 @@ interface ServiceWorkerMetrics {
 export function ServiceWorkerDebugPanel() {
   const [registration, setRegistration] =
     useState<ServiceWorkerRegistration | null>(null);
-  const [waiting, setWaiting] = useState(false);
   const [controllerState, setControllerState] = useState<string>("");
-  const [webVitals, setWebVitals] = useState<WebVitalMetric[]>([]);
+  const [webVitals, setWebVitals] = useState<WebVitalData[]>([]);
   const [bypassEnabled, setBypassEnabled] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [events, setEvents] = useState<ServiceWorkerEvent[]>([]);
@@ -63,11 +65,15 @@ export function ServiceWorkerDebugPanel() {
     ]);
   }, []);
 
+  const clearEvents = useCallback(() => {
+    setEvents([]);
+    addEvent("System", "Event log cleared");
+  }, [addEvent]);
+
   const checkRegistration = useCallback(async () => {
     try {
       const reg = await navigator.serviceWorker.getRegistration();
       setRegistration(reg || null);
-      setWaiting(!!reg?.waiting);
       setControllerState(
         navigator.serviceWorker.controller ? "active" : "none"
       );
@@ -83,6 +89,15 @@ export function ServiceWorkerDebugPanel() {
       addEvent("Error", "Failed to get service worker registration");
     }
   }, [addEvent]);
+
+  // Subscribe to web vitals updates
+  useEffect(() => {
+    const unsubscribe = performanceMonitor.subscribeToWebVitals(vitals => {
+      setWebVitals(vitals);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -165,6 +180,20 @@ export function ServiceWorkerDebugPanel() {
     }
   }, [registration, bypassEnabled]);
 
+  const handleLogLevelChange = useCallback(
+    (level: string) => {
+      setLogLevel(level);
+      if (registration?.active) {
+        registration.active.postMessage({
+          type: "SET_LOG_LEVEL",
+          payload: { level },
+        });
+        addEvent("LogLevel", `Log level set to ${level}`);
+      }
+    },
+    [registration, addEvent]
+  );
+
   const handleNetworkSimulation = useCallback(
     (condition: string) => {
       if (registration?.active) {
@@ -179,6 +208,50 @@ export function ServiceWorkerDebugPanel() {
     [registration, addEvent]
   );
 
+  const handleForceUpdate = useCallback(async () => {
+    try {
+      const success = await swMonitor.updateServiceWorker();
+      if (success) {
+        addEvent("Update", "Service worker update triggered");
+      } else {
+        addEvent("Error", "Failed to update service worker");
+      }
+    } catch (error) {
+      addEvent("Error", `Update failed: ${error}`);
+    }
+  }, [addEvent]);
+
+  const handleUnregister = useCallback(async () => {
+    try {
+      const success = await swMonitor.unregisterServiceWorker();
+      if (success) {
+        addEvent("Unregister", "Service worker unregistered");
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        addEvent("Error", "Failed to unregister service worker");
+      }
+    } catch (error) {
+      addEvent("Error", `Unregister failed: ${error}`);
+    }
+  }, [addEvent]);
+
+  const handleResetMetrics = useCallback(() => {
+    swMonitor.reset();
+    setMetrics({
+      cacheSize: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
+      networkRequests: 0,
+    });
+    addEvent("Metrics", "Metrics reset");
+  }, [addEvent]);
+
+  // Calculate cache hit ratio
+  const cacheHitRatio =
+    metrics.cacheHits + metrics.cacheMisses > 0
+      ? (metrics.cacheHits / (metrics.cacheHits + metrics.cacheMisses)) * 100
+      : 0;
+
   // Return early if not in development environment or no registration
   if (!import.meta.env.DEV || !registration) {
     return null;
@@ -187,7 +260,7 @@ export function ServiceWorkerDebugPanel() {
   if (isMinimized) {
     return (
       <Button
-        className="fixed bottom-4 right-4 p-2"
+        className="fixed bottom-4 right-4 z-50 p-2"
         variant="outline"
         size="icon"
         onClick={() => setIsMinimized(false)}
@@ -238,6 +311,13 @@ export function ServiceWorkerDebugPanel() {
             </div>
 
             <div className="flex items-center justify-between">
+              <span className="text-sm">Client ID:</span>
+              <span className="max-w-[150px] truncate font-mono text-sm text-xs">
+                {swMonitor.getClientId()}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
               <span className="text-sm">Iframe Proxy Bypass:</span>
               <Switch
                 checked={bypassEnabled}
@@ -269,6 +349,7 @@ export function ServiceWorkerDebugPanel() {
                   onClick={handleSkipWaiting}
                   className="w-full"
                 >
+                  <Download className="mr-2 h-4 w-4" />
                   Apply Update
                 </Button>
               </div>
@@ -276,8 +357,8 @@ export function ServiceWorkerDebugPanel() {
 
             <div className="flex items-center justify-between">
               <span className="text-sm">Log Level:</span>
-              <Select value={logLevel} onValueChange={setLogLevel}>
-                <SelectTrigger className="w-[120px]">
+              <Select value={logLevel} onValueChange={handleLogLevelChange}>
+                <SelectTrigger className="w-[120px]" aria-label="Log Level">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -288,32 +369,121 @@ export function ServiceWorkerDebugPanel() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Service Worker Controls */}
+            <div className="flex gap-2 border-t pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleForceUpdate}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Force Update
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="flex-1"
+                onClick={handleUnregister}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Unregister
+              </Button>
+            </div>
           </div>
         </TabsContent>
 
         <TabsContent value="events" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              Event Log ({events.length})
+            </span>
+            <Button variant="ghost" size="sm" onClick={clearEvents}>
+              <Trash2 className="mr-1 h-4 w-4" />
+              Clear
+            </Button>
+          </div>
           <div className="max-h-[300px] space-y-2 overflow-y-auto">
-            {events.map((event, index) => (
-              <div
-                key={index}
-                className="border-l-2 border-accent pl-2 text-sm"
-              >
-                <div className="flex justify-between">
-                  <span className="font-medium">{event.type}</span>
-                  <span className="text-muted-foreground">
-                    {new Date(event.timestamp).toLocaleTimeString()}
-                  </span>
+            {events.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                No events yet
+              </p>
+            ) : (
+              events.map((event, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "border-l-2 pl-2 text-sm",
+                    event.type === "Error"
+                      ? "border-red-500"
+                      : event.type === "Network"
+                        ? "border-blue-500"
+                        : "border-accent"
+                  )}
+                >
+                  <div className="flex justify-between">
+                    <span className="font-medium">{event.type}</span>
+                    <span className="text-muted-foreground">
+                      {new Date(event.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  {event.details && (
+                    <p className="text-muted-foreground">{event.details}</p>
+                  )}
                 </div>
-                {event.details && (
-                  <p className="text-muted-foreground">{event.details}</p>
-                )}
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="perf" className="space-y-4">
+          {/* Web Vitals Section */}
           <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Core Web Vitals</span>
+            </div>
+            {webVitals.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Web vitals data will appear as metrics are collected...
+              </p>
+            ) : (
+              <div className="space-y-1">
+                {webVitals.map(vital => (
+                  <div
+                    key={vital.name}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-sm">{vital.name}</span>
+                    <span
+                      className={cn(
+                        "rounded px-2 py-0.5 text-sm font-medium",
+                        vital.rating === "good" &&
+                          "bg-green-500/20 text-green-700 dark:text-green-400",
+                        vital.rating === "needs-improvement" &&
+                          "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400",
+                        vital.rating === "poor" &&
+                          "bg-red-500/20 text-red-700 dark:text-red-400"
+                      )}
+                    >
+                      {vital.value.toFixed(vital.name === "CLS" ? 3 : 0)}
+                      {vital.name !== "CLS" && "ms"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Cache Metrics Section */}
+          <div className="space-y-2 border-t pt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Cache Metrics</span>
+              <Button variant="ghost" size="sm" onClick={handleResetMetrics}>
+                <RotateCcw className="mr-1 h-3 w-3" />
+                Reset
+              </Button>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <span className="text-sm font-medium">Cache Hits</span>
@@ -336,6 +506,29 @@ export function ServiceWorkerDebugPanel() {
                 </div>
               </div>
             </div>
+
+            {/* Cache Hit Ratio */}
+            <div className="space-y-1 pt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Cache Hit Ratio</span>
+                <span className="text-sm font-medium">
+                  {cacheHitRatio.toFixed(1)}%
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all",
+                    cacheHitRatio > 75
+                      ? "bg-green-500"
+                      : cacheHitRatio > 50
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
+                  )}
+                  style={{ width: `${cacheHitRatio}%` }}
+                />
+              </div>
+            </div>
           </div>
         </TabsContent>
 
@@ -355,12 +548,40 @@ export function ServiceWorkerDebugPanel() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            {/* Network Metrics from swMonitor */}
+            <div className="space-y-2 border-t pt-2">
+              <span className="text-sm font-medium">Network Metrics</span>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                    {swMonitor.getNetworkMetrics().successes}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Successes</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-red-600 dark:text-red-400">
+                    {swMonitor.getNetworkMetrics().failures}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Failures</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                    {swMonitor.getNetworkMetrics().timeouts}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Timeouts</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 border-t pt-2">
+              <span className="text-sm font-medium">
+                Simulate Network Condition
+              </span>
               <Select
                 value={networkCondition}
                 onValueChange={handleNetworkSimulation}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-label="Network Condition">
                   <SelectValue placeholder="Simulate Network Condition" />
                 </SelectTrigger>
                 <SelectContent>
