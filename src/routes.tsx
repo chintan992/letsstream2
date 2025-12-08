@@ -1,34 +1,35 @@
 import { Routes, Route, Outlet } from "react-router-dom";
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { lazyLoadWithRetry } from "./utils/lazy-load-with-retry";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
 
 // Lazy load pages
-const Index = lazy(() => import("./pages/Index"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const Profile = lazy(() => import("./pages/Profile"));
-const Movies = lazy(() => import("./pages/Movies"));
-const TVShowsPage = lazy(() => import("./pages/tv"));
-const Sports = lazy(() => import("./pages/Sports"));
-const Search = lazy(() => import("./pages/Search"));
-const WatchHistory = lazy(() => import("./pages/WatchHistory"));
-const MovieDetails = lazy(() => import("./pages/MovieDetails"));
-const TVDetails = lazy(() => import("./pages/TVDetails"));
-const SportMatchPlayer = lazy(() => import("./pages/SportMatchPlayer"));
-const Player = lazy(() => import("./pages/Player"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Trending = lazy(() => import("./pages/Trending"));
+const Index = lazyLoadWithRetry(() => import("./pages/Index"));
+const Login = lazyLoadWithRetry(() => import("./pages/Login"));
+const Signup = lazyLoadWithRetry(() => import("./pages/Signup"));
+const Profile = lazyLoadWithRetry(() => import("./pages/Profile"));
+const Movies = lazyLoadWithRetry(() => import("./pages/Movies"));
+const TVShowsPage = lazyLoadWithRetry(() => import("./pages/tv"));
+const Sports = lazyLoadWithRetry(() => import("./pages/Sports"));
+const Search = lazyLoadWithRetry(() => import("./pages/Search"));
+const WatchHistory = lazyLoadWithRetry(() => import("./pages/WatchHistory"));
+const MovieDetails = lazyLoadWithRetry(() => import("./pages/MovieDetails"));
+const TVDetails = lazyLoadWithRetry(() => import("./pages/TVDetails"));
+const SportMatchPlayer = lazyLoadWithRetry(() => import("./pages/SportMatchPlayer"));
+const Player = lazyLoadWithRetry(() => import("./pages/Player"));
+const NotFound = lazyLoadWithRetry(() => import("./pages/NotFound"));
+const Trending = lazyLoadWithRetry(() => import("./pages/Trending"));
 
 // Live streams pages
-const LiveStreams = lazy(() => import("./pages/LiveStreams"));
-const LiveStreamPlayer = lazy(() => import("./pages/LiveStreamPlayer"));
+const LiveStreams = lazyLoadWithRetry(() => import("./pages/LiveStreams"));
+const LiveStreamPlayer = lazyLoadWithRetry(() => import("./pages/LiveStreamPlayer"));
 
 // Legal pages
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const ContentRemoval = lazy(() => import("./pages/ContentRemoval"));
-const DMCANotice = lazy(() => import("./pages/DMCANotice"));
+const PrivacyPolicy = lazyLoadWithRetry(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazyLoadWithRetry(() => import("./pages/TermsOfService"));
+const ContentRemoval = lazyLoadWithRetry(() => import("./pages/ContentRemoval"));
+const DMCANotice = lazyLoadWithRetry(() => import("./pages/DMCANotice"));
 
 export default function AppRoutes() {
   const enableManualRestoration =

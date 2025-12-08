@@ -7,7 +7,6 @@ import { WatchHistoryProvider } from "./contexts/watch-history";
 import { UserProfileProvider } from "./contexts/user-profile-context";
 import { NotificationProvider } from "./contexts/notification-context";
 import { ServiceWorkerErrorBoundary } from "./components/ServiceWorkerErrorBoundary";
-import { ServiceWorkerUpdateNotification } from "./components/ServiceWorkerUpdateNotification";
 import { ServiceWorkerDebugPanel } from "./components/ServiceWorkerDebugPanel";
 import { AuthProvider } from "./hooks/auth-context";
 import { ChatbotProvider } from "./contexts/chatbot-context";
@@ -32,47 +31,10 @@ const queryClient = new QueryClient({
 
 function App() {
   const isDevelopment = import.meta.env.DEV;
-  const [swUpdateAvailable, setSwUpdateAvailable] = React.useState(false);
-
-  // React.useEffect(() => {
-  // ...existing code...
-  // }, []);
-
-  /**
-   * Handles acceptance of a service worker update.
-   * Sends a message to the waiting service worker to skip waiting,
-   * and reloads the page when the new service worker takes control.
-   * Enhanced with error handling and user notification.
+  /* 
+   * Service Worker updates are handled automatically by vite-plugin-pwa (autoUpdate behavior)
+   * and the lazyLoadWithRetry utility (reloading on ChunkLoadError).
    */
-  const handleSwUpdateAccept = () => {
-    try {
-      if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          type: "SKIP_WAITING",
-        });
-      }
-      // Listen for controllerchange and reload when new SW takes control
-      const reloadOnControllerChange = () => {
-        window.location.reload();
-      };
-      navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        reloadOnControllerChange,
-        { once: true }
-      );
-    } catch (err) {
-      console.error("Error during service worker update acceptance:", err);
-      if (window && "Notification" in window) {
-        Notification.requestPermission().then(permission => {
-          if (permission === "granted") {
-            new Notification("Update Error", {
-              body: "Failed to apply the update. Please refresh the page manually.",
-            });
-          }
-        });
-      }
-    }
-  };
   /**
    * App component for the Let's Stream PWA.
    *
@@ -85,9 +47,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter
-        future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
-      >
+      <BrowserRouter>
         <ServiceWorkerErrorBoundary>
           <ThemeProvider>
             <NotificationProvider>
@@ -97,12 +57,6 @@ function App() {
                     <UserProfileProvider>
                       <ChatbotProvider>
                         <FeatureNotificationsListener />
-                        {swUpdateAvailable && (
-                          <ServiceWorkerUpdateNotification
-                            onAcceptUpdate={handleSwUpdateAccept}
-                            onDismiss={() => setSwUpdateAvailable(false)}
-                          />
-                        )}
                         {isDevelopment && <ServiceWorkerDebugPanel />}
                         <AppRoutes />
                         <ChatbotButton />
