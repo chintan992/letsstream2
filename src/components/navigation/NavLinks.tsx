@@ -12,7 +12,7 @@ const NavLinks = () => {
     { name: "Movies", path: "/movie" },
     { name: "TV Shows", path: "/tv" },
     { name: "Sports", path: "/sports" },
-    // { name: 'Live', path: '/live' },
+    { name: "Simkl", path: "/simkl" },
     { name: "Trending", path: "/trending" },
   ];
 
@@ -22,9 +22,8 @@ const NavLinks = () => {
         <Link
           key={link.path}
           to={link.path}
-          className={`text-sm transition-colors hover:text-white ${
-            isActive(link.path) ? "font-medium text-white" : "text-white/70"
-          }`}
+          className={`text-sm transition-colors hover:text-white ${isActive(link.path) ? "font-medium text-white" : "text-white/70"
+            }`}
         >
           {link.name}
         </Link>

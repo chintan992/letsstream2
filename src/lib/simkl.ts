@@ -154,6 +154,98 @@ export class SimklService {
             anime: [...watchingAnime, ...anime],
         };
     }
+
+    // ==================== DISCOVER API ====================
+
+    /**
+     * Get trending content from Simkl
+     * @param type - Type of content: 'tv', 'movies', or 'anime'
+     * @param filters - Optional filters (e.g., genre, year, network)
+     */
+    static async getTrending(
+        type: 'tv' | 'movies' | 'anime',
+        filters?: Record<string, string>
+    ): Promise<SimklTrendingItem[]> {
+        try {
+            const params = new URLSearchParams({
+                extended: 'full',
+                client_id: SIMKL_CLIENT_ID,
+                ...(filters || {})
+            });
+
+            const response = await fetch(
+                `${SIMKL_API_URL}/${type}/trending?${params}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'simkl-api-key': SIMKL_CLIENT_ID,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                console.warn(`Simkl trending ${type} returned ${response.status}`);
+                return [];
+            }
+
+            return response.json();
+        } catch (error) {
+            console.warn(`Failed to fetch Simkl trending ${type}:`, error);
+            return [];
+        }
+    }
+
+    /**
+     * Get personalized recommendations (requires auth)
+     */
+    static async getRecommendations(
+        token: string,
+        type: 'tv' | 'movies' | 'anime' = 'tv'
+    ): Promise<SimklTrendingItem[]> {
+        const response = await fetch(
+            `${SIMKL_API_URL}/recommendations/${type}?extended=full`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                    'simkl-api-key': SIMKL_CLIENT_ID,
+                },
+            }
+        );
+
+        if (!response.ok) {
+            // Return empty array on error for recommendations
+            return [];
+        }
+
+        return response.json();
+    }
+
+    /**
+     * Get available genre filters
+     */
+    static async getGenres(
+        type: 'tv' | 'movies' | 'anime'
+    ): Promise<SimklGenre[]> {
+        const response = await fetch(
+            `${SIMKL_API_URL}/genres/${type}/filters`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'simkl-api-key': SIMKL_CLIENT_ID,
+                },
+            }
+        );
+
+        if (!response.ok) {
+            return [];
+        }
+
+        return response.json();
+    }
 }
 
 // Types for Simkl API responses
@@ -220,6 +312,35 @@ export interface SimklWatchHistoryResponse {
     movies: SimklListItem[];
     shows: SimklListItem[];
     anime: SimklListItem[];
+}
+
+// ==================== DISCOVER TYPES ====================
+
+export interface SimklTrendingItem {
+    title: string;
+    year?: number;
+    poster?: string;
+    fanart?: string;
+    rank?: number;
+    ratings?: {
+        simkl?: { rating: number; votes: number };
+        imdb?: { rating: number; votes: number };
+    };
+    ids: SimklIds;
+    overview?: string;
+    genres?: string[];
+    runtime?: number;
+    status?: string;
+    certification?: string;
+    network?: string;
+    country?: string;
+    anime_type?: string;
+    ep_count?: number;
+}
+
+export interface SimklGenre {
+    slug: string;
+    name: string;
 }
 
 // Helper to get the last watched episode from a show/anime

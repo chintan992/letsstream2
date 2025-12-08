@@ -32,6 +32,10 @@ const ContentRemoval = lazyLoadWithRetry(() => import("./pages/ContentRemoval"))
 const DMCANotice = lazyLoadWithRetry(() => import("./pages/DMCANotice"));
 const SimklCallback = lazyLoadWithRetry(() => import("./pages/SimklCallback"));
 
+// Simkl pages
+const SimklDiscover = lazyLoadWithRetry(() => import("./pages/SimklDiscover"));
+const SimklDiscoverList = lazyLoadWithRetry(() => import("./pages/SimklDiscoverList"));
+
 export default function AppRoutes() {
   const enableManualRestoration =
     import.meta.env.VITE_SCROLL_RESTORATION_MANUAL === "true";
@@ -89,6 +93,10 @@ export default function AppRoutes() {
           {/* Live streams routes */}
           <Route path="/live" element={<LiveStreams />} />
           <Route path="/watch/live/:id" element={<LiveStreamPlayer />} />
+
+          {/* Simkl routes */}
+          <Route path="/simkl" element={<SimklDiscover />} />
+          <Route path="/simkl/:category" element={<SimklDiscoverList />} />
 
           {/* Legal routes */}
           <Route path="/privacy" element={<PrivacyPolicy />} />
