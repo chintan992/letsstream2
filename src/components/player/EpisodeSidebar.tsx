@@ -204,14 +204,18 @@ export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
                     episodeRefs.current[idx] = el;
                   }}
                   className={cn(
-                    "relative cursor-pointer overflow-hidden rounded-lg transition-all duration-300 hover:bg-white/5",
-                    isCurrentEpisode && "bg-accent/10 ring-2 ring-accent",
+                    "group relative cursor-pointer overflow-hidden rounded-lg transition-all duration-200",
+                    "hover:scale-[1.02] hover:bg-white/10 hover:ring-1 hover:ring-white/20",
+                    "active:scale-[0.99]",
+                    isCurrentEpisode && "bg-accent/10 ring-2 ring-accent hover:ring-accent",
                     !isCurrentEpisode && "bg-white/5"
                   )}
                   onClick={() => handleEpisodeClick(episode.episode_number)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={e => handleKeyDown(e, episode.episode_number)}
+                  aria-label={`Play ${episode.name}, Episode ${episode.episode_number}`}
+                  aria-current={isCurrentEpisode ? "true" : undefined}
                 >
                   <div className="flex gap-3 p-3">
                     {/* Thumbnail */}

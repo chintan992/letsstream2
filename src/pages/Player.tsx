@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
-import { ExternalLink, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { MovieDetails, TVDetails } from "@/utils/types";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useScrollRestoration } from "@/hooks";
@@ -93,7 +94,7 @@ const Player = () => {
         <Navbar />
       </motion.nav>
 
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto px-4 py-4 md:px-6 md:py-6">
         <MediaActions
           isFavorite={isFavorite}
           isInWatchlist={isInMyWatchlist}
@@ -101,6 +102,17 @@ const Player = () => {
           onToggleWatchlist={toggleWatchlist}
           onBack={goBack}
           onViewDetails={goToDetails}
+          title={mediaType === "movie"
+            ? (mediaDetails as MovieDetails)?.title
+            : (mediaDetails as TVDetails)?.name}
+          subtitle={mediaType === "tv" && season && episode
+            ? `Season ${season} • Episode ${episode}`
+            : undefined}
+          year={mediaType === "movie"
+            ? (mediaDetails as MovieDetails)?.release_date?.substring(0, 4)
+            : (mediaDetails as TVDetails)?.first_air_date?.substring(0, 4)}
+          rating={mediaDetails?.vote_average}
+          mediaType={mediaType}
         />
 
         {/* Desktop Layout: Video Player and Episode Sidebar side-by-side */}
@@ -116,7 +128,7 @@ const Player = () => {
                 onError={handlePlayerError}
               />
             </div>
-            <div className="h-[calc(9/16*56.25vw)] max-h-[80vh] min-h-[400px] w-[280px] flex-shrink-0 md:w-80 lg:w-96 xl:w-[400px]">
+            <div className="aspect-video max-h-[70vh] min-h-[350px] w-[280px] flex-shrink-0 md:w-80 lg:w-96 xl:w-[420px]">
               <EpisodeSidebar
                 episodes={episodes}
                 currentEpisodeIndex={currentEpisodeIndex}
@@ -200,24 +212,13 @@ const Player = () => {
           className="mt-6 space-y-6"
         >
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-medium text-white">
-                  Video Sources
-                </h3>
-                <p className="text-sm text-white/60">
-                  Select your preferred streaming source
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10"
-                onClick={goToDetails}
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View Details
-              </Button>
+            <div>
+              <h3 className="text-lg font-medium text-white">
+                Video Sources
+              </h3>
+              <p className="text-sm text-white/60">
+                Select your preferred streaming source
+              </p>
             </div>
             <VideoSourceSelector
               videoSources={videoSources}

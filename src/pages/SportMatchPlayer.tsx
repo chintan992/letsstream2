@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useScrollRestoration } from "@/hooks";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Check, Radio } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+import { Button } from "@/components/ui/button";
 import { getMatchStreamsById, getMatchById } from "@/utils/sports-api";
 import { useToast } from "@/hooks/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { swMonitor } from "@/utils/sw-monitor";
 import { saveLocalData, getLocalData } from "@/utils/supabase";
 
 const SportMatchPlayer = () => {
   const { id: matchId } = useParams();
+  const navigate = useNavigate();
   useScrollRestoration();
   const { toast } = useToast();
   const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
@@ -177,109 +173,124 @@ const SportMatchPlayer = () => {
 
         <div className="pb-12 pt-20">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="mb-8">
-              <h1 className="mb-2 text-3xl font-bold text-white">
+            {/* Header with back button */}
+            <div className="mb-6 flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="text-white/70 hover:bg-white/10 hover:text-white"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+            </div>
+
+            {/* Match Info */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Radio className="h-4 w-4 text-red-500 animate-pulse" />
+                <span className="text-xs font-medium uppercase tracking-wider text-red-400">Live</span>
+              </div>
+              <h1 className="mb-2 text-2xl font-bold text-white md:text-3xl">
                 {match.title}
               </h1>
-              <p className="text-white/70">
+              <p className="text-white/60">
                 {match.category} • {new Date(match.date).toLocaleString()}
               </p>
             </div>
 
-            {/* Source Selection Dropdown */}
-            {streams && streams.length > 0 && (
-              <div className="mb-4 flex items-center gap-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md bg-white/10 px-4 py-2 text-white hover:bg-white/20 transition-colors">
-                    {selectedStream
-                      ? `${selectedStream.source} (Stream ${selectedStream.streamNo}) ${selectedStream.hd ? "HD" : ""}`
-                      : "Select Source"}
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="border border-white/20 bg-background max-h-[300px] overflow-y-auto">
-                    {streams.map((stream, index) => (
-                      <DropdownMenuItem
-                        key={`${stream.source}-${stream.id}-${index}`} // Use composite key to ensure uniqueness
-                        onSelect={() => handleStreamChange(stream.id, stream.source)}
-                        className={cn(
-                          "cursor-pointer",
-                          selectedStreamId === stream.id && "bg-accent text-white focus:bg-accent focus:text-white"
-                        )}
-                      >
-                        <span className="flex items-center gap-2">
-                          {stream.source} (Stream {stream.streamNo})
-                          {stream.hd && (
-                            <span className="rounded bg-white/20 px-1 py-0.5 text-[10px] font-bold text-white">
-                              HD
-                            </span>
-                          )}
-                        </span>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <div className="text-sm text-white/50">
-                  {isPlayerLoaded ? (
-                    <span className="text-green-400 flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-400"></span>
-                      Stream loaded
-                    </span>
-                  ) : embedUrl ? (
-                    <span className="animate-pulse flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-400"></span>
-                      Loading stream...
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            )}
-
             {/* Video Player */}
-            <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
+            <div className="relative aspect-video overflow-hidden rounded-xl bg-black shadow-2xl">
               {embedUrl ? (
                 <iframe
                   key={`${selectedStreamId}-${loadAttempts}`}
                   src={embedUrl}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
+                  className="h-full w-full"
                   allowFullScreen
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  referrerPolicy="no-referrer"
                   title="Video Player"
                   onLoad={handleIframeLoad}
                   onError={handleIframeError}
-                ></iframe>
+                />
               ) : (
                 <div className="flex h-full items-center justify-center text-white">
-                  <p>No streams available for this match.</p>
+                  <div className="text-center">
+                    <Radio className="mx-auto mb-4 h-12 w-12 text-white/30" />
+                    <p className="text-white/60">No streams available for this match.</p>
+                  </div>
                 </div>
               )}
 
-              {/* Loading overlay */}
+              {/* Loading overlay with source info */}
               {!isPlayerLoaded && embedUrl && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
                   <div className="text-center text-white">
-                    <div className="mx-auto mb-2 h-10 w-10 animate-spin rounded-full border-t-2 border-accent"></div>
-                    <p>Loading stream...</p>
+                    <div className="mx-auto mb-3 h-12 w-12 animate-spin rounded-full border-2 border-white/20 border-t-accent" />
+                    <p className="text-sm text-white/80">Loading stream...</p>
+                    {selectedStream && (
+                      <p className="mt-1 text-xs text-white/50">
+                        {selectedStream.source} • Stream {selectedStream.streamNo}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Stream info */}
-            {selectedStream && (
-              <div className="mt-4 rounded-md bg-white/5 p-4">
-                <h3 className="mb-2 text-lg font-medium text-white">
-                  Stream Information
-                </h3>
-                <p className="text-sm text-white/70">
-                  Source: {selectedStream.source} • Quality:{" "}
-                  {selectedStream.hd ? "HD" : "SD"}{" "}
-                  • Status: {isPlayerLoaded ? "Ready" : "Loading"}
-                </p>
-                <p className="mt-1 text-xs text-white/50">
-                  If the current stream isn't working, try switching to another
-                  source.
-                </p>
+            {/* Source Selection - Visible Toggle Buttons */}
+            {streams && streams.length > 0 && (
+              <div className="mt-6">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-white">
+                    Available Sources
+                  </h3>
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
+                    {streams.length} streams
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {streams.map((stream, index) => (
+                    <button
+                      key={`${stream.source}-${stream.id}-${index}`}
+                      onClick={() => handleStreamChange(stream.id, stream.source)}
+                      className={cn(
+                        "relative flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
+                        selectedStreamId === stream.id
+                          ? "border-accent bg-accent/20 text-white"
+                          : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                      )}
+                    >
+                      <span className="font-medium">{stream.source}</span>
+                      <span className="text-white/50">#{stream.streamNo}</span>
+                      {stream.hd && (
+                        <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">
+                          HD
+                        </span>
+                      )}
+                      {selectedStreamId === stream.id && (
+                        <Check className="ml-1 h-3.5 w-3.5 text-accent" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Stream status indicator */}
+                <div className="mt-3 text-xs text-white/50">
+                  {isPlayerLoaded ? (
+                    <span className="flex items-center gap-1.5 text-green-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                      Stream connected
+                    </span>
+                  ) : embedUrl ? (
+                    <span className="flex items-center gap-1.5 text-yellow-400 animate-pulse">
+                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+                      Connecting to stream...
+                    </span>
+                  ) : null}
+                </div>
               </div>
             )}
           </div>
