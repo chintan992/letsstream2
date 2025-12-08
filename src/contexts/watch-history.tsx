@@ -38,6 +38,8 @@ import {
   updateEpisodeInHistory,
   findEpisodeInHistory,
 } from "@/utils/watch-history-utils";
+import { SimklService } from "@/lib/simkl";
+import { performBidirectionalSync, updateSyncState } from "@/lib/simkl-sync";
 
 const LOCAL_STORAGE_HISTORY_KEY = "fdf_watch_history";
 const ITEMS_PER_PAGE = 20;
@@ -248,7 +250,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
         setLastVisible(
           historySnapshot.docs[
-            historySnapshot.docs.length - 1
+          historySnapshot.docs.length - 1
           ] as QueryDocumentSnapshot<DocumentData>
         );
 
@@ -374,6 +376,51 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, initialFetchDone]); // Remove function dependencies to prevent infinite loop
 
+  // Automatic Simkl bidirectional sync after initial fetch
+  useEffect(() => {
+    const performSimklSync = async () => {
+      // Only sync if: user is logged in, Simkl is enabled, initial fetch is done, not currently loading
+      if (!user || !userPreferences?.isSimklEnabled || !userPreferences?.simklToken || !initialFetchDone || isLoading) {
+        return;
+      }
+
+      try {
+        console.log("Starting automatic Simkl sync...");
+        await updateSyncState(user.uid, { isSyncing: true });
+
+        const result = await performBidirectionalSync(user.uid, userPreferences.simklToken);
+
+        console.log("Simkl sync completed:", result);
+
+        await updateSyncState(user.uid, {
+          isSyncing: false,
+          lastSyncAt: new Date().toISOString(),
+          lastResult: result,
+        });
+
+        // If items were imported, refresh the watch history
+        if (result.imported > 0 || result.merged > 0) {
+          await fetchWatchHistory(true);
+          toast({
+            title: "Simkl Sync Complete",
+            description: `Imported ${result.imported} items, merged ${result.merged} items.`,
+          });
+        }
+
+        if (result.errors.length > 0) {
+          console.warn("Simkl sync errors:", result.errors);
+        }
+      } catch (error) {
+        console.error("Simkl sync error:", error);
+        await updateSyncState(user.uid, { isSyncing: false });
+      }
+    };
+
+    performSimklSync();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, userPreferences?.isSimklEnabled, userPreferences?.simklToken, initialFetchDone]);
+
+
   useEffect(() => {
     const migrateWatchHistory = async () => {
       if (!user) return;
@@ -498,7 +545,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Error consolidating TV show episodes:", error);
+        // Silently ignore permission errors in migration to avoid console noise
+        const err = error as any;
+        if (err?.code !== "permission-denied") {
+          console.error("Error consolidating TV show episodes:", error);
+        }
       }
     };
 
@@ -585,6 +636,24 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     setWatchHistory(updatedHistory);
     saveLocalWatchHistory(updatedHistory);
     lastUpdateTimestamps.set(mediaKey, now);
+
+    // Simkl Sync
+    if (userPreferences.isSimklEnabled && userPreferences.simklToken) {
+      try {
+        await SimklService.checkin(userPreferences.simklToken, {
+          title,
+          year: media.release_date ? new Date(media.release_date).getFullYear() : undefined, // Approximation if release_date exists
+          ids: {
+            tmdb: mediaId,
+            // external_ids would be better but we might not have them here. 
+            // Simkl can match by title/year/tmdb id.
+          },
+          ...(typeof season === 'number' && typeof episode === 'number' ? { season, episode } : {})
+        });
+      } catch (error) {
+        console.error("Failed to sync to Simkl", error);
+      }
+    }
 
     if (!navigator.onLine) {
       console.log("Queueing watch history update for later");

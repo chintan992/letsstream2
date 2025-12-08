@@ -30,6 +30,7 @@ const PrivacyPolicy = lazyLoadWithRetry(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazyLoadWithRetry(() => import("./pages/TermsOfService"));
 const ContentRemoval = lazyLoadWithRetry(() => import("./pages/ContentRemoval"));
 const DMCANotice = lazyLoadWithRetry(() => import("./pages/DMCANotice"));
+const SimklCallback = lazyLoadWithRetry(() => import("./pages/SimklCallback"));
 
 export default function AppRoutes() {
   const enableManualRestoration =
@@ -94,6 +95,7 @@ export default function AppRoutes() {
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/content-removal" element={<ContentRemoval />} />
           <Route path="/dmca" element={<DMCANotice />} />
+          <Route path="/simkl-callback" element={<SimklCallback />} />
 
           {/* 404 route */}
           <Route path="*" element={<NotFound />} />

@@ -25,7 +25,12 @@ interface ExtendedMedia extends Omit<Media, "id"> {
     duration: number;
     watched_at: string;
   }>;
+  // For Simkl integration
+  custom_poster_url?: string | null;
+  watched_episodes_count?: number;
+  total_episodes_count?: number;
 }
+
 
 interface MediaGridProps {
   media: ExtendedMedia[];
@@ -93,15 +98,17 @@ const MediaGrid = ({
   };
 
   const renderTimestamp = (media: ExtendedMedia) => {
-    if (!media.created_at) return null;
+    const timestamp = media.created_at || media.last_watched_at;
+    if (!timestamp) return null;
 
     return (
       <div className="mb-2 flex items-center text-xs text-white/70">
         <Clock className="mr-1 h-3 w-3" />
-        {formatDistanceToNow(new Date(media.created_at), { addSuffix: true })}
+        {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
       </div>
     );
   };
+
 
   const renderSelectionButtons = () => {
     if (!selectable) return null;
@@ -219,9 +226,27 @@ const MediaGrid = ({
                   {renderTimestamp(mediaItem)}
                   <div className="flex flex-wrap items-center gap-2">
                     {mediaItem.media_type === "tv" && (
-                      <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
-                        S{mediaItem.season} E{mediaItem.episode}
-                      </span>
+                      <>
+                        {/* Show S{X} E{Y} for items with proper season/episode info */}
+                        {mediaItem.season !== undefined && mediaItem.episode !== undefined && (
+                          <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
+                            S{mediaItem.season} E{mediaItem.episode}
+                          </span>
+                        )}
+                        {/* Show episode progress for Simkl items */}
+                        {mediaItem.watched_episodes_count !== undefined && mediaItem.season === undefined && (
+                          <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
+                            {mediaItem.watched_episodes_count} ep{mediaItem.watched_episodes_count !== 1 ? 's' : ''} watched
+                            {mediaItem.total_episodes_count && ` / ${mediaItem.total_episodes_count}`}
+                          </span>
+                        )}
+                        {/* Fallback: just show TV badge if no episode info */}
+                        {mediaItem.season === undefined && mediaItem.watched_episodes_count === undefined && (
+                          <span className="rounded bg-purple-600/50 px-2 py-1 text-xs font-medium">
+                            TV Show
+                          </span>
+                        )}
+                      </>
                     )}
                     {mediaItem.media_type === "movie" && (
                       <span className="rounded bg-gray-700/50 px-2 py-1 text-xs font-medium">
@@ -231,30 +256,48 @@ const MediaGrid = ({
                   </div>
 
                   {/* Show additional episode information for TV shows */}
-                  {mediaItem.media_type === "tv" &&
-                    mediaItem.episodes_watched &&
-                    mediaItem.episodes_watched.length > 0 && (
-                      <div className="mt-2">
-                        <div className="text-xs text-white/70">
-                          Episodes watched: {mediaItem.episodes_watched.length}
-                        </div>
-                        {mediaItem.episodes_watched
-                          .slice(0, 3)
-                          .map((ep, idx) => (
-                            <span
-                              key={`${ep.season}-${ep.episode}-${idx}`}
-                              className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
-                            >
-                              S{ep.season}E{ep.episode}
+                  {mediaItem.media_type === "tv" && (
+                    <>
+                      {/* Firebase format: detailed episodes_watched array */}
+                      {mediaItem.episodes_watched && mediaItem.episodes_watched.length > 0 && (
+                        <div className="mt-2">
+                          <div className="text-xs text-white/70">
+                            Episodes watched: {mediaItem.episodes_watched.length}
+                          </div>
+                          {mediaItem.episodes_watched
+                            .slice(0, 3)
+                            .map((ep, idx) => (
+                              <span
+                                key={`${ep.season}-${ep.episode}-${idx}`}
+                                className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
+                              >
+                                S{ep.season}E{ep.episode}
+                              </span>
+                            ))}
+                          {mediaItem.episodes_watched.length > 3 && (
+                            <span className="text-xs text-white/50">
+                              +{mediaItem.episodes_watched.length - 3} more
                             </span>
-                          ))}
-                        {mediaItem.episodes_watched.length > 3 && (
-                          <span className="text-xs text-white/50">
-                            +{mediaItem.episodes_watched.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
+                          )}
+                        </div>
+                      )}
+                      {/* Simkl format: just count with current episode shown separately */}
+                      {!mediaItem.episodes_watched && mediaItem.watched_episodes_count !== undefined && mediaItem.watched_episodes_count > 0 && (
+                        <div className="mt-2">
+                          <div className="text-xs text-white/70">
+                            Episodes watched: {mediaItem.watched_episodes_count}
+                            {mediaItem.total_episodes_count && ` / ${mediaItem.total_episodes_count}`}
+                          </div>
+                          {mediaItem.season !== undefined && mediaItem.episode !== undefined && (
+                            <span className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs">
+                              S{mediaItem.season}E{mediaItem.episode}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+
 
                   <p className="mt-2 line-clamp-2 text-sm text-white/70">
                     {mediaItem.overview}

@@ -4,15 +4,21 @@ export interface Media {
   media_id?: number;
   title?: string;
   name?: string;
-  poster_path: string;
-  backdrop_path: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
   overview: string;
   vote_average: number;
   media_type: "movie" | "tv";
   release_date?: string;
   first_air_date?: string;
   genre_ids: number[];
+  // For external poster URLs (e.g., Simkl CDN)
+  custom_poster_url?: string | null;
+  // TV show episode info
+  season?: number;
+  episode?: number;
 }
+
 
 export interface ExtendedMedia extends Media {
   media_id: number; // Required in ExtendedMedia

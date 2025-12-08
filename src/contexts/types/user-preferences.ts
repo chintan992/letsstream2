@@ -12,6 +12,8 @@ export interface UserPreferences {
   accentColor?: string;
   isNotificationsEnabled: boolean; // Control feature notifications
   display_override?: string;
+  simklToken?: string;
+  isSimklEnabled?: boolean;
 }
 
 export interface UserPreferencesContextType {

@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode, useCallback } from "react";
+import { useState, useEffect, ReactNode, useCallback, useContext } from "react";
 import { useAuth } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -10,6 +10,7 @@ import { collection, doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export { UserPreferencesContext };
+
 
 export function UserPreferencesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -111,12 +112,14 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
 
         if (userPreferencesDoc.exists()) {
           const prefs = userPreferencesDoc.data() as UserPreferences;
+
           setUserPreferences(prefs);
 
           // Apply accent color if it exists
           if (prefs.accentColor) {
             applyAccentColor(prefs.accentColor);
           }
+
         } else {
           // Initialize with default preferences
           const defaultPreferences: UserPreferences = {
@@ -126,6 +129,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
             accentColor: "#E63462", // Default accent color
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            isSimklEnabled: false,
           };
 
           try {
@@ -153,14 +157,29 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
           variant: "destructive",
         });
         // Set default preferences in memory even if save fails
-        setUserPreferences({
+        const fallbackPrefs = {
           user_id: user.uid,
           isWatchHistoryEnabled: true,
           isNotificationsEnabled: true,
           accentColor: "#E63462",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        });
+          isSimklEnabled: false,
+        };
+
+        try {
+          const localSimkl = localStorage.getItem("simkl_prefs");
+          if (localSimkl) {
+            const parsed = JSON.parse(localSimkl);
+            fallbackPrefs.isSimklEnabled = parsed.isSimklEnabled ?? false;
+            // Add simklToken to type if needed, or cast
+            (fallbackPrefs as any).simklToken = parsed.simklToken;
+          }
+        } catch (e) {
+          console.warn("Local storage access blocked or failed in fallback", e);
+        }
+
+        setUserPreferences(fallbackPrefs);
       } finally {
         setIsLoading(false);
       }
@@ -170,12 +189,36 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
   }, [user, toast, applyAccentColor]);
 
   const updatePreferences = async (preferences: Partial<UserPreferences>) => {
-    if (!user || !userPreferences) return;
+    if (!user) {
+      console.warn("updatePreferences: No user, aborting.");
+      return;
+    }
 
     try {
       const userPrefsRef = doc(db, "userPreferences", user.uid);
+
+      // If local state is not loaded yet, fetch current state from Firestore first
+      let currentPrefs = userPreferences;
+      if (!currentPrefs) {
+        const currentDoc = await getDoc(userPrefsRef);
+        if (currentDoc.exists()) {
+          currentPrefs = currentDoc.data() as UserPreferences;
+        } else {
+          // Create default prefs if none exist
+          currentPrefs = {
+            user_id: user.uid,
+            isWatchHistoryEnabled: true,
+            isNotificationsEnabled: true,
+            accentColor: "#E63462",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            isSimklEnabled: false,
+          };
+        }
+      }
+
       const updatedPreferences = {
-        ...userPreferences,
+        ...currentPrefs,
         ...preferences,
         updated_at: new Date().toISOString(),
       };
@@ -183,12 +226,36 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       await setDoc(userPrefsRef, updatedPreferences);
       setUserPreferences(updatedPreferences);
 
+      // Simkl preferences are now strictly cloud-based (Firestore). 
+      // Removed local storage sync to prevent "split brain" issues.
+
       toast({
         title: "Preferences updated",
         description: "Your preferences have been saved successfully.",
       });
+
     } catch (error) {
       console.error("Error updating user preferences:", error);
+
+      // For Simkl preferences, update local state even if cloud fails
+      if (preferences.simklToken !== undefined || preferences.isSimklEnabled !== undefined) {
+        console.warn("Cloud save failed for Simkl preferences, updating local state only.");
+        const updatedWithLocal = {
+          ...userPreferences,
+          ...preferences,
+          updated_at: new Date().toISOString()
+        };
+        setUserPreferences(updatedWithLocal);
+        toast({
+          title: "Preferences saved locally",
+          description: "Cloud sync failed, but settings saved on this device.",
+        });
+        return;
+      }
+
+      if ((error as any).code === 'permission-denied') {
+        console.error("Firestore Permission Denied. Check security rules for 'userPreferences' collection.");
+      }
       toast({
         title: "Error saving preferences",
         description: "There was a problem saving your preferences.",
@@ -196,6 +263,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       });
     }
   };
+
 
   const toggleWatchHistory = async () => {
     if (!user || !userPreferences) return;
@@ -257,4 +325,12 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       {children}
     </UserPreferencesContext.Provider>
   );
+}
+
+export function useUserPreferences() {
+  const context = useContext(UserPreferencesContext);
+  if (context === undefined) {
+    throw new Error("useUserPreferences must be used within a UserPreferencesProvider");
+  }
+  return context;
 }

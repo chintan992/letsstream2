@@ -1,34 +1,39 @@
 rules_version = '2';
 service cloud.firestore {
-match /databases/{database}/documents {
-// Helper functions from new config
-function isAuthenticated() {
-return request.auth != null;
-}
-
+  match /databases/{database}/documents {
+    // --- Helper Functions ---
+    
+    // Check if user is signed in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the user is accessing their own user document (where docId == userId)
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Original user-centric rules (old config)
+    // Check if the resource's user_id field matches the current user
+    function isResourceOwner() {
+      return isAuthenticated() && resource.data.user_id == request.auth.uid;
+    }
+
+    // Check if the new data's user_id field matches the current user
+    function isRequestOwner() {
+      return isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+    }
+
+    // --- User Profiles & Preferences ---
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }
 
-    match /users/{userId}/watchlist/{document=**} {
-      allow read, write: if isOwner(userId);
-    }
-
-    match /users/{userId}/history/{document=**} {
-      allow read, write: if isOwner(userId);
-    }
-
-    // New collection-centric rules (new config)
-
-    // Allow both camelCase and kebab-case for user preferences and notifications
+    // User Preferences (supports both collection names just in case)
     match /userPreferences/{userId} {
       allow read, write: if isOwner(userId);
     }
+    // Deprecated/Alternate spelling support
     match /user-preferences/{userId} {
       allow read, write: if isOwner(userId);
     }
@@ -47,37 +52,42 @@ return request.auth != null;
       allow read, write: if isOwner(userId);
     }
 
-    // Allow users to read their own feature notifications
-    match /feature-notifications/{userId} {
+    match /users/{userId}/watchlist/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    match /users/{userId}/history/{document=**} {
       allow read, write: if isOwner(userId);
     }
 
-    // Allow users to read their own media preferences
-    match /media-preferences/{userId} {
-      allow read, write: if isOwner(userId);
-    }
+    // --- Media Collections (Watch History, Favorites, Watchlist) ---
+    // These collections use a generated ID (or media ID), so we check the 'user_id' field.
 
     match /watchHistory/{documentId} {
-      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow read: if isResourceOwner();
+      allow create: if isRequestOwner();
+      allow update: if isResourceOwner() && isRequestOwner();
+      allow delete: if isResourceOwner();
     }
-
+    
     match /favorites/{documentId} {
-      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow read: if isResourceOwner();
+      allow create: if isRequestOwner();
+      allow update: if isResourceOwner() && isRequestOwner();
+      allow delete: if isResourceOwner();
     }
-      match /watchlist/{documentId} {
-      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
-    }    // No more caching in Firestore
 
-    // Default deny for all other paths
+    match /watchlist/{documentId} {
+      allow read: if isResourceOwner();
+      allow create: if isRequestOwner();
+      allow update: if isResourceOwner() && isRequestOwner();
+      allow delete: if isResourceOwner();
+    }
+
+    // --- Default Deny ---
+    
     match /{document=**} {
       allow read, write: if false;
     }
-
-}
+  }
 }

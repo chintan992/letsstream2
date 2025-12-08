@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Settings } from "lucide-react";
+import { Settings, CircleDashed, CloudOff } from "lucide-react";
+import { SimklService } from "@/lib/simkl";
 import { useUserPreferences } from "@/hooks/user-preferences";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -49,6 +50,23 @@ const PreferencesTab: React.FC = () => {
     }
   };
 
+  const handleSimklConnect = () => {
+    const redirectUri = `${window.location.origin}/simkl-callback`;
+    const authUrl = SimklService.getAuthorizeUrl(redirectUri);
+    window.location.href = authUrl;
+  };
+
+  const handleSimklDisconnect = async () => {
+    await updatePreferences({
+      simklToken: undefined,
+      isSimklEnabled: false,
+    });
+    toast({
+      title: "Simkl Disconnected",
+      description: "Your Simkl account has been disconnected.",
+    });
+  };
+
   return (
     <motion.div
       className="glass rounded-lg p-6"
@@ -77,6 +95,61 @@ const PreferencesTab: React.FC = () => {
             onCheckedChange={toggleWatchHistory}
             aria-label="Toggle watch history"
           />
+        </div>
+
+        {/* Simkl Integration */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <h3 className="text-lg font-medium text-white flex items-center">
+              Simkl Integration
+              {userPreferences?.isSimklEnabled ? (
+                <span className="ml-2 inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-500">
+                  Connected
+                </span>
+              ) : (
+                <span className="ml-2 inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white/50">
+                  Not Connected
+                </span>
+              )}
+            </h3>
+            <p className="text-sm text-white/70">
+              Sync your watch history with Simkl
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            {userPreferences?.isSimklEnabled ? (
+              <>
+                <Switch
+                  checked={userPreferences.isSimklEnabled}
+                  onCheckedChange={async (checked) => {
+                    await updatePreferences({ isSimklEnabled: checked });
+                    toast({
+                      title: checked ? "Simkl Sync Enabled" : "Simkl Sync Paused",
+                      description: checked
+                        ? "Watch history will be synced to Simkl"
+                        : "Watch history sync is paused",
+                    });
+                  }}
+                  aria-label="Toggle Simkl sync"
+                />
+                <button
+                  onClick={handleSimklDisconnect}
+                  className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                  title="Disconnect Simkl"
+                >
+                  <CloudOff className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleSimklConnect}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+              >
+                <CircleDashed className="mr-2 h-4 w-4" />
+                Connect Simkl
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Feature Notifications Toggle */}
