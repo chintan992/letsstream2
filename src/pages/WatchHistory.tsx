@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { History, Clock, Trash2, Bookmark, Heart, Loader2, Cloud, RefreshCw } from "lucide-react";
+import { History, Clock, Trash2, Bookmark, Heart, Loader2, Cloud, RefreshCw, ArrowLeftRight } from "lucide-react";
 import { useWatchHistory } from "@/hooks/watch-history";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,9 +10,11 @@ import MediaGrid from "@/components/MediaGrid";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks";
 import { useUserPreferences } from "@/hooks/user-preferences";
 import { SimklService, SimklListItem, getLastWatchedEpisode } from "@/lib/simkl";
+import { performBidirectionalSync } from "@/lib/simkl-sync";
 
 const WatchHistory = () => {
   const {
@@ -33,6 +35,9 @@ const WatchHistory = () => {
     loadMore,
   } = useWatchHistory();
   const { userPreferences } = useUserPreferences();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<
     "history" | "favorites" | "watchlist" | "simkl"
   >("history");
@@ -42,6 +47,13 @@ const WatchHistory = () => {
   const [simklHistory, setSimklHistory] = useState<SimklListItem[]>([]);
   const [isLoadingSimkl, setIsLoadingSimkl] = useState(false);
   const [simklError, setSimklError] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncResult, setLastSyncResult] = useState<{
+    imported: number;
+    exported: number;
+    merged: number;
+    syncedAt: Date;
+  } | null>(null);
 
   // Fetch Simkl watch history when tab is selected
   const fetchSimklHistory = useCallback(async () => {
@@ -76,6 +88,61 @@ const WatchHistory = () => {
       setIsLoadingSimkl(false);
     }
   }, [userPreferences?.isSimklEnabled, userPreferences?.simklToken]);
+
+  // Manual bidirectional sync handler
+  const handleManualSync = useCallback(async () => {
+    if (!user || !userPreferences?.simklToken) {
+      toast({
+        title: "Sync unavailable",
+        description: "Please connect your Simkl account first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const result = await performBidirectionalSync(user.uid, userPreferences.simklToken);
+
+      // Refresh Simkl history after sync
+      await fetchSimklHistory();
+
+      const totalChanges = result.imported + result.exported + result.merged;
+
+      // Save sync result for tooltip display
+      setLastSyncResult({
+        imported: result.imported,
+        exported: result.exported,
+        merged: result.merged,
+        syncedAt: new Date(),
+      });
+
+      if (totalChanges > 0) {
+        toast({
+          title: "Sync Complete",
+          description: `Imported ${result.imported}, exported ${result.exported}, merged ${result.merged} items.`,
+        });
+      } else {
+        toast({
+          title: "Already in sync",
+          description: "Your watch history is up to date.",
+        });
+      }
+
+      if (result.errors.length > 0) {
+        console.warn("Sync errors:", result.errors);
+      }
+    } catch (error) {
+      console.error("Manual sync failed:", error);
+      toast({
+        title: "Sync failed",
+        description: "Failed to sync with Simkl. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [user, userPreferences?.simklToken, toast, fetchSimklHistory]);
 
   // Fetch Simkl data when tab is selected
   useEffect(() => {
@@ -150,9 +217,6 @@ const WatchHistory = () => {
     storageKey: `scroll-watch-history-${activeTab}`,
     enabled: isContentHydrated,
   });
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loader = useRef(null);
@@ -417,12 +481,45 @@ const WatchHistory = () => {
                 </Button>
               )}
 
+              {/* Sync button visible on all tabs when Simkl is connected */}
+              {userPreferences?.isSimklEnabled && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleManualSync}
+                        disabled={isSyncing}
+                        className="border-purple-500/50 bg-purple-500/20 text-white hover:bg-purple-500/30"
+                      >
+                        <ArrowLeftRight className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-pulse' : ''}`} />
+                        {isSyncing ? 'Syncing...' : 'Sync with Simkl'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-black/90 border-white/20 text-white">
+                      {lastSyncResult ? (
+                        <div className="text-sm">
+                          <p className="font-medium mb-1">Last sync: {lastSyncResult.syncedAt.toLocaleTimeString()}</p>
+                          <p>↓ Imported: {lastSyncResult.imported}</p>
+                          <p>↑ Exported: {lastSyncResult.exported}</p>
+                          <p>⟷ Merged: {lastSyncResult.merged}</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm">Sync watch history with Simkl (both ways)</p>
+                      )}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {/* Refresh button only on Simkl tab */}
               {activeTab === "simkl" && userPreferences?.isSimklEnabled && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={fetchSimklHistory}
-                  disabled={isLoadingSimkl}
+                  disabled={isLoadingSimkl || isSyncing}
                   className="border-white/20 bg-black/50 text-white hover:bg-black/70"
                 >
                   <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingSimkl ? 'animate-spin' : ''}`} />
