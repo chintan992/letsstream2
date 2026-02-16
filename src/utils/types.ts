@@ -19,7 +19,6 @@ export interface Media {
   episode?: number;
 }
 
-
 export interface ExtendedMedia extends Media {
   media_id: number; // Required in ExtendedMedia
   // Any additional fields needed for the extended version
@@ -184,4 +183,16 @@ export interface CastMember {
   character: string;
   profile_path: string | null;
   order: number;
+  credit_id?: string;
+}
+
+// --- CREW TYPES ---
+export interface CrewMember {
+  id: number;
+  credit_id: string;
+  name: string;
+  gender: number;
+  profile_path: string | null;
+  department: string;
+  job: string;
 }

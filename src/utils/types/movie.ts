@@ -1,6 +1,6 @@
 import { Media, Genre, Company } from "../types";
 
-interface CrewMember {
+export interface CrewMember {
   id: number;
   credit_id: string;
   name: string;

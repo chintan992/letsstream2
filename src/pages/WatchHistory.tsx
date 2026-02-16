@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useScrollRestoration } from "@/hooks";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { History, Clock, Trash2, Bookmark, Heart, Loader2, Cloud, RefreshCw, ArrowLeftRight } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useWatchHistory } from "@/hooks/watch-history";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,11 +10,15 @@ import MediaGrid from "@/components/MediaGrid";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks";
 import { useUserPreferences } from "@/hooks/user-preferences";
-import { SimklService, SimklListItem, getLastWatchedEpisode } from "@/lib/simkl";
+import {
+  SimklService,
+  SimklListItem,
+  getLastWatchedEpisode,
+} from "@/lib/simkl";
 import { performBidirectionalSync } from "@/lib/simkl-sync";
+import { WatchHistoryHeader, HistoryEmptyState } from "@/components/history";
 
 const WatchHistory = () => {
   const {
@@ -37,7 +41,6 @@ const WatchHistory = () => {
   const { userPreferences } = useUserPreferences();
   const { toast } = useToast();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<
     "history" | "favorites" | "watchlist" | "simkl"
   >("history");
@@ -65,22 +68,22 @@ const WatchHistory = () => {
     setSimklError(null);
 
     try {
-      const data = await SimklService.getFullWatchHistory(userPreferences.simklToken);
+      const data = await SimklService.getFullWatchHistory(
+        userPreferences.simklToken
+      );
 
-      // Combine all types into one array
-      const allItems = [
-        ...data.movies,
-        ...data.shows,
-        ...data.anime,
-      ].sort((a, b) => {
-        // Sort by last watched date, newest first
-        const dateA = new Date(a.last_watched_at || a.last_watched || 0).getTime();
-        const dateB = new Date(b.last_watched_at || b.last_watched || 0).getTime();
-        return dateB - dateA;
-      });
+      const allItems = [...data.movies, ...data.shows, ...data.anime].sort(
+        (a, b) => {
+          const dateA = new Date(
+            a.last_watched_at || a.last_watched || 0
+          ).getTime();
+          const dateB = new Date(
+            b.last_watched_at || b.last_watched || 0
+          ).getTime();
+          return dateB - dateA;
+        }
+      );
       setSimklHistory(allItems);
-
-
     } catch (error) {
       console.error("Failed to fetch Simkl history:", error);
       setSimklError("Failed to load Simkl watch history");
@@ -102,14 +105,15 @@ const WatchHistory = () => {
 
     setIsSyncing(true);
     try {
-      const result = await performBidirectionalSync(user.uid, userPreferences.simklToken);
+      const result = await performBidirectionalSync(
+        user.uid,
+        userPreferences.simklToken
+      );
 
-      // Refresh Simkl history after sync
       await fetchSimklHistory();
 
       const totalChanges = result.imported + result.exported + result.merged;
 
-      // Save sync result for tooltip display
       setLastSyncResult({
         imported: result.imported,
         exported: result.exported,
@@ -146,16 +150,26 @@ const WatchHistory = () => {
 
   // Fetch Simkl data when tab is selected
   useEffect(() => {
-    if (activeTab === "simkl" && userPreferences?.isSimklEnabled && simklHistory.length === 0 && !isLoadingSimkl) {
+    if (
+      activeTab === "simkl" &&
+      userPreferences?.isSimklEnabled &&
+      simklHistory.length === 0 &&
+      !isLoadingSimkl
+    ) {
       fetchSimklHistory();
     }
-  }, [activeTab, userPreferences?.isSimklEnabled, simklHistory.length, isLoadingSimkl, fetchSimklHistory]);
+  }, [
+    activeTab,
+    userPreferences?.isSimklEnabled,
+    simklHistory.length,
+    isLoadingSimkl,
+    fetchSimklHistory,
+  ]);
 
-  // Reset hydration state when tab changes and set it after content loads
+  // Reset hydration state when tab changes
   useEffect(() => {
     setIsContentHydrated(false);
     const timer = setTimeout(() => {
-      // Set hydrated state based on the current tab's data availability
       let isTabDataReady = false;
       if (activeTab === "history") {
         isTabDataReady = !isLoading && watchHistory.length > 0;
@@ -166,10 +180,8 @@ const WatchHistory = () => {
       } else if (activeTab === "simkl") {
         isTabDataReady = !isLoadingSimkl && simklHistory.length > 0;
       }
-
-      // Mark as hydrated when data is loaded for the active tab
       setIsContentHydrated(isTabDataReady);
-    }, 100); // Small delay to ensure content renders
+    }, 100);
 
     return () => {
       if (timer) clearTimeout(timer);
@@ -184,39 +196,12 @@ const WatchHistory = () => {
     simklHistory.length,
   ]);
 
-  // Update hydration state when data changes after initial check
-  useEffect(() => {
-    if (isContentHydrated) {
-      // Re-evaluate hydration state if data changes after being hydrated
-      let isTabDataReady = false;
-      if (activeTab === "history") {
-        isTabDataReady = !isLoading && watchHistory.length > 0;
-      } else if (activeTab === "favorites") {
-        isTabDataReady = favorites.length > 0;
-      } else if (activeTab === "watchlist") {
-        isTabDataReady = watchlist.length > 0;
-      } else if (activeTab === "simkl") {
-        isTabDataReady = !isLoadingSimkl && simklHistory.length > 0;
-      }
-      setIsContentHydrated(isTabDataReady);
-    }
-  }, [
-    activeTab,
-    isLoading,
-    isLoadingSimkl,
-    watchHistory.length,
-    favorites.length,
-    watchlist.length,
-    simklHistory.length,
-    isContentHydrated,
-  ]);
-
-
   // Use tab-specific scroll restoration with hydration check
   useScrollRestoration({
     storageKey: `scroll-watch-history-${activeTab}`,
     enabled: isContentHydrated,
   });
+
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loader = useRef(null);
@@ -264,31 +249,7 @@ const WatchHistory = () => {
     });
   };
 
-  const handleDeleteWatchHistoryItem = (id: string) => {
-    deleteWatchHistoryItem(id);
-  };
-
-  const handleDeleteSelectedWatchHistory = (ids: string[]) => {
-    deleteSelectedWatchHistory(ids);
-  };
-
-  const handleDeleteFavoriteItem = (id: string) => {
-    deleteFavoriteItem(id);
-  };
-
-  const handleDeleteSelectedFavorites = (ids: string[]) => {
-    deleteSelectedFavorites(ids);
-  };
-
-  const handleDeleteWatchlistItem = (id: string) => {
-    deleteWatchlistItem(id);
-  };
-
-  const handleDeleteSelectedWatchlist = (ids: string[]) => {
-    deleteSelectedWatchlist(ids);
-  };
-
-  // Sort watch history based on selected option (only for current page)
+  // Sort watch history based on selected option
   const sortedWatchHistory = [...watchHistory].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
     const dateB = new Date(b.created_at).getTime();
@@ -297,7 +258,7 @@ const WatchHistory = () => {
 
   // Convert watch history items to Media format for the MediaGrid
   const watchHistoryMedia = sortedWatchHistory.map(item => ({
-    id: item.media_id, // Use media_id for navigation
+    id: item.media_id,
     media_id: item.media_id,
     title: item.title,
     name: item.title,
@@ -307,12 +268,10 @@ const WatchHistory = () => {
     vote_average: item.rating || 0,
     media_type: item.media_type,
     genre_ids: [],
-    // Additional watch info to display
     watch_position: item.watch_position,
     duration: item.duration,
     created_at: item.created_at,
-    docId: item.id, // Store document ID separately for deletion
-    // TV show specific info
+    docId: item.id,
     season: item.season,
     episode: item.episode,
     last_watched_at: item.last_watched_at,
@@ -321,7 +280,7 @@ const WatchHistory = () => {
 
   // Convert favorites to Media format
   const favoritesMedia = favorites.map(item => ({
-    id: item.media_id, // Use media_id for navigation
+    id: item.media_id,
     media_id: item.media_id,
     title: item.title,
     name: item.title,
@@ -332,12 +291,12 @@ const WatchHistory = () => {
     media_type: item.media_type,
     genre_ids: [],
     added_at: item.added_at,
-    docId: item.id, // Store document ID separately for deletion
+    docId: item.id,
   }));
 
   // Convert watchlist to Media format
   const watchlistMedia = watchlist.map(item => ({
-    id: item.media_id, // Use media_id for navigation
+    id: item.media_id,
     media_id: item.media_id,
     title: item.title,
     name: item.title,
@@ -348,7 +307,7 @@ const WatchHistory = () => {
     media_type: item.media_type,
     genre_ids: [],
     added_at: item.added_at,
-    docId: item.id, // Store document ID separately for deletion
+    docId: item.id,
   }));
 
   // Convert Simkl items to Media format
@@ -356,15 +315,11 @@ const WatchHistory = () => {
     const media = item.movie || item.show || item.anime;
     const isMovie = !!item.movie;
 
-    // Simkl poster: use wsrv.nl CDN. The poster value is a hash.
     const simklPosterUrl = media?.poster
       ? `https://wsrv.nl/?url=https://simkl.in/posters/${media.poster}_m.webp`
       : null;
 
-    // Get last watched episode info for TV shows/anime
     const lastEpisode = !isMovie ? getLastWatchedEpisode(item) : null;
-
-    // Format year as date string for consistency with TMDB format
     const yearStr = media?.year ? `${media.year}-01-01` : undefined;
 
     return {
@@ -372,25 +327,20 @@ const WatchHistory = () => {
       media_id: media?.ids?.tmdb || media?.ids?.simkl || 0,
       title: media?.title || "Unknown",
       name: media?.title || "Unknown",
-      // Use custom_poster_url for full external URLs (Simkl CDN)
       poster_path: null,
       custom_poster_url: simklPosterUrl,
       backdrop_path: null,
       overview: "",
       vote_average: item.user_rating || 0,
-      media_type: isMovie ? "movie" as const : "tv" as const,
+      media_type: isMovie ? ("movie" as const) : ("tv" as const),
       genre_ids: [],
-      // Year info for display (same format as TMDB)
       release_date: isMovie ? yearStr : undefined,
       first_air_date: !isMovie ? yearStr : undefined,
-      // Timestamp for "watched X ago" display
       created_at: item.last_watched_at,
       last_watched_at: item.last_watched_at,
       status: item.status,
-      // Season/episode from extended API data
       season: lastEpisode?.season,
       episode: lastEpisode?.episode,
-      // Also include episode count for fallback display
       watched_episodes_count: item.watched_episodes_count,
       total_episodes_count: item.total_episodes_count,
       simkl_id: media?.ids?.simkl,
@@ -398,27 +348,8 @@ const WatchHistory = () => {
     };
   });
 
-
-
-
   const handleTabChange = (value: string) => {
     setActiveTab(value as "history" | "favorites" | "watchlist" | "simkl");
-  };
-
-  const handleItemRemove = (mediaId: number, mediaType: "movie" | "tv") => {
-    if (activeTab === "favorites") {
-      removeFromFavorites(mediaId, mediaType);
-      toast({
-        title: "Removed from favorites",
-        description: "The item has been removed from your favorites.",
-      });
-    } else if (activeTab === "watchlist") {
-      removeFromWatchlist(mediaId, mediaType);
-      toast({
-        title: "Removed from watchlist",
-        description: "The item has been removed from your watchlist.",
-      });
-    }
   };
 
   return (
@@ -432,105 +363,27 @@ const WatchHistory = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="glass mb-8 rounded-lg p-6">
-          <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div className="flex items-center">
-              {activeTab === "history" && (
-                <History className="mr-3 h-6 w-6 text-accent" />
-              )}
-              {activeTab === "favorites" && (
-                <Heart className="mr-3 h-6 w-6 text-accent" />
-              )}
-              {activeTab === "watchlist" && (
-                <Bookmark className="mr-3 h-6 w-6 text-accent" />
-              )}
-              {activeTab === "simkl" && (
-                <Cloud className="mr-3 h-6 w-6 text-accent" />
-              )}
-              <h1 className="text-2xl font-bold text-white">
-                {activeTab === "history" && "Your Watch History"}
-                {activeTab === "favorites" && "Your Favorites"}
-                {activeTab === "watchlist" && "Your Watchlist"}
-                {activeTab === "simkl" && "Simkl Watch History"}
-              </h1>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {activeTab === "history" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
-                  }
-                  className="border-white/20 bg-black/50 text-white hover:bg-black/70"
-                >
-                  <Clock className="mr-2 h-4 w-4" />
-                  {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                </Button>
-              )}
-
-              {activeTab === "history" && watchHistory.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearHistory}
-                  className="border-white/20 bg-black/50 text-white hover:bg-black/70"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Clear History
-                </Button>
-              )}
-
-              {/* Sync button visible on all tabs when Simkl is connected */}
-              {userPreferences?.isSimklEnabled && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleManualSync}
-                        disabled={isSyncing}
-                        className="border-purple-500/50 bg-purple-500/20 text-white hover:bg-purple-500/30"
-                      >
-                        <ArrowLeftRight className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-pulse' : ''}`} />
-                        {isSyncing ? 'Syncing...' : 'Sync with Simkl'}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-black/90 border-white/20 text-white">
-                      {lastSyncResult ? (
-                        <div className="text-sm">
-                          <p className="font-medium mb-1">Last sync: {lastSyncResult.syncedAt.toLocaleTimeString()}</p>
-                          <p>↓ Imported: {lastSyncResult.imported}</p>
-                          <p>↑ Exported: {lastSyncResult.exported}</p>
-                          <p>⟷ Merged: {lastSyncResult.merged}</p>
-                        </div>
-                      ) : (
-                        <p className="text-sm">Sync watch history with Simkl (both ways)</p>
-                      )}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
-              {/* Refresh button only on Simkl tab */}
-              {activeTab === "simkl" && userPreferences?.isSimklEnabled && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={fetchSimklHistory}
-                  disabled={isLoadingSimkl || isSyncing}
-                  className="border-white/20 bg-black/50 text-white hover:bg-black/70"
-                >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingSimkl ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-              )}
-            </div>
-          </div>
+          <WatchHistoryHeader
+            activeTab={activeTab}
+            sortOrder={sortOrder}
+            onSortOrderChange={() =>
+              setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
+            }
+            onClearHistory={handleClearHistory}
+            showClearButton={activeTab === "history" && watchHistory.length > 0}
+            isSimklEnabled={userPreferences?.isSimklEnabled || false}
+            isSyncing={isSyncing}
+            onSync={handleManualSync}
+            lastSyncResult={lastSyncResult}
+            isLoadingSimkl={isLoadingSimkl}
+            onRefreshSimkl={
+              activeTab === "simkl" ? fetchSimklHistory : undefined
+            }
+          />
 
           <Tabs
             defaultValue="history"
+            value={activeTab}
             onValueChange={handleTabChange}
             className="w-full"
           >
@@ -539,28 +392,24 @@ const WatchHistory = () => {
                 value="history"
                 className="data-[state=active]:bg-accent"
               >
-                <History className="mr-2 h-4 w-4" />
                 History
               </TabsTrigger>
               <TabsTrigger
                 value="favorites"
                 className="data-[state=active]:bg-accent"
               >
-                <Heart className="mr-2 h-4 w-4" />
                 Favorites
               </TabsTrigger>
               <TabsTrigger
                 value="watchlist"
                 className="data-[state=active]:bg-accent"
               >
-                <Bookmark className="mr-2 h-4 w-4" />
                 Watchlist
               </TabsTrigger>
               <TabsTrigger
                 value="simkl"
                 className="data-[state=active]:bg-accent"
               >
-                <Cloud className="mr-2 h-4 w-4" />
                 Simkl
               </TabsTrigger>
             </TabsList>
@@ -572,8 +421,8 @@ const WatchHistory = () => {
                     media={watchHistoryMedia}
                     listView
                     selectable
-                    onDelete={handleDeleteWatchHistoryItem}
-                    onDeleteSelected={handleDeleteSelectedWatchHistory}
+                    onDelete={deleteWatchHistoryItem}
+                    onDeleteSelected={deleteSelectedWatchHistory}
                   />
                   {(hasMore || isLoadingMore) && (
                     <div
@@ -585,16 +434,7 @@ const WatchHistory = () => {
                   )}
                 </>
               ) : (
-                <div className="glass rounded-lg p-8 text-center">
-                  <History className="mx-auto mb-4 h-12 w-12 text-white/50" />
-                  <h3 className="mb-2 text-lg font-medium text-white">
-                    No watch history yet
-                  </h3>
-                  <p className="mb-4 text-white/70">
-                    Start watching movies and shows to build your history.
-                  </p>
-                  <Button onClick={() => navigate("/")}>Browse Content</Button>
-                </div>
+                <HistoryEmptyState type="history" />
               )}
             </TabsContent>
 
@@ -604,20 +444,11 @@ const WatchHistory = () => {
                   media={favoritesMedia}
                   listView
                   selectable
-                  onDelete={handleDeleteFavoriteItem}
-                  onDeleteSelected={handleDeleteSelectedFavorites}
+                  onDelete={deleteFavoriteItem}
+                  onDeleteSelected={deleteSelectedFavorites}
                 />
               ) : (
-                <div className="glass rounded-lg p-8 text-center">
-                  <Heart className="mx-auto mb-4 h-12 w-12 text-white/50" />
-                  <h3 className="mb-2 text-lg font-medium text-white">
-                    No favorites yet
-                  </h3>
-                  <p className="mb-4 text-white/70">
-                    Add movies and shows to your favorites for quick access.
-                  </p>
-                  <Button onClick={() => navigate("/")}>Browse Content</Button>
-                </div>
+                <HistoryEmptyState type="favorites" />
               )}
             </TabsContent>
 
@@ -627,34 +458,19 @@ const WatchHistory = () => {
                   media={watchlistMedia}
                   listView
                   selectable
-                  onDelete={handleDeleteWatchlistItem}
-                  onDeleteSelected={handleDeleteSelectedWatchlist}
+                  onDelete={deleteWatchlistItem}
+                  onDeleteSelected={deleteSelectedWatchlist}
                 />
               ) : (
-                <div className="glass rounded-lg p-8 text-center">
-                  <Bookmark className="mx-auto mb-4 h-12 w-12 text-white/50" />
-                  <h3 className="mb-2 text-lg font-medium text-white">
-                    Your watchlist is empty
-                  </h3>
-                  <p className="mb-4 text-white/70">
-                    Add movies and shows to your watchlist to watch later.
-                  </p>
-                  <Button onClick={() => navigate("/")}>Browse Content</Button>
-                </div>
+                <HistoryEmptyState type="watchlist" />
               )}
             </TabsContent>
 
             <TabsContent value="simkl" className="mt-0">
               {!userPreferences?.isSimklEnabled ? (
                 <div className="glass rounded-lg p-8 text-center">
-                  <Cloud className="mx-auto mb-4 h-12 w-12 text-white/50" />
-                  <h3 className="mb-2 text-lg font-medium text-white">
-                    Connect to Simkl
-                  </h3>
-                  <p className="mb-4 text-white/70">
-                    Link your Simkl account to see your watch history here.
-                  </p>
-                  <Link to="/profile">
+                  <HistoryEmptyState type="simkl" />
+                  <Link to="/profile" className="mt-4 inline-block">
                     <Button>Go to Settings</Button>
                   </Link>
                 </div>
@@ -663,35 +479,14 @@ const WatchHistory = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-accent" />
                 </div>
               ) : simklError ? (
-                <div className="glass rounded-lg p-8 text-center">
-                  <Cloud className="mx-auto mb-4 h-12 w-12 text-red-400" />
-                  <h3 className="mb-2 text-lg font-medium text-white">
-                    Error Loading Simkl Data
-                  </h3>
-                  <p className="mb-4 text-white/70">{simklError}</p>
-                  <Button onClick={fetchSimklHistory}>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Try Again
-                  </Button>
-                </div>
-              ) : simklHistory.length > 0 ? (
-                <MediaGrid
-                  media={simklMedia}
-                  listView
+                <HistoryEmptyState
+                  type="simkl-error"
+                  errorMessage={simklError}
                 />
+              ) : simklHistory.length > 0 ? (
+                <MediaGrid media={simklMedia} listView />
               ) : (
-                <div className="glass rounded-lg p-8 text-center">
-                  <Cloud className="mx-auto mb-4 h-12 w-12 text-white/50" />
-                  <h3 className="mb-2 text-lg font-medium text-white">
-                    No Simkl watch history
-                  </h3>
-                  <p className="mb-4 text-white/70">
-                    Your Simkl watch history will appear here once you start tracking.
-                  </p>
-                  <a href="https://simkl.com" target="_blank" rel="noopener noreferrer">
-                    <Button>Visit Simkl</Button>
-                  </a>
-                </div>
+                <HistoryEmptyState type="simkl" />
               )}
             </TabsContent>
           </Tabs>
