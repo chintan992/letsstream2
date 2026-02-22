@@ -119,9 +119,7 @@ export const getStreamsBySource = async (
   id: string
 ): Promise<Stream[]> => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/stream/${source}/${id}`
-    );
+    const response = await fetch(`${API_BASE_URL}/api/stream/${source}/${id}`);
     if (!response.ok) {
       throw new Error(
         `Failed to fetch streams for match: ${id} from source: ${source}`
@@ -190,7 +188,9 @@ export const getPopularTodayMatches = async (): Promise<APIMatch[]> => {
   }
 };
 
-export const getMatchById = async (matchId: string): Promise<APIMatch | null> => {
+export const getMatchById = async (
+  matchId: string
+): Promise<APIMatch | null> => {
   try {
     // Try to find the match in all matches
     const allMatches = await getAllMatches();
@@ -219,7 +219,9 @@ export const getMatchById = async (matchId: string): Promise<APIMatch | null> =>
   }
 };
 
-export const getMatchStreamsById = async (matchId: string): Promise<Stream[]> => {
+export const getMatchStreamsById = async (
+  matchId: string
+): Promise<Stream[]> => {
   try {
     // First, get the match details to access the sources array
     const match = await getMatchById(matchId);
@@ -237,7 +239,10 @@ export const getMatchStreamsById = async (matchId: string): Promise<Stream[]> =>
         const streams = await getStreamsBySource(source.source, source.id);
         allStreams.push(...streams);
       } catch (error) {
-        console.warn(`Failed to fetch streams from source ${source.source}:`, error);
+        console.warn(
+          `Failed to fetch streams from source ${source.source}:`,
+          error
+        );
       }
     }
 

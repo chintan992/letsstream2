@@ -45,14 +45,12 @@ const SportsCategoryList: React.FC<SportsCategoryListProps> = ({
       >
         <m.button
           onClick={() => onSelectSport("all")}
-          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105`}
+          className={`flex transform items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out hover:scale-105`}
           style={{
             backgroundColor:
               selectedSport === "all" ? accentColor : "rgba(255,255,255,0.05)",
             border: `1px solid ${
-              selectedSport === "all"
-                ? "transparent"
-                : "rgba(255,255,255,0.1)"
+              selectedSport === "all" ? "transparent" : "rgba(255,255,255,0.1)"
             }`,
             color: selectedSport === "all" ? "white" : "rgba(255,255,255,0.7)",
           }}
@@ -77,7 +75,7 @@ const SportsCategoryList: React.FC<SportsCategoryListProps> = ({
             <m.button
               key={sport.id}
               onClick={() => onSelectSport(sport.id)}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105`}
+              className={`flex transform items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out hover:scale-105`}
               style={{
                 backgroundColor:
                   selectedSport === sport.id

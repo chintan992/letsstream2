@@ -250,7 +250,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
         setLastVisible(
           historySnapshot.docs[
-          historySnapshot.docs.length - 1
+            historySnapshot.docs.length - 1
           ] as QueryDocumentSnapshot<DocumentData>
         );
 
@@ -378,7 +378,13 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const performSimklSync = async () => {
       // Only sync if: user is logged in, Simkl is enabled, initial fetch is done, not currently loading
-      if (!user || !userPreferences?.isSimklEnabled || !userPreferences?.simklToken || !initialFetchDone || isLoading) {
+      if (
+        !user ||
+        !userPreferences?.isSimklEnabled ||
+        !userPreferences?.simklToken ||
+        !initialFetchDone ||
+        isLoading
+      ) {
         return;
       }
 
@@ -386,7 +392,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         console.log("Starting automatic Simkl sync...");
         await updateSyncState(user.uid, { isSyncing: true });
 
-        const result = await performBidirectionalSync(user.uid, userPreferences.simklToken);
+        const result = await performBidirectionalSync(
+          user.uid,
+          userPreferences.simklToken
+        );
 
         console.log("Simkl sync completed:", result);
 
@@ -416,8 +425,12 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
     performSimklSync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.uid, userPreferences?.isSimklEnabled, userPreferences?.simklToken, initialFetchDone]);
-
+  }, [
+    user?.uid,
+    userPreferences?.isSimklEnabled,
+    userPreferences?.simklToken,
+    initialFetchDone,
+  ]);
 
   useEffect(() => {
     const migrateWatchHistory = async () => {
@@ -640,13 +653,17 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       try {
         await SimklService.checkin(userPreferences.simklToken, {
           title,
-          year: media.release_date ? new Date(media.release_date).getFullYear() : undefined, // Approximation if release_date exists
+          year: media.release_date
+            ? new Date(media.release_date).getFullYear()
+            : undefined, // Approximation if release_date exists
           ids: {
             tmdb: mediaId,
-            // external_ids would be better but we might not have them here. 
+            // external_ids would be better but we might not have them here.
             // Simkl can match by title/year/tmdb id.
           },
-          ...(typeof season === 'number' && typeof episode === 'number' ? { season, episode } : {})
+          ...(typeof season === "number" && typeof episode === "number"
+            ? { season, episode }
+            : {}),
         });
       } catch (error) {
         console.error("Failed to sync to Simkl", error);

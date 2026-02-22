@@ -11,7 +11,6 @@ import { db } from "@/lib/firebase";
 
 export { UserPreferencesContext };
 
-
 export function UserPreferencesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [userPreferences, setUserPreferences] =
@@ -118,7 +117,6 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
           if (prefs.accentColor) {
             applyAccentColor(prefs.accentColor);
           }
-
         } else {
           // Initialize with default preferences
           const defaultPreferences: UserPreferences = {
@@ -216,8 +214,19 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Build base that preserves required fields (e.g., user_id)
+      const basePrefs: UserPreferences = currentPrefs ?? {
+        user_id: user.uid,
+        isWatchHistoryEnabled: true,
+        isNotificationsEnabled: true,
+        accentColor: "#E63462",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        isSimklEnabled: false,
+      };
+
       const updatedPreferences = {
-        ...currentPrefs,
+        ...basePrefs,
         ...preferences,
         updated_at: new Date().toISOString(),
       };
@@ -225,24 +234,28 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       await setDoc(userPrefsRef, updatedPreferences);
       setUserPreferences(updatedPreferences);
 
-      // Simkl preferences are now strictly cloud-based (Firestore). 
+      // Simkl preferences are now strictly cloud-based (Firestore).
       // Removed local storage sync to prevent "split brain" issues.
 
       toast({
         title: "Preferences updated",
         description: "Your preferences have been saved successfully.",
       });
-
     } catch (error) {
       console.error("Error updating user preferences:", error);
 
       // For Simkl preferences, update local state even if cloud fails
-      if (preferences.simklToken !== undefined || preferences.isSimklEnabled !== undefined) {
-        console.warn("Cloud save failed for Simkl preferences, updating local state only.");
+      if (
+        preferences.simklToken !== undefined ||
+        preferences.isSimklEnabled !== undefined
+      ) {
+        console.warn(
+          "Cloud save failed for Simkl preferences, updating local state only."
+        );
         const updatedWithLocal = {
           ...userPreferences,
           ...preferences,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         };
         setUserPreferences(updatedWithLocal);
         toast({
@@ -252,8 +265,10 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if ((error as any).code === 'permission-denied') {
-        console.error("Firestore Permission Denied. Check security rules for 'userPreferences' collection.");
+      if ((error as any).code === "permission-denied") {
+        console.error(
+          "Firestore Permission Denied. Check security rules for 'userPreferences' collection."
+        );
       }
       toast({
         title: "Error saving preferences",
@@ -262,7 +277,6 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       });
     }
   };
-
 
   const toggleWatchHistory = async () => {
     if (!user || !userPreferences) return;
@@ -329,7 +343,9 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
 export function useUserPreferences() {
   const context = useContext(UserPreferencesContext);
   if (context === undefined) {
-    throw new Error("useUserPreferences must be used within a UserPreferencesProvider");
+    throw new Error(
+      "useUserPreferences must be used within a UserPreferencesProvider"
+    );
   }
   return context;
 }

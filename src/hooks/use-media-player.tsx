@@ -42,7 +42,14 @@ export const useMediaPlayer = (
     isLoading: true,
     hasInitialized: false,
   });
-  const { title, mediaDetails, episodes, currentEpisodeIndex, isLoading, hasInitialized } = mediaState;
+  const {
+    title,
+    mediaDetails,
+    episodes,
+    currentEpisodeIndex,
+    isLoading,
+    hasInitialized,
+  } = mediaState;
   const [selectedSource, setSelectedSource] = useState<string>(
     userPreferences?.preferred_source || ""
   );
@@ -50,7 +57,9 @@ export const useMediaPlayer = (
   // Set initial selected source once sources are loaded
   useEffect(() => {
     if (videoSources.length > 0 && !selectedSource) {
-      setSelectedSource(userPreferences?.preferred_source || videoSources[0].key);
+      setSelectedSource(
+        userPreferences?.preferred_source || videoSources[0].key
+      );
     }
   }, [videoSources, selectedSource, userPreferences]);
   const [iframeUrl, setIframeUrl] = useState<string>("");
@@ -61,7 +70,8 @@ export const useMediaPlayer = (
     nextSeasonNumber: null as number | null,
     nextSeasonHasEpisodes: false,
   });
-  const { hasNextSeason, nextSeasonNumber, nextSeasonHasEpisodes } = nextSeasonInfo;
+  const { hasNextSeason, nextSeasonNumber, nextSeasonHasEpisodes } =
+    nextSeasonInfo;
   const watchHistoryRecorded = useRef(false);
   // Removed custom source state
   // Custom API state removed
@@ -314,7 +324,11 @@ export const useMediaPlayer = (
   // Calculate next season availability when media details change
   useEffect(() => {
     if (mediaType !== "tv" || !mediaDetails || !season) {
-      setNextSeasonInfo({ hasNextSeason: false, nextSeasonNumber: null, nextSeasonHasEpisodes: false });
+      setNextSeasonInfo({
+        hasNextSeason: false,
+        nextSeasonNumber: null,
+        nextSeasonHasEpisodes: false,
+      });
       return;
     }
 
@@ -322,7 +336,11 @@ export const useMediaPlayer = (
     const currentSeasonNumber = parseInt(season, 10);
 
     if (!tvDetails.seasons) {
-      setNextSeasonInfo({ hasNextSeason: false, nextSeasonNumber: null, nextSeasonHasEpisodes: false });
+      setNextSeasonInfo({
+        hasNextSeason: false,
+        nextSeasonNumber: null,
+        nextSeasonHasEpisodes: false,
+      });
       return;
     }
 
@@ -344,16 +362,28 @@ export const useMediaPlayer = (
           );
           const hasEpisodes = nextSeasonDetails && nextSeasonDetails.length > 0;
 
-          setNextSeasonInfo({ hasNextSeason: hasEpisodes, nextSeasonNumber: nextSeason.season_number, nextSeasonHasEpisodes: hasEpisodes });
+          setNextSeasonInfo({
+            hasNextSeason: hasEpisodes,
+            nextSeasonNumber: nextSeason.season_number,
+            nextSeasonHasEpisodes: hasEpisodes,
+          });
         } catch (error) {
           console.error("Error validating next season episodes:", error);
-          setNextSeasonInfo({ hasNextSeason: false, nextSeasonNumber: null, nextSeasonHasEpisodes: false });
+          setNextSeasonInfo({
+            hasNextSeason: false,
+            nextSeasonNumber: null,
+            nextSeasonHasEpisodes: false,
+          });
         }
       };
 
       validateNextSeason();
     } else {
-      setNextSeasonInfo({ hasNextSeason: false, nextSeasonNumber: null, nextSeasonHasEpisodes: false });
+      setNextSeasonInfo({
+        hasNextSeason: false,
+        nextSeasonNumber: null,
+        nextSeasonHasEpisodes: false,
+      });
     }
   }, [mediaType, mediaDetails, season, id]);
 

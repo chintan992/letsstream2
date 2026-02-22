@@ -269,7 +269,10 @@ const ChatbotButton: React.FC = () => {
                 document.removeEventListener("touchend", clearTimer);
                 document.removeEventListener("touchmove", clearTimer);
               };
-              document.addEventListener("touchend", clearTimer, { once: true, passive: true });
+              document.addEventListener("touchend", clearTimer, {
+                once: true,
+                passive: true,
+              });
               document.addEventListener("touchmove", clearTimer, {
                 once: true,
               });

@@ -82,11 +82,30 @@ const SecondaryContent = () => {
     crunchyroll: [],
   });
   const {
-    basedOnTrueStories, actionMovies, comedyMovies, dramaMovies, thrillerMovies,
-    sciFiMovies, horrorMovies, romanceMovies, animationMovies, familyMovies,
-    documentaryMovies, mysteryMovies, fantasyMovies, bingeSeries, moviesForKids,
-    hollywoodMovies, bollywoodMovies, koreanDramas, japaneseAnime, europeanCinema,
-    youTubeOriginals, hboMax, peacock, crunchyroll,
+    basedOnTrueStories,
+    actionMovies,
+    comedyMovies,
+    dramaMovies,
+    thrillerMovies,
+    sciFiMovies,
+    horrorMovies,
+    romanceMovies,
+    animationMovies,
+    familyMovies,
+    documentaryMovies,
+    mysteryMovies,
+    fantasyMovies,
+    bingeSeries,
+    moviesForKids,
+    hollywoodMovies,
+    bollywoodMovies,
+    koreanDramas,
+    japaneseAnime,
+    europeanCinema,
+    youTubeOriginals,
+    hboMax,
+    peacock,
+    crunchyroll,
   } = content;
 
   const [actionPage, setActionPage] = useState(1);
@@ -121,7 +140,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreAction(true);
     const nextPage = actionPage + 1;
     const newMovies = await getActionMovies(nextPage);
-    setContent(prev => ({ ...prev, actionMovies: [...prev.actionMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      actionMovies: [...prev.actionMovies, ...newMovies],
+    }));
     setActionPage(nextPage);
     setIsLoadingMoreAction(false);
   }, [actionPage, isLoadingMoreAction]);
@@ -135,7 +157,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreComedy(true);
     const nextPage = comedyPage + 1;
     const newMovies = await getComedyMovies(nextPage);
-    setContent(prev => ({ ...prev, comedyMovies: [...prev.comedyMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      comedyMovies: [...prev.comedyMovies, ...newMovies],
+    }));
     setComedyPage(nextPage);
     setIsLoadingMoreComedy(false);
   }, [comedyPage, isLoadingMoreComedy]);
@@ -149,7 +174,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreDrama(true);
     const nextPage = dramaPage + 1;
     const newMovies = await getDramaMovies(nextPage);
-    setContent(prev => ({ ...prev, dramaMovies: [...prev.dramaMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      dramaMovies: [...prev.dramaMovies, ...newMovies],
+    }));
     setDramaPage(nextPage);
     setIsLoadingMoreDrama(false);
   }, [dramaPage, isLoadingMoreDrama]);
@@ -160,7 +188,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreThriller(true);
     const nextPage = thrillerPage + 1;
     const newMovies = await getThrillerMovies(nextPage);
-    setContent(prev => ({ ...prev, thrillerMovies: [...prev.thrillerMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      thrillerMovies: [...prev.thrillerMovies, ...newMovies],
+    }));
     setThrillerPage(nextPage);
     setIsLoadingMoreThriller(false);
   }, [thrillerPage, isLoadingMoreThriller]);
@@ -174,7 +205,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreSciFi(true);
     const nextPage = sciFiPage + 1;
     const newMovies = await getSciFiMovies(nextPage);
-    setContent(prev => ({ ...prev, sciFiMovies: [...prev.sciFiMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      sciFiMovies: [...prev.sciFiMovies, ...newMovies],
+    }));
     setSciFiPage(nextPage);
     setIsLoadingMoreSciFi(false);
   }, [sciFiPage, isLoadingMoreSciFi]);
@@ -185,7 +219,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreHorror(true);
     const nextPage = horrorPage + 1;
     const newMovies = await getHorrorMovies(nextPage);
-    setContent(prev => ({ ...prev, horrorMovies: [...prev.horrorMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      horrorMovies: [...prev.horrorMovies, ...newMovies],
+    }));
     setHorrorPage(nextPage);
     setIsLoadingMoreHorror(false);
   }, [horrorPage, isLoadingMoreHorror]);
@@ -199,7 +236,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreRomance(true);
     const nextPage = romancePage + 1;
     const newMovies = await getRomanceMovies(nextPage);
-    setContent(prev => ({ ...prev, romanceMovies: [...prev.romanceMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      romanceMovies: [...prev.romanceMovies, ...newMovies],
+    }));
     setRomancePage(nextPage);
     setIsLoadingMoreRomance(false);
   }, [romancePage, isLoadingMoreRomance]);
@@ -213,7 +253,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreAnimation(true);
     const nextPage = animationPage + 1;
     const newMovies = await getAnimationMovies(nextPage);
-    setContent(prev => ({ ...prev, animationMovies: [...prev.animationMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      animationMovies: [...prev.animationMovies, ...newMovies],
+    }));
     setAnimationPage(nextPage);
     setIsLoadingMoreAnimation(false);
   }, [animationPage, isLoadingMoreAnimation]);
@@ -227,7 +270,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreFamily(true);
     const nextPage = familyPage + 1;
     const newMovies = await getFamilyMovies(nextPage);
-    setContent(prev => ({ ...prev, familyMovies: [...prev.familyMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      familyMovies: [...prev.familyMovies, ...newMovies],
+    }));
     setFamilyPage(nextPage);
     setIsLoadingMoreFamily(false);
   }, [familyPage, isLoadingMoreFamily]);
@@ -241,7 +287,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreDocumentary(true);
     const nextPage = documentaryPage + 1;
     const newMovies = await getDocumentaryMovies(nextPage);
-    setContent(prev => ({ ...prev, documentaryMovies: [...prev.documentaryMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      documentaryMovies: [...prev.documentaryMovies, ...newMovies],
+    }));
     setDocumentaryPage(nextPage);
     setIsLoadingMoreDocumentary(false);
   }, [documentaryPage, isLoadingMoreDocumentary]);
@@ -255,7 +304,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreMystery(true);
     const nextPage = mysteryPage + 1;
     const newMovies = await getMysteryMovies(nextPage);
-    setContent(prev => ({ ...prev, mysteryMovies: [...prev.mysteryMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      mysteryMovies: [...prev.mysteryMovies, ...newMovies],
+    }));
     setMysteryPage(nextPage);
     setIsLoadingMoreMystery(false);
   }, [mysteryPage, isLoadingMoreMystery]);
@@ -269,7 +321,10 @@ const SecondaryContent = () => {
     setIsLoadingMoreFantasy(true);
     const nextPage = fantasyPage + 1;
     const newMovies = await getFantasyMovies(nextPage);
-    setContent(prev => ({ ...prev, fantasyMovies: [...prev.fantasyMovies, ...newMovies] }));
+    setContent(prev => ({
+      ...prev,
+      fantasyMovies: [...prev.fantasyMovies, ...newMovies],
+    }));
     setFantasyPage(nextPage);
     setIsLoadingMoreFantasy(false);
   }, [fantasyPage, isLoadingMoreFantasy]);
@@ -284,8 +339,18 @@ const SecondaryContent = () => {
         setContent(prev => ({ ...prev, basedOnTrueStories: trueStories }));
 
         const [
-          action, comedy, drama, thriller, scifi, horror, romance,
-          animation, family, documentary, mystery, fantasy,
+          action,
+          comedy,
+          drama,
+          thriller,
+          scifi,
+          horror,
+          romance,
+          animation,
+          family,
+          documentary,
+          mystery,
+          fantasy,
         ] = await Promise.all([
           getActionMovies(1),
           getComedyMovies(),
@@ -320,7 +385,11 @@ const SecondaryContent = () => {
           getBingeWorthySeries(),
           getMoviesForKids(),
         ]);
-        setContent(prev => ({ ...prev, bingeSeries: binge, moviesForKids: kids }));
+        setContent(prev => ({
+          ...prev,
+          bingeSeries: binge,
+          moviesForKids: kids,
+        }));
 
         const [hollywood, bollywood, korean, anime, euro] = await Promise.all([
           getHollywoodMovies(),

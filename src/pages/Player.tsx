@@ -107,15 +107,21 @@ const Player = () => {
           onToggleWatchlist={toggleWatchlist}
           onBack={goBack}
           onViewDetails={goToDetails}
-          title={mediaType === "movie"
-            ? (mediaDetails as MovieDetails)?.title
-            : (mediaDetails as TVDetails)?.name}
-          subtitle={mediaType === "tv" && season && episode
-            ? `Season ${season} • Episode ${episode}`
-            : undefined}
-          year={mediaType === "movie"
-            ? (mediaDetails as MovieDetails)?.release_date?.substring(0, 4)
-            : (mediaDetails as TVDetails)?.first_air_date?.substring(0, 4)}
+          title={
+            mediaType === "movie"
+              ? (mediaDetails as MovieDetails)?.title
+              : (mediaDetails as TVDetails)?.name
+          }
+          subtitle={
+            mediaType === "tv" && season && episode
+              ? `Season ${season} • Episode ${episode}`
+              : undefined
+          }
+          year={
+            mediaType === "movie"
+              ? (mediaDetails as MovieDetails)?.release_date?.substring(0, 4)
+              : (mediaDetails as TVDetails)?.first_air_date?.substring(0, 4)
+          }
           rating={mediaDetails?.vote_average}
           mediaType={mediaType}
         />
@@ -226,9 +232,7 @@ const Player = () => {
         >
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-medium text-white">
-                Video Sources
-              </h3>
+              <h3 className="text-lg font-medium text-white">Video Sources</h3>
               <p className="text-sm text-white/60">
                 Select your preferred streaming source
               </p>

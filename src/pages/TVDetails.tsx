@@ -51,7 +51,8 @@ const TVDetailsPage = () => {
     } | null;
     isLoading: boolean;
   }>({ episode: null, isLoading: false });
-  const { episode: lastWatchedEpisode, isLoading: isLastWatchedLoading } = lastWatchedState;
+  const { episode: lastWatchedEpisode, isLoading: isLastWatchedLoading } =
+    lastWatchedState;
   const { user } = useAuth();
   const { triggerHaptic } = useHaptic();
 
@@ -86,7 +87,7 @@ const TVDetailsPage = () => {
   // Fetch last watched episode when tvShow changes
   useEffect(() => {
     const fetchLastWatched = async () => {
-      if (!tvShow) return;
+      if (!tvShow?.id) return;
 
       try {
         setLastWatchedState(prev => ({ ...prev, isLoading: true }));
@@ -101,7 +102,7 @@ const TVDetailsPage = () => {
     if (tvShow?.id) {
       fetchLastWatched();
     }
-  }, [tvShow, getLastWatchedEpisode]);
+  }, [tvShow?.id, getLastWatchedEpisode]);
 
   // Handle hydration tracking for different tabs
   useEffect(() => {

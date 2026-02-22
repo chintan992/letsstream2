@@ -42,7 +42,7 @@ const MediaActions = ({
     <m.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="sticky top-16 z-40 -mx-4 mb-4 border-b border-white/5 bg-background/80 px-4 py-3 backdrop-blur-md md:-mx-6 md:px-6"
+      className="bg-background/80 sticky top-16 z-40 -mx-4 mb-4 border-b border-white/5 px-4 py-3 backdrop-blur-md md:-mx-6 md:px-6"
     >
       <div className="flex items-center gap-4">
         {/* Back Button */}
@@ -64,9 +64,7 @@ const MediaActions = ({
               {title}
             </h1>
             <div className="flex items-center gap-3 text-xs text-white/60 md:text-sm">
-              {subtitle && (
-                <span className="truncate">{subtitle}</span>
-              )}
+              {subtitle && <span className="truncate">{subtitle}</span>}
               {year && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
@@ -102,7 +100,9 @@ const MediaActions = ({
                 : "text-white/70 hover:text-white"
             )}
             onClick={onToggleFavorite}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-label={
+              isFavorite ? "Remove from favorites" : "Add to favorites"
+            }
             aria-pressed={isFavorite}
           >
             <Heart className={cn("h-5 w-5", isFavorite && "fill-current")} />
@@ -118,7 +118,9 @@ const MediaActions = ({
                 : "text-white/70 hover:text-white"
             )}
             onClick={onToggleWatchlist}
-            aria-label={isInWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+            aria-label={
+              isInWatchlist ? "Remove from watchlist" : "Add to watchlist"
+            }
             aria-pressed={isInWatchlist}
           >
             <Bookmark

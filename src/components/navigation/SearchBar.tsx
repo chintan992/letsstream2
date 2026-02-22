@@ -28,8 +28,18 @@ const SearchBar = ({
     showSuggestions: boolean;
     isLoading: boolean;
     selectedIndex: number;
-  }>({ suggestions: [], showSuggestions: false, isLoading: false, selectedIndex: -1 });
-  const { suggestions: searchSuggestions, showSuggestions, isLoading, selectedIndex } = searchState;
+  }>({
+    suggestions: [],
+    showSuggestions: false,
+    isLoading: false,
+    selectedIndex: -1,
+  });
+  const {
+    suggestions: searchSuggestions,
+    showSuggestions,
+    isLoading,
+    selectedIndex,
+  } = searchState;
   const navigate = useNavigate();
   const { toast } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -158,7 +168,11 @@ const SearchBar = ({
 
   const handleClear = () => {
     setSearchQuery("");
-    setSearchState(prev => ({ ...prev, suggestions: [], showSuggestions: false }));
+    setSearchState(prev => ({
+      ...prev,
+      suggestions: [],
+      showSuggestions: false,
+    }));
     searchInputRef.current?.focus();
   };
 

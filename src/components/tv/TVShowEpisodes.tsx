@@ -274,7 +274,9 @@ export const TVShowEpisodes = ({
       scrollContainer.addEventListener("scrollend", handleScrollEnd);
     } catch (e) {
       // scrollend not supported, use scroll with timeout instead
-      scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+      scrollContainer.addEventListener("scroll", handleScroll, {
+        passive: true,
+      });
     }
 
     return () => {
@@ -283,7 +285,9 @@ export const TVShowEpisodes = ({
       } catch (e) {
         // Ignore error if scrollend is not supported
       }
-      scrollContainer.removeEventListener("scroll", handleScroll, { passive: true });
+      scrollContainer.removeEventListener("scroll", handleScroll, {
+        passive: true,
+      });
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }

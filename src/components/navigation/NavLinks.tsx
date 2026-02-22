@@ -22,8 +22,10 @@ const NavLinks = () => {
         <Link
           key={link.path}
           to={link.path}
-          className={`text-sm transition-colors hover:text-white ${isActive(link.path) ? "font-medium text-white" : "text-white/70"
-            }`}
+          aria-current={isActive(link.path) ? "page" : undefined}
+          className={`text-sm transition-colors hover:text-white ${
+            isActive(link.path) ? "font-medium text-white" : "text-white/70"
+          }`}
         >
           {link.name}
         </Link>

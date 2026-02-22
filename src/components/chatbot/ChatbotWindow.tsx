@@ -111,7 +111,10 @@ const ChatbotWindow: React.FC = () => {
       } else {
         // Get personalized recommendations based on the query
         const userRecommendations = await getRecommendations(5);
-        setRecState(prev => ({ ...prev, recommendations: userRecommendations }));
+        setRecState(prev => ({
+          ...prev,
+          recommendations: userRecommendations,
+        }));
 
         // Send message with enhanced context
         await sendMessage(trimmedInput, {

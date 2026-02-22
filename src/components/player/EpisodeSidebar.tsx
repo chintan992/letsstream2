@@ -126,7 +126,9 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
                 // and let the page handle fetching/redirecting, or assume episode 1.
                 // The current routing structure seems to require episode number: /watch/tv/:id/:season/:episode
                 // So we'll default to episode 1.
-                navigate(`/watch/tv/${showId}/${selectedSeason.season_number}/1`);
+                navigate(
+                  `/watch/tv/${showId}/${selectedSeason.season_number}/1`
+                );
               }
             }}
           >
@@ -209,7 +211,8 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
                     "group relative cursor-pointer overflow-hidden rounded-lg transition-all duration-200",
                     "hover:scale-[1.02] hover:bg-white/10 hover:ring-1 hover:ring-white/20",
                     "active:scale-[0.99]",
-                    isCurrentEpisode && "bg-accent/10 ring-2 ring-accent hover:ring-accent",
+                    isCurrentEpisode &&
+                      "bg-accent/10 ring-2 ring-accent hover:ring-accent",
                     !isCurrentEpisode && "bg-white/5"
                   )}
                   onClick={() => handleEpisodeClick(episode.episode_number)}

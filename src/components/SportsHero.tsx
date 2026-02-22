@@ -7,11 +7,11 @@ interface SportsHeroProps {
 
 const SportsHero: React.FC<SportsHeroProps> = ({ liveMatchesCount }) => {
   return (
-    <div className="relative pt-20 pb-12">
+    <div className="relative pb-12 pt-20">
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <m.div
-          className="absolute -top-[20%] -right-[10%] h-[500px] w-[500px] rounded-full bg-accent/10 blur-[120px]"
+          className="bg-accent/10 absolute -right-[10%] -top-[20%] h-[500px] w-[500px] rounded-full blur-[120px]"
           animate={{
             scale: [1, 1.1, 1],
             rotate: [0, 10, 0],
@@ -34,7 +34,7 @@ const SportsHero: React.FC<SportsHeroProps> = ({ liveMatchesCount }) => {
             repeatType: "mirror",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/80 to-background" />
+        <div className="from-background/30 via-background/80 absolute inset-0 bg-gradient-to-b to-background" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6">
@@ -60,14 +60,14 @@ const SportsHero: React.FC<SportsHeroProps> = ({ liveMatchesCount }) => {
           </div>
           {liveMatchesCount > 0 && (
             <m.div
-              className="flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-2 text-red-500 border border-red-500/20"
+              className="flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-red-500"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
               </span>
               <span className="font-bold">{liveMatchesCount} Live Events</span>
             </m.div>

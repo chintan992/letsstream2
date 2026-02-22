@@ -15,6 +15,21 @@ const useKeyPress = (
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === key) {
+        // Harden Space handling: ignore when an interactive element is focused
+        if (key === " ") {
+          const active = (document.activeElement as HTMLElement) ?? null;
+          const isInteractive =
+            !!active &&
+            (active.tagName === "BUTTON" ||
+              active.getAttribute("role") === "button" ||
+              active.tagName === "A" ||
+              active.tagName === "INPUT" ||
+              active.tagName === "SELECT" ||
+              active.tagName === "TEXTAREA");
+          if (isInteractive) {
+            return;
+          }
+        }
         if (preventDefault) {
           event.preventDefault();
         }

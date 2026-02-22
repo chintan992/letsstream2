@@ -50,16 +50,24 @@ const Index = () => {
     secondaryLoaded: false,
   });
   const {
-    trendingMedia, popularMovies, popularTVShows, topRatedTVShows,
-    isLoading, contentVisible, secondaryLoaded,
+    trendingMedia,
+    popularMovies,
+    popularTVShows,
+    topRatedTVShows,
+    isLoading,
+    contentVisible,
+    secondaryLoaded,
   } = pageState;
   const [isPageHydrated, setIsPageHydrated] = useState(false);
 
   useEffect(() => {
     const hydrated = !isLoading && contentVisible;
-    const timer = setTimeout(() => {
-      setIsPageHydrated(hydrated);
-    }, hydrated ? 200 : 0);
+    const timer = setTimeout(
+      () => {
+        setIsPageHydrated(hydrated);
+      },
+      hydrated ? 200 : 0
+    );
     return () => clearTimeout(timer);
   }, [isLoading, contentVisible]);
 

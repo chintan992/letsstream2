@@ -27,12 +27,7 @@ const LiveStreamPlayer = () => {
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
   const [playerError, setPlayerError] = useState<string | null>(null);
 
-  // Initialize proxy system when component mounts
-  useEffect(() => {
-    const init = async () => { };
-
-    init();
-  }, []);
+  // Proxy initialization has been removed to avoid dead code in this component
 
   // If stream wasn't passed through navigation state, find it in the fetched data
   useEffect(() => {

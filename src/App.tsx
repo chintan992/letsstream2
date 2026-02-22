@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
 
 function App() {
   const isDevelopment = import.meta.env.DEV;
-  /* 
+  /*
    * Service Worker updates are handled automatically by vite-plugin-pwa (autoUpdate behavior)
    * and the lazyLoadWithRetry utility (reloading on ChunkLoadError).
    */
@@ -50,28 +50,28 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <LazyMotion features={domAnimation}>
-        <ServiceWorkerErrorBoundary>
-          <ThemeProvider>
-            <NotificationProvider>
-              <AuthProvider>
-                <UserPreferencesProvider>
-                  <WatchHistoryProvider>
-                    <UserProfileProvider>
-                      <ChatbotProvider>
-                        <FeatureNotificationsListener />
-                        {isDevelopment && <ServiceWorkerDebugPanel />}
-                        <AppRoutes />
-                        <ChatbotButton />
-                        <ChatbotWindow />
-                        <ProactiveSuggestions />
-                      </ChatbotProvider>
-                    </UserProfileProvider>
-                  </WatchHistoryProvider>
-                </UserPreferencesProvider>
-              </AuthProvider>
-            </NotificationProvider>
-          </ThemeProvider>
-        </ServiceWorkerErrorBoundary>
+          <ServiceWorkerErrorBoundary>
+            <ThemeProvider>
+              <NotificationProvider>
+                <AuthProvider>
+                  <UserPreferencesProvider>
+                    <WatchHistoryProvider>
+                      <UserProfileProvider>
+                        <ChatbotProvider>
+                          <FeatureNotificationsListener />
+                          {isDevelopment && <ServiceWorkerDebugPanel />}
+                          <AppRoutes />
+                          <ChatbotButton />
+                          <ChatbotWindow />
+                          <ProactiveSuggestions />
+                        </ChatbotProvider>
+                      </UserProfileProvider>
+                    </WatchHistoryProvider>
+                  </UserPreferencesProvider>
+                </AuthProvider>
+              </NotificationProvider>
+            </ThemeProvider>
+          </ServiceWorkerErrorBoundary>
         </LazyMotion>
       </BrowserRouter>
     </QueryClientProvider>

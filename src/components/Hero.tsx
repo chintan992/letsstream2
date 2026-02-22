@@ -565,6 +565,7 @@ const Hero = ({ media, className = "" }: HeroProps) => {
             onKeyDown={e => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
+                e.stopPropagation();
                 triggerHapticFeedback(10);
                 setCurrentIndex(index);
               }

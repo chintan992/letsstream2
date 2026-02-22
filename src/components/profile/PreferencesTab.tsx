@@ -100,7 +100,7 @@ const PreferencesTab: React.FC = () => {
         {/* Simkl Integration */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <h3 className="text-lg font-medium text-white flex items-center">
+            <h3 className="flex items-center text-lg font-medium text-white">
               Simkl Integration
               {userPreferences?.isSimklEnabled ? (
                 <span className="ml-2 inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-500">
@@ -121,10 +121,12 @@ const PreferencesTab: React.FC = () => {
               <>
                 <Switch
                   checked={userPreferences.isSimklEnabled}
-                  onCheckedChange={async (checked) => {
+                  onCheckedChange={async checked => {
                     await updatePreferences({ isSimklEnabled: checked });
                     toast({
-                      title: checked ? "Simkl Sync Enabled" : "Simkl Sync Paused",
+                      title: checked
+                        ? "Simkl Sync Enabled"
+                        : "Simkl Sync Paused",
                       description: checked
                         ? "Watch history will be synced to Simkl"
                         : "Watch history sync is paused",
@@ -134,7 +136,7 @@ const PreferencesTab: React.FC = () => {
                 />
                 <button
                   onClick={handleSimklDisconnect}
-                  className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                  className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
                   title="Disconnect Simkl"
                 >
                   <CloudOff className="h-4 w-4" />
@@ -143,7 +145,7 @@ const PreferencesTab: React.FC = () => {
             ) : (
               <button
                 onClick={handleSimklConnect}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+                className="hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               >
                 <CircleDashed className="mr-2 h-4 w-4" />
                 Connect Simkl

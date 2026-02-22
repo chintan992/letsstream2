@@ -6,6 +6,39 @@ import { cn } from "@/lib/utils";
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
+const escapeId = (id: string): string => {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(id);
+  }
+  let result = "";
+  for (let i = 0; i < id.length; i++) {
+    const ch = id[i];
+    const code = ch.charCodeAt(0);
+    if (code === 0) {
+      result += "\uFFFD";
+      continue;
+    }
+    if ((code >= 0x01 && code <= 0x1f) || (code >= 0x7f && code <= 0x9f)) {
+      result += "\\" + code.toString(16).toLowerCase() + " ";
+      continue;
+    }
+    if (
+      (ch >= "a" && ch <= "z") ||
+      (ch >= "A" && ch <= "Z") ||
+      ch === "-" ||
+      (ch >= "0" && ch <= "9" && i > 0) ||
+      (ch === "-" && i > 0 && id[i - 1] >= "0" && id[i - 1] <= "9")
+    ) {
+      result += ch;
+    } else if (ch >= "0" && ch <= "9" && i === 0) {
+      result += "\\" + ch + " ";
+    } else {
+      result += "\\" + ch;
+    }
+  }
+  return result;
+};
+
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode;
@@ -74,20 +107,42 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  const safeId = escapeId(id);
+
+  const isValidColor = (color: string): boolean => {
+    if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+      return CSS.supports("color", color);
+    }
+    if (typeof document !== "undefined") {
+      const el = document.createElement("div");
+      el.style.color = color;
+      document.body.appendChild(el);
+      const computed = getComputedStyle(el).color;
+      document.body.removeChild(el);
+      return computed !== "";
+    }
+    return false;
+  };
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart=${safeId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
+    const safeKey = escapeId(key);
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    if (color && isValidColor(color)) {
+      return `  --color-${safeKey}: ${color};`;
+    }
+    return null;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `

@@ -127,18 +127,37 @@ export function ServiceWorkerDebugPanel() {
   }, [checkRegistration, addEvent]);
 
   const handleControllerChange = useCallback(() => {
-    setControllerState(
-      navigator.serviceWorker.controller ? "active" : "none"
-    );
+    setControllerState(navigator.serviceWorker.controller ? "active" : "none");
     addEvent("Controller", "Service worker controller changed");
   }, [addEvent]);
 
   useEffect(() => {
     checkRegistration();
 
-    if (registration) {
-      registration.addEventListener("statechange", handleSwStateChange);
-    }
+    // Attach statechange listeners to existing workers and listen for future updates
+    const attachStateChangeListeners = () => {
+      if (!registration) return;
+      const workers = [
+        registration.installing,
+        registration.waiting,
+        registration.active,
+      ].filter((w): w is ServiceWorker => !!w);
+      workers.forEach(w =>
+        w.addEventListener("statechange", handleSwStateChange)
+      );
+    };
+
+    attachStateChangeListeners();
+    // Listen for updates so we can attach to the new installing worker
+    const onUpdateFound = () => {
+      if (registration?.installing) {
+        registration.installing.addEventListener(
+          "statechange",
+          handleSwStateChange
+        );
+      }
+    };
+    registration?.addEventListener("updatefound", onUpdateFound as any);
 
     window.addEventListener("online", handleNetworkChange);
     window.addEventListener("offline", handleNetworkChange);
@@ -150,8 +169,16 @@ export function ServiceWorkerDebugPanel() {
 
     return () => {
       if (registration) {
-        registration.removeEventListener("statechange", handleSwStateChange);
+        const workers = [
+          registration.installing,
+          registration.waiting,
+          registration.active,
+        ].filter((w): w is ServiceWorker => !!w);
+        workers.forEach(w =>
+          w.removeEventListener("statechange", handleSwStateChange)
+        );
       }
+      registration?.removeEventListener("updatefound", onUpdateFound as any);
       window.removeEventListener("online", handleNetworkChange);
       window.removeEventListener("offline", handleNetworkChange);
       navigator.serviceWorker.removeEventListener("message", handleSwMessage);

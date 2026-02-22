@@ -17,7 +17,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
  * - No explicit z-index - relies on natural document flow
  * - Grid layout with natural stacking for hover effects
  * - Absolute positioned elements (check icon) stack within button context
- * 
+ *
  * RESPONSIVE BEHAVIOR:
  * - Mobile: Horizontal scroll with snap, compact cards
  * - Desktop: Grid layout with larger cards
@@ -67,7 +67,7 @@ const VideoSourceSelector = ({
   if (isMobile) {
     return (
       <m.div
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide snap-x snap-mandatory"
+        className="scrollbar-hide -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}

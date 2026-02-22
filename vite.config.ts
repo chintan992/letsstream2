@@ -50,8 +50,17 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return id.toString().split('node_modules/')[1].split('/')[0].toString();
+          if (id.includes("node_modules")) {
+            const parts = id.toString().split("node_modules/");
+            if (parts.length > 1) {
+              const modulePath = parts[1];
+              const segments = modulePath.split("/");
+              // Handle scoped packages like @scope/pkg
+              if (segments[0].startsWith("@") && segments.length > 1) {
+                return `${segments[0]}/${segments[1]}`;
+              }
+              return segments[0];
+            }
           }
         },
       },

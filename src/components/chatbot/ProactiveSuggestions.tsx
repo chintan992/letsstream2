@@ -15,6 +15,7 @@ const ProactiveSuggestions: React.FC = () => {
     visible: false,
     text: "",
   });
+  const autoHideTimerRef = React.useRef<number | null>(null);
   const { visible, text: suggestion } = suggestionState;
   const { sendMessage, isOpen } = useChatbot();
   const { profile } = useUserProfile();
@@ -52,9 +53,14 @@ const ProactiveSuggestions: React.FC = () => {
 
     const checkProactiveSuggestion = () => {
       if (Math.random() < 0.3) {
+        // Clear any existing timer before creating a new one
+        if (autoHideTimerRef.current) {
+          clearTimeout(autoHideTimerRef.current);
+          autoHideTimerRef.current = null;
+        }
         setSuggestionState({ text: generateSuggestion(), visible: true });
 
-        setTimeout(() => {
+        autoHideTimerRef.current = window.setTimeout(() => {
           setSuggestionState(prev => ({ ...prev, visible: false }));
         }, 15000);
       }
@@ -67,6 +73,10 @@ const ProactiveSuggestions: React.FC = () => {
     const interval = setInterval(checkProactiveSuggestion, 60000 * 30); // every 30 minutes
 
     return () => {
+      if (autoHideTimerRef.current) {
+        clearTimeout(autoHideTimerRef.current);
+        autoHideTimerRef.current = null;
+      }
       clearTimeout(timer);
       clearInterval(interval);
     };
@@ -75,10 +85,18 @@ const ProactiveSuggestions: React.FC = () => {
   const handleSuggestionClick = () => {
     const message = suggestion.replace(/\?$/, "");
     sendMessage(message);
+    if (autoHideTimerRef.current) {
+      clearTimeout(autoHideTimerRef.current);
+      autoHideTimerRef.current = null;
+    }
     setSuggestionState(prev => ({ ...prev, visible: false }));
   };
 
   const handleDismiss = () => {
+    if (autoHideTimerRef.current) {
+      clearTimeout(autoHideTimerRef.current);
+      autoHideTimerRef.current = null;
+    }
     setSuggestionState(prev => ({ ...prev, visible: false }));
   };
 

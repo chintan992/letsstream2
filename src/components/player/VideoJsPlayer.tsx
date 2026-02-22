@@ -220,7 +220,8 @@ const VideoJsPlayer = ({
 
         const subs = initialLink.subtitles || [];
         const defaultIdx = subs.findIndex(s => s.default);
-        const initialSubIdx = subs.length > 0 ? (defaultIdx >= 0 ? defaultIdx : -1) : -1;
+        const initialSubIdx =
+          subs.length > 0 ? (defaultIdx >= 0 ? defaultIdx : -1) : -1;
         setPlayerState({ ready: true, activeSubtitleIndex: initialSubIdx });
         if (subs.length > 0) {
           updateSubtitleTracks(player, subs, initialSubIdx);
@@ -579,6 +580,7 @@ const VideoJsPlayer = ({
         onKeyDown={e => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
+            e.stopPropagation();
             togglePlay();
           }
         }}
@@ -611,6 +613,7 @@ const VideoJsPlayer = ({
           onKeyDown={e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
+              e.stopPropagation();
               togglePlay();
             }
           }}
@@ -650,6 +653,8 @@ const VideoJsPlayer = ({
           aria-valuemax={100}
           onClick={handleProgressClick}
           onKeyDown={e => {
+            // Stop propagation to avoid global window key handlers
+            e.stopPropagation();
             switch (e.key) {
               case "ArrowRight":
               case "ArrowUp":
@@ -668,7 +673,9 @@ const VideoJsPlayer = ({
                 break;
               case "End":
                 e.preventDefault();
-                playerRef.current?.currentTime(playerRef.current?.duration() || 0);
+                playerRef.current?.currentTime(
+                  playerRef.current?.duration() || 0
+                );
                 showControlsTemporarily();
                 break;
             }

@@ -75,8 +75,14 @@ const Search = () => {
         ? persistedState.page
         : 1,
   }));
-  const { allResults, displayedResults, isLoading, isHydrated, hasRestoredForQuery, page } =
-    searchState;
+  const {
+    allResults,
+    displayedResults,
+    isLoading,
+    isHydrated,
+    hasRestoredForQuery,
+    page,
+  } = searchState;
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -274,6 +280,7 @@ const Search = () => {
     sortBy,
     persistedState.resultIds,
     persistedState.queryParam,
+    persistedState.page,
     hasRestoredForQuery,
     isHydrated,
   ]);

@@ -16,25 +16,35 @@ const Search = lazyLoadWithRetry(() => import("./pages/Search"));
 const WatchHistory = lazyLoadWithRetry(() => import("./pages/WatchHistory"));
 const MovieDetails = lazyLoadWithRetry(() => import("./pages/MovieDetails"));
 const TVDetails = lazyLoadWithRetry(() => import("./pages/TVDetails"));
-const SportMatchPlayer = lazyLoadWithRetry(() => import("./pages/SportMatchPlayer"));
+const SportMatchPlayer = lazyLoadWithRetry(
+  () => import("./pages/SportMatchPlayer")
+);
 const Player = lazyLoadWithRetry(() => import("./pages/Player"));
 const NotFound = lazyLoadWithRetry(() => import("./pages/NotFound"));
 const Trending = lazyLoadWithRetry(() => import("./pages/Trending"));
 
 // Live streams pages
 const LiveStreams = lazyLoadWithRetry(() => import("./pages/LiveStreams"));
-const LiveStreamPlayer = lazyLoadWithRetry(() => import("./pages/LiveStreamPlayer"));
+const LiveStreamPlayer = lazyLoadWithRetry(
+  () => import("./pages/LiveStreamPlayer")
+);
 
 // Legal pages
 const PrivacyPolicy = lazyLoadWithRetry(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazyLoadWithRetry(() => import("./pages/TermsOfService"));
-const ContentRemoval = lazyLoadWithRetry(() => import("./pages/ContentRemoval"));
+const TermsOfService = lazyLoadWithRetry(
+  () => import("./pages/TermsOfService")
+);
+const ContentRemoval = lazyLoadWithRetry(
+  () => import("./pages/ContentRemoval")
+);
 const DMCANotice = lazyLoadWithRetry(() => import("./pages/DMCANotice"));
 const SimklCallback = lazyLoadWithRetry(() => import("./pages/SimklCallback"));
 
 // Simkl pages
 const SimklDiscover = lazyLoadWithRetry(() => import("./pages/SimklDiscover"));
-const SimklDiscoverList = lazyLoadWithRetry(() => import("./pages/SimklDiscoverList"));
+const SimklDiscoverList = lazyLoadWithRetry(
+  () => import("./pages/SimklDiscoverList")
+);
 
 export default function AppRoutes() {
   const enableManualRestoration =

@@ -55,7 +55,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
   return (
     <Link
       to={`/sports/player/${match.id}`}
-      className={cn("group block relative h-full", className)}
+      className={cn("group relative block h-full", className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -66,9 +66,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className="h-full"
       >
-        <Card
-          className="h-full overflow-hidden border-white/10 bg-black/30 backdrop-blur-xl shadow-lg transition-all duration-300"
-        >
+        <Card className="h-full overflow-hidden border-white/10 bg-black/30 shadow-lg backdrop-blur-xl transition-all duration-300">
           {/* Image Container */}
           <div className="relative aspect-video overflow-hidden">
             {match.poster ? (
@@ -90,12 +88,14 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
             {/* Hover Overlay with Play Button */}
-            <div className={cn(
-              "absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[3px] transition-all duration-300",
-              isHovered ? "opacity-100" : "opacity-0"
-            )}>
+            <div
+              className={cn(
+                "absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[3px] transition-all duration-300",
+                isHovered ? "opacity-100" : "opacity-0"
+              )}
+            >
               <m.div
-                className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-white backdrop-blur-md border border-white/20"
+                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-white backdrop-blur-md"
                 style={{ boxShadow: `0 0 20px ${accentColor}40` }}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={isHovered ? { scale: 1, opacity: 1 } : {}}
@@ -107,22 +107,23 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
             </div>
 
             {/* Top Badges */}
-            <div className="absolute left-3 top-3 right-3 flex justify-between items-start z-20">
+            <div className="absolute left-3 right-3 top-3 z-20 flex items-start justify-between">
               <Badge
                 variant="outline"
-                className="bg-black/50 backdrop-blur-lg border-white/10 text-xs font-medium text-white/90 uppercase tracking-wider"
+                className="border-white/10 bg-black/50 text-xs font-medium uppercase tracking-wider text-white/90 backdrop-blur-lg"
               >
                 {match.category}
               </Badge>
 
-              <div className="flex flex-col gap-2 items-end">
+              <div className="flex flex-col items-end gap-2">
                 {countdown.isLive && (
                   <Badge
-                    className="relative overflow-hidden font-bold border-none px-3 py-1 text-sm"
+                    className="relative overflow-hidden border-none px-3 py-1 text-sm font-bold"
                     style={{
                       background: `radial-gradient(circle, #ff6b6b, #ef4444)`,
-                      boxShadow: "0 0 15px rgba(239, 68, 68, 0.6), inset 0 0 5px rgba(255,255,255,0.3)",
-                      textShadow: "0 1px 2px rgba(0,0,0,0.3)"
+                      boxShadow:
+                        "0 0 15px rgba(239, 68, 68, 0.6), inset 0 0 5px rgba(255,255,255,0.3)",
+                      textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                     }}
                   >
                     <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-white" />
@@ -131,9 +132,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                 )}
 
                 {match.popular && !countdown.isLive && (
-                  <Badge
-                    className="font-semibold border-none bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg text-sm px-3 py-1"
-                  >
+                  <Badge className="border-none bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-sm font-semibold text-white shadow-lg">
                     🔥 Popular
                   </Badge>
                 )}
@@ -146,25 +145,28 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
               size="icon"
               variant="ghost"
               className={cn(
-                "absolute right-3 bottom-3 h-9 w-9 rounded-full backdrop-blur-md transition-all duration-300 z-20",
+                "absolute bottom-3 right-3 z-20 h-9 w-9 rounded-full backdrop-blur-md transition-all duration-300",
                 favorited
-                  ? "bg-red-500 text-white shadow-lg hover:bg-red-600 scale-110"
-                  : "bg-black/40 text-white/70 hover:bg-black/60 hover:text-white border border-white/10",
+                  ? "scale-110 bg-red-500 text-white shadow-lg hover:bg-red-600"
+                  : "border border-white/10 bg-black/40 text-white/70 hover:bg-black/60 hover:text-white"
               )}
             >
               <Heart
-                className={cn("h-4 w-4 transition-all duration-300", favorited && "fill-current")}
+                className={cn(
+                  "h-4 w-4 transition-all duration-300",
+                  favorited && "fill-current"
+                )}
               />
             </Button>
           </div>
 
-          <CardContent className="p-4 relative">
+          <CardContent className="relative p-4">
             {/* Teams / Title */}
             <div className="mb-4 min-h-[6rem]">
               {match.teams?.home && match.teams?.away ? (
                 <div className="relative flex items-center justify-center">
                   {/* Home Team */}
-                  <div className="flex-1 flex flex-col items-center text-center gap-2">
+                  <div className="flex flex-1 flex-col items-center gap-2 text-center">
                     <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
                       <img
                         src={getTeamBadgeUrl(match.teams.home.badge)}
@@ -184,8 +186,8 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                   </div>
 
                   {/* Away Team */}
-                  <div className="flex-1 flex flex-col items-center text-center gap-2">
-                     <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
+                  <div className="flex flex-1 flex-col items-center gap-2 text-center">
+                    <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
                       <img
                         src={getTeamBadgeUrl(match.teams.away.badge)}
                         alt={match.teams.away.name}
@@ -197,27 +199,31 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                       {match.teams.away.name}
                     </span>
                   </div>
-
                 </div>
               ) : (
-                <h3 className="line-clamp-2 text-lg font-bold text-white leading-snug flex items-center h-full">
+                <h3 className="line-clamp-2 flex h-full items-center text-lg font-bold leading-snug text-white">
                   {match.title}
                 </h3>
               )}
             </div>
 
             {/* Footer Info */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+            <div className="flex items-center justify-between border-t border-white/10 pt-3">
               <div className="flex items-center gap-2 text-xs text-white/60">
                 <Calendar className="h-3.5 w-3.5" />
-                <span className={cn("font-medium", isUpcoming && countdown.hours < 24 && "text-amber-400")}>
+                <span
+                  className={cn(
+                    "font-medium",
+                    isUpcoming && countdown.hours < 24 && "text-amber-400"
+                  )}
+                >
                   {isUpcoming
                     ? formatCountdown(countdown)
                     : format(matchTime, "MMM d, h:mm a")}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs font-medium text-white/50 bg-white/5 px-2 py-1 rounded-md">
+              <div className="flex items-center gap-1.5 rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-white/50">
                 <Tv className="h-3 w-3" />
                 <span>{match.sources.length} Sources</span>
               </div>

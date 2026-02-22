@@ -161,8 +161,9 @@ const MediaCard = React.memo(
                 src={
                   imageError
                     ? "/placeholder.svg"
-                    : (media as any).custom_poster_url || getImageUrl(media.poster_path, posterSizes.medium) ||
-                    "/placeholder.svg"
+                    : (media as any).custom_poster_url ||
+                      getImageUrl(media.poster_path, posterSizes.medium) ||
+                      "/placeholder.svg"
                 }
                 alt={media.title || media.name || "Media Poster"}
                 className={cn(
@@ -203,8 +204,9 @@ const MediaCard = React.memo(
               src={
                 imageError
                   ? "/placeholder.svg"
-                  : (media as any).custom_poster_url || getImageUrl(media.poster_path, posterSizes.medium) ||
-                  "/placeholder.svg"
+                  : (media as any).custom_poster_url ||
+                    getImageUrl(media.poster_path, posterSizes.medium) ||
+                    "/placeholder.svg"
               }
               alt={media.title || media.name || "Media Poster"}
               className={cn(

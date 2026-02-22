@@ -29,7 +29,9 @@ export async function fetchVideoSources(): Promise<VideoSource[]> {
   try {
     const apiUrl = import.meta.env.VITE_VIDEO_SOURCE_API;
     if (!apiUrl) {
-      console.error("VITE_VIDEO_SOURCE_API environment variable is not defined");
+      console.error(
+        "VITE_VIDEO_SOURCE_API environment variable is not defined"
+      );
       return [];
     }
 

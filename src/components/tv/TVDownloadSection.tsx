@@ -46,7 +46,10 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
         <div className="w-full sm:w-64">
-          <label htmlFor="tv-download-season" className="mb-2 block text-left text-sm font-medium text-white/80">
+          <label
+            htmlFor="tv-download-season"
+            className="mb-2 block text-left text-sm font-medium text-white/80"
+          >
             Season
           </label>
           <select
@@ -66,7 +69,10 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
           </select>
         </div>
         <div className="w-full sm:w-64">
-          <label htmlFor="tv-download-episode" className="mb-2 block text-left text-sm font-medium text-white/80">
+          <label
+            htmlFor="tv-download-episode"
+            className="mb-2 block text-left text-sm font-medium text-white/80"
+          >
             Episode
           </label>
           <select

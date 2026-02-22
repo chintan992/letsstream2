@@ -188,9 +188,11 @@ const SportMatchPlayer = () => {
 
             {/* Match Info */}
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Radio className="h-4 w-4 text-red-500 animate-pulse" />
-                <span className="text-xs font-medium uppercase tracking-wider text-red-400">Live</span>
+              <div className="mb-2 flex items-center gap-2">
+                <Radio className="h-4 w-4 animate-pulse text-red-500" />
+                <span className="text-xs font-medium uppercase tracking-wider text-red-400">
+                  Live
+                </span>
               </div>
               <h1 className="mb-2 text-2xl font-bold text-white md:text-3xl">
                 {match.title}
@@ -218,7 +220,9 @@ const SportMatchPlayer = () => {
                 <div className="flex h-full items-center justify-center text-white">
                   <div className="text-center">
                     <Radio className="mx-auto mb-4 h-12 w-12 text-white/30" />
-                    <p className="text-white/60">No streams available for this match.</p>
+                    <p className="text-white/60">
+                      No streams available for this match.
+                    </p>
                   </div>
                 </div>
               )}
@@ -231,7 +235,8 @@ const SportMatchPlayer = () => {
                     <p className="text-sm text-white/80">Loading stream...</p>
                     {selectedStream && (
                       <p className="mt-1 text-xs text-white/50">
-                        {selectedStream.source} • Stream {selectedStream.streamNo}
+                        {selectedStream.source} • Stream{" "}
+                        {selectedStream.streamNo}
                       </p>
                     )}
                   </div>
@@ -254,12 +259,14 @@ const SportMatchPlayer = () => {
                   {streams.map((stream, index) => (
                     <button
                       key={`${stream.source}-${stream.id}-${index}`}
-                      onClick={() => handleStreamChange(stream.id, stream.source)}
+                      onClick={() =>
+                        handleStreamChange(stream.id, stream.source)
+                      }
                       className={cn(
                         "relative flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
                         selectedStreamId === stream.id
-                          ? "border-accent bg-accent/20 text-white"
+                          ? "bg-accent/20 border-accent text-white"
                           : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
                       )}
                     >
@@ -285,7 +292,7 @@ const SportMatchPlayer = () => {
                       Stream connected
                     </span>
                   ) : embedUrl ? (
-                    <span className="flex items-center gap-1.5 text-yellow-400 animate-pulse">
+                    <span className="flex animate-pulse items-center gap-1.5 text-yellow-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
                       Connecting to stream...
                     </span>

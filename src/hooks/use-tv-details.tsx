@@ -63,7 +63,18 @@ export const useTVDetails = (id: string | undefined) => {
     networks: [] as Network[],
     contentRatings: [] as ContentRating[],
   });
-  const { tvShow, isLoading, error, recommendations, cast, creators, images, keywords, networks, contentRatings } = tvState;
+  const {
+    tvShow,
+    isLoading,
+    error,
+    recommendations,
+    cast,
+    creators,
+    images,
+    keywords,
+    networks,
+    contentRatings,
+  } = tvState;
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [activeTab, setActiveTab] = useState<
@@ -89,13 +100,21 @@ export const useTVDetails = (id: string | undefined) => {
   useEffect(() => {
     const fetchTVData = async () => {
       if (!id) {
-        setTVState(prev => ({ ...prev, error: "TV show ID is required", isLoading: false }));
+        setTVState(prev => ({
+          ...prev,
+          error: "TV show ID is required",
+          isLoading: false,
+        }));
         return;
       }
 
       const tvId = parseInt(id, 10);
       if (isNaN(tvId)) {
-        setTVState(prev => ({ ...prev, error: "Invalid TV show ID", isLoading: false }));
+        setTVState(prev => ({
+          ...prev,
+          error: "Invalid TV show ID",
+          isLoading: false,
+        }));
         return;
       }
 
@@ -146,7 +165,10 @@ export const useTVDetails = (id: string | undefined) => {
         }
       } catch (error) {
         console.error("Error fetching TV show data:", error);
-        setTVState(prev => ({ ...prev, error: "Failed to load TV show data. Please try again." }));
+        setTVState(prev => ({
+          ...prev,
+          error: "Failed to load TV show data. Please try again.",
+        }));
       } finally {
         setTVState(prev => ({ ...prev, isLoading: false }));
       }
