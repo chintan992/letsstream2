@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   Home,
   Film,
@@ -89,7 +89,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
     <>
       {/* Overlay */}
       {isOpen && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -99,7 +99,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
       )}
 
       {/* Menu */}
-      <motion.div
+      <m.div
         className="bg-background/95 fixed bottom-0 right-0 top-0 z-50 w-64 overflow-y-auto shadow-lg backdrop-blur-lg"
         variants={menuVariants}
         initial="closed"
@@ -118,7 +118,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         <nav className="px-4 pb-6">
           <ul className="space-y-1">
             {menuItems.map(item => (
-              <motion.li key={item.path} variants={menuItemVariants}>
+              <m.li key={item.path} variants={menuItemVariants}>
                 <Link
                   to={item.path}
                   onClick={onClose}
@@ -132,11 +132,11 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
                   <item.icon size={18} className="mr-3" />
                   {item.name}
                 </Link>
-              </motion.li>
+              </m.li>
             ))}
           </ul>
         </nav>
-      </motion.div>
+      </m.div>
     </>
   );
 };

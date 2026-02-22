@@ -11,7 +11,7 @@ import { useUserPreferences } from "@/hooks/user-preferences";
 import { useCountdown, formatCountdown } from "@/hooks/use-countdown";
 import { useFavoriteMatches } from "@/hooks/use-favorite-matches";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface SportMatchCardProps {
   match: APIMatch;
@@ -59,7 +59,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <motion.div
+      <m.div
         variants={cardVariants}
         initial="initial"
         whileHover="hover"
@@ -72,7 +72,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
           {/* Image Container */}
           <div className="relative aspect-video overflow-hidden">
             {match.poster ? (
-              <motion.img
+              <m.img
                 src={getMatchPosterUrl(match.poster)}
                 alt={match.title}
                 className="h-full w-full object-cover"
@@ -94,7 +94,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
               "absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[3px] transition-all duration-300",
               isHovered ? "opacity-100" : "opacity-0"
             )}>
-              <motion.div
+              <m.div
                 className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-white backdrop-blur-md border border-white/20"
                 style={{ boxShadow: `0 0 20px ${accentColor}40` }}
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -103,7 +103,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
               >
                 <PlayCircle className="h-5 w-5 fill-white text-transparent" />
                 <span className="font-medium">Watch Now</span>
-              </motion.div>
+              </m.div>
             </div>
 
             {/* Top Badges */}
@@ -224,7 +224,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </m.div>
     </Link>
   );
 };

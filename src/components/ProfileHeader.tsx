@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   User,
   Settings,
@@ -40,7 +40,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   ];
 
   return (
-    <motion.div
+    <m.div
       className="container mx-auto px-4 pt-24"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -115,7 +115,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
       />
-    </motion.div>
+    </m.div>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { MovieDetails, TVDetails } from "@/utils/types";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useState } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ const Player = () => {
     : undefined;
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -90,14 +90,14 @@ const Player = () => {
          - Episode number badges: z-10 (base UI elements)
          - Video player & other components: natural flow (no explicit z-index)
        */}
-      <motion.nav
+      <m.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
         className="sticky top-0 z-50"
       >
         <Navbar />
-      </motion.nav>
+      </m.nav>
 
       <div className="container mx-auto px-4 py-4 md:px-6 md:py-6">
         <MediaActions
@@ -219,7 +219,7 @@ const Player = () => {
         )}
 
         {/* Existing components below video player */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-6 space-y-6"
@@ -239,9 +239,9 @@ const Player = () => {
               onSourceChange={handleSourceChange}
             />
           </div>
-        </motion.div>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

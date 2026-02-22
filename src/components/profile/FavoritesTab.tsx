@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWatchHistory } from "@/hooks/watch-history";
@@ -68,7 +68,7 @@ const FavoritesTab: React.FC = () => {
 
   if (favorites.length === 0) {
     return (
-      <motion.div
+      <m.div
         className="glass rounded-lg p-8 text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -81,12 +81,12 @@ const FavoritesTab: React.FC = () => {
         <p className="mb-4 text-white/70">
           Start adding movies and shows to your favorites to see them here.
         </p>
-      </motion.div>
+      </m.div>
     );
   }
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -115,7 +115,7 @@ const FavoritesTab: React.FC = () => {
           }
         }}
       />
-    </motion.div>
+    </m.div>
   );
 };
 

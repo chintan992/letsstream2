@@ -4,7 +4,7 @@ import { APIMatch } from "@/utils/sports-types";
 import SportMatchCard from "./SportMatchCard";
 import SportMatchCardSkeleton from "./SportMatchCardSkeleton";
 import EmptyState from "./EmptyState";
-import { motion, Variants } from "framer-motion";
+import { m, Variants } from "framer-motion";
 
 interface SportMatchGridProps {
   matches: APIMatch[];
@@ -77,21 +77,21 @@ const SportMatchGrid = ({
     <div className={cn("px-4 py-6 md:px-8", className)}>
       {title && <h2 className="mb-6 text-2xl font-bold text-white">{title}</h2>}
 
-      <motion.div
+      <m.div
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5"
         variants={container}
         initial="hidden"
         animate="show"
       >
         {matches.map(match => (
-          <motion.div
+          <m.div
             key={`${match.id}-${match.sources[0]?.source}`}
             variants={item}
           >
             <SportMatchCard match={match} />
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
     </div>
   );
 };

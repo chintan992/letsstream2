@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 interface QuickReplySuggestionsProps {
   suggestions: string[];
@@ -23,7 +23,7 @@ const QuickReplySuggestions: React.FC<QuickReplySuggestionsProps> = ({
       )}
     >
       {suggestions.map((suggestion, index) => (
-        <motion.button
+        <m.button
           key={suggestion}
           className="bg-muted/50 border-border/20 flex-shrink-0 snap-start whitespace-nowrap rounded-full border px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-muted active:scale-95"
           onClick={() => onSelectSuggestion(suggestion)}
@@ -33,7 +33,7 @@ const QuickReplySuggestions: React.FC<QuickReplySuggestionsProps> = ({
           whileTap={{ scale: 0.95 }}
         >
           {suggestion}
-        </motion.button>
+        </m.button>
       ))}
     </div>
   );

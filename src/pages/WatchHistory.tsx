@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useWatchHistory } from "@/hooks/watch-history";
 import Navbar from "@/components/Navbar";
@@ -356,7 +356,7 @@ const WatchHistory = () => {
     <div className="min-h-screen bg-background pb-16">
       <Navbar />
 
-      <motion.div
+      <m.div
         className="container mx-auto px-4 pt-24"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -491,7 +491,7 @@ const WatchHistory = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </motion.div>
+      </m.div>
 
       <Footer />
     </div>

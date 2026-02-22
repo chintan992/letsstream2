@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { LazyMotion, domAnimation } from "framer-motion";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "./contexts/theme";
@@ -48,6 +49,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <LazyMotion features={domAnimation}>
         <ServiceWorkerErrorBoundary>
           <ThemeProvider>
             <NotificationProvider>
@@ -70,6 +72,7 @@ function App() {
             </NotificationProvider>
           </ThemeProvider>
         </ServiceWorkerErrorBoundary>
+        </LazyMotion>
       </BrowserRouter>
     </QueryClientProvider>
   );

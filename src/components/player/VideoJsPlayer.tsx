@@ -3,7 +3,7 @@ import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
 import { LabeledStreamLink, Watch32Subtitle } from "@/utils/types";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useChromecast } from "@/hooks/use-chromecast";
 
 /**
@@ -536,7 +536,7 @@ const VideoJsPlayer = ({
   if (isLoading || links.length === 0) {
     return (
       <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="flex flex-col items-center gap-3"
@@ -545,7 +545,7 @@ const VideoJsPlayer = ({
           <p className="text-sm font-medium text-white/50">
             Fetching streaming links...
           </p>
-        </motion.div>
+        </m.div>
       </div>
     );
   }
@@ -577,7 +577,7 @@ const VideoJsPlayer = ({
       {/* Seek indicator overlay */}
       <AnimatePresence>
         {seekIndicator && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -586,7 +586,7 @@ const VideoJsPlayer = ({
             <div className="rounded-xl bg-black/70 px-6 py-3 text-2xl font-bold text-white backdrop-blur-sm">
               {seekIndicator}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -596,7 +596,7 @@ const VideoJsPlayer = ({
           className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center"
           onClick={togglePlay}
         >
-          <motion.div
+          <m.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 ring-1 ring-white/30 backdrop-blur-md transition-transform hover:scale-110"
@@ -608,12 +608,12 @@ const VideoJsPlayer = ({
             >
               <path d="M8 5v14l11-7z" />
             </svg>
-          </motion.div>
+          </m.div>
         </div>
       )}
 
       {/* Custom Controls Bar */}
-      <motion.div
+      <m.div
         initial={false}
         animate={{ opacity: showControls || !isPlaying ? 1 : 0 }}
         transition={{ duration: 0.25 }}
@@ -826,7 +826,7 @@ const VideoJsPlayer = ({
 
               <AnimatePresence>
                 {isSubtitleOpen && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
@@ -882,7 +882,7 @@ const VideoJsPlayer = ({
                         )}
                       </button>
                     ))}
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </div>
@@ -919,7 +919,7 @@ const VideoJsPlayer = ({
 
               <AnimatePresence>
                 {isQualityOpen && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
@@ -941,7 +941,7 @@ const VideoJsPlayer = ({
                         </span>
                       </button>
                     ))}
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </div>
@@ -1031,7 +1031,7 @@ const VideoJsPlayer = ({
             )}
           </button>
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Keyboard shortcuts hint - shown briefly on first hover */}
       <div className="pointer-events-none absolute left-3 top-3 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

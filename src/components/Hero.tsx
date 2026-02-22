@@ -15,7 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useMediaPreferences } from "@/hooks/use-media-preferences";
 import { trackMediaPreference } from "@/lib/analytics";
 import useKeyPress from "@/hooks/use-key-press";
@@ -178,7 +178,9 @@ const Hero = ({ media, className = "" }: HeroProps) => {
     triggerHapticFeedback(15);
     setIsLoaded(false);
     setCurrentIndex(prev => (prev + 1) % filteredMedia.length);
-  }, [filteredMedia.length]);
+    preloadNextImage();
+    preloadPrevImage();
+  }, [filteredMedia.length, preloadNextImage, preloadPrevImage]);
 
   const goToPrev = useCallback(() => {
     triggerHapticFeedback(15);
@@ -186,7 +188,9 @@ const Hero = ({ media, className = "" }: HeroProps) => {
     setCurrentIndex(
       prev => (prev - 1 + filteredMedia.length) % filteredMedia.length
     );
-  }, [filteredMedia.length]);
+    preloadNextImage();
+    preloadPrevImage();
+  }, [filteredMedia.length, preloadNextImage, preloadPrevImage]);
 
   // Keyboard navigation
   useKeyPress("ArrowRight", goToNext);
@@ -296,14 +300,6 @@ const Hero = ({ media, className = "" }: HeroProps) => {
     }
     return pauseAutoRotation;
   }, [startAutoRotation, isAutoRotating]);
-
-  // Preload next and previous images when current is loaded
-  useEffect(() => {
-    if (isLoaded) {
-      preloadNextImage();
-      preloadPrevImage();
-    }
-  }, [isLoaded, preloadNextImage, preloadPrevImage]);
 
   // Preload the first image using <link rel="preload"> for best LCP
   useEffect(() => {
@@ -444,7 +440,7 @@ const Hero = ({ media, className = "" }: HeroProps) => {
       {/* Full-screen backdrop with minimal treatment */}
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
-          <motion.div
+          <m.div
             key={`bg-${currentIndex}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -463,14 +459,14 @@ const Hero = ({ media, className = "" }: HeroProps) => {
 
             {/* Subtle gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
 
       {/* Floating content area - minimal, positioned at bottom */}
       <div className="absolute bottom-0 left-0 right-0 px-6 py-12 md:px-10 lg:px-16">
         <div className="container mx-auto">
-          <motion.div
+          <m.div
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -530,7 +526,7 @@ const Hero = ({ media, className = "" }: HeroProps) => {
                 <span className="font-medium">More Info</span>
               </Button>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
 
@@ -571,7 +567,7 @@ const Hero = ({ media, className = "" }: HeroProps) => {
             aria-label={`Go to slide ${index + 1}`}
           >
             {index === currentIndex && (
-              <motion.div
+              <m.div
                 ref={el => (paginationProgressRefs.current[index] = el)}
                 className="h-full bg-white"
                 initial={{ width: "0%" }}

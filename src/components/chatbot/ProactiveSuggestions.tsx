@@ -3,7 +3,7 @@ import { useChatbot } from "@/contexts/chatbot-context";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { Button } from "@/components/ui/button";
 import { Sparkles, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
@@ -88,7 +88,7 @@ const ProactiveSuggestions: React.FC = () => {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
@@ -124,7 +124,7 @@ const ProactiveSuggestions: React.FC = () => {
               </Button>
             </CardContent>
           </Card>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

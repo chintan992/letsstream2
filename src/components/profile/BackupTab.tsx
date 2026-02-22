@@ -1,12 +1,12 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Database } from "lucide-react";
 import { BackupRestore } from "@/components/BackupRestore";
 import { BackupRestoreErrorBoundary } from "@/components/BackupRestoreErrorBoundary";
 
 const BackupTab: React.FC = () => {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -25,7 +25,7 @@ const BackupTab: React.FC = () => {
       <BackupRestoreErrorBoundary>
         <BackupRestore />
       </BackupRestoreErrorBoundary>
-    </motion.div>
+    </m.div>
   );
 };
 

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 import { Play, Clock, Info, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
   };
 
   return (
-    <motion.div
+    <m.div
       className="hover:border-accent/70 group relative aspect-video w-[280px] flex-none cursor-pointer overflow-hidden rounded-xl border border-transparent bg-card transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl md:w-[300px]"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -126,7 +126,7 @@ const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
           Continue
         </Button>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

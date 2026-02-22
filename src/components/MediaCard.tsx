@@ -10,7 +10,7 @@ import { Media } from "@/utils/types";
 import { posterSizes } from "@/utils/api";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { Star, Info, Heart, Play } from "lucide-react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { trackMediaPreference, trackMediaView } from "@/lib/analytics";
 import { useWillChange } from "@/hooks/useWillChange";
 
@@ -180,7 +180,7 @@ const MediaCard = React.memo(
     }
 
     return (
-      <motion.div
+      <m.div
         className={cn(
           "group/card relative block transform transition-all duration-300 hover:-translate-y-2",
           className
@@ -287,7 +287,7 @@ const MediaCard = React.memo(
             </svg>
           </button>
         </div>
-      </motion.div>
+      </m.div>
     );
   }
 );

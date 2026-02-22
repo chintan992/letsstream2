@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Bookmark, ArrowLeft, Star, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 /**
  * Z-INDEX STRATEGY:
@@ -39,7 +39,7 @@ const MediaActions = ({
   mediaType,
 }: MediaActionsProps) => {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className="sticky top-16 z-40 -mx-4 mb-4 border-b border-white/5 bg-background/80 px-4 py-3 backdrop-blur-md md:-mx-6 md:px-6"
@@ -87,7 +87,7 @@ const MediaActions = ({
         {!title && <div className="flex-1" />}
 
         {/* Action Buttons */}
-        <motion.div
+        <m.div
           className="flex items-center gap-1 md:gap-2"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -125,9 +125,9 @@ const MediaActions = ({
               className={cn("h-5 w-5", isInWatchlist && "fill-current")}
             />
           </Button>
-        </motion.div>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

@@ -1,6 +1,6 @@
 import { Media } from "@/utils/types";
 import MediaCard from "./MediaCard";
-import { motion, Variants } from "framer-motion";
+import { m, Variants } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { Clock, Trash2, SquareCheck, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,6 @@ interface ExtendedMedia extends Omit<Media, "id"> {
   total_episodes_count?: number;
 }
 
-
 interface MediaGridProps {
   media: ExtendedMedia[];
   title?: string;
@@ -40,6 +39,83 @@ interface MediaGridProps {
   onDelete?: (id: string) => void;
   onDeleteSelected?: (ids: string[]) => void;
 }
+
+const Timestamp = ({ media }: { media: ExtendedMedia }) => {
+  const timestamp = media.created_at || media.last_watched_at;
+  if (!timestamp) return null;
+
+  return (
+    <div className="mb-2 flex items-center text-xs text-white/70">
+      <Clock className="mr-1 h-3 w-3" />
+      {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
+    </div>
+  );
+};
+
+const SelectionButtons = ({
+  selectable,
+  selectMode,
+  onToggleSelectMode,
+  onSelectAll,
+  selectedItems,
+  mediaLength,
+  onDeleteSelected,
+}: {
+  selectable: boolean;
+  selectMode: boolean;
+  onToggleSelectMode: () => void;
+  onSelectAll: () => void;
+  selectedItems: string[];
+  mediaLength: number;
+  onDeleteSelected?: (ids: string[]) => void;
+}) => {
+  if (!selectable) return null;
+
+  return (
+    <div className="mb-4 flex gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onToggleSelectMode}
+        className="border-white/20 bg-black/50 text-white hover:bg-black/70"
+      >
+        {selectMode ? "Cancel Selection" : "Select Items"}
+      </Button>
+
+      {selectMode && (
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSelectAll}
+            className="border-white/20 bg-black/50 text-white hover:bg-black/70"
+          >
+            {selectedItems.length === mediaLength ? (
+              <Square className="mr-2 h-4 w-4" />
+            ) : (
+              <SquareCheck className="mr-2 h-4 w-4" />
+            )}
+            {selectedItems.length === mediaLength
+              ? "Deselect All"
+              : "Select All"}
+          </Button>
+
+          {selectedItems.length > 0 && onDeleteSelected && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDeleteSelected(selectedItems)}
+              className="ml-auto"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Selected ({selectedItems.length})
+            </Button>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
 
 const MediaGrid = ({
   media,
@@ -97,84 +173,30 @@ const MediaGrid = ({
     }
   };
 
-  const renderTimestamp = (media: ExtendedMedia) => {
-    const timestamp = media.created_at || media.last_watched_at;
-    if (!timestamp) return null;
-
-    return (
-      <div className="mb-2 flex items-center text-xs text-white/70">
-        <Clock className="mr-1 h-3 w-3" />
-        {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
-      </div>
-    );
-  };
-
-
-  const renderSelectionButtons = () => {
-    if (!selectable) return null;
-
-    return (
-      <div className="mb-4 flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleSelectMode}
-          className="border-white/20 bg-black/50 text-white hover:bg-black/70"
-        >
-          {selectMode ? "Cancel Selection" : "Select Items"}
-        </Button>
-
-        {selectMode && (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSelectAll}
-              className="border-white/20 bg-black/50 text-white hover:bg-black/70"
-            >
-              {selectedItems.length === media.length ? (
-                <Square className="mr-2 h-4 w-4" />
-              ) : (
-                <SquareCheck className="mr-2 h-4 w-4" />
-              )}
-              {selectedItems.length === media.length
-                ? "Deselect All"
-                : "Select All"}
-            </Button>
-
-            {selectedItems.length > 0 && onDeleteSelected && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onDeleteSelected(selectedItems)}
-                className="ml-auto"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedItems.length})
-              </Button>
-            )}
-          </>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="px-4 py-6 md:px-8">
       <div className="mb-6 flex flex-col justify-between md:flex-row md:items-center">
         {title && <h2 className="text-2xl font-bold text-white">{title}</h2>}
-        {renderSelectionButtons()}
+        <SelectionButtons
+          selectable={selectable}
+          selectMode={selectMode}
+          onToggleSelectMode={toggleSelectMode}
+          onSelectAll={handleSelectAll}
+          selectedItems={selectedItems}
+          mediaLength={media.length}
+          onDeleteSelected={onDeleteSelected}
+        />
       </div>
 
       {listView ? (
-        <motion.div
+        <m.div
           className="flex flex-col gap-4"
           variants={container}
           initial="hidden"
           animate="show"
         >
           {media.map((mediaItem, idx) => (
-            <motion.div
+            <m.div
               key={`${mediaItem.media_type}-${mediaItem.id}-${mediaItem.docId ?? idx}`}
               variants={item}
               className="glass group rounded-lg p-4 transition-colors hover:bg-white/10"
@@ -223,29 +245,37 @@ const MediaGrid = ({
                       </span>
                     )}
                   </div>
-                  {renderTimestamp(mediaItem)}
+                  <Timestamp media={mediaItem} />
                   <div className="flex flex-wrap items-center gap-2">
                     {mediaItem.media_type === "tv" && (
                       <>
                         {/* Show S{X} E{Y} for items with proper season/episode info */}
-                        {mediaItem.season !== undefined && mediaItem.episode !== undefined && (
-                          <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
-                            S{mediaItem.season} E{mediaItem.episode}
-                          </span>
-                        )}
+                        {mediaItem.season !== undefined &&
+                          mediaItem.episode !== undefined && (
+                            <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
+                              S{mediaItem.season} E{mediaItem.episode}
+                            </span>
+                          )}
                         {/* Show episode progress for Simkl items */}
-                        {mediaItem.watched_episodes_count !== undefined && mediaItem.season === undefined && (
-                          <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
-                            {mediaItem.watched_episodes_count} ep{mediaItem.watched_episodes_count !== 1 ? 's' : ''} watched
-                            {mediaItem.total_episodes_count && ` / ${mediaItem.total_episodes_count}`}
-                          </span>
-                        )}
+                        {mediaItem.watched_episodes_count !== undefined &&
+                          mediaItem.season === undefined && (
+                            <span className="bg-accent/20 rounded px-2 py-1 text-xs font-medium">
+                              {mediaItem.watched_episodes_count} ep
+                              {mediaItem.watched_episodes_count !== 1
+                                ? "s"
+                                : ""}{" "}
+                              watched
+                              {mediaItem.total_episodes_count &&
+                                ` / ${mediaItem.total_episodes_count}`}
+                            </span>
+                          )}
                         {/* Fallback: just show TV badge if no episode info */}
-                        {mediaItem.season === undefined && mediaItem.watched_episodes_count === undefined && (
-                          <span className="rounded bg-purple-600/50 px-2 py-1 text-xs font-medium">
-                            TV Show
-                          </span>
-                        )}
+                        {mediaItem.season === undefined &&
+                          mediaItem.watched_episodes_count === undefined && (
+                            <span className="rounded bg-purple-600/50 px-2 py-1 text-xs font-medium">
+                              TV Show
+                            </span>
+                          )}
                       </>
                     )}
                     {mediaItem.media_type === "movie" && (
@@ -259,63 +289,69 @@ const MediaGrid = ({
                   {mediaItem.media_type === "tv" && (
                     <>
                       {/* Firebase format: detailed episodes_watched array */}
-                      {mediaItem.episodes_watched && mediaItem.episodes_watched.length > 0 && (
-                        <div className="mt-2">
-                          <div className="text-xs text-white/70">
-                            Episodes watched: {mediaItem.episodes_watched.length}
-                          </div>
-                          {mediaItem.episodes_watched
-                            .slice(0, 3)
-                            .map((ep, idx) => (
-                              <span
-                                key={`${ep.season}-${ep.episode}-${idx}`}
-                                className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
-                              >
-                                S{ep.season}E{ep.episode}
+                      {mediaItem.episodes_watched &&
+                        mediaItem.episodes_watched.length > 0 && (
+                          <div className="mt-2">
+                            <div className="text-xs text-white/70">
+                              Episodes watched:{" "}
+                              {mediaItem.episodes_watched.length}
+                            </div>
+                            {mediaItem.episodes_watched
+                              .slice(0, 3)
+                              .map((ep, idx) => (
+                                <span
+                                  key={`${ep.season}-${ep.episode}-${idx}`}
+                                  className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
+                                >
+                                  S{ep.season}E{ep.episode}
+                                </span>
+                              ))}
+                            {mediaItem.episodes_watched.length > 3 && (
+                              <span className="text-xs text-white/50">
+                                +{mediaItem.episodes_watched.length - 3} more
                               </span>
-                            ))}
-                          {mediaItem.episodes_watched.length > 3 && (
-                            <span className="text-xs text-white/50">
-                              +{mediaItem.episodes_watched.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {/* Simkl format: just count with current episode shown separately */}
-                      {!mediaItem.episodes_watched && mediaItem.watched_episodes_count !== undefined && mediaItem.watched_episodes_count > 0 && (
-                        <div className="mt-2">
-                          <div className="text-xs text-white/70">
-                            Episodes watched: {mediaItem.watched_episodes_count}
-                            {mediaItem.total_episodes_count && ` / ${mediaItem.total_episodes_count}`}
+                            )}
                           </div>
-                          {mediaItem.season !== undefined && mediaItem.episode !== undefined && (
-                            <span className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs">
-                              S{mediaItem.season}E{mediaItem.episode}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      {/* Simkl format: just count with current episode shown separately */}
+                      {!mediaItem.episodes_watched &&
+                        mediaItem.watched_episodes_count !== undefined &&
+                        mediaItem.watched_episodes_count > 0 && (
+                          <div className="mt-2">
+                            <div className="text-xs text-white/70">
+                              Episodes watched:{" "}
+                              {mediaItem.watched_episodes_count}
+                              {mediaItem.total_episodes_count &&
+                                ` / ${mediaItem.total_episodes_count}`}
+                            </div>
+                            {mediaItem.season !== undefined &&
+                              mediaItem.episode !== undefined && (
+                                <span className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs">
+                                  S{mediaItem.season}E{mediaItem.episode}
+                                </span>
+                              )}
+                          </div>
+                        )}
                     </>
                   )}
-
 
                   <p className="mt-2 line-clamp-2 text-sm text-white/70">
                     {mediaItem.overview}
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       ) : (
-        <motion.div
+        <m.div
           className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5 xl:grid-cols-6"
           variants={container}
           initial="hidden"
           animate="show"
         >
           {media.map((mediaItem, idx) => (
-            <motion.div
+            <m.div
               key={`${mediaItem.media_type}-${mediaItem.id}-${mediaItem.docId ?? idx}`}
               variants={item}
               className="group relative"
@@ -339,9 +375,9 @@ const MediaGrid = ({
                 </Button>
               )}
               <MediaCard media={{ ...mediaItem, id: mediaItem.media_id }} />
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       )}
     </div>
   );

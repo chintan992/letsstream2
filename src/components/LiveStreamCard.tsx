@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Play } from "lucide-react";
 // ...existing code...
@@ -23,7 +23,7 @@ const LiveStreamCard: FC<LiveStreamCardProps> = ({ stream }) => {
   const team2Flag = stream.team_2_flag;
 
   return (
-    <motion.div
+    <m.div
       whileHover={{ y: -5, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
@@ -88,7 +88,7 @@ const LiveStreamCard: FC<LiveStreamCardProps> = ({ stream }) => {
           Watch Live
         </Button>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { X, Camera, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,7 +74,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               </DialogTitle>
             </DialogHeader>
 
-            <motion.div
+            <m.div
               className="space-y-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -157,7 +157,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   {isUpdating ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
-            </motion.div>
+            </m.div>
           </DialogContent>
         </Dialog>
       )}

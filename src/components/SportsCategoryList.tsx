@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Sport } from "@/utils/sports-types";
 import { getSportIcon } from "@/utils/sport-icons";
 import { useUserPreferences } from "@/hooks/user-preferences";
@@ -37,13 +37,13 @@ const SportsCategoryList: React.FC<SportsCategoryListProps> = ({
 
   return (
     <div className="mb-8 overflow-x-auto pb-4">
-      <motion.div
+      <m.div
         className="flex min-w-max space-x-2"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.button
+        <m.button
           onClick={() => onSelectSport("all")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105`}
           style={{
@@ -60,12 +60,12 @@ const SportsCategoryList: React.FC<SportsCategoryListProps> = ({
         >
           <span>🏅</span>
           All Sports
-        </motion.button>
+        </m.button>
 
         {isLoading ? (
           <div className="flex space-x-2">
             {[...Array(5)].map((_, i) => (
-              <motion.div
+              <m.div
                 key={i}
                 className="h-10 w-28 animate-pulse rounded-full bg-white/10"
                 variants={itemVariants}
@@ -74,7 +74,7 @@ const SportsCategoryList: React.FC<SportsCategoryListProps> = ({
           </div>
         ) : (
           sports.map((sport: Sport) => (
-            <motion.button
+            <m.button
               key={sport.id}
               onClick={() => onSelectSport(sport.id)}
               className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ease-in-out transform hover:scale-105`}
@@ -97,10 +97,10 @@ const SportsCategoryList: React.FC<SportsCategoryListProps> = ({
             >
               <span>{getSportIcon(sport.id)}</span>
               {sport.name}
-            </motion.button>
+            </m.button>
           ))
         )}
-      </motion.div>
+      </m.div>
     </div>
   );
 };

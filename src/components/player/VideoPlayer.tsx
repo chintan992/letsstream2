@@ -1,7 +1,9 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useEffect, useRef, useMemo } from "react";
 import { memo, lazy, Suspense } from "react";
 import { LabeledStreamLink } from "@/utils/types";
+
+const EMPTY_STREAM_LINKS: LabeledStreamLink[] = [];
 
 const VideoJsPlayer = lazy(() => import("./VideoJsPlayer"));
 
@@ -34,7 +36,7 @@ const VideoPlayerComponent = ({
   onLoaded,
   onError,
   isApiSource = false,
-  streamLinks = [],
+  streamLinks = EMPTY_STREAM_LINKS,
   apiLoading = false,
   apiError = null,
 }: VideoPlayerProps) => {
@@ -97,23 +99,23 @@ const VideoPlayerComponent = ({
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg shadow-2xl">
       {isLoading ? (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 flex items-center justify-center bg-black/60"
         >
           <div className="h-16 w-16 animate-spin rounded-full border-4 border-white/30 border-t-white" />
-        </motion.div>
+        </m.div>
       ) : null}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="h-full w-full"
       >
         {iframeElement}
-      </motion.div>
+      </m.div>
     </div>
   );
 };

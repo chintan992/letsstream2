@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -156,7 +156,7 @@ const LiveStreams = () => {
                     ))}
                   </div>
                 ) : filteredStreams && filteredStreams.length > 0 ? (
-                  <motion.div
+                  <m.div
                     className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -165,7 +165,7 @@ const LiveStreams = () => {
                     {filteredStreams.map(stream => (
                       <LiveStreamCard key={stream.match_id} stream={stream} />
                     ))}
-                  </motion.div>
+                  </m.div>
                 ) : (
                   <div className="py-16 text-center">
                     <p className="text-gray-400">

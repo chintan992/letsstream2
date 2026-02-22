@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useAuth } from "@/hooks";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { WatchHistoryItem } from "@/contexts/types/watch-history";
@@ -101,7 +101,7 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
           />
         )}
 
-        <motion.div
+        <m.div
           ref={rowRef}
           className="hide-scrollbar flex gap-6 overflow-x-auto pb-4"
           onScroll={handleScroll}
@@ -117,7 +117,7 @@ const ContinueWatching = ({ maxItems = 20 }: ContinueWatchingProps) => {
               onNavigateToDetails={handleNavigateToDetails}
             />
           ))}
-        </motion.div>
+        </m.div>
 
         {/* Right scroll button */}
         {showRightArrow && (

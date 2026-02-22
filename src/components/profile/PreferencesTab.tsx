@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Settings, CircleDashed, CloudOff } from "lucide-react";
 import { SimklService } from "@/lib/simkl";
 import { useUserPreferences } from "@/hooks/user-preferences";
@@ -68,7 +68,7 @@ const PreferencesTab: React.FC = () => {
   };
 
   return (
-    <motion.div
+    <m.div
       className="glass rounded-lg p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -201,7 +201,7 @@ const PreferencesTab: React.FC = () => {
           </Select>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

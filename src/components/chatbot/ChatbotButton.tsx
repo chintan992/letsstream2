@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MessageSquare, X, Mic, BellOff, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatbot } from "@/contexts/chatbot-context";
@@ -7,7 +7,7 @@ import {
   triggerHapticFeedback,
   triggerHapticPattern,
 } from "@/utils/haptic-feedback";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   Tooltip,
   TooltipContent,
@@ -25,30 +25,19 @@ const ChatbotButton: React.FC = () => {
     isMuted,
     setIsMuted,
   } = useChatbot();
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  // isMuted state now comes from context
-  const [isRecording, setIsRecording] = useState(false);
-  const dragConstraints = useRef<HTMLDivElement>(null);
-
-  // Calculate initial position (bottom right) - using useMemo to avoid conditional hook calls
-  const initialPosition = useMemo(() => {
+  const [position, setPosition] = useState(() => {
     if (typeof window !== "undefined") {
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
       return {
-        x: windowWidth - 80, // Adjust based on button size and desired margin
-        y: windowHeight - 80,
+        x: window.innerWidth - 80,
+        y: window.innerHeight - 80,
       };
     }
     return { x: 0, y: 0 };
-  }, []);
-
-  // Set initial position
-  useEffect(() => {
-    setPosition(initialPosition);
-  }, [initialPosition]);
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const dragConstraints = useRef<HTMLDivElement>(null);
 
   // Reset unread indicator when opening chat
   useEffect(() => {
@@ -177,7 +166,7 @@ const ChatbotButton: React.FC = () => {
       ref={dragConstraints}
       className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
     >
-      <motion.div
+      <m.div
         drag
         dragConstraints={dragConstraints}
         dragMomentum={false}
@@ -247,7 +236,7 @@ const ChatbotButton: React.FC = () => {
         <div className="relative">
           <AnimatePresence>
             {hasUnread && !isOpen && (
-              <motion.div
+              <m.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -280,7 +269,7 @@ const ChatbotButton: React.FC = () => {
                 document.removeEventListener("touchend", clearTimer);
                 document.removeEventListener("touchmove", clearTimer);
               };
-              document.addEventListener("touchend", clearTimer, { once: true });
+              document.addEventListener("touchend", clearTimer, { once: true, passive: true });
               document.addEventListener("touchmove", clearTimer, {
                 once: true,
               });
@@ -289,12 +278,12 @@ const ChatbotButton: React.FC = () => {
             {isOpen ? (
               <X className={cn("h-5 w-5", iconColorClass)} />
             ) : isRecording ? (
-              <motion.div
+              <m.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 1 }}
               >
                 <Mic className="h-6 w-6 text-red-500" />
-              </motion.div>
+              </m.div>
             ) : (
               <MessageSquare className={cn("h-6 w-6", iconColorClass)} />
             )}
@@ -306,7 +295,7 @@ const ChatbotButton: React.FC = () => {
           {showOptions && (
             <>
               {/* Mic Button */}
-              <motion.div
+              <m.div
                 initial={{ y: 0, opacity: 0, scale: 0.5 }}
                 animate={{ y: -60, opacity: 1, scale: 1 }}
                 exit={{ y: 0, opacity: 0, scale: 0.5 }}
@@ -327,10 +316,10 @@ const ChatbotButton: React.FC = () => {
                     <p>Voice input</p>
                   </TooltipContent>
                 </Tooltip>
-              </motion.div>
+              </m.div>
 
               {/* Notification Toggle Button */}
-              <motion.div
+              <m.div
                 initial={{ y: 0, opacity: 0, scale: 0.5 }}
                 animate={{ y: -110, opacity: 1, scale: 1 }}
                 exit={{ y: 0, opacity: 0, scale: 0.5 }}
@@ -362,11 +351,11 @@ const ChatbotButton: React.FC = () => {
                     </p>
                   </TooltipContent>
                 </Tooltip>
-              </motion.div>
+              </m.div>
             </>
           )}
         </AnimatePresence>
-      </motion.div>
+      </m.div>
     </div>
   );
 };

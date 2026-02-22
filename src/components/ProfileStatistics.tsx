@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Clock, Film, Star, Calendar, TrendingUp } from "lucide-react";
 import { ProfileStats } from "@/hooks/useProfileData";
 
@@ -55,7 +55,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({
   ];
 
   return (
-    <motion.div
+    <m.div
       className={`glass rounded-lg p-6 ${className}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -65,7 +65,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         {statItems.map((item, index) => (
-          <motion.div
+          <m.div
             key={item.label}
             className="rounded-lg bg-white/5 p-3 text-center transition-colors hover:bg-white/10"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -75,7 +75,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({
             <item.icon className={`mx-auto mb-2 h-6 w-6 ${item.color}`} />
             <div className="text-lg font-bold text-white">{item.value}</div>
             <div className="text-xs text-white/70">{item.label}</div>
-          </motion.div>
+          </m.div>
         ))}
       </div>
 
@@ -96,7 +96,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({
           </div>
         </div>
       )}
-    </motion.div>
+    </m.div>
   );
 };
 

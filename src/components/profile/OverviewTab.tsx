@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { TrendingUp, Clock, Star, Heart, Bookmark, Play } from "lucide-react";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useWatchHistory } from "@/hooks/watch-history";
@@ -62,7 +62,7 @@ const OverviewTab: React.FC = () => {
   ];
 
   return (
-    <motion.div
+    <m.div
       className="space-y-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -71,7 +71,7 @@ const OverviewTab: React.FC = () => {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {quickStats.map((stat, index) => (
-          <motion.div
+          <m.div
             key={stat.label}
             className="glass rounded-lg p-4 text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -81,7 +81,7 @@ const OverviewTab: React.FC = () => {
             <stat.icon className={`mx-auto mb-2 h-8 w-8 ${stat.color}`} />
             <div className="text-2xl font-bold text-white">{stat.value}</div>
             <div className="text-sm text-white/70">{stat.label}</div>
-          </motion.div>
+          </m.div>
         ))}
       </div>
 
@@ -141,7 +141,7 @@ const OverviewTab: React.FC = () => {
       {watchHistoryMedia.length === 0 &&
         favorites.length === 0 &&
         watchlist.length === 0 && (
-          <motion.div
+          <m.div
             className="glass rounded-lg p-8 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -155,9 +155,9 @@ const OverviewTab: React.FC = () => {
               Start watching movies and shows to see your activity, favorites,
               and recommendations here.
             </p>
-          </motion.div>
+          </m.div>
         )}
-    </motion.div>
+    </m.div>
   );
 };
 

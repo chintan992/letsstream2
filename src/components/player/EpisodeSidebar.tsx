@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Season } from "@/utils/types";
 
+const EMPTY_SEASONS: Season[] = [];
+
 /**
  * Z-INDEX STRATEGY:
  * - Episode number badges: z-20 (always visible on thumbnails)
@@ -32,12 +34,12 @@ interface EpisodeSidebarProps {
   seasons?: Season[];
 }
 
-export const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
+const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   episodes,
   currentEpisodeIndex,
   showId,
   season,
-  seasons = [],
+  seasons = EMPTY_SEASONS,
 }) => {
   const navigate = useNavigate();
   const episodeRefs = useRef<(HTMLDivElement | null)[]>([]);

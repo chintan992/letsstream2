@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ThumbsUp, Star, ThumbsDown, MessageSquare } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "@/contexts/chatbot-context";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useChatbot } from "@/contexts/chatbot-context";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { extractMediaFromResponse } from "@/utils/chatbot-utils";
@@ -158,7 +158,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           </div>
         )}
 
-        <motion.div
+        <m.div
           className="ml-4 grid gap-4"
           style={{
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -168,7 +168,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           transition={{ duration: 0.3, staggerChildren: 0.1 }}
         >
           {mediaItems.map((media, index) => (
-            <motion.div
+            <m.div
               key={`${media.id}-${index}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -179,9 +179,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 onRate={rating => handleRate(rating)}
                 personalizedScore={getPersonalizedScore(media)}
               />
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
 
         <div className="flex justify-end">
           {showRating ? (
@@ -249,13 +249,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       >
         {displayedText}
         {isTyping && !message.isUser && (
-          <motion.span
+          <m.span
             className="ml-1 inline-block opacity-70"
             animate={{ opacity: [0.2, 1, 0.2] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
             ▋
-          </motion.span>
+          </m.span>
         )}
 
         {!message.isUser && !isTyping && (

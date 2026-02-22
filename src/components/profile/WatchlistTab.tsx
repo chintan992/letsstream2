@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Bookmark, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWatchHistory } from "@/hooks/watch-history";
@@ -67,7 +67,7 @@ const WatchlistTab: React.FC = () => {
 
   if (watchlist.length === 0) {
     return (
-      <motion.div
+      <m.div
         className="glass rounded-lg p-8 text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -81,12 +81,12 @@ const WatchlistTab: React.FC = () => {
           Add movies and shows to your watchlist to keep track of what you want
           to watch.
         </p>
-      </motion.div>
+      </m.div>
     );
   }
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -115,7 +115,7 @@ const WatchlistTab: React.FC = () => {
           }
         }}
       />
-    </motion.div>
+    </m.div>
   );
 };
 

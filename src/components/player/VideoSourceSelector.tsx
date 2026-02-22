@@ -3,7 +3,7 @@ import {
   triggerHapticFeedback,
   triggerSuccessHaptic,
 } from "@/utils/haptic-feedback";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { VideoSource } from "@/utils/types";
 import { useToast } from "@/hooks/use-toast";
@@ -66,14 +66,14 @@ const VideoSourceSelector = ({
   // Mobile: Compact horizontal scroll layout
   if (isMobile) {
     return (
-      <motion.div
+      <m.div
         className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide snap-x snap-mandatory"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
         {videoSources.map((source, index) => (
-          <motion.button
+          <m.button
             key={source.key}
             onClick={() => handleSourceChange(source.key)}
             className={cn(
@@ -95,31 +95,31 @@ const VideoSourceSelector = ({
                 {source.name}
               </span>
               {selectedSource === source.key && (
-                <motion.div
+                <m.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="flex h-4 w-4 items-center justify-center rounded-full bg-white"
                 >
                   <Check className="h-2.5 w-2.5 text-black" />
-                </motion.div>
+                </m.div>
               )}
             </div>
-          </motion.button>
+          </m.button>
         ))}
-      </motion.div>
+      </m.div>
     );
   }
 
   // Desktop: Grid layout
   return (
-    <motion.div
+    <m.div
       className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 md:gap-4 lg:grid-cols-5 xl:grid-cols-5"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
     >
       {videoSources.map((source, index) => (
-        <motion.button
+        <m.button
           key={source.key}
           onClick={() => handleSourceChange(source.key)}
           className={cn(
@@ -139,7 +139,7 @@ const VideoSourceSelector = ({
         >
           {/* Pulsing border for active state */}
           {selectedSource === source.key && (
-            <motion.div
+            <m.div
               className="absolute inset-0 rounded-xl border border-white/30"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -164,25 +164,25 @@ const VideoSourceSelector = ({
                 {source.name}
               </span>
               {selectedSource === source.key && (
-                <motion.div
+                <m.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white"
                 >
                   <Check className="h-2.5 w-2.5 text-black" />
-                </motion.div>
+                </m.div>
               )}
             </div>
             <div className="flex items-center gap-1.5">
               {selectedSource === source.key ? (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="flex items-center gap-1 text-xs font-medium text-white/90"
                 >
                   <Check className="h-3 w-3" />
                   Currently active
-                </motion.div>
+                </m.div>
               ) : (
                 <span className="text-xs text-white/50 group-hover:text-white/70">
                   Click to select
@@ -200,9 +200,9 @@ const VideoSourceSelector = ({
               selectedSource === source.key && "opacity-30"
             )}
           />
-        </motion.button>
+        </m.button>
       ))}
-    </motion.div>
+    </m.div>
   );
 };
 
