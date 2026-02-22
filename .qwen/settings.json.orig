@@ -8,5 +8,6 @@
       }
     }
   },
-  "$version": 3
+  "$version": 2,
+  "advanced.tavilyApiKey": "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"
 }

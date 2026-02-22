@@ -17,7 +17,6 @@ import EpisodeNavigation from "@/components/player/EpisodeNavigation";
 import EpisodeSidebar from "@/components/player/EpisodeSidebar";
 import MediaActions from "@/components/player/MediaActions";
 import { useMediaPlayer } from "@/hooks/use-media-player";
-import { videoSources } from "@/utils/video-sources";
 import { useAuth } from "@/hooks";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -64,6 +63,12 @@ const Player = () => {
     handlePlayerLoaded,
     handlePlayerError,
     goBack,
+    // StreamFlix API source state
+    isApiSource,
+    streamLinks,
+    apiLoading,
+    apiError,
+    videoSources,
   } = useMediaPlayer(id, season, episode, type);
 
   const posterUrl = mediaDetails
@@ -126,6 +131,10 @@ const Player = () => {
                 poster={posterUrl}
                 onLoaded={handlePlayerLoaded}
                 onError={handlePlayerError}
+                isApiSource={isApiSource}
+                streamLinks={streamLinks}
+                apiLoading={apiLoading}
+                apiError={apiError}
               />
             </div>
             <div className="aspect-video max-h-[70vh] min-h-[350px] w-[280px] flex-shrink-0 md:w-80 lg:w-96 xl:w-[420px]">
@@ -149,6 +158,10 @@ const Player = () => {
                 poster={posterUrl}
                 onLoaded={handlePlayerLoaded}
                 onError={handlePlayerError}
+                isApiSource={isApiSource}
+                streamLinks={streamLinks}
+                apiLoading={apiLoading}
+                apiError={apiError}
               />
             </div>
 

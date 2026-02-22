@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useMemo } from "react";
-import { memo } from "react";
+import { memo, lazy, Suspense } from "react";
+import { LabeledStreamLink } from "@/utils/types";
+
+const VideoJsPlayer = lazy(() => import("./VideoJsPlayer"));
 
 /**
  * Z-INDEX STRATEGY:
@@ -16,6 +19,11 @@ interface VideoPlayerProps {
   poster?: string;
   onLoaded: () => void;
   onError: (error: string) => void;
+  // API source props (for Video.js player)
+  isApiSource?: boolean;
+  streamLinks?: LabeledStreamLink[];
+  apiLoading?: boolean;
+  apiError?: string | null;
 }
 
 const VideoPlayerComponent = ({
@@ -25,6 +33,10 @@ const VideoPlayerComponent = ({
   poster,
   onLoaded,
   onError,
+  isApiSource = false,
+  streamLinks = [],
+  apiLoading = false,
+  apiError = null,
 }: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -56,6 +68,32 @@ const VideoPlayerComponent = ({
     [iframeUrl, handleIframeError, handleIframeLoad]
   ); // Only re-create iframe when iframeUrl changes
 
+  // Render Video.js player for API sources
+  if (isApiSource) {
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-lg shadow-2xl">
+        <Suspense
+          fallback={
+            <div className="flex h-full w-full items-center justify-center bg-black/60">
+              <div className="h-16 w-16 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+            </div>
+          }
+        >
+          <VideoJsPlayer
+            links={streamLinks}
+            title={title}
+            poster={poster}
+            onLoaded={onLoaded}
+            onError={onError}
+            isLoading={apiLoading}
+            apiError={apiError}
+          />
+        </Suspense>
+      </div>
+    );
+  }
+
+  // Default: render iframe player (existing behavior, unchanged)
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg shadow-2xl">
       {isLoading ? (
@@ -81,12 +119,15 @@ const VideoPlayerComponent = ({
 };
 
 const VideoPlayer = memo(VideoPlayerComponent, (prevProps, nextProps) => {
-  // Only re-render if iframeUrl changes, not on other prop changes like orientation
   return (
     prevProps.iframeUrl === nextProps.iframeUrl &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.title === nextProps.title &&
-    prevProps.poster === nextProps.poster
+    prevProps.poster === nextProps.poster &&
+    prevProps.isApiSource === nextProps.isApiSource &&
+    prevProps.streamLinks === nextProps.streamLinks &&
+    prevProps.apiLoading === nextProps.apiLoading &&
+    prevProps.apiError === nextProps.apiError
   );
 });
 

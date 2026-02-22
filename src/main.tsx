@@ -16,10 +16,14 @@ window.addEventListener("beforeinstallprompt", e => {
 import React from "react";
 import { createRoot } from "react-dom/client";
 import HapticApp from "./HapticApp";
+import { initSecurity } from "./utils/security";
 import "./index.css";
 
 // Initialize the app after DOM is fully loaded
 const initApp = () => {
+  // Initialize security to prevent developer console access
+  initSecurity();
+
   const rootElement = document.getElementById("root");
   if (!rootElement) {
     console.error("Root element not found!");

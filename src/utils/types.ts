@@ -144,10 +144,91 @@ export interface CustomVideoSourceResult {
   }>;
 }
 
+// StreamFlix API types
+export interface StreamFlixLink {
+  url: string;
+  quality: string;
+  tier: string;
+}
+
+export interface LabeledStreamLink extends StreamFlixLink {
+  label: string; // e.g. "720p (1)", "1080p (2)" or server name like "UpCloud"
+  subtitles?: Watch32Subtitle[];
+}
+
+export interface StreamFlixMovieResponse {
+  type: "movie";
+  tmdbId: string;
+  title: string;
+  year: string;
+  rating: number;
+  duration: string;
+  description: string;
+  poster: string;
+  relativePath: string;
+  links: StreamFlixLink[];
+}
+
+export interface StreamFlixTVResponse {
+  type: "tv";
+  tmdbId: string;
+  title: string;
+  year: string;
+  rating: number;
+  poster: string;
+  season: number;
+  episode: number;
+  episodeName: string;
+  episodeOverview: string;
+  episodeRating: number;
+  episodeRuntime: number;
+  stillPath: string;
+  relativePath: string;
+  links: StreamFlixLink[];
+}
+
+export type StreamFlixResponse = StreamFlixMovieResponse | StreamFlixTVResponse;
+
+// Watch32 API types
+export interface Watch32Subtitle {
+  label: string;
+  url: string;
+  default: boolean;
+}
+
+export interface Watch32Server {
+  name: string;
+  url?: string;
+  subtitles?: Watch32Subtitle[];
+  source: string;
+  error?: string;
+}
+
+export interface Watch32Response {
+  type: "movie" | "tv";
+  tmdbId: string;
+  title: string;
+  year: string;
+  poster?: string;
+  background?: string;
+  synopsis?: string;
+  genres?: string[];
+  duration?: string;
+  season?: number;
+  episode?: number;
+  episodeName?: string;
+  totalSeasons?: number;
+  totalEpisodesInSeason?: number;
+  watch32Url?: string;
+  servers: Watch32Server[];
+}
+
 // ...existing code...
 export interface VideoSource {
   key: string;
   name: string;
+  isApiSource?: boolean;
+  requiresAuth?: boolean;
   getMovieUrl: (
     id: number
   ) => string | Promise<string> | Promise<CustomVideoSourceResult | string>;

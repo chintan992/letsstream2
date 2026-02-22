@@ -1,13 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { getMovieDetails, getTVDetails, getSeasonDetails } from "@/utils/api";
 // Custom API references removed
 import { MovieDetails, TVDetails, VideoSource, Episode } from "@/utils/types";
-import { videoSources } from "@/utils/video-sources";
+import { fetchVideoSources } from "@/utils/video-source-loader";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { useAuth } from "@/hooks";
 import { useUserPreferences } from "@/hooks/user-preferences";
 import { useToast } from "@/hooks/use-toast";
+import { useStreamFlixApi } from "@/hooks/use-streamflix-api";
 
 export const useMediaPlayer = (
   id: string | undefined,
@@ -16,10 +18,33 @@ export const useMediaPlayer = (
   type: string | undefined
 ) => {
   const { userPreferences, updatePreferences } = useUserPreferences();
+  const { user } = useAuth();
+
+  const { data: fetchedSources = [], isLoading: isSourcesLoading } = useQuery({
+    queryKey: ["videoSources"],
+    queryFn: fetchVideoSources,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+
+  // Filter sources: hide requiresAuth sources from unauthenticated users
+  const videoSources = useMemo(() => {
+    return fetchedSources.filter(src => {
+      if (src.requiresAuth && !user) return false;
+      return true;
+    });
+  }, [fetchedSources, user]);
+
   const [title, setTitle] = useState<string>("");
   const [selectedSource, setSelectedSource] = useState<string>(
-    userPreferences?.preferred_source || videoSources[0].key
+    userPreferences?.preferred_source || ""
   );
+
+  // Set initial selected source once sources are loaded
+  useEffect(() => {
+    if (videoSources.length > 0 && !selectedSource) {
+      setSelectedSource(userPreferences?.preferred_source || videoSources[0].key);
+    }
+  }, [videoSources, selectedSource, userPreferences]);
   const [iframeUrl, setIframeUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [mediaType, setMediaType] = useState<"movie" | "tv">("movie");
@@ -39,7 +64,6 @@ export const useMediaPlayer = (
 
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const {
     addToWatchHistory,
     addToFavorites,
@@ -49,6 +73,36 @@ export const useMediaPlayer = (
     isInFavorites,
     isInWatchlist,
   } = useWatchHistory();
+
+  // Detect if current source is an API source
+  const currentSource = useMemo(
+    () => videoSources.find(src => src.key === selectedSource),
+    [selectedSource, videoSources]
+  );
+  const isApiSource = currentSource?.isApiSource || false;
+
+  // Compute the API URL for StreamFlix sources
+  const apiUrl = useMemo(() => {
+    if (!isApiSource || !currentSource || !id) return null;
+    const mediaId = parseInt(id, 10);
+    if (mediaType === "movie") {
+      return currentSource.getMovieUrl(mediaId) as string;
+    } else if (mediaType === "tv" && season && episode) {
+      return currentSource.getTVUrl(
+        mediaId,
+        parseInt(season, 10),
+        parseInt(episode, 10)
+      ) as string;
+    }
+    return null;
+  }, [isApiSource, currentSource, id, mediaType, season, episode]);
+
+  // Fetch streaming links when using an API source
+  const {
+    links: streamLinks,
+    isLoading: apiLoading,
+    error: apiError,
+  } = useStreamFlixApi(apiUrl);
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
@@ -502,7 +556,7 @@ export const useMediaPlayer = (
     mediaDetails,
     episodes,
     currentEpisodeIndex,
-    isLoading,
+    isLoading: isLoading || isSourcesLoading,
     isPlayerLoaded,
     iframeUrl,
     selectedSource,
@@ -520,6 +574,12 @@ export const useMediaPlayer = (
     handlePlayerLoaded,
     handlePlayerError,
     goBack: () => navigate(-1),
+    // StreamFlix API source state
+    isApiSource,
+    streamLinks,
+    apiLoading,
+    apiError,
+    videoSources,
   };
 };
 
