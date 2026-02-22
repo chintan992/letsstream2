@@ -51,24 +51,27 @@ interface GuestStar {
 }
 
 export const useTVDetails = (id: string | undefined) => {
-  const [tvShow, setTVShow] = useState<TVDetails | null>(null);
+  const [tvState, setTVState] = useState({
+    tvShow: null as TVDetails | null,
+    isLoading: true,
+    error: null as string | null,
+    recommendations: [] as Media[],
+    cast: [] as CastMember[],
+    creators: [] as Creator[],
+    images: null as Images | null,
+    keywords: [] as Keyword[],
+    networks: [] as Network[],
+    contentRatings: [] as ContentRating[],
+  });
+  const { tvShow, isLoading, error, recommendations, cast, creators, images, keywords, networks, contentRatings } = tvState;
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     "episodes" | "about" | "cast" | "reviews"
   >("episodes");
-  const [recommendations, setRecommendations] = useState<Media[]>([]);
-  const [cast, setCast] = useState<CastMember[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
-  const [creators, setCreators] = useState<Creator[]>([]);
-  const [images, setImages] = useState<Images | null>(null);
-  const [keywords, setKeywords] = useState<Keyword[]>([]);
-  const [networks, setNetworks] = useState<Network[]>([]);
-  const [contentRatings, setContentRatings] = useState<ContentRating[]>([]);
   const [guestStars, setGuestStars] = useState<GuestStar[]>([]);
 
   const navigate = useNavigate();
@@ -86,21 +89,18 @@ export const useTVDetails = (id: string | undefined) => {
   useEffect(() => {
     const fetchTVData = async () => {
       if (!id) {
-        setError("TV show ID is required");
-        setIsLoading(false);
+        setTVState(prev => ({ ...prev, error: "TV show ID is required", isLoading: false }));
         return;
       }
 
       const tvId = parseInt(id, 10);
       if (isNaN(tvId)) {
-        setError("Invalid TV show ID");
-        setIsLoading(false);
+        setTVState(prev => ({ ...prev, error: "Invalid TV show ID", isLoading: false }));
         return;
       }
 
       try {
-        setIsLoading(true);
-        setError(null);
+        setTVState(prev => ({ ...prev, isLoading: true, error: null }));
         const [
           tvData,
           recommendationsData,
@@ -122,18 +122,21 @@ export const useTVDetails = (id: string | undefined) => {
         ]);
 
         if (!tvData) {
-          setError("TV show not found");
+          setTVState(prev => ({ ...prev, error: "TV show not found" }));
           return;
         }
 
-        setTVShow(tvData);
-        setRecommendations(recommendationsData);
-        setCast(castData);
-        setCreators(creatorsData);
-        setImages(imagesData);
-        setKeywords(keywordsData);
-        setNetworks(networksData);
-        setContentRatings(contentRatingsData);
+        setTVState(prev => ({
+          ...prev,
+          tvShow: tvData,
+          recommendations: recommendationsData,
+          cast: castData,
+          creators: creatorsData,
+          images: imagesData,
+          keywords: keywordsData,
+          networks: networksData,
+          contentRatings: contentRatingsData,
+        }));
 
         if (tvData.seasons && tvData.seasons.length > 0) {
           const firstSeason = tvData.seasons.find(s => s.season_number > 0);
@@ -143,9 +146,9 @@ export const useTVDetails = (id: string | undefined) => {
         }
       } catch (error) {
         console.error("Error fetching TV show data:", error);
-        setError("Failed to load TV show data. Please try again.");
+        setTVState(prev => ({ ...prev, error: "Failed to load TV show data. Please try again." }));
       } finally {
-        setIsLoading(false);
+        setTVState(prev => ({ ...prev, isLoading: false }));
       }
     };
 
@@ -396,5 +399,3 @@ export const useTVDetails = (id: string | undefined) => {
     guestStars,
   };
 };
-
-export default useTVDetails;

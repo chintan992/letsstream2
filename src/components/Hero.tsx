@@ -562,6 +562,13 @@ const Hero = ({ media, className = "" }: HeroProps) => {
               triggerHapticFeedback(10);
               setCurrentIndex(index);
             }}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                triggerHapticFeedback(10);
+                setCurrentIndex(index);
+              }
+            }}
             role="button"
             tabIndex={0}
             aria-label={`Go to slide ${index + 1}`}

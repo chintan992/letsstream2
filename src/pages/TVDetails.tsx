@@ -7,14 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ContentRow from "@/components/ContentRow";
 import Navbar from "@/components/Navbar";
 import ReviewSection from "@/components/ReviewSection";
-import TVShowHeader from "@/components/tv/TVShowHeader";
-import TVShowEpisodes from "@/components/tv/TVShowEpisodes";
-import TVShowAbout from "@/components/tv/TVShowAbout";
-import TVShowCast from "@/components/tv/TVShowCast";
-import TVShowCreators from "@/components/tv/TVShowCreators";
-import TVShowImages from "@/components/tv/TVShowImages";
-import TVShowKeywords from "@/components/tv/TVShowKeywords";
-import TVShowNetworks from "@/components/tv/TVShowNetworks";
+import { TVShowHeader } from "@/components/tv/TVShowHeader";
+import { TVShowEpisodes } from "@/components/tv/TVShowEpisodes";
+import { TVShowAbout } from "@/components/tv/TVShowAbout";
+import { TVShowCast } from "@/components/tv/TVShowCast";
+import { TVShowCreators } from "@/components/tv/TVShowCreators";
+import { TVShowImages } from "@/components/tv/TVShowImages";
+import { TVShowKeywords } from "@/components/tv/TVShowKeywords";
+import { TVShowNetworks } from "@/components/tv/TVShowNetworks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTVDetails } from "@/hooks/use-tv-details";
 import { TVDownloadSection } from "@/components/tv/TVDownloadSection";
@@ -38,17 +38,20 @@ const TVDetailsPage = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>("episodes");
   const [isContentHydrated, setIsContentHydrated] = useState(false);
-  const [lastWatchedEpisode, setLastWatchedEpisode] = useState<{
-    season: number;
-    episode: number;
-    progress: number;
-    episodeTitle: string;
-    episodeThumbnail: string | null;
-    timeRemaining: number;
-    watchPosition: number;
-    duration: number;
-  } | null>(null);
-  const [isLastWatchedLoading, setIsLastWatchedLoading] = useState(false);
+  const [lastWatchedState, setLastWatchedState] = useState<{
+    episode: {
+      season: number;
+      episode: number;
+      progress: number;
+      episodeTitle: string;
+      episodeThumbnail: string | null;
+      timeRemaining: number;
+      watchPosition: number;
+      duration: number;
+    } | null;
+    isLoading: boolean;
+  }>({ episode: null, isLoading: false });
+  const { episode: lastWatchedEpisode, isLoading: isLastWatchedLoading } = lastWatchedState;
   const { user } = useAuth();
   const { triggerHaptic } = useHaptic();
 
@@ -82,23 +85,21 @@ const TVDetailsPage = () => {
 
   // Fetch last watched episode when tvShow changes
   useEffect(() => {
-    const fetchLastWatchedEpisode = async () => {
+    const fetchLastWatched = async () => {
       if (!tvShow) return;
 
       try {
-        setIsLastWatchedLoading(true);
-        const episode = await getLastWatchedEpisode();
-        setLastWatchedEpisode(episode);
+        setLastWatchedState(prev => ({ ...prev, isLoading: true }));
+        const result = await getLastWatchedEpisode();
+        setLastWatchedState({ episode: result, isLoading: false });
       } catch (error) {
         console.error("Error fetching last watched episode:", error);
-        setLastWatchedEpisode(null);
-      } finally {
-        setIsLastWatchedLoading(false);
+        setLastWatchedState({ episode: null, isLoading: false });
       }
     };
 
     if (tvShow?.id) {
-      fetchLastWatchedEpisode();
+      fetchLastWatched();
     }
   }, [tvShow, getLastWatchedEpisode]);
 
@@ -108,7 +109,6 @@ const TVDetailsPage = () => {
 
     const checkHydration = async () => {
       if (isCancelled) return;
-      setIsContentHydrated(false);
       await new Promise(resolve => setTimeout(resolve, 100));
       if (isCancelled) return;
 
@@ -206,6 +206,7 @@ const TVDetailsPage = () => {
           <div className="absolute inset-0 bg-black/60">
             <iframe
               className="h-full w-full"
+              title="TV Show Trailer"
               src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

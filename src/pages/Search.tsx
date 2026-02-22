@@ -43,9 +43,6 @@ const Search = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // State for hydration tracking
-  const [isHydrated, setIsHydrated] = useState(false);
-
   // Use page state persistence hook based on search query
   const searchQuery = searchParams.get("q") || "";
   const storageKey = `search-state-${searchQuery}`;
@@ -60,16 +57,27 @@ const Search = () => {
       queryParam: searchQuery,
     });
 
-  // Initialize state from persisted state only if query matches
-  const [allResults, setAllResults] = useState<ExtendedMedia[]>([]);
-  const [displayedResults, setDisplayedResults] = useState<ExtendedMedia[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchState, setSearchState] = useState<{
+    allResults: ExtendedMedia[];
+    displayedResults: ExtendedMedia[];
+    isLoading: boolean;
+    isHydrated: boolean;
+    hasRestoredForQuery: string | null;
+    page: number;
+  }>(() => ({
+    allResults: [],
+    displayedResults: [],
+    isLoading: false,
+    isHydrated: false,
+    hasRestoredForQuery: null,
+    page:
+      searchQuery && searchQuery === persistedState.queryParam
+        ? persistedState.page
+        : 1,
+  }));
+  const { allResults, displayedResults, isLoading, isHydrated, hasRestoredForQuery, page } =
+    searchState;
   const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [page, setPage] = useState(() => {
-    return searchQuery && searchQuery === persistedState.queryParam
-      ? persistedState.page
-      : 1;
-  });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [advancedSearch, setAdvancedSearch] = useState(() => {
@@ -166,20 +174,18 @@ const Search = () => {
     [searchHistory]
   );
 
-  // State to track if we've already restored for this query
-  const [hasRestoredForQuery, setHasRestoredForQuery] = useState<string | null>(
-    null
-  );
-
   // Effect to handle search results restoration
   useEffect(() => {
     const searchQuery = searchParams.get("q");
 
     if (!searchQuery) {
-      setAllResults([]);
-      setDisplayedResults([]);
-      setHasRestoredForQuery(null);
-      setIsHydrated(true);
+      setSearchState(prev => ({
+        ...prev,
+        allResults: [],
+        displayedResults: [],
+        hasRestoredForQuery: null,
+        isHydrated: true,
+      }));
       return;
     }
 
@@ -187,14 +193,16 @@ const Search = () => {
       return;
     }
 
-    setHasRestoredForQuery(searchQuery);
-
     if (
       searchQuery === persistedState.queryParam &&
       persistedState.resultIds.length > 0
     ) {
       const fetchSearchResults = async () => {
-        setIsLoading(true);
+        setSearchState(prev => ({
+          ...prev,
+          hasRestoredForQuery: searchQuery,
+          isLoading: true,
+        }));
         try {
           const results = await searchMedia(searchQuery);
 
@@ -235,23 +243,24 @@ const Search = () => {
             persistedState.resultIds.includes(item.id)
           );
 
-          setAllResults(restoredResults);
-
-          const startIndex = (persistedState.page - 1) * RESULTS_PER_PAGE;
-          const endIndex = startIndex + RESULTS_PER_PAGE;
-          setDisplayedResults(restoredResults.slice(startIndex, endIndex));
-          setPage(persistedState.page);
+          const cumulativeCount = persistedState.page * RESULTS_PER_PAGE;
+          setSearchState(prev => ({
+            ...prev,
+            allResults: restoredResults,
+            displayedResults: restoredResults.slice(0, cumulativeCount),
+            page: persistedState.page,
+            isLoading: false,
+            isHydrated: true,
+          }));
         } catch (error) {
           console.error("Error fetching search results:", error);
           performNewSearch(searchQuery);
-        } finally {
-          setIsLoading(false);
-          setIsHydrated(true);
         }
       };
 
       fetchSearchResults();
     } else {
+      setSearchState(prev => ({ ...prev, hasRestoredForQuery: searchQuery }));
       performNewSearch(searchQuery);
     }
 
@@ -271,7 +280,7 @@ const Search = () => {
 
   // Helper function to perform a new search
   const performNewSearch = async (searchQuery: string) => {
-    setIsLoading(true);
+    setSearchState(prev => ({ ...prev, isLoading: true }));
     try {
       const results = await searchMedia(searchQuery);
 
@@ -308,21 +317,28 @@ const Search = () => {
         });
       }
 
-      setAllResults(sortedResults);
-      setDisplayedResults(sortedResults.slice(0, RESULTS_PER_PAGE));
-      setPage(1);
+      setSearchState(prev => ({
+        ...prev,
+        allResults: sortedResults,
+        displayedResults: sortedResults.slice(0, RESULTS_PER_PAGE),
+        page: 1,
+        isLoading: false,
+        isHydrated: true,
+      }));
     } catch (error) {
       console.error("Error fetching search results:", error);
-      setAllResults([]);
-      setDisplayedResults([]);
+      setSearchState(prev => ({
+        ...prev,
+        allResults: [],
+        displayedResults: [],
+        isLoading: false,
+        isHydrated: true,
+      }));
       toast({
         title: "Search Error",
         description: "Failed to retrieve search results. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-      setIsHydrated(true);
     }
   };
 
@@ -428,8 +444,11 @@ const Search = () => {
   const handleShowMore = () => {
     const nextPage = page + 1;
     const nextResults = allResults.slice(0, nextPage * RESULTS_PER_PAGE);
-    setDisplayedResults(nextResults);
-    setPage(nextPage);
+    setSearchState(prev => ({
+      ...prev,
+      displayedResults: nextResults,
+      page: nextPage,
+    }));
     setPersistedState(prevState => ({
       ...prevState,
       page: nextPage,

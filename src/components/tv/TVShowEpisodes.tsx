@@ -274,7 +274,7 @@ export const TVShowEpisodes = ({
       scrollContainer.addEventListener("scrollend", handleScrollEnd);
     } catch (e) {
       // scrollend not supported, use scroll with timeout instead
-      scrollContainer.addEventListener("scroll", handleScroll);
+      scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
     }
 
     return () => {
@@ -283,7 +283,7 @@ export const TVShowEpisodes = ({
       } catch (e) {
         // Ignore error if scrollend is not supported
       }
-      scrollContainer.removeEventListener("scroll", handleScroll);
+      scrollContainer.removeEventListener("scroll", handleScroll, { passive: true });
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
@@ -365,6 +365,8 @@ export const TVShowEpisodes = ({
               WebkitOverflowScrolling: "touch",
               userSelect: "none",
             }}
+            role="tablist"
+            aria-label="Season selector"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
@@ -379,6 +381,7 @@ export const TVShowEpisodes = ({
 
               return (
                 <button
+                  role="tab"
                   key={season.id}
                   data-season={season.season_number}
                   onClick={() => onSeasonChange(season.season_number)}
@@ -390,7 +393,7 @@ export const TVShowEpisodes = ({
                   style={{
                     scrollSnapAlign: showAllSeasons ? "none" : "center",
                   }}
-                  aria-pressed={isActive}
+                  aria-selected={isActive}
                 >
                   <div
                     className={`w-full border-b ${isActive ? "border-accent/30 from-accent/10 to-accent/5 bg-gradient-to-r" : "border-white/10 bg-gradient-to-r from-white/5 to-white/10"} px-2 py-2 text-center transition-colors duration-300`}
@@ -733,5 +736,3 @@ export const TVShowEpisodes = ({
     </>
   );
 };
-
-export default TVShowEpisodes;

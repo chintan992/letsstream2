@@ -100,13 +100,12 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
   // Fetch user preferences
   useEffect(() => {
     const fetchPreferences = async () => {
-      if (!user) {
-        setUserPreferences(null);
-        setIsLoading(false);
-        return;
-      }
-
       try {
+        if (!user) {
+          setUserPreferences(null);
+          return;
+        }
+
         const userPreferencesRef = doc(db, "userPreferences", user.uid);
         const userPreferencesDoc = await getDoc(userPreferencesRef);
 

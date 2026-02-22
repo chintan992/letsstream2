@@ -132,37 +132,44 @@ const PWAInstallPrompt = ({
     setPromptVisible(true);
   }, [promptVisible, cardDismissed]);
 
-  useEffect(() => {
-    // Handler for beforeinstallprompt
-    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+  const handleBeforeInstallPrompt = useCallback(
+    (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       if (!isAppInstalled) {
         showInstallCard();
       }
-    };
+    },
+    [isAppInstalled, showInstallCard]
+  );
 
-    // Handler for appinstalled
-    const handleAppInstalled = (e: Event) => {
-      setIsAppInstalled(true);
-      setDeferredPrompt(null);
-      localStorage.setItem("app-installed", "true");
-      toast({
-        title: "Successfully Installed",
-        description: installedMessage,
-      });
-      setPromptVisible(false);
-    };
+  const handleAppInstalled = useCallback(() => {
+    setIsAppInstalled(true);
+    setDeferredPrompt(null);
+    localStorage.setItem("app-installed", "true");
+    toast({
+      title: "Successfully Installed",
+      description: installedMessage,
+    });
+    setPromptVisible(false);
+  }, [toast, installedMessage]);
 
+  useEffect(() => {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    // In development, if no deferredPrompt and not installed/dismissed, show the card after a short delay
     if (isDev && !deferredPrompt && !isAppInstalled && !cardDismissed) {
       const timeout = setTimeout(() => {
         setPromptVisible(true);
       }, 1000);
-      return () => clearTimeout(timeout);
+      return () => {
+        clearTimeout(timeout);
+        window.removeEventListener(
+          "beforeinstallprompt",
+          handleBeforeInstallPrompt
+        );
+        window.removeEventListener("appinstalled", handleAppInstalled);
+      };
     }
 
     return () => {
@@ -173,12 +180,11 @@ const PWAInstallPrompt = ({
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, [
-    toast,
-    isAppInstalled,
-    showInstallCard,
-    installedMessage,
+    handleBeforeInstallPrompt,
+    handleAppInstalled,
     isDev,
     deferredPrompt,
+    isAppInstalled,
     cardDismissed,
   ]);
 

@@ -39,16 +39,27 @@ interface Images {
 
 const MovieDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = useState<MovieDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [movieData, setMovieData] = useState<{
+    movie: MovieDetails | null;
+    recommendations: Media[];
+    cast: CastMember[];
+    directors: CrewMember[];
+    images: Images | null;
+    isLoading: boolean;
+    error: string | null;
+  }>({
+    movie: null,
+    recommendations: [],
+    cast: [],
+    directors: [],
+    images: null,
+    isLoading: true,
+    error: null,
+  });
+  const { movie, recommendations, cast, directors, images, isLoading, error } = movieData;
   const [activeTab, setActiveTab] = useState<TabType>("about");
   const [isContentHydrated, setIsContentHydrated] = useState(false);
-  const [recommendations, setRecommendations] = useState<Media[]>([]);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
-  const [cast, setCast] = useState<CastMember[]>([]);
-  const [directors, setDirectors] = useState<CrewMember[]>([]);
-  const [images, setImages] = useState<Images | null>(null);
   const {
     addToFavorites,
     addToWatchlist,
@@ -70,24 +81,21 @@ const MovieDetailsPage = () => {
   });
 
   useEffect(() => {
-    const fetchMovieData = async () => {
+    const fetchMovie = async () => {
       if (!id) {
-        setError("Movie ID is required");
-        setIsLoading(false);
+        setMovieData(prev => ({ ...prev, error: "Movie ID is required", isLoading: false }));
         return;
       }
 
       const movieId = parseInt(id, 10);
       if (isNaN(movieId)) {
-        setError("Invalid movie ID");
-        setIsLoading(false);
+        setMovieData(prev => ({ ...prev, error: "Invalid movie ID", isLoading: false }));
         return;
       }
 
       try {
-        setIsLoading(true);
-        setError(null);
-        const [movieData, recommendationsData, creditsData, imagesData] =
+        setMovieData(prev => ({ ...prev, isLoading: true, error: null }));
+        const [movieResult, recommendationsData, creditsData, imagesData] =
           await Promise.all([
             getMovieDetails(movieId),
             getMovieRecommendations(movieId),
@@ -95,25 +103,31 @@ const MovieDetailsPage = () => {
             getMovieImages(movieId),
           ]);
 
-        if (!movieData) {
-          setError("Movie not found");
+        if (!movieResult) {
+          setMovieData(prev => ({ ...prev, error: "Movie not found", isLoading: false }));
           return;
         }
 
-        setMovie(movieData);
-        setRecommendations(recommendationsData);
-        setCast(creditsData.cast);
-        setDirectors(creditsData.crew.filter(c => c.job === "Director"));
-        setImages(imagesData);
-      } catch (error) {
-        console.error("Error fetching movie data:", error);
-        setError("Failed to load movie data. Please try again.");
-      } finally {
-        setIsLoading(false);
+        setMovieData(prev => ({
+          ...prev,
+          movie: movieResult,
+          recommendations: recommendationsData,
+          cast: creditsData.cast,
+          directors: creditsData.crew.filter(c => c.job === "Director"),
+          images: imagesData,
+          isLoading: false,
+        }));
+      } catch (err) {
+        console.error("Error fetching movie data:", err);
+        setMovieData(prev => ({
+          ...prev,
+          error: "Failed to load movie data. Please try again.",
+          isLoading: false,
+        }));
       }
     };
 
-    fetchMovieData();
+    fetchMovie();
   }, [id]);
 
   useEffect(() => {
@@ -143,7 +157,6 @@ const MovieDetailsPage = () => {
 
     const checkHydration = async () => {
       if (isCancelled) return;
-      setIsContentHydrated(false);
       await new Promise(resolve => setTimeout(resolve, 100));
       if (isCancelled) return;
 

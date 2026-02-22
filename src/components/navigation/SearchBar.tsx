@@ -23,10 +23,13 @@ const SearchBar = ({
   onToggleExpand,
 }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchSuggestions, setSearchSuggestions] = useState<Media[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [searchState, setSearchState] = useState<{
+    suggestions: Media[];
+    showSuggestions: boolean;
+    isLoading: boolean;
+    selectedIndex: number;
+  }>({ suggestions: [], showSuggestions: false, isLoading: false, selectedIndex: -1 });
+  const { suggestions: searchSuggestions, showSuggestions, isLoading, selectedIndex } = searchState;
   const navigate = useNavigate();
   const { toast } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +60,7 @@ const SearchBar = ({
         suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target as Node)
       ) {
-        setShowSuggestions(false);
+        setSearchState(prev => ({ ...prev, showSuggestions: false }));
       }
     };
 
@@ -68,21 +71,27 @@ const SearchBar = ({
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.trim().length > 0) {
-        setIsLoading(true);
+        setSearchState(prev => ({ ...prev, isLoading: true }));
         try {
           const results = await searchMedia(searchQuery);
-          setSearchSuggestions(results.slice(0, 6));
-          setShowSuggestions(true);
-          setSelectedIndex(-1);
+          setSearchState(prev => ({
+            ...prev,
+            suggestions: results.slice(0, 6),
+            showSuggestions: true,
+            selectedIndex: -1,
+            isLoading: false,
+          }));
         } catch (error) {
           console.error("Error fetching suggestions:", error);
-        } finally {
-          setIsLoading(false);
+          setSearchState(prev => ({ ...prev, isLoading: false }));
         }
       } else {
-        setSearchSuggestions([]);
-        setShowSuggestions(false);
-        setIsLoading(false);
+        setSearchState(prev => ({
+          ...prev,
+          suggestions: [],
+          showSuggestions: false,
+          isLoading: false,
+        }));
       }
     };
 
@@ -95,7 +104,7 @@ const SearchBar = ({
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
-      setShowSuggestions(false);
+      setSearchState(prev => ({ ...prev, showSuggestions: false }));
       if (onSearch) onSearch();
       if (onToggleExpand) onToggleExpand();
 
@@ -110,7 +119,7 @@ const SearchBar = ({
   const handleSuggestionClick = (item: Media) => {
     navigate(`/${item.media_type}/${item.id}`);
     setSearchQuery("");
-    setShowSuggestions(false);
+    setSearchState(prev => ({ ...prev, showSuggestions: false }));
     if (onSearch) onSearch();
     if (onToggleExpand) onToggleExpand();
 
@@ -126,12 +135,19 @@ const SearchBar = ({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex(prev =>
-        prev < searchSuggestions.length - 1 ? prev + 1 : prev
-      );
+      setSearchState(prev => ({
+        ...prev,
+        selectedIndex:
+          prev.selectedIndex < prev.suggestions.length - 1
+            ? prev.selectedIndex + 1
+            : prev.selectedIndex,
+      }));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex(prev => (prev > -1 ? prev - 1 : -1));
+      setSearchState(prev => ({
+        ...prev,
+        selectedIndex: prev.selectedIndex > -1 ? prev.selectedIndex - 1 : -1,
+      }));
     } else if (e.key === "Enter") {
       if (selectedIndex >= 0 && selectedIndex < searchSuggestions.length) {
         e.preventDefault();
@@ -142,8 +158,7 @@ const SearchBar = ({
 
   const handleClear = () => {
     setSearchQuery("");
-    setSearchSuggestions([]);
-    setShowSuggestions(false);
+    setSearchState(prev => ({ ...prev, suggestions: [], showSuggestions: false }));
     searchInputRef.current?.focus();
   };
 

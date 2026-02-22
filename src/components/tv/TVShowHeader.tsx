@@ -210,12 +210,23 @@ export const TVShowHeader = ({
                 <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
                   {/* Enhanced Continue Watching Card */}
                   <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() =>
                       onPlayEpisode(
                         lastWatchedEpisode.season,
                         lastWatchedEpisode.episode
                       )
                     }
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onPlayEpisode(
+                          lastWatchedEpisode.season,
+                          lastWatchedEpisode.episode
+                        );
+                      }
+                    }}
                     className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
                   >
                     {/* Episode Thumbnail */}
@@ -322,5 +333,3 @@ export const TVShowHeader = ({
     </div>
   );
 };
-
-export default TVShowHeader;

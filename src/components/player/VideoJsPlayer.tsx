@@ -63,12 +63,14 @@ const VideoJsPlayer = ({
     defaultIndex >= 0 ? defaultIndex : 0
   );
   const [isQualityOpen, setIsQualityOpen] = useState(false);
-  const [playerReady, setPlayerReady] = useState(false);
+  const [playerState, setPlayerState] = useState<{
+    ready: boolean;
+    activeSubtitleIndex: number;
+  }>({ ready: false, activeSubtitleIndex: -1 });
+  const { ready: playerReady, activeSubtitleIndex } = playerState;
   const qualityRef = useRef<HTMLDivElement>(null);
 
-  // Subtitle state
   const [isSubtitleOpen, setIsSubtitleOpen] = useState(false);
-  const [activeSubtitleIndex, setActiveSubtitleIndex] = useState<number>(-1); // -1 = off
   const subtitleRef = useRef<HTMLDivElement>(null);
 
   // Chromecast
@@ -83,8 +85,8 @@ const VideoJsPlayer = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
+  const [audioState, setAudioState] = useState({ volume: 1, isMuted: false });
+  const { volume, isMuted } = audioState;
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [seekIndicator, setSeekIndicator] = useState<string | null>(null);
@@ -214,16 +216,13 @@ const VideoJsPlayer = ({
 
       player.ready(() => {
         playerRef.current = player;
-        setPlayerReady(true);
         onLoaded();
 
-        // Add initial subtitle tracks if available
         const subs = initialLink.subtitles || [];
+        const defaultIdx = subs.findIndex(s => s.default);
+        const initialSubIdx = subs.length > 0 ? (defaultIdx >= 0 ? defaultIdx : -1) : -1;
+        setPlayerState({ ready: true, activeSubtitleIndex: initialSubIdx });
         if (subs.length > 0) {
-          // Auto-select the default subtitle or the first one
-          const defaultIdx = subs.findIndex(s => s.default);
-          const initialSubIdx = defaultIdx >= 0 ? defaultIdx : -1;
-          setActiveSubtitleIndex(initialSubIdx);
           updateSubtitleTracks(player, subs, initialSubIdx);
         }
       });
@@ -238,8 +237,10 @@ const VideoJsPlayer = ({
         setDuration(player.duration() || 0);
       });
       player.on("volumechange", () => {
-        setVolume(player.volume() || 0);
-        setIsMuted(player.muted() || false);
+        setAudioState({
+          volume: player.volume() || 0,
+          isMuted: player.muted() || false,
+        });
       });
       player.on("progress", () => {
         const buf = player.buffered();
@@ -266,7 +267,7 @@ const VideoJsPlayer = ({
       if (player && !player.isDisposed()) {
         player.dispose();
         playerRef.current = null;
-        setPlayerReady(false);
+        setPlayerState(prev => ({ ...prev, ready: false }));
       }
       if (hideControlsTimer.current) clearTimeout(hideControlsTimer.current);
       if (seekIndicatorTimer.current) clearTimeout(seekIndicatorTimer.current);
@@ -468,10 +469,10 @@ const VideoJsPlayer = ({
             : activeSubtitleIndex >= 0
               ? Math.min(activeSubtitleIndex, newSubs.length - 1)
               : -1;
-        setActiveSubtitleIndex(subIdx);
+        setPlayerState(prev => ({ ...prev, activeSubtitleIndex: subIdx }));
         updateSubtitleTracks(playerRef.current, newSubs, subIdx);
       } else {
-        setActiveSubtitleIndex(-1);
+        setPlayerState(prev => ({ ...prev, activeSubtitleIndex: -1 }));
       }
 
       playerRef.current.one("loadedmetadata", () => {
@@ -487,7 +488,7 @@ const VideoJsPlayer = ({
   );
 
   const handleSubtitleChange = useCallback((index: number) => {
-    setActiveSubtitleIndex(index);
+    setPlayerState(prev => ({ ...prev, activeSubtitleIndex: index }));
     setIsSubtitleOpen(false);
 
     if (playerRef.current) {
@@ -571,7 +572,16 @@ const VideoJsPlayer = ({
         ref={videoRef}
         data-vjs-player
         className="absolute inset-0 h-full w-full cursor-pointer [&_.video-js]:!h-full [&_.video-js]:!w-full [&_.video-js]:!p-0 [&_.vjs-big-play-button]:!hidden [&_.vjs-control-bar]:!hidden [&_.vjs-loading-spinner]:!hidden [&_.vjs-poster]:bg-cover [&_.vjs-tech]:object-contain"
+        role="button"
+        tabIndex={0}
+        aria-label="Toggle play"
         onClick={togglePlay}
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            togglePlay();
+          }
+        }}
       />
 
       {/* Seek indicator overlay */}
@@ -594,7 +604,16 @@ const VideoJsPlayer = ({
       {!isPlaying && playerReady && (
         <div
           className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center"
+          role="button"
+          tabIndex={0}
+          aria-label="Play video"
           onClick={togglePlay}
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              togglePlay();
+            }
+          }}
         >
           <m.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -623,7 +642,37 @@ const VideoJsPlayer = ({
         <div
           ref={progressBarRef}
           className="group/progress mb-2 h-1.5 cursor-pointer rounded-full bg-white/20 transition-all hover:h-2.5"
+          role="slider"
+          tabIndex={0}
+          aria-label="Video progress"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
           onClick={handleProgressClick}
+          onKeyDown={e => {
+            switch (e.key) {
+              case "ArrowRight":
+              case "ArrowUp":
+                e.preventDefault();
+                seekBy(5);
+                break;
+              case "ArrowLeft":
+              case "ArrowDown":
+                e.preventDefault();
+                seekBy(-5);
+                break;
+              case "Home":
+                e.preventDefault();
+                playerRef.current?.currentTime(0);
+                showControlsTemporarily();
+                break;
+              case "End":
+                e.preventDefault();
+                playerRef.current?.currentTime(playerRef.current?.duration() || 0);
+                showControlsTemporarily();
+                break;
+            }
+          }}
           onMouseDown={e => {
             setIsSeeking(true);
             handleProgressClick(e);

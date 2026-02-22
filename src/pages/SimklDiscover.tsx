@@ -87,15 +87,22 @@ const CategoryRow = ({ title, icon, items, mediaType, category, isLoading }: Cat
 
 const SimklDiscover = () => {
     const { userPreferences } = useUserPreferences();
-    const [trendingMovies, setTrendingMovies] = useState<SimklTrendingItem[]>([]);
-    const [trendingTV, setTrendingTV] = useState<SimklTrendingItem[]>([]);
-    const [trendingAnime, setTrendingAnime] = useState<SimklTrendingItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [discoverState, setDiscoverState] = useState<{
+        trendingMovies: SimklTrendingItem[];
+        trendingTV: SimklTrendingItem[];
+        trendingAnime: SimklTrendingItem[];
+        isLoading: boolean;
+    }>({
+        trendingMovies: [],
+        trendingTV: [],
+        trendingAnime: [],
+        isLoading: true,
+    });
+    const { trendingMovies, trendingTV, trendingAnime, isLoading } = discoverState;
 
     useEffect(() => {
         const fetchContent = async () => {
             try {
-                // Fetch trending content in parallel
                 const [
                     trendingMoviesData,
                     trendingTVData,
@@ -106,13 +113,15 @@ const SimklDiscover = () => {
                     SimklService.getTrending("anime"),
                 ]);
 
-                setTrendingMovies(trendingMoviesData);
-                setTrendingTV(trendingTVData);
-                setTrendingAnime(trendingAnimeData);
+                setDiscoverState({
+                    trendingMovies: trendingMoviesData,
+                    trendingTV: trendingTVData,
+                    trendingAnime: trendingAnimeData,
+                    isLoading: false,
+                });
             } catch (error) {
                 console.error("Error fetching Simkl discover content:", error);
-            } finally {
-                setIsLoading(false);
+                setDiscoverState(prev => ({ ...prev, isLoading: false }));
             }
         };
 

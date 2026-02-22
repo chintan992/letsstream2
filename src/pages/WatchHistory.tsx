@@ -168,7 +168,6 @@ const WatchHistory = () => {
 
   // Reset hydration state when tab changes
   useEffect(() => {
-    setIsContentHydrated(false);
     const timer = setTimeout(() => {
       let isTabDataReady = false;
       if (activeTab === "history") {

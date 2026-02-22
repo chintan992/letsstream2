@@ -45,5 +45,3 @@ export const TVShowCreators = ({ creators }: TVShowCreatorsProps) => {
     </div>
   );
 };
-
-export default TVShowCreators;

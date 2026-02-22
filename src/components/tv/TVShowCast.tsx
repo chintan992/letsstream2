@@ -54,5 +54,3 @@ export const TVShowCast = ({ cast }: TVShowCastProps) => {
     </div>
   );
 };
-
-export default TVShowCast;

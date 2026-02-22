@@ -71,8 +71,11 @@ function simklToMedia(item: SimklTrendingItem, mediaType: "movie" | "tv", index:
 const SimklDiscoverList = () => {
     const { category } = useParams<{ category: string }>();
     const { userPreferences } = useUserPreferences();
-    const [items, setItems] = useState<SimklTrendingItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [fetchState, setFetchState] = useState<{ items: SimklTrendingItem[]; isLoading: boolean }>({
+        items: [],
+        isLoading: true,
+    });
+    const { items, isLoading } = fetchState;
 
     const config = category ? CATEGORY_CONFIG[category] : null;
 
@@ -80,24 +83,23 @@ const SimklDiscoverList = () => {
         const fetchContent = async () => {
             if (!config) return;
 
-            setIsLoading(true);
+            setFetchState(prev => ({ ...prev, isLoading: true }));
             try {
-                // Special handling for recommendations
+                let data: SimklTrendingItem[];
                 if (category === "recommendations" && userPreferences.simklToken) {
                     const [recMovies, recTV, recAnime] = await Promise.all([
                         SimklService.getRecommendations(userPreferences.simklToken, "movies"),
                         SimklService.getRecommendations(userPreferences.simklToken, "tv"),
                         SimklService.getRecommendations(userPreferences.simklToken, "anime"),
                     ]);
-                    setItems([...recMovies, ...recTV, ...recAnime]);
+                    data = [...recMovies, ...recTV, ...recAnime];
                 } else {
-                    const data = await config.apiCall();
-                    setItems(data);
+                    data = await config.apiCall();
                 }
+                setFetchState({ items: data, isLoading: false });
             } catch (error) {
                 console.error("Error fetching Simkl content:", error);
-            } finally {
-                setIsLoading(false);
+                setFetchState(prev => ({ ...prev, isLoading: false }));
             }
         };
 

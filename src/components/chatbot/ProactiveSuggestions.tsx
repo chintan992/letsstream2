@@ -11,8 +11,11 @@ import { Card, CardContent } from "@/components/ui/card";
  * based on time of day, viewing history, etc.
  */
 const ProactiveSuggestions: React.FC = () => {
-  const [visible, setVisible] = useState(false);
-  const [suggestion, setSuggestion] = useState("");
+  const [suggestionState, setSuggestionState] = useState({
+    visible: false,
+    text: "",
+  });
+  const { visible, text: suggestion } = suggestionState;
   const { sendMessage, isOpen } = useChatbot();
   const { profile } = useUserProfile();
 
@@ -43,20 +46,16 @@ const ProactiveSuggestions: React.FC = () => {
   // and randomly (not too frequently)
   useEffect(() => {
     if (isOpen) {
-      setVisible(false);
+      setSuggestionState(prev => ({ ...prev, visible: false }));
       return;
     }
 
-    // Determine if we should show a suggestion (randomly)
     const checkProactiveSuggestion = () => {
-      // Only show suggestions with a 30% probability to avoid being annoying
       if (Math.random() < 0.3) {
-        setSuggestion(generateSuggestion());
-        setVisible(true);
+        setSuggestionState({ text: generateSuggestion(), visible: true });
 
-        // Auto-hide after 15 seconds
         setTimeout(() => {
-          setVisible(false);
+          setSuggestionState(prev => ({ ...prev, visible: false }));
         }, 15000);
       }
     };
@@ -76,11 +75,11 @@ const ProactiveSuggestions: React.FC = () => {
   const handleSuggestionClick = () => {
     const message = suggestion.replace(/\?$/, "");
     sendMessage(message);
-    setVisible(false);
+    setSuggestionState(prev => ({ ...prev, visible: false }));
   };
 
   const handleDismiss = () => {
-    setVisible(false);
+    setSuggestionState(prev => ({ ...prev, visible: false }));
   };
 
   if (!visible) return null;

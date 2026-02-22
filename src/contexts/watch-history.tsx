@@ -361,15 +361,13 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           ]);
         } catch (error) {
           console.error("Error fetching data:", error);
-        } finally {
-          setIsLoading(false);
         }
       } else if (!user) {
         setWatchHistory([]);
         setFavorites([]);
         setWatchlist([]);
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     fetchAllData();

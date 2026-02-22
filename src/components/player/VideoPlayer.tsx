@@ -58,6 +58,7 @@ const VideoPlayerComponent = ({
         key={iframeUrl}
         ref={iframeRef}
         src={iframeUrl}
+        title={title}
         className="h-full w-full"
         allowFullScreen
         allow="autoplay; encrypted-media; picture-in-picture"

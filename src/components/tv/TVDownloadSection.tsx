@@ -46,10 +46,11 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
         <div className="w-full sm:w-64">
-          <label className="mb-2 block text-left text-sm font-medium text-white/80">
+          <label htmlFor="tv-download-season" className="mb-2 block text-left text-sm font-medium text-white/80">
             Season
           </label>
           <select
+            id="tv-download-season"
             className="hover:border-accent/50 w-full appearance-none rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             value={selectedSeason}
             onChange={e => {
@@ -65,10 +66,11 @@ export const TVDownloadSection: React.FC<TVDownloadSectionProps> = ({
           </select>
         </div>
         <div className="w-full sm:w-64">
-          <label className="mb-2 block text-left text-sm font-medium text-white/80">
+          <label htmlFor="tv-download-episode" className="mb-2 block text-left text-sm font-medium text-white/80">
             Episode
           </label>
           <select
+            id="tv-download-episode"
             className="hover:border-accent/50 w-full appearance-none rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white shadow-sm transition-all duration-300 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             value={selectedEpisode}
             onChange={e => {

@@ -166,5 +166,3 @@ export const TVShowImages = ({ images, tvShowName }: TVShowImagesProps) => {
     </div>
   );
 };
-
-export default TVShowImages;

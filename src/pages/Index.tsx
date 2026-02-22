@@ -19,43 +19,60 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Lazy-loaded secondary content
 const SecondaryContent = lazy(() => import("./components/SecondaryContent"));
 
+const RowSkeleton = () => (
+  <div className="mb-8">
+    <Skeleton className="mb-4 h-8 w-48" />
+    <div className="flex gap-4 overflow-hidden">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-36 w-64 flex-shrink-0 rounded-lg" />
+      ))}
+    </div>
+  </div>
+);
+
 const Index = () => {
   const { user } = useAuth();
-  const [trendingMedia, setTrendingMedia] = useState<Media[]>([]);
-  const [popularMovies, setPopularMovies] = useState<Media[]>([]);
-  const [popularTVShows, setPopularTVShows] = useState<Media[]>([]);
-  // const [topRatedMovies, setTopRatedMovies] = useState<Media[]>([]);
-  const [topRatedTVShows, setTopRatedTVShows] = useState<Media[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [contentVisible, setContentVisible] = useState(false);
-  const [secondaryLoaded, setSecondaryLoaded] = useState(false);
+  const [pageState, setPageState] = useState<{
+    trendingMedia: Media[];
+    popularMovies: Media[];
+    popularTVShows: Media[];
+    topRatedTVShows: Media[];
+    isLoading: boolean;
+    contentVisible: boolean;
+    secondaryLoaded: boolean;
+  }>({
+    trendingMedia: [],
+    popularMovies: [],
+    popularTVShows: [],
+    topRatedTVShows: [],
+    isLoading: true,
+    contentVisible: false,
+    secondaryLoaded: false,
+  });
+  const {
+    trendingMedia, popularMovies, popularTVShows, topRatedTVShows,
+    isLoading, contentVisible, secondaryLoaded,
+  } = pageState;
   const [isPageHydrated, setIsPageHydrated] = useState(false);
 
-  // Update hydration state when content is visible and loading is complete
   useEffect(() => {
-    if (!isLoading && contentVisible) {
-      // Additional delay to ensure hero and primary content rows have rendered
-      const hydrationTimer = setTimeout(() => {
-        setIsPageHydrated(true);
-      }, 200); // Small delay to ensure layout is present
-
-      return () => clearTimeout(hydrationTimer);
-    } else if (isLoading) {
-      // Reset hydration when loading starts again
-      setIsPageHydrated(false);
-    }
+    const hydrated = !isLoading && contentVisible;
+    const timer = setTimeout(() => {
+      setIsPageHydrated(hydrated);
+    }, hydrated ? 200 : 0);
+    return () => clearTimeout(timer);
   }, [isLoading, contentVisible]);
 
-  // Use scroll restoration with hydration check
   useScrollRestoration({
     enabled: isPageHydrated,
   });
 
-  // Primary data fetch - critical for initial render
   useEffect(() => {
+    let contentTimer: ReturnType<typeof setTimeout>;
+    let secondaryTimer: ReturnType<typeof setTimeout>;
+
     const fetchPrimaryData = async () => {
       try {
-        // Use Promise.all for parallel requests
         const [trendingData, popularMoviesData, popularTVData, topTVData] =
           await Promise.all([
             getTrending(),
@@ -68,40 +85,33 @@ const Index = () => {
           item => item.backdrop_path
         );
 
-        setTrendingMedia(filteredTrendingData);
-        setPopularMovies(popularMoviesData);
-        setPopularTVShows(popularTVData);
-        setTopRatedTVShows(topTVData);
+        setPageState(prev => ({
+          ...prev,
+          trendingMedia: filteredTrendingData,
+          popularMovies: popularMoviesData,
+          popularTVShows: popularTVData,
+          topRatedTVShows: topTVData,
+          isLoading: false,
+        }));
       } catch (error) {
         console.error("Error fetching homepage data:", error);
-      } finally {
-        setIsLoading(false);
-        // Add a slight delay for content fade-in
-        setTimeout(() => {
-          setContentVisible(true);
-        }, 100); // Reduced from 300ms to 100ms for faster perceived performance
-
-        // After primary content is visible, load secondary content
-        setTimeout(() => {
-          setSecondaryLoaded(true);
-        }, 1000);
+        setPageState(prev => ({ ...prev, isLoading: false }));
       }
+      contentTimer = setTimeout(() => {
+        setPageState(prev => ({ ...prev, contentVisible: true }));
+      }, 100);
+      secondaryTimer = setTimeout(() => {
+        setPageState(prev => ({ ...prev, secondaryLoaded: true }));
+      }, 1000);
     };
 
     fetchPrimaryData();
-  }, []);
 
-  // Content placeholder skeleton
-  const RowSkeleton = () => (
-    <div className="mb-8">
-      <Skeleton className="mb-4 h-8 w-48" />
-      <div className="flex gap-4 overflow-hidden">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-36 w-64 flex-shrink-0 rounded-lg" />
-        ))}
-      </div>
-    </div>
-  );
+    return () => {
+      clearTimeout(contentTimer);
+      clearTimeout(secondaryTimer);
+    };
+  }, []);
 
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">

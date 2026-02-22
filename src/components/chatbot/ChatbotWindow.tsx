@@ -47,10 +47,11 @@ const ChatbotWindow: React.FC = () => {
   const [input, setInput] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [recommendations, setRecommendations] = useState<
-    MediaWithAvailability[]
-  >([]);
-  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [recState, setRecState] = useState<{
+    recommendations: MediaWithAvailability[];
+    loadingAvailability: boolean;
+  }>({ recommendations: [], loadingAvailability: false });
+  const { recommendations, loadingAvailability } = recState;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -105,12 +106,12 @@ const ChatbotWindow: React.FC = () => {
               searchResults,
               profile.streamingServices
             );
-          setRecommendations(availableResults);
+          setRecState(prev => ({ ...prev, recommendations: availableResults }));
         }
       } else {
         // Get personalized recommendations based on the query
         const userRecommendations = await getRecommendations(5);
-        setRecommendations(userRecommendations);
+        setRecState(prev => ({ ...prev, recommendations: userRecommendations }));
 
         // Send message with enhanced context
         await sendMessage(trimmedInput, {
@@ -132,7 +133,7 @@ const ChatbotWindow: React.FC = () => {
     const loadAvailability = async () => {
       if (!recommendations.length || !profile) return;
 
-      setLoadingAvailability(true);
+      setRecState(prev => ({ ...prev, loadingAvailability: true }));
       try {
         const updatedRecommendations = await Promise.all(
           recommendations.map(async media => {
@@ -141,11 +142,13 @@ const ChatbotWindow: React.FC = () => {
             return { ...media, availability };
           })
         );
-        setRecommendations(updatedRecommendations);
+        setRecState({
+          recommendations: updatedRecommendations,
+          loadingAvailability: false,
+        });
       } catch (error) {
         console.error("Error loading streaming availability:", error);
-      } finally {
-        setLoadingAvailability(false);
+        setRecState(prev => ({ ...prev, loadingAvailability: false }));
       }
     };
 

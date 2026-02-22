@@ -28,9 +28,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   const [hasReacted, setHasReacted] = useState(false);
 
-  const [displayedText, setDisplayedText] = useState("");
-
-  const [isTyping, setIsTyping] = useState(!message.isUser);
+  const [typingState, setTypingState] = useState({
+    displayedText: "",
+    isTyping: !message.isUser,
+  });
+  const { displayedText, isTyping } = typingState;
 
   const [showFeedback, setShowFeedback] = useState(false);
 
@@ -71,30 +73,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   useEffect(() => {
     if (message.isUser) {
-      setDisplayedText(message.text);
+      setTypingState({ displayedText: message.text, isTyping: false });
 
       return;
     }
-
-    // Check if this is a recommendation message with media items
 
     if (mediaItems.length > 0) {
-      setDisplayedText(message.text);
-
-      setIsTyping(false);
+      setTypingState({ displayedText: message.text, isTyping: false });
 
       return;
     }
-
-    // Simulate typing effect for bot messages
 
     let index = 0;
 
     const text = message.text;
 
-    setDisplayedText("");
-
-    setIsTyping(true);
+    setTypingState({ displayedText: "", isTyping: true });
 
     // Calculate typing speed based on message length
 
@@ -110,11 +104,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       if (index < text.length) {
         // Add character by character with natural pauses at punctuation
 
-        setDisplayedText(prev => prev + text[index]);
+        setTypingState(prev => ({
+          ...prev,
+          displayedText: prev.displayedText + text[index],
+        }));
 
         index++;
-
-        // Add slight pause at punctuation for more natural typing
 
         if ([".", "!", "?", ",", ";", ":"].includes(text[index - 1])) {
           clearInterval(typingInterval);
@@ -123,24 +118,27 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             () => {
               const newInterval = setInterval(() => {
                 if (index < text.length) {
-                  setDisplayedText(prev => prev + text[index]);
+                  setTypingState(prev => ({
+                    ...prev,
+                    displayedText: prev.displayedText + text[index],
+                  }));
 
                   index++;
                 } else {
                   clearInterval(newInterval);
 
-                  setIsTyping(false);
+                  setTypingState(prev => ({ ...prev, isTyping: false }));
                 }
               }, typingSpeed);
             },
 
             text[index - 1] === "." ? 300 : 150
-          ); // Longer pause for periods
+          );
         }
       } else {
         clearInterval(typingInterval);
 
-        setIsTyping(false);
+        setTypingState(prev => ({ ...prev, isTyping: false }));
       }
     }, typingSpeed); // Dynamic typing speed
 

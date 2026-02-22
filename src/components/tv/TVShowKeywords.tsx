@@ -28,5 +28,3 @@ export const TVShowKeywords = ({ keywords }: TVShowKeywordsProps) => {
     </div>
   );
 };
-
-export default TVShowKeywords;

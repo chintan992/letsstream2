@@ -19,21 +19,23 @@ interface ReviewSectionProps {
 }
 
 const ReviewSection = ({ mediaId, mediaType }: ReviewSectionProps) => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [reviewState, setReviewState] = useState<{
+    reviews: Review[];
+    isLoading: boolean;
+  }>({ reviews: [], isLoading: true });
+  const { reviews, isLoading } = reviewState;
   const [visibleReviews, setVisibleReviews] = useState(3);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        setIsLoading(true);
+        setReviewState(prev => ({ ...prev, isLoading: true }));
         const reviewsData = await getReviews(mediaId, mediaType);
-        setReviews(reviewsData);
+        setReviewState({ reviews: reviewsData, isLoading: false });
       } catch (error) {
         console.error("Error fetching reviews:", error);
-      } finally {
-        setIsLoading(false);
+        setReviewState(prev => ({ ...prev, isLoading: false }));
       }
     };
 

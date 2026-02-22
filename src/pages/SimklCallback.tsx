@@ -17,58 +17,63 @@ export default function SimklCallback() {
             const searchParams = new URLSearchParams(location.search);
             const code = searchParams.get("code");
             const errorParam = searchParams.get("error");
+            let errorMsg: string | null = null;
 
             if (errorParam) {
-                setError("Simkl authentication denied.");
+                errorMsg = "Simkl authentication denied.";
                 toast({
                     title: "Authentication Failed",
                     description: "Simkl authentication was denied.",
                     variant: "destructive",
                 });
                 setTimeout(() => navigate("/profile"), 2000);
-                return;
-            }
-
-            if (!code) {
-                setError("No authentication code received.");
-                return;
-            }
-
-            if (processedRef.current) return;
-            processedRef.current = true;
-
-            try {
-                const redirectUri = `${window.location.origin}/simkl-callback`;
-                const tokenResponse = await SimklService.exchangeCodeForToken(
-                    code,
-                    redirectUri
-                );
-
-                // IMPORTANT: Check valid token
-                if (!tokenResponse.access_token) {
-                    throw new Error("Token response missing access_token");
-                }
-
-                await updatePreferences({
-                    simklToken: tokenResponse.access_token,
-                    isSimklEnabled: true,
-                });
-
+            } else if (!code) {
+                errorMsg = "No authentication code received.";
                 toast({
-                    title: "Simkl Connected",
-                    description: "Your Simkl account has been successfully connected.",
-                });
-
-                navigate("/profile");
-            } catch (err) {
-                console.error("Simkl authentication error:", err);
-                setError("Failed to connect to Simkl. Please try again.");
-                toast({
-                    title: "Connection Failed",
-                    description: "Could not connect to Simkl. Please try again.",
+                    title: "Authentication Failed",
+                    description: "No authentication code received.",
                     variant: "destructive",
                 });
                 setTimeout(() => navigate("/profile"), 2000);
+            } else if (!processedRef.current) {
+                processedRef.current = true;
+
+                try {
+                    const redirectUri = `${window.location.origin}/simkl-callback`;
+                    const tokenResponse = await SimklService.exchangeCodeForToken(
+                        code,
+                        redirectUri
+                    );
+
+                    if (!tokenResponse.access_token) {
+                        throw new Error("Token response missing access_token");
+                    }
+
+                    await updatePreferences({
+                        simklToken: tokenResponse.access_token,
+                        isSimklEnabled: true,
+                    });
+
+                    toast({
+                        title: "Simkl Connected",
+                        description: "Your Simkl account has been successfully connected.",
+                    });
+
+                    navigate("/profile");
+                } catch (err) {
+                    console.error("Simkl authentication error:", err);
+                    errorMsg = "Failed to connect to Simkl. Please try again.";
+                    toast({
+                        title: "Connection Failed",
+                        description: "Could not connect to Simkl. Please try again.",
+                        variant: "destructive",
+                    });
+                    setTimeout(() => navigate("/profile"), 2000);
+                }
+            }
+
+            if (errorMsg) {
+                setError(errorMsg);
             }
         };
 

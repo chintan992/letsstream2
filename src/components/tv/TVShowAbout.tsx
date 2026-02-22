@@ -116,5 +116,3 @@ export const TVShowAbout = ({ tvShow }: TVShowAboutProps) => {
     </div>
   );
 };
-
-export default TVShowAbout;

@@ -11,7 +11,15 @@ const Logo: React.FC = () => {
   return (
     <div
       title="Let's Stream"
+      role="button"
+      tabIndex={0}
       onClick={() => navigate("/")}
+      onKeyDown={e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate("/");
+        }
+      }}
       className="cursor-pointer font-mono text-5xl font-bold"
     >
       <span className={styles.flickerL + " text-white"}>L</span>

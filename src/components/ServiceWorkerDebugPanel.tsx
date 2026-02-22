@@ -99,8 +99,8 @@ export function ServiceWorkerDebugPanel() {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+  const handleSwMessage = useCallback(
+    (event: MessageEvent) => {
       if (event.data?.type === "BYPASS_STATUS") {
         setBypassEnabled(event.data.active);
         addEvent(
@@ -111,39 +111,38 @@ export function ServiceWorkerDebugPanel() {
         setMetrics(event.data.metrics);
         addEvent("Metrics", "Performance metrics updated");
       }
-    };
+    },
+    [addEvent]
+  );
 
-    const handleNetworkChange = () => {
-      const status = navigator.onLine ? "online" : "offline";
-      setNetworkCondition(status);
-      addEvent("Network", `Network status changed to ${status}`);
-    };
+  const handleNetworkChange = useCallback(() => {
+    const status = navigator.onLine ? "online" : "offline";
+    setNetworkCondition(status);
+    addEvent("Network", `Network status changed to ${status}`);
+  }, [addEvent]);
 
-    const handleStateChange = () => {
-      checkRegistration();
-      addEvent("State", "Service worker state changed");
-    };
+  const handleSwStateChange = useCallback(() => {
+    checkRegistration();
+    addEvent("State", "Service worker state changed");
+  }, [checkRegistration, addEvent]);
 
-    const handleControllerChange = () => {
-      setControllerState(
-        navigator.serviceWorker.controller ? "active" : "none"
-      );
-      addEvent("Controller", "Service worker controller changed");
-    };
+  const handleControllerChange = useCallback(() => {
+    setControllerState(
+      navigator.serviceWorker.controller ? "active" : "none"
+    );
+    addEvent("Controller", "Service worker controller changed");
+  }, [addEvent]);
 
-    const initializePanel = () => {
-      checkRegistration();
-    };
-
-    initializePanel();
+  useEffect(() => {
+    checkRegistration();
 
     if (registration) {
-      registration.addEventListener("statechange", handleStateChange);
+      registration.addEventListener("statechange", handleSwStateChange);
     }
 
     window.addEventListener("online", handleNetworkChange);
     window.addEventListener("offline", handleNetworkChange);
-    navigator.serviceWorker.addEventListener("message", handleMessage);
+    navigator.serviceWorker.addEventListener("message", handleSwMessage);
     navigator.serviceWorker.addEventListener(
       "controllerchange",
       handleControllerChange
@@ -151,17 +150,24 @@ export function ServiceWorkerDebugPanel() {
 
     return () => {
       if (registration) {
-        registration.removeEventListener("statechange", handleStateChange);
+        registration.removeEventListener("statechange", handleSwStateChange);
       }
       window.removeEventListener("online", handleNetworkChange);
       window.removeEventListener("offline", handleNetworkChange);
-      navigator.serviceWorker.removeEventListener("message", handleMessage);
+      navigator.serviceWorker.removeEventListener("message", handleSwMessage);
       navigator.serviceWorker.removeEventListener(
         "controllerchange",
         handleControllerChange
       );
     };
-  }, [registration, checkRegistration, addEvent]);
+  }, [
+    registration,
+    checkRegistration,
+    handleSwMessage,
+    handleNetworkChange,
+    handleSwStateChange,
+    handleControllerChange,
+  ]);
 
   const handleSkipWaiting = useCallback(() => {
     if (registration?.waiting) {

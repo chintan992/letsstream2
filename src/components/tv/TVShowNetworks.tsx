@@ -49,5 +49,3 @@ export const TVShowNetworks = ({ networks }: TVShowNetworksProps) => {
     </div>
   );
 };
-
-export default TVShowNetworks;
