@@ -1,5 +1,5 @@
 // Sport icons mapping
-export const sportIcons: Record<string, string> = {
+const sportIcons: Record<string, string> = {
   football: "⚽",
   basketball: "🏀",
   "american-football": "🏈",

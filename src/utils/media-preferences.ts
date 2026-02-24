@@ -122,7 +122,7 @@ export async function analyzeUserPreferences(
   }
 }
 
-export function calculatePreferenceScore(
+function calculatePreferenceScore(
   stats: MediaPreferenceStats
 ): ContentPreference {
   // Calculate preference scores

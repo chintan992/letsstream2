@@ -9,7 +9,7 @@ interface AuthErrorConfig {
 }
 
 // Map of Firebase Auth error codes to user-friendly messages
-export const AUTH_ERROR_MESSAGES: Record<string, AuthErrorConfig> = {
+const AUTH_ERROR_MESSAGES: Record<string, AuthErrorConfig> = {
   // Email/password errors
   "auth/invalid-email": {
     title: "Invalid Email",
@@ -125,7 +125,7 @@ export const AUTH_ERROR_MESSAGES: Record<string, AuthErrorConfig> = {
 };
 
 // Default error configuration for unknown errors
-export const DEFAULT_ERROR_CONFIG: AuthErrorConfig = {
+const DEFAULT_ERROR_CONFIG: AuthErrorConfig = {
   title: "Authentication Error",
   description: "An unexpected error occurred during authentication.",
   suggestion: "Please try again or contact support if the issue persists.",

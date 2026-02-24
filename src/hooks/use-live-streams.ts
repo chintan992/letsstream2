@@ -10,10 +10,10 @@ interface LiveStreamsResponse {
   matches: LiveStream[];
 }
 
-export const LIVE_STREAMS_API =
+const LIVE_STREAMS_API =
   "https://raw.githubusercontent.com/byte-capsule/FanCode-Hls-Fetcher/main/Fancode_hls_m3u8.Json";
 
-export const fetchLiveStreams = async (): Promise<LiveStreamsResponse> => {
+const fetchLiveStreams = async (): Promise<LiveStreamsResponse> => {
   try {
     const { data } = await axios.get<LiveStreamsResponse>(LIVE_STREAMS_API);
     return data;

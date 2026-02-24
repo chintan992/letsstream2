@@ -5,11 +5,6 @@ import { TMDBTVResult, TMDBTVDetailsResult } from "../types/tmdb";
 import { formatMediaResult } from "./media";
 import { TMDB } from "../config/constants";
 
-export async function getTVShow(id: number): Promise<TVDetails> {
-  const response = await tmdb.get<TMDBTVDetailsResult>(`/tv/${id}`);
-  return formatTVDetails(response.data);
-}
-
 export async function getPopularTVShows(page = 1): Promise<Media[]> {
   const response = await tmdb.get<{ results: TMDBTVResult[] }>("/tv/popular", {
     params: { page },
@@ -149,37 +144,6 @@ export async function getTVDetails(id: number): Promise<TVDetails | null> {
   }
 }
 
-// Validate TMDB TV ID
-export async function validateTVId(tmdbId: number): Promise<boolean> {
-  try {
-    const response = await tmdb.get(`/tv/${tmdbId}`);
-    return response.data && response.data.id === tmdbId;
-  } catch (error) {
-    return false;
-  }
-}
-
-function formatTVDetails(show: TMDBTVDetailsResult): TVDetails {
-  const formattedData = formatMediaResult({ ...show, media_type: "tv" });
-
-  return {
-    ...formattedData,
-    name: show.name || "Unknown TV Show",
-    first_air_date: show.first_air_date || "",
-    episode_run_time: show.episode_run_time || [],
-    genres: show.genres || [],
-    status: show.status || "",
-    tagline: show.tagline || "",
-    number_of_episodes: show.number_of_episodes || 0,
-    number_of_seasons: show.number_of_seasons || 0,
-    seasons: show.seasons || [],
-    production_companies: show.production_companies || [],
-    created_by: show.created_by || [],
-    certification: "", // Set by parent function after content ratings lookup
-    logo_path: null, // Set by parent function after image lookup
-  };
-}
-
 // Get TV show creators
 export async function getTVShowCreators(id: number): Promise<any[]> {
   try {
@@ -232,17 +196,6 @@ export async function getTVShowContentRatings(id: number): Promise<any> {
   } catch (error) {
     console.error(`Error fetching content ratings for TV show ${id}:`, error);
     return [];
-  }
-}
-
-// Get TV show external IDs
-export async function getTVShowExternalIds(id: number): Promise<any> {
-  try {
-    const response = await tmdb.get<any>(`/tv/${id}/external_ids`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching external IDs for TV show ${id}:`, error);
-    return {};
   }
 }
 

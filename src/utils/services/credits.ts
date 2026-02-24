@@ -1,33 +1,6 @@
 import { tmdb } from "./tmdb";
 import { CastMember, CrewMember } from "../types";
 
-// Get movie cast
-export const getMovieCast = async (id: number): Promise<CastMember[]> => {
-  try {
-    const response = await tmdb.get(`/movie/${id}/credits`);
-    return (response.data.cast || []).map(
-      (member: {
-        id: number;
-        name: string;
-        character: string;
-        profile_path: string | null;
-        order: number;
-        credit_id?: string;
-      }) => ({
-        id: member.id,
-        name: member.name,
-        character: member.character,
-        profile_path: member.profile_path,
-        order: member.order,
-        credit_id: member.credit_id,
-      })
-    );
-  } catch (error) {
-    console.error(`Error fetching movie cast for id ${id}:`, error);
-    return [];
-  }
-};
-
 // Get movie credits (cast and crew)
 export const getMovieCredits = async (
   id: number

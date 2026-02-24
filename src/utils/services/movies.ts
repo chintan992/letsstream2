@@ -6,11 +6,6 @@ import { TMDBMovieResult, TMDBMovieDetailsResult } from "../types/tmdb";
 import { formatMediaResult } from "./media";
 import { TMDB } from "../config/constants";
 
-export async function getMovie(id: number): Promise<MovieDetails> {
-  const response = await tmdb.get<TMDBMovieDetailsResult>(`/movie/${id}`);
-  return formatMovieDetails(response.data);
-}
-
 export async function getPopularMovies(page = 1): Promise<Media[]> {
   const response = await tmdb.get<{ results: TMDBMovieResult[] }>(
     "/movie/popular",
@@ -24,19 +19,6 @@ export async function getPopularMovies(page = 1): Promise<Media[]> {
 export async function getTopRatedMovies(page = 1): Promise<Media[]> {
   const response = await tmdb.get<{ results: TMDBMovieResult[] }>(
     "/movie/top_rated",
-    {
-      params: { page },
-    }
-  );
-  return response.data.results.map(formatMediaResult);
-}
-
-export async function getTrendingMovies(
-  timeWindow: "day" | "week" = "week",
-  page = 1
-): Promise<Media[]> {
-  const response = await tmdb.get<{ results: TMDBMovieResult[] }>(
-    `/trending/movie/${timeWindow}`,
     {
       params: { page },
     }
@@ -152,25 +134,6 @@ export async function getMovieDetails(
   }
 }
 
-// Validate TMDB movie ID
-export async function validateMovieId(tmdbId: number): Promise<boolean> {
-  try {
-    const response = await tmdb.get(`/movie/${tmdbId}`);
-    return response.data && response.data.id === tmdbId;
-  } catch (error) {
-    // Log API error to analytics
-    await trackEvent({
-      name: "api_error",
-      params: {
-        api: "tmdb/movie/validate",
-        error: error instanceof Error ? error.message : String(error),
-        movieId: tmdbId,
-      },
-    });
-    return false;
-  }
-}
-
 // Get movie images
 export async function getMovieImages(id: number): Promise<any> {
   try {
@@ -180,30 +143,4 @@ export async function getMovieImages(id: number): Promise<any> {
     console.error(`Error fetching images for movie ${id}:`, error);
     return { backdrops: [], posters: [] };
   }
-}
-
-function formatMovieDetails(movie: TMDBMovieDetailsResult): MovieDetails {
-  const formattedData = formatMediaResult({ ...movie, media_type: "movie" });
-
-  // Extract directors from crew
-  const directors =
-    movie.credits?.crew?.filter(
-      person => person.job === "Director" && person.department === "Directing"
-    ) || [];
-
-  return {
-    ...formattedData,
-    title: movie.title || "Unknown Movie",
-    release_date: movie.release_date || "",
-    runtime: movie.runtime || 0,
-    genres: movie.genres || [],
-    status: movie.status || "",
-    tagline: movie.tagline || "",
-    budget: movie.budget || 0,
-    revenue: movie.revenue || 0,
-    production_companies: movie.production_companies || [],
-    directors: directors,
-    certification: "", // Set by parent function after release dates lookup
-    logo_path: null, // Set by parent function after image lookup
-  };
 }

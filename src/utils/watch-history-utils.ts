@@ -126,7 +126,7 @@ export const deduplicateWatchHistory = (
  * Determines if two watch history items refer to the same media content
  * For TV shows, checks only media type and ID (not season/episode)
  */
-export const isSameMedia = (
+const isSameMedia = (
   item1: WatchHistoryItem,
   item2: WatchHistoryItem
 ): boolean => {
@@ -242,18 +242,6 @@ export const filterWatchHistoryDuplicates = (
     // For movies, keep the original behavior
     return { items: [newItem, ...filteredItems], existingItem };
   }
-};
-
-/**
- * Calculate the percentage progress of a watched item
- */
-export const calculateProgress = (
-  position: number,
-  duration: number
-): number => {
-  if (!duration || duration <= 0) return 0;
-  const progress = (position / duration) * 100;
-  return Math.min(100, Math.max(0, progress)); // Ensure between 0-100
 };
 
 /**

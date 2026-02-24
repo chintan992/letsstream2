@@ -1,5 +1,3 @@
-export { AuthContext, type AuthContextType } from "@/contexts/auth";
-export { AuthProvider } from "./auth-context";
 export { useAuth } from "./useAuth";
 export { useElementScrollRestoration } from "./useElementScrollRestoration";
 export { useHorizontalScrollRestoration } from "./useHorizontalScrollRestoration";

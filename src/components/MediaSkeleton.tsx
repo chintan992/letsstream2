@@ -4,7 +4,7 @@ interface MediaSkeletonProps {
   listView?: boolean;
 }
 
-export function MediaSkeleton({ listView }: MediaSkeletonProps) {
+function MediaSkeleton({ listView }: MediaSkeletonProps) {
   return (
     <div
       className={cn(

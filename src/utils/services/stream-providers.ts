@@ -39,39 +39,3 @@ const getProviderContent = async (
     return [];
   }
 };
-
-// Netflix (provider id: 8)
-export const getNetflixContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.NETFLIX, page);
-
-// Hulu (provider id: 15)
-export const getHuluContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.HULU, page);
-
-// Prime Video (provider id: 119)
-export const getPrimeContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.PRIME, page);
-
-// Paramount+ (provider id: 531)
-export const getParamountContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.PARAMOUNT, page);
-
-// Disney+ (provider id: 337)
-export const getDisneyContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.DISNEY, page);
-
-// Hotstar (provider id: 122)
-export const getHotstarContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.HOTSTAR, page, "IN");
-
-// Apple TV+ (provider id: 350)
-export const getAppleTVContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.APPLE_TV, page);
-
-// JioCinema (provider id: 970)
-export const getJioCinemaContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.JIO_CINEMA, page, "IN");
-
-// Sony Liv (provider id: 237)
-export const getSonyLivContent = (page: number = 1) =>
-  getProviderContent(PROVIDERS.SONY_LIV, page, "IN");

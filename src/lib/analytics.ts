@@ -136,36 +136,6 @@ export const trackMediaView = async ({
 };
 
 /**
- * Tracks when a user completes watching media content
- * @param {Object} params - Media completion parameters
- * @param {'movie' | 'tv'} params.mediaType - Type of media completed
- * @param {string} params.mediaId - Unique identifier of the media
- * @param {string} params.title - Title of the media
- * @param {number} params.watchTime - Total watch time in seconds
- */
-export const trackMediaComplete = async ({
-  mediaType,
-  mediaId,
-  title,
-  watchTime,
-}: {
-  mediaType: "movie" | "tv";
-  mediaId: string;
-  title: string;
-  watchTime: number;
-}) => {
-  await trackEvent({
-    name: "media_complete",
-    params: {
-      content_type: mediaType,
-      item_id: mediaId,
-      title,
-      watch_time: watchTime,
-    },
-  });
-};
-
-/**
  * Tracks user preferences between movies and TV shows
  * @param {'movie' | 'tv'} mediaType - Type of media being interacted with
  * @param {'select' | 'browse' | 'favorite'} action - The type of interaction
@@ -179,36 +149,6 @@ export const trackMediaPreference = async (
     params: {
       content_type: mediaType,
       action,
-    },
-  });
-};
-
-/**
- * Tracks user engagement metrics for media content
- * @param {Object} params - Engagement parameters
- * @param {'movie' | 'tv'} params.mediaType - Type of media
- * @param {string} params.mediaId - Unique identifier of the media
- * @param {'pause' | 'resume' | 'seek' | 'rate'} params.action - Type of engagement
- * @param {AnalyticsParams} [params.additionalParams] - Additional tracking parameters
- */
-export const trackMediaEngagement = async ({
-  mediaType,
-  mediaId,
-  action,
-  additionalParams = {},
-}: {
-  mediaType: "movie" | "tv";
-  mediaId: string;
-  action: "pause" | "resume" | "seek" | "rate";
-  additionalParams?: AnalyticsParams;
-}) => {
-  await trackEvent({
-    name: "media_engagement",
-    params: {
-      content_type: mediaType,
-      item_id: mediaId,
-      action,
-      ...additionalParams,
     },
   });
 };

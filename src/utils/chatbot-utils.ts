@@ -203,9 +203,7 @@ const extractMediaItems = (text: string): ParsedMediaItem[] => {
  * Create temporary Media objects from parsed items
  * Used for displaying in the chatbot UI
  */
-export const createMediaObjects = (
-  parsedItems: ParsedMediaItem[]
-): ChatbotMedia[] => {
+const createMediaObjects = (parsedItems: ParsedMediaItem[]): ChatbotMedia[] => {
   return parsedItems.map(item => {
     const media: ChatbotMedia = {
       id: item.tmdbId || 0,

@@ -25,7 +25,7 @@ export interface ExtendedMedia extends Media {
 }
 
 // Helper function to convert Media to ExtendedMedia
-export const ensureExtendedMedia = (media: Media): ExtendedMedia => {
+const ensureExtendedMedia = (media: Media): ExtendedMedia => {
   return {
     ...media,
     media_id: media.media_id || media.id, // Ensure media_id is present

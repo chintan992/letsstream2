@@ -283,4 +283,4 @@ class StreamingPlatformService {
 }
 
 export const streamingPlatformService = StreamingPlatformService.getInstance();
-export type { StreamingProvider, StreamingAvailability, ContentMetadata };
+export type { StreamingAvailability };

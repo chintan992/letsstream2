@@ -15,20 +15,19 @@ import {
   getDocs,
   doc,
   setDoc,
-  getDoc,
 } from "firebase/firestore";
 import { SimklService, SimklListItem, getLastWatchedEpisode } from "./simkl";
 import { WatchHistoryItem } from "@/contexts/types/watch-history";
 import { getMovieDetails, getTVDetails } from "@/utils/api";
 
-export interface SyncResult {
+interface SyncResult {
   imported: number;
   exported: number;
   merged: number;
   errors: string[];
 }
 
-export interface SyncState {
+interface SyncState {
   lastSyncAt: string | null;
   isSyncing: boolean;
   lastResult: SyncResult | null;
@@ -378,23 +377,6 @@ async function exportToSimkl(
   }
 
   return result;
-}
-
-/**
- * Get or update sync state for a user
- */
-export async function getSyncState(userId: string): Promise<SyncState | null> {
-  try {
-    const syncRef = doc(db, "simklSync", userId);
-    const syncDoc = await getDoc(syncRef);
-
-    if (syncDoc.exists()) {
-      return syncDoc.data() as SyncState;
-    }
-    return null;
-  } catch {
-    return null;
-  }
 }
 
 export async function updateSyncState(

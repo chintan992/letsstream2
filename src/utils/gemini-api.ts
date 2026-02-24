@@ -20,12 +20,6 @@ interface GeminiConfig {
   };
 }
 
-export interface GeminiChatMessage {
-  role: "user" | "assistant" | "system";
-  content: string;
-  timestamp: number;
-}
-
 export interface GeminiResponse {
   text: string;
   status: "success" | "error";
@@ -526,5 +520,3 @@ export interface GeminiResponse {
   fallback?: boolean;
   responseTime?: number;
 }
-
-export type { GeminiConfig, GeminiAPIError };

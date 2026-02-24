@@ -19,7 +19,5 @@ const TMDB = {
 // Export individual constants for easier imports
 export const TMDB_API_KEY = TMDB.API_KEY;
 export const BASE_URL = TMDB.BASE_URL;
-export const IMAGE_BASE_URL = TMDB.IMAGE_BASE_URL;
-
 export { TMDB };
 export const { posterSizes, backdropSizes } = TMDB;

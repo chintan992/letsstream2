@@ -50,7 +50,7 @@ export const getPopularMatchesBySport = async (
   }
 };
 
-export const getAllMatches = async (): Promise<APIMatch[]> => {
+const getAllMatches = async (): Promise<APIMatch[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/matches/all`);
     if (!response.ok) {
@@ -114,7 +114,7 @@ const SOURCES = [
   "intel",
 ];
 
-export const getStreamsBySource = async (
+const getStreamsBySource = async (
   source: string,
   id: string
 ): Promise<Stream[]> => {
@@ -158,34 +158,6 @@ export const getMatchPosterUrl = (posterId: string) => {
 
   // Otherwise, treat it as a poster ID and use the proxy endpoint
   return `${API_BASE_URL}/api/images/proxy/${posterId}.webp`;
-};
-
-export const getPopularLiveMatches = async (): Promise<APIMatch[]> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/matches/live/popular`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch popular live matches");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching popular live matches:", error);
-    return [];
-  }
-};
-
-export const getPopularTodayMatches = async (): Promise<APIMatch[]> => {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/matches/all-today/popular`
-    );
-    if (!response.ok) {
-      throw new Error("Failed to fetch popular today matches");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching popular today matches:", error);
-    return [];
-  }
 };
 
 export const getMatchById = async (

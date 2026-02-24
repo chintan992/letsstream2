@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 
-export interface ScrollRestorationOptions {
+interface ScrollRestorationOptions {
   enabled?: boolean;
   restoreDelay?: number;
   maxRestoreDelay?: number;

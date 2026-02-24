@@ -3,7 +3,7 @@
  * @param imageUrl - The URL of the image to download
  * @param filename - The filename to save the image as
  */
-export const downloadImage = async (
+const downloadImage = async (
   imageUrl: string,
   filename: string
 ): Promise<void> => {

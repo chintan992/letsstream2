@@ -1,16 +1,10 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useCallback, useEffect, useRef } from "react";
 import * as Toast from "@radix-ui/react-toast";
 import { useWillChange } from "@/hooks/useWillChange";
 
-export type NotificationType = "success" | "error" | "warning" | "info";
+type NotificationType = "success" | "error" | "warning" | "info";
 
-export interface Notification {
+interface Notification {
   id: string;
   title: string;
   description?: string;
@@ -128,14 +122,4 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
       </Toast.Provider>
     </NotificationContext.Provider>
   );
-};
-
-export const useNotification = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error(
-      "useNotification must be used within a NotificationProvider"
-    );
-  }
-  return context;
 };

@@ -4,12 +4,9 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   UserPreferencesContext,
   UserPreferences,
-  UserPreferencesContextType,
 } from "./types/user-preferences";
 import { collection, doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
-export { UserPreferencesContext };
 
 export function UserPreferencesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();

@@ -168,5 +168,3 @@ export class RateLimiter {
     return this.isAllowed(dummyUrl, dummyClientId);
   }
 }
-
-export const rateLimiter = RateLimiter.getInstance();

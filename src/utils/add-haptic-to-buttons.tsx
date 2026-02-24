@@ -9,7 +9,7 @@ import { triggerHapticFeedback } from "./haptic-feedback";
  * @param element The React element to process
  * @returns A new React element with haptic feedback added to all buttons
  */
-export function addHapticToButtons(element: React.ReactNode): React.ReactNode {
+function addHapticToButtons(element: React.ReactNode): React.ReactNode {
   if (!React.isValidElement(element)) {
     return element;
   }
@@ -70,7 +70,7 @@ export function addHapticToButtons(element: React.ReactNode): React.ReactNode {
  * @param Component The component to enhance
  * @returns A new component with haptic feedback added to all buttons
  */
-export function withHapticFeedback<P extends object>(
+function withHapticFeedback<P extends object>(
   Component: React.ComponentType<P>
 ): React.FC<P> {
   const WithHapticFeedback: React.FC<P> = props => {

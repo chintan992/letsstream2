@@ -68,7 +68,7 @@ auth.setPersistence(browserLocalPersistence).catch(error => {
 // Initialize analytics only if it's supported in the current environment
 let analyticsInstance: ReturnType<typeof getAnalytics> | null = null;
 
-export const initAnalytics = async () => {
+const initAnalytics = async () => {
   if (await isSupported()) {
     analyticsInstance = getAnalytics(app);
     return analyticsInstance;
@@ -108,5 +108,3 @@ enableIndexedDbPersistence(db).catch(err => {
 // } else {
 //   console.log("Firebase API key: Using provided key");
 // }
-
-export { app };

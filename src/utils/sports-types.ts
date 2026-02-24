@@ -1,4 +1,4 @@
-export interface Team {
+interface Team {
   name: string;
   badge: string;
 }

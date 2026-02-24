@@ -336,4 +336,3 @@ class RecommendationEngine {
 }
 
 export const recommendationEngine = RecommendationEngine.getInstance();
-export type { RecommendationScore };

@@ -298,11 +298,4 @@ function extractEpisodeInfo(media: Media): TMDBEpisodeInfo | null {
   return null;
 }
 
-export {
-  searchAndValidateTMDB,
-  getValidatedRoute,
-  extractEpisodeInfo,
-  type TMDBValidatedContent,
-  type TMDBSearchResult,
-  type TMDBEpisodeInfo,
-};
+export { getValidatedRoute, type TMDBEpisodeInfo };

@@ -36,14 +36,3 @@ export interface UserProfile {
   };
   streamingServices: string[]; // List of user's subscribed streaming services
 }
-
-export interface UserProfileContextType {
-  profile: UserProfile | null;
-  isLoading: boolean;
-  updatePreferences: (preferences: Partial<UserPreference>) => Promise<void>;
-  addInteraction: (interaction: UserInteraction) => Promise<void>;
-  updateStreamingServices: (services: string[]) => Promise<void>;
-  getRecommendations: (count?: number) => Promise<Media[]>;
-  getSimilarContent: (mediaId: number) => Promise<Media[]>;
-  getPersonalizedScore: (media: Media) => number;
-}

@@ -319,7 +319,7 @@ export function downloadBackup(
 /**
  * Generates a default backup filename
  */
-export function generateDefaultBackupFilename(backupData: BackupData): string {
+function generateDefaultBackupFilename(backupData: BackupData): string {
   const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
   return `letsstream-backup-${backupData.user_id}-${date}.json`;
 }

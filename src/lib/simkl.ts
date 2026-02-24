@@ -2,7 +2,7 @@ const SIMKL_API_URL = "https://api.simkl.com";
 const SIMKL_CLIENT_ID = import.meta.env.VITE_SIMKL_CLIENT_ID;
 const SIMKL_CLIENT_SECRET = import.meta.env.VITE_SIMKL_CLIENT_SECRET;
 
-export interface SimklTokenResponse {
+interface SimklTokenResponse {
   access_token: string;
   token_type: string;
   scope: string;
@@ -280,7 +280,7 @@ export interface SimklListItem {
   // Extended data - seasons at top level!
   seasons?: SimklSeason[];
 }
-export interface SimklShow {
+interface SimklShow {
   title: string;
   poster?: string;
   year?: number;
@@ -289,14 +289,14 @@ export interface SimklShow {
   seasons?: SimklSeason[];
 }
 
-export interface SimklMovie {
+interface SimklMovie {
   title: string;
   poster?: string;
   year?: number;
   ids: SimklIds;
 }
 
-export interface SimklAnime {
+interface SimklAnime {
   title: string;
   poster?: string;
   year?: number;
@@ -305,17 +305,17 @@ export interface SimklAnime {
   episodes?: SimklEpisode[];
 }
 
-export interface SimklSeason {
+interface SimklSeason {
   number: number;
   episodes?: SimklEpisode[];
 }
 
-export interface SimklEpisode {
+interface SimklEpisode {
   number: number;
   watched_at?: string;
 }
 
-export interface SimklIds {
+interface SimklIds {
   simkl: number;
   slug?: string;
   imdb?: string;
@@ -325,7 +325,7 @@ export interface SimklIds {
   anidb?: number;
 }
 
-export interface SimklWatchHistoryResponse {
+interface SimklWatchHistoryResponse {
   movies: SimklListItem[];
   shows: SimklListItem[];
   anime: SimklListItem[];
@@ -355,7 +355,7 @@ export interface SimklTrendingItem {
   ep_count?: number;
 }
 
-export interface SimklGenre {
+interface SimklGenre {
   slug: string;
   name: string;
 }
