@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const handleAuthError = (error: FirebaseError) => {
     const errorConfig = formatAuthError(error.code);
@@ -153,24 +153,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      const popup = window.open("", "_blank");
-      if (popup) {
-        popup.close(); // Preload and close to avoid popup blockers
-      }
       // Use retry mechanism for network-related operations
       await retryWithBackoff(async () => {
         return await signInWithPopup(auth, provider);
       });
-      // Check if popup was closed by user
-      if (popup && popup.closed) {
-        toast({
-          title: "Popup Closed",
-          description:
-            "Authentication popup was closed before completing sign-in.",
-          variant: "destructive",
-        });
-        return;
-      }
       toast({
         title: "Welcome!",
         description: "You have successfully signed in with Google.",
