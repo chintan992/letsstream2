@@ -26,9 +26,16 @@ const useKeyPress = (
               active.tagName === "SELECT" ||
               active.tagName === "TEXTAREA" ||
               active.isContentEditable ||
-              ["button", "link", "tab", "menuitem", "option", "checkbox", "radio", "switch"].includes(
-                (active.getAttribute("role") || "").toLowerCase()
-              ));
+              [
+                "button",
+                "link",
+                "tab",
+                "menuitem",
+                "option",
+                "checkbox",
+                "radio",
+                "switch",
+              ].includes((active.getAttribute("role") || "").toLowerCase()));
           if (isInteractive) {
             return;
           }

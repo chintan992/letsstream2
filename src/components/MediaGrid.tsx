@@ -296,16 +296,14 @@ const MediaGrid = ({
                               Episodes watched:{" "}
                               {mediaItem.episodes_watched.length}
                             </div>
-                            {mediaItem.episodes_watched
-                              .slice(0, 3)
-                              .map((ep, idx) => (
-                                <span
-                                  key={`${ep.season}-${ep.episode}-${idx}`}
-                                  className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
-                                >
-                                  S{ep.season}E{ep.episode}
-                                </span>
-                              ))}
+                            {mediaItem.episodes_watched.slice(0, 3).map((ep, idx) => (
+                              <span
+                                key={`${ep.season}-${ep.episode}-${ep.watched_at ?? ep.watch_position ?? idx}`}
+                                className="mr-1 rounded bg-purple-600/30 px-1.5 py-0.5 text-xs"
+                              >
+                                S{ep.season}E{ep.episode}
+                              </span>
+                            ))}
                             {mediaItem.episodes_watched.length > 3 && (
                               <span className="text-xs text-white/50">
                                 +{mediaItem.episodes_watched.length - 3} more

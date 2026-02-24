@@ -2,6 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+// Note: PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis,
+// and PaginationLinkProps have been removed intentionally.
+// Only Pagination, PaginationContent, and PaginationItem remain.
+// Consumers must provide their own link/navigation primitives.
+
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     aria-label="pagination"

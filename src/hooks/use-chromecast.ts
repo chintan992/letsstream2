@@ -122,6 +122,42 @@ export function useChromecast(): UseChromecastResult {
   >(null);
 
   useEffect(() => {
+    function initializeCast() {
+      if (
+        initializedRef.current ||
+        (!window.cast?.framework && !window.chrome?.cast)
+      )
+        return;
+      initializedRef.current = true;
+
+      const castContext = window.cast.framework.CastContext.getInstance();
+      castContext.setOptions({
+        receiverApplicationId: "CC1AD845", // Default Media Receiver
+        autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      });
+
+      castContextRef.current = castContext;
+      setIsAvailable(true);
+
+      // Listen for session state changes
+      const onSessionStateChanged = (event: SessionStateEvent) => {
+        const fw = window.cast!.framework;
+        if (
+          event.sessionState === fw.SessionState.SESSION_STARTED ||
+          event.sessionState === fw.SessionState.SESSION_RESUMED
+        ) {
+          setIsConnected(true);
+        } else if (event.sessionState === fw.SessionState.SESSION_ENDED) {
+          setIsConnected(false);
+        }
+      };
+      sessionStateChangedListenerRef.current = onSessionStateChanged;
+      castContext.addEventListener(
+        window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        onSessionStateChanged
+      );
+    }
+
     // If cast SDK is already loaded
     if (window.cast?.framework) {
       initializeCast();
@@ -147,43 +183,6 @@ export function useChromecast(): UseChromecastResult {
       }
     };
   }, []);
-
-  function initializeCast() {
-    if (
-      initializedRef.current ||
-      !window.cast?.framework ||
-      !window.chrome?.cast
-    )
-      return;
-    initializedRef.current = true;
-
-    const castContext = window.cast.framework.CastContext.getInstance();
-    castContext.setOptions({
-      receiverApplicationId: "CC1AD845", // Default Media Receiver
-      autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-    });
-
-    castContextRef.current = castContext;
-    setIsAvailable(true);
-
-    // Listen for session state changes
-    const onSessionStateChanged = (event: SessionStateEvent) => {
-      const fw = window.cast!.framework;
-      if (
-        event.sessionState === fw.SessionState.SESSION_STARTED ||
-        event.sessionState === fw.SessionState.SESSION_RESUMED
-      ) {
-        setIsConnected(true);
-      } else if (event.sessionState === fw.SessionState.SESSION_ENDED) {
-        setIsConnected(false);
-      }
-    };
-    sessionStateChangedListenerRef.current = onSessionStateChanged;
-    castContext.addEventListener(
-      window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-      onSessionStateChanged
-    );
-  }
 
   const castMedia = useCallback(
     (url: string, title: string, posterUrl?: string, startTime: number = 0) => {

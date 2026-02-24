@@ -38,7 +38,8 @@ const LiveStreamPlayer = () => {
       );
 
       if (foundStream) {
-        setStream(foundStream);
+        const timeout = setTimeout(() => setStream(foundStream), 0);
+        return () => clearTimeout(timeout);
       }
     }
   }, [data, id, stream]);

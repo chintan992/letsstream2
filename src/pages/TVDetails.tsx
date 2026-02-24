@@ -118,56 +118,53 @@ const TVDetailsPage = () => {
   // Handle hydration tracking for different tabs
   useEffect(() => {
     let isCancelled = false;
+    let timeoutId: NodeJS.Timeout;
 
     const checkHydration = async () => {
       if (isCancelled) return;
-      await new Promise(resolve => setTimeout(resolve, 100));
-      if (isCancelled) return;
 
-      let hydrated = false;
-      switch (activeTab) {
-        case "episodes":
-          hydrated = episodes && episodes.length > 0;
-          break;
-        case "about":
-          hydrated = !!tvShow;
-          break;
-        case "cast":
-          hydrated = !!tvShow && cast && cast.length > 0;
-          break;
-        case "reviews":
-        case "downloads":
-          hydrated = true;
-          break;
-        default:
-          hydrated = true;
+      // Fast path for episode and cast to immediately hydrate when populated
+      if (activeTab === "episodes" && episodes && episodes.length > 0) {
+        setIsContentHydrated(true);
+        return;
+      }
+      if (activeTab === "cast" && cast && cast.length > 0) {
+        setIsContentHydrated(true);
+        return;
       }
 
-      if (!isCancelled) {
+      timeoutId = setTimeout(() => {
+        if (isCancelled) return;
+        let hydrated = false;
+        switch (activeTab) {
+          case "episodes":
+            hydrated = !!(episodes && episodes.length > 0);
+            break;
+          case "about":
+            hydrated = !!tvShow;
+            break;
+          case "cast":
+            hydrated = !!(tvShow && cast && cast.length > 0);
+            break;
+          case "reviews":
+          case "downloads":
+            hydrated = true;
+            break;
+          default:
+            hydrated = true;
+        }
+
         setIsContentHydrated(hydrated);
-      }
+      }, 100);
     };
 
     checkHydration();
 
     return () => {
       isCancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [activeTab, selectedSeason, tvShow, episodes, cast]);
-
-  // Handle hydration tracking for episodes tab specifically
-  useEffect(() => {
-    if (activeTab === "episodes" && episodes && episodes.length > 0) {
-      setIsContentHydrated(true);
-    }
-  }, [episodes, activeTab]);
-
-  // Handle hydration tracking for cast tab specifically
-  useEffect(() => {
-    if (activeTab === "cast" && cast && cast.length > 0) {
-      setIsContentHydrated(true);
-    }
-  }, [cast, activeTab]);
 
   if (isLoading) {
     return (

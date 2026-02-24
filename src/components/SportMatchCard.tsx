@@ -226,7 +226,10 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
 
               <div className="flex items-center gap-1.5 rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-white/50">
                 <Tv className="h-3 w-3" />
-                <span>{match.sources?.length || 0} Source{(match.sources?.length === 1) ? "" : "s"}</span>
+                <span>
+                  {match.sources?.length || 0} Source
+                  {match.sources?.length === 1 ? "" : "s"}
+                </span>
               </div>
             </div>
           </CardContent>

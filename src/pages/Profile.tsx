@@ -50,8 +50,16 @@ const Profile = () => {
 
   // Reset hydration state when tab changes and set it after a short timeout
   useEffect(() => {
-    const cleanup = updateTabHydration();
-    return cleanup;
+    let innerCleanup: (() => void) | undefined;
+    const timeoutId = setTimeout(() => {
+      // updateTabHydration returns a cleanup that would normally clear a timeout inside it
+      // Since evaluating it calls setState, we wrap the evaluation
+      innerCleanup = updateTabHydration();
+    }, 0);
+    return () => {
+      clearTimeout(timeoutId);
+      if (innerCleanup) innerCleanup();
+    };
   }, [activeTab, updateTabHydration]);
 
   // Use tab-specific scroll restoration with hydration check

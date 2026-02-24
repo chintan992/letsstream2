@@ -14,15 +14,23 @@ export const useCountdown = (targetDate: Date): CountdownTime => {
     calculateCountdown(targetDate)
   );
 
+  const targetTime = targetDate.getTime();
+
   useEffect(() => {
     // Update immediately so changes to targetDate reflect without delay
-    setCountdown(calculateCountdown(targetDate));
+    const initialTimeout = setTimeout(
+      () => setCountdown(calculateCountdown(new Date(targetTime))),
+      0
+    );
     const interval = setInterval(() => {
-      setCountdown(calculateCountdown(targetDate));
+      setCountdown(calculateCountdown(new Date(targetTime)));
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [targetDate.getTime()]);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(initialTimeout);
+    };
+  }, [targetTime]);
 
   return countdown;
 };

@@ -32,7 +32,10 @@ export const initSecurity = () => {
   window.addEventListener("keydown", currentKeydownListener);
 
   if (securityClearIntervalId) clearInterval(securityClearIntervalId);
-  const isDev = typeof process !== 'undefined' && process.env ? process.env.NODE_ENV !== 'production' : false;
+  const isDev =
+    typeof process !== "undefined" && process.env
+      ? process.env.NODE_ENV !== "production"
+      : false;
 
   if (!isDev) {
     securityClearIntervalId = setInterval(() => {

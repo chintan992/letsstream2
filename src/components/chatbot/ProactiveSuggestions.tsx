@@ -47,8 +47,11 @@ const ProactiveSuggestions: React.FC = () => {
   // and randomly (not too frequently)
   useEffect(() => {
     if (isOpen) {
-      setSuggestionState(prev => ({ ...prev, visible: false }));
-      return;
+      const timeout = setTimeout(
+        () => setSuggestionState(prev => ({ ...prev, visible: false })),
+        0
+      );
+      return () => clearTimeout(timeout);
     }
 
     const checkProactiveSuggestion = () => {

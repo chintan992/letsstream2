@@ -22,7 +22,7 @@ export const useFavoriteMatches = () => {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           const validFavorites = parsed.filter(
-            (item) =>
+            item =>
               typeof item === "object" &&
               item !== null &&
               typeof item.id !== "undefined" &&

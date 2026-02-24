@@ -181,18 +181,87 @@ const Search = () => {
   );
 
   // Effect to handle search results restoration
+  const performNewSearch = useCallback(
+    async (searchQuery: string) => {
+      setSearchState(prev => ({ ...prev, isLoading: true }));
+      try {
+        const results = await searchMedia(searchQuery);
+
+        let filteredResults = results.map(item => ({
+          ...item,
+          id: item.id,
+          media_id: item.id,
+          media_type: item.media_type,
+          title: item.title || "",
+          name: item.name || "",
+          poster_path: item.poster_path,
+          backdrop_path: item.backdrop_path,
+          overview: item.overview,
+          vote_average: item.vote_average,
+          release_date: item.release_date,
+          first_air_date: item.first_air_date,
+          genre_ids: item.genre_ids,
+        })) as ExtendedMedia[];
+
+        if (mediaType !== "all") {
+          filteredResults = filteredResults.filter(
+            item => item.media_type === mediaType
+          );
+        }
+
+        const sortedResults = [...filteredResults];
+        if (sortBy === "rating") {
+          sortedResults.sort((a, b) => b.vote_average - a.vote_average);
+        } else if (sortBy === "newest") {
+          sortedResults.sort((a, b) => {
+            const dateA = a.release_date || a.first_air_date || "";
+            const dateB = b.release_date || b.first_air_date || "";
+            return dateB.localeCompare(dateA);
+          });
+        }
+
+        setSearchState(prev => ({
+          ...prev,
+          allResults: sortedResults,
+          displayedResults: sortedResults.slice(0, RESULTS_PER_PAGE),
+          page: 1,
+          isLoading: false,
+          isHydrated: true,
+        }));
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        setSearchState(prev => ({
+          ...prev,
+          allResults: [],
+          displayedResults: [],
+          isLoading: false,
+          isHydrated: true,
+        }));
+        toast({
+          title: "Search Error",
+          description: "Failed to retrieve search results. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
+    [mediaType, sortBy, toast]
+  );
   useEffect(() => {
     const searchQuery = searchParams.get("q");
 
     if (!searchQuery) {
-      setSearchState(prev => ({
-        ...prev,
-        allResults: [],
-        displayedResults: [],
-        hasRestoredForQuery: null,
-        isHydrated: true,
-      }));
-      return;
+      const timeout = setTimeout(
+        () =>
+          setSearchState(prev => ({
+            ...prev,
+            allResults: [],
+            displayedResults: [],
+            hasRestoredForQuery: null,
+            isHydrated: true,
+          })),
+        0
+      );
+      return () => clearTimeout(timeout);
     }
 
     if (hasRestoredForQuery === searchQuery && isHydrated) {
@@ -266,13 +335,25 @@ const Search = () => {
 
       fetchSearchResults();
     } else {
-      setSearchState(prev => ({ ...prev, hasRestoredForQuery: searchQuery }));
-      performNewSearch(searchQuery);
-    }
+      const timeout1 = setTimeout(() => {
+        setSearchState(prev => ({
+          ...prev,
+          hasRestoredForQuery: searchQuery,
+        }));
+        performNewSearch(searchQuery);
+      }, 0);
 
-    setQuery(searchQuery);
-    setMediaType(searchParams.get("type") || "all");
-    setSortBy(searchParams.get("sort") || "popularity");
+      const timeout2 = setTimeout(() => {
+        setQuery(searchQuery);
+        setMediaType(searchParams.get("type") || "all");
+        setSortBy(searchParams.get("sort") || "popularity");
+      }, 0);
+
+      return () => {
+        clearTimeout(timeout1);
+        clearTimeout(timeout2);
+      };
+    }
   }, [
     searchParams,
     toast,
@@ -283,71 +364,8 @@ const Search = () => {
     persistedState.page,
     hasRestoredForQuery,
     isHydrated,
+    performNewSearch,
   ]);
-
-  // Helper function to perform a new search
-  const performNewSearch = async (searchQuery: string) => {
-    setSearchState(prev => ({ ...prev, isLoading: true }));
-    try {
-      const results = await searchMedia(searchQuery);
-
-      let filteredResults = results.map(item => ({
-        ...item,
-        id: item.id,
-        media_id: item.id,
-        media_type: item.media_type,
-        title: item.title || "",
-        name: item.name || "",
-        poster_path: item.poster_path,
-        backdrop_path: item.backdrop_path,
-        overview: item.overview,
-        vote_average: item.vote_average,
-        release_date: item.release_date,
-        first_air_date: item.first_air_date,
-        genre_ids: item.genre_ids,
-      })) as ExtendedMedia[];
-
-      if (mediaType !== "all") {
-        filteredResults = filteredResults.filter(
-          item => item.media_type === mediaType
-        );
-      }
-
-      const sortedResults = [...filteredResults];
-      if (sortBy === "rating") {
-        sortedResults.sort((a, b) => b.vote_average - a.vote_average);
-      } else if (sortBy === "newest") {
-        sortedResults.sort((a, b) => {
-          const dateA = a.release_date || a.first_air_date || "";
-          const dateB = b.release_date || b.first_air_date || "";
-          return dateB.localeCompare(dateA);
-        });
-      }
-
-      setSearchState(prev => ({
-        ...prev,
-        allResults: sortedResults,
-        displayedResults: sortedResults.slice(0, RESULTS_PER_PAGE),
-        page: 1,
-        isLoading: false,
-        isHydrated: true,
-      }));
-    } catch (error) {
-      console.error("Error fetching search results:", error);
-      setSearchState(prev => ({
-        ...prev,
-        allResults: [],
-        displayedResults: [],
-        isLoading: false,
-        isHydrated: true,
-      }));
-      toast({
-        title: "Search Error",
-        description: "Failed to retrieve search results. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const updateSearchHistory = useCallback((term: string) => {
     setSearchHistory(prev => {

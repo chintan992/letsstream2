@@ -256,9 +256,9 @@ const SportMatchPlayer = () => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {streams.map((stream, index) => (
+                  {streams.map(stream => (
                     <button
-                      key={`${stream.source}-${stream.id}-${index}`}
+                      key={stream.id}
                       onClick={() =>
                         handleStreamChange(stream.id, stream.source)
                       }

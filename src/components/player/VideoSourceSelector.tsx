@@ -96,8 +96,8 @@ const VideoSourceSelector = ({
               </span>
               {selectedSource === source.key && (
                 <m.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
                   className="flex h-4 w-4 items-center justify-center rounded-full bg-white"
                 >
                   <Check className="h-2.5 w-2.5 text-black" />
@@ -165,8 +165,8 @@ const VideoSourceSelector = ({
               </span>
               {selectedSource === source.key && (
                 <m.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
                   className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white"
                 >
                   <Check className="h-2.5 w-2.5 text-black" />

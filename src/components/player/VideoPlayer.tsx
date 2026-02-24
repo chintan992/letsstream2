@@ -68,8 +68,8 @@ const VideoPlayerComponent = ({
         onError={handleIframeError}
       />
     ),
-    [iframeUrl, handleIframeError, handleIframeLoad]
-  ); // Only re-create iframe when iframeUrl changes
+    [iframeUrl, handleIframeError, handleIframeLoad, title]
+  ); // Re-create iframe when iframeUrl, title, handleIframeError, or handleIframeLoad change
 
   // Render Video.js player for API sources
   if (isApiSource) {

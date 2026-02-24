@@ -67,7 +67,8 @@ const PWAInstallPrompt = ({
   }, [deferredPrompt]);
 
   useEffect(() => {
-    updateDeferredPrompt();
+    const timeout = setTimeout(() => updateDeferredPrompt(), 0);
+    return () => clearTimeout(timeout);
   }, [updateDeferredPrompt]);
 
   // Prevent multiple toasts

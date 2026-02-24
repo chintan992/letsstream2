@@ -11,7 +11,7 @@ interface SportMatchGridProps {
   title?: string;
   emptyMessage?: string;
   isLoading?: boolean;
-  emptyType?: "search" | "no-matches" | "no-popular" | "no-live";
+  emptyType?: "search" | "no-matches" | "no-popular" | "no-live" | "no-favorites";
   searchQuery?: string;
   sportName?: string;
   onClearFilters?: () => void;
@@ -37,8 +37,8 @@ const SportMatchGrid = ({
           <h2 className="mb-6 text-2xl font-bold text-white">{title}</h2>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-            <SportMatchCardSkeleton key={i} />
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+            <SportMatchCardSkeleton key={`skeleton-${num}`} />
           ))}
         </div>
       </div>

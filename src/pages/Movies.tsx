@@ -51,10 +51,12 @@ const Movies = () => {
       persistedState.sortBy === urlSortBy
   );
 
-  const [activeTab, setActiveTab] = useState<"popular" | "top_rated">(
+  // eslint-disable-next-line react-hooks/refs
+  const [activeTab, setActiveTab] = useState<"popular" | "top_rated">(() =>
     initialShouldUsePersistedRef.current ? persistedState.activeTab : "popular"
   );
-  const [viewMode, setViewMode] = useState<"grid" | "list">(
+  // eslint-disable-next-line react-hooks/refs
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() =>
     initialShouldUsePersistedRef.current ? persistedState.viewMode : "grid"
   );
   const [sortBy, setSortBy] = useState<

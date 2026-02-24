@@ -161,9 +161,9 @@ const EmptyState = ({
         {/* Suggestions */}
         {content.suggestions && content.suggestions.length > 0 && (
           <div className="mb-6 flex flex-wrap justify-center gap-2">
-            {content.suggestions.map((suggestion, index) => (
+            {content.suggestions.map(suggestion => (
               <div
-                key={index}
+                key={suggestion}
                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/50 backdrop-blur-sm"
               >
                 {suggestion}

@@ -133,7 +133,8 @@ export function ServiceWorkerDebugPanel() {
   }, [addEvent]);
 
   useEffect(() => {
-    checkRegistration();
+    const timeout = setTimeout(() => checkRegistration(), 0);
+    return () => clearTimeout(timeout);
 
     // Attach statechange listeners to existing workers and listen for future updates
     const attachStateChangeListeners = () => {
@@ -493,11 +494,11 @@ export function ServiceWorkerDebugPanel() {
                       className={cn(
                         "rounded px-2 py-0.5 text-sm font-medium",
                         vital.rating === "good" &&
-                        "bg-green-500/20 text-green-700 dark:text-green-400",
+                          "bg-green-500/20 text-green-700 dark:text-green-400",
                         vital.rating === "needs-improvement" &&
-                        "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400",
+                          "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400",
                         vital.rating === "poor" &&
-                        "bg-red-500/20 text-red-700 dark:text-red-400"
+                          "bg-red-500/20 text-red-700 dark:text-red-400"
                       )}
                     >
                       {vital.value.toFixed(vital.name === "CLS" ? 3 : 0)}

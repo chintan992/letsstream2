@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { usePageStatePersistence } from "@/hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   getPopularTVShows,
@@ -11,13 +10,6 @@ import MediaGrid from "@/components/MediaGrid";
 import { MediaGridSkeleton } from "@/components/MediaSkeleton";
 import ShowMoreButton from "./ShowMoreButton";
 import useFilteredShows from "../hooks/useFilteredShows";
-
-// Define the interface for the persisted state
-interface TabContentState {
-  // We only persist the page number to know how much to fetch if needed,
-  // but for now we'll just rely on infinite query's internal state and cache.
-  // Keeping it simple.
-}
 
 interface TabContentProps {
   type: "popular" | "top_rated" | "trending";

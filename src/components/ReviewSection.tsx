@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useReducer, useEffect } from "react";
 import { getReviews } from "@/utils/api";
 import { Review } from "@/utils/types";
 import {
@@ -17,26 +17,59 @@ interface ReviewSectionProps {
   mediaId: number;
   mediaType: "movie" | "tv";
 }
+interface ReviewState {
+  reviews: Review[];
+  isLoading: boolean;
+  visibleReviews: number;
+}
+
+type ReviewAction =
+  | { type: "FETCH_START" }
+  | { type: "FETCH_SUCCESS"; payload: Review[] }
+  | { type: "FETCH_ERROR" }
+  | { type: "LOAD_MORE" }
+  | { type: "SHOW_LESS" };
+
+const initialState: ReviewState = {
+  reviews: [],
+  isLoading: true,
+  visibleReviews: 3,
+};
+
+const reviewReducer = (
+  state: ReviewState,
+  action: ReviewAction
+): ReviewState => {
+  switch (action.type) {
+    case "FETCH_START":
+      return { ...state, isLoading: true, visibleReviews: 3 };
+    case "FETCH_SUCCESS":
+      return { ...state, reviews: action.payload, isLoading: false };
+    case "FETCH_ERROR":
+      return { ...state, reviews: [], isLoading: false };
+    case "LOAD_MORE":
+      return { ...state, visibleReviews: state.visibleReviews + 3 };
+    case "SHOW_LESS":
+      return { ...state, visibleReviews: 3 };
+    default:
+      return state;
+  }
+};
 
 const ReviewSection = ({ mediaId, mediaType }: ReviewSectionProps) => {
-  const [reviewState, setReviewState] = useState<{
-    reviews: Review[];
-    isLoading: boolean;
-  }>({ reviews: [], isLoading: true });
-  const { reviews, isLoading } = reviewState;
-  const [visibleReviews, setVisibleReviews] = useState(3);
+  const [state, dispatch] = useReducer(reviewReducer, initialState);
+  const { reviews, isLoading, visibleReviews } = state;
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        setReviewState(prev => ({ ...prev, isLoading: true }));
-        setVisibleReviews(3);
+        dispatch({ type: "FETCH_START" });
         const reviewsData = await getReviews(mediaId, mediaType);
-        setReviewState({ reviews: reviewsData, isLoading: false });
+        dispatch({ type: "FETCH_SUCCESS", payload: reviewsData });
       } catch (error) {
         console.error("Error fetching reviews:", error);
-        setReviewState({ reviews: [], isLoading: false });
+        dispatch({ type: "FETCH_ERROR" });
       }
     };
 
@@ -44,11 +77,11 @@ const ReviewSection = ({ mediaId, mediaType }: ReviewSectionProps) => {
   }, [mediaId, mediaType]);
 
   const loadMoreReviews = () => {
-    setVisibleReviews(prev => prev + 3);
+    dispatch({ type: "LOAD_MORE" });
   };
 
   const showLessReviews = () => {
-    setVisibleReviews(3);
+    dispatch({ type: "SHOW_LESS" });
   };
 
   // Format date to readable format
@@ -74,8 +107,11 @@ const ReviewSection = ({ mediaId, mediaType }: ReviewSectionProps) => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="glass animate-pulse rounded-lg p-4">
+        {[1, 2, 3].map(num => (
+          <div
+            key={`skeleton-${num}`}
+            className="glass animate-pulse rounded-lg p-4"
+          >
             <div className="mb-3 flex items-center gap-3">
               <Skeleton className="h-10 w-10 rounded-full" />
               <div className="space-y-2">

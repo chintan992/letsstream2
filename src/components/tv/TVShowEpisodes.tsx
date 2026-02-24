@@ -390,10 +390,11 @@ export const TVShowEpisodes = ({
                   key={season.id}
                   data-season={season.season_number}
                   onClick={() => onSeasonChange(season.season_number)}
-                  className={`flex flex-shrink-0 flex-col items-center overflow-hidden rounded-xl shadow-md transition-all duration-300 ${isActive
-                    ? "ring-accent/80 from-accent/20 to-accent/10 shadow-accent/20 scale-105 transform bg-gradient-to-b ring-2"
-                    : "bg-gradient-to-b from-white/5 to-white/10 hover:scale-105 hover:from-white/10 hover:to-white/20 hover:shadow-lg"
-                    } ${showAllSeasons ? "w-[100px] md:w-[110px]" : "w-[110px] md:w-[120px]"} touch-manipulation border border-white/10 backdrop-blur-sm`}
+                  className={`flex flex-shrink-0 flex-col items-center overflow-hidden rounded-xl shadow-md transition-all duration-300 ${
+                    isActive
+                      ? "ring-accent/80 from-accent/20 to-accent/10 shadow-accent/20 scale-105 transform bg-gradient-to-b ring-2"
+                      : "bg-gradient-to-b from-white/5 to-white/10 hover:scale-105 hover:from-white/10 hover:to-white/20 hover:shadow-lg"
+                  } ${showAllSeasons ? "w-[100px] md:w-[110px]" : "w-[110px] md:w-[120px]"} touch-manipulation border border-white/10 backdrop-blur-sm`}
                   style={{
                     scrollSnapAlign: showAllSeasons ? "none" : "center",
                   }}
@@ -424,14 +425,15 @@ export const TVShowEpisodes = ({
 
                   <div className="flex w-full flex-col items-center p-2">
                     <div
-                      className={`relative mb-2 flex h-10 w-10 items-center justify-center rounded-full ${isActive
-                        ? "to-accent/80 ring-accent/50 shadow-accent/30 bg-gradient-to-br from-accent shadow-md ring-2"
-                        : progress === 100
-                          ? "bg-gradient-to-br from-green-500/80 to-green-600/80 shadow-md shadow-green-500/30"
-                          : progress > 0
-                            ? "bg-gradient-to-br from-amber-500/80 to-amber-600/80 shadow-md shadow-amber-500/30"
-                            : "border border-dashed border-white/30 bg-black/50 shadow-sm"
-                        }`}
+                      className={`relative mb-2 flex h-10 w-10 items-center justify-center rounded-full ${
+                        isActive
+                          ? "to-accent/80 ring-accent/50 shadow-accent/30 bg-gradient-to-br from-accent shadow-md ring-2"
+                          : progress === 100
+                            ? "bg-gradient-to-br from-green-500/80 to-green-600/80 shadow-md shadow-green-500/30"
+                            : progress > 0
+                              ? "bg-gradient-to-br from-amber-500/80 to-amber-600/80 shadow-md shadow-amber-500/30"
+                              : "border border-dashed border-white/30 bg-black/50 shadow-sm"
+                      }`}
                     >
                       {progress === 100 ? (
                         <Check className="h-4 w-4 text-white" />
