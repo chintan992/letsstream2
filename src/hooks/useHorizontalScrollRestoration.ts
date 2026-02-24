@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 
-export interface HorizontalScrollRestorationOptions {
+interface HorizontalScrollRestorationOptions {
   enabled?: boolean;
   restoreDelay?: number;
   maxRestoreDelay?: number;

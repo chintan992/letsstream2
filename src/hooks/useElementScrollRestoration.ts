@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 
-export interface ElementScrollRestorationOptions {
+interface ElementScrollRestorationOptions {
   enabled?: boolean;
   restoreDelay?: number;
   maxRestoreDelay?: number;

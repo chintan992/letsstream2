@@ -16,7 +16,7 @@ export interface UserPreferences {
   isSimklEnabled?: boolean;
 }
 
-export interface UserPreferencesContextType {
+interface UserPreferencesContextType {
   userPreferences: UserPreferences | null;
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
   isLoading: boolean;

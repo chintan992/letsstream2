@@ -19,7 +19,7 @@ interface PreferenceUpdate {
 class NLPService {
   private static instance: NLPService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): NLPService {
     if (!NLPService.instance) {
