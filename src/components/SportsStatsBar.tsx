@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Activity, Calendar, Trophy, Wifi } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useUserPreferences } from "@/hooks/user-preferences";
@@ -19,7 +19,42 @@ const SportsStatsBar = ({
   isLoading = false,
 }: SportsStatsBarProps) => {
   const { userPreferences } = useUserPreferences();
-  const accentColor = userPreferences?.accentColor || "hsl(var(--accent))";
+  const accentColor = userPreferences?.accentColor || "#E63462";
+  const [cssVarColor, setCssVarColor] = useState<string | null>(null);
+
+  useEffect(() => {
+    const color = accentColor?.trim();
+    if (!color || !color.startsWith("var(")) {
+      setCssVarColor(null);
+      return;
+    }
+
+    if (typeof window === "undefined") return;
+
+    const el = document.createElement("div");
+    try {
+      el.style.color = color;
+      document.body.appendChild(el);
+      const computed = getComputedStyle(el).color;
+      if (
+        computed &&
+        (computed.startsWith("rgb(") || computed.startsWith("rgba("))
+      ) {
+        const match = computed.match(/rgba?\(([^)]+)\)/);
+        if (match) {
+          const parts = match[1].split(",").map((s: string) => s.trim());
+          const r = parseInt(parts[0], 10);
+          const g = parseInt(parts[1], 10);
+          const b = parseInt(parts[2], 10);
+          if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) {
+            setCssVarColor(`rgba(${r}, ${g}, ${b}, 0.15)`);
+          }
+        }
+      }
+    } finally {
+      document.body.removeChild(el);
+    }
+  }, [accentColor]);
 
   const resolvedBgColor = useMemo(() => {
     const color = accentColor?.trim();
@@ -87,32 +122,8 @@ const SportsStatsBar = ({
       }
     }
     if (typeof color === "string" && color.startsWith("var(")) {
-      const varName = color.match(/var\(([^)]+)\)/)?.[1];
-      if (varName && typeof window !== "undefined") {
-        const el = document.createElement("div");
-        try {
-          el.style.color = color;
-          document.body.appendChild(el);
-          const computed = getComputedStyle(el).color;
-          if (computed && computed.startsWith("rgb(")) {
-            const match = computed.match(/rgba?\(([^)]+)\)/);
-            if (match) {
-              const parts = match[1].split(",").map((s: string) => s.trim());
-              const r = parseInt(parts[0], 10);
-              const g = parseInt(parts[1], 10);
-              const b = parseInt(parts[2], 10);
-              if (
-                Number.isFinite(r) &&
-                Number.isFinite(g) &&
-                Number.isFinite(b)
-              ) {
-                return `rgba(${r}, ${g}, ${b}, 0.15)`;
-              }
-            }
-          }
-        } finally {
-          document.body.removeChild(el);
-        }
+      if (cssVarColor) {
+        return cssVarColor;
       }
     }
     if (
@@ -123,7 +134,7 @@ const SportsStatsBar = ({
       return `color-mix(in srgb, ${accentColor}, transparent 85%)`;
     }
     return "rgba(0,0,0,0.15)";
-  }, [accentColor]);
+  }, [accentColor, cssVarColor]);
 
   const stats = [
     {
@@ -158,52 +169,23 @@ const SportsStatsBar = ({
       color: accentColor,
       bgColor: resolvedBgColor,
     },
-    },
   ];
 
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card
-          key="skeleton-1"
-          className="flex items-center gap-3 border-white/5 bg-white/5 p-3 backdrop-blur-sm"
-        >
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
-            <div className="h-5 w-8 animate-pulse rounded bg-white/10" />
-          </div>
-        </Card>
-        <Card
-          key="skeleton-2"
-          className="flex items-center gap-3 border-white/5 bg-white/5 p-3 backdrop-blur-sm"
-        >
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
-            <div className="h-5 w-8 animate-pulse rounded bg-white/10" />
-          </div>
-        </Card>
-        <Card
-          key="skeleton-3"
-          className="flex items-center gap-3 border-white/5 bg-white/5 p-3 backdrop-blur-sm"
-        >
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
-            <div className="h-5 w-8 animate-pulse rounded bg-white/10" />
-          </div>
-        </Card>
-        <Card
-          key="skeleton-4"
-          className="flex items-center gap-3 border-white/5 bg-white/5 p-3 backdrop-blur-sm"
-        >
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
-            <div className="h-5 w-8 animate-pulse rounded bg-white/10" />
-          </div>
-        </Card>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card
+            key={`skeleton-${i}`}
+            className="flex items-center gap-3 border-white/5 bg-white/5 p-3 backdrop-blur-sm"
+          >
+            <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
+            <div className="space-y-2">
+              <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
+              <div className="h-5 w-8 animate-pulse rounded bg-white/10" />
+            </div>
+          </Card>
+        ))}
       </div>
     );
   }

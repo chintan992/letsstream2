@@ -227,7 +227,7 @@ export const TVShowHeader = ({
                         );
                       }
                     }}
-                    className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
+                    className="hover:border-accent/70 group flex min-w-[280px] max-w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-black/50 p-3 shadow-lg backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
                   >
                     {/* Episode Thumbnail */}
                     <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-card">

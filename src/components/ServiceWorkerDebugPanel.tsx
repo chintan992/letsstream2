@@ -29,6 +29,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface ServiceWorkerEvent {
+  id: number;
   type: string;
   timestamp: number;
   details?: string;
@@ -58,9 +59,9 @@ export function ServiceWorkerDebugPanel() {
   const [networkCondition, setNetworkCondition] = useState("online");
   const [logLevel, setLogLevel] = useState("info");
 
-  const addEvent = useCallback((type: string, details?: string) => {
+  const addEvent = useCallback((type: string, details: string) => {
     setEvents(prevEvents => [
-      { type, timestamp: Date.now(), details },
+      { id: Date.now() + Math.random(), type, timestamp: Date.now(), details },
       ...prevEvents.slice(0, 99),
     ]);
   }, []);
@@ -443,9 +444,9 @@ export function ServiceWorkerDebugPanel() {
                 No events yet
               </p>
             ) : (
-              events.map((event, index) => (
+              events.map(event => (
                 <div
-                  key={index}
+                  key={event.id}
                   className={cn(
                     "border-l-2 pl-2 text-sm",
                     event.type === "Error"
@@ -492,11 +493,11 @@ export function ServiceWorkerDebugPanel() {
                       className={cn(
                         "rounded px-2 py-0.5 text-sm font-medium",
                         vital.rating === "good" &&
-                          "bg-green-500/20 text-green-700 dark:text-green-400",
+                        "bg-green-500/20 text-green-700 dark:text-green-400",
                         vital.rating === "needs-improvement" &&
-                          "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400",
+                        "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400",
                         vital.rating === "poor" &&
-                          "bg-red-500/20 text-red-700 dark:text-red-400"
+                        "bg-red-500/20 text-red-700 dark:text-red-400"
                       )}
                     >
                       {vital.value.toFixed(vital.name === "CLS" ? 3 : 0)}

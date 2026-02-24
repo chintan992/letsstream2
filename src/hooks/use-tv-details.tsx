@@ -83,7 +83,7 @@ export const useTVDetails = (id: string | undefined) => {
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
-  const [guestStars, setGuestStars] = useState<GuestStar[]>([]);
+  const [guestStars, setGuestStars] = useState<Record<number, GuestStar[]>>({});
 
   const navigate = useNavigate();
   const { toast } = useToast();

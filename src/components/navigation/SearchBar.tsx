@@ -79,21 +79,26 @@ const SearchBar = ({
   }, []);
 
   useEffect(() => {
+    let ignore = false;
     const fetchSuggestions = async () => {
       if (searchQuery.trim().length > 0) {
         setSearchState(prev => ({ ...prev, isLoading: true }));
         try {
           const results = await searchMedia(searchQuery);
-          setSearchState(prev => ({
-            ...prev,
-            suggestions: results.slice(0, 6),
-            showSuggestions: true,
-            selectedIndex: -1,
-            isLoading: false,
-          }));
+          if (!ignore) {
+            setSearchState(prev => ({
+              ...prev,
+              suggestions: results.slice(0, 6),
+              showSuggestions: true,
+              selectedIndex: -1,
+              isLoading: false,
+            }));
+          }
         } catch (error) {
-          console.error("Error fetching suggestions:", error);
-          setSearchState(prev => ({ ...prev, isLoading: false }));
+          if (!ignore) {
+            console.error("Error fetching suggestions:", error);
+            setSearchState(prev => ({ ...prev, isLoading: false }));
+          }
         }
       } else {
         setSearchState(prev => ({
@@ -106,7 +111,10 @@ const SearchBar = ({
     };
 
     const debounceTimer = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(debounceTimer);
+    return () => {
+      ignore = true;
+      clearTimeout(debounceTimer);
+    };
   }, [searchQuery]);
 
   const handleSearch = (e: React.FormEvent) => {

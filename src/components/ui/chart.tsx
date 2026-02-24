@@ -3,6 +3,38 @@ import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/lib/utils";
 
+const colorCache = new Map<string, boolean>();
+const detachedEl =
+  typeof document !== "undefined" ? document.createElement("div") : null;
+const sentinelColor = "rgb(0, 0, 0)";
+
+const isValidColor = (color: string): boolean => {
+  if (colorCache.has(color)) {
+    return colorCache.get(color)!;
+  }
+
+  if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+    const result = CSS.supports("color", color);
+    colorCache.set(color, result);
+    return result;
+  }
+  if (detachedEl) {
+    try {
+      const previousColor = detachedEl.style.color;
+      detachedEl.style.color = color;
+      const computed = getComputedStyle(detachedEl).color;
+      detachedEl.style.color = previousColor;
+      const result = computed !== "" && computed !== sentinelColor;
+      colorCache.set(color, result);
+      return result;
+    } catch {
+      colorCache.set(color, false);
+      return false;
+    }
+  }
+  return false;
+};
+
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
@@ -109,21 +141,6 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
   const safeId = escapeId(id);
 
-  const isValidColor = (color: string): boolean => {
-    if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
-      return CSS.supports("color", color);
-    }
-    if (typeof document !== "undefined") {
-      const el = document.createElement("div");
-      el.style.color = color;
-      document.body.appendChild(el);
-      const computed = getComputedStyle(el).color;
-      document.body.removeChild(el);
-      return computed !== "";
-    }
-    return false;
-  };
-
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -137,7 +154,7 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color;
-    if (color && isValidColor(color)) {
+    if (color) {
       return `  --color-${safeKey}: ${color};`;
     }
     return null;

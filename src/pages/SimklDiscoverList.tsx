@@ -97,7 +97,7 @@ const SimklDiscoverList = () => {
       // Always show loading state for clarity
       if (!config && category !== "recommendations") return;
 
-      setFetchState(prev => ({ ...prev, isLoading: true }));
+      setFetchState({ items: [], isLoading: true });
       try {
         let data: SimklTrendingItem[] = [];
         if (category === "recommendations" && userPreferences.simklToken) {
@@ -205,8 +205,27 @@ const SimklDiscoverList = () => {
             <h1 className="text-3xl font-bold text-white">{title}</h1>
           </div>
           <p className="mt-2 text-sm text-white/60">
-            {items.length} items from Simkl
+            {isLoading
+              ? ""
+              : items.length > 0
+                ? `${items.length} items from Simkl`
+                : ""}
           </p>
+          {category === "recommendations" &&
+            !userPreferences.simklToken &&
+            !isLoading && (
+              <div className="mt-4 rounded-lg border border-purple-500/20 bg-purple-500/10 p-6 text-center">
+                <Sparkles className="mx-auto mb-2 h-8 w-8 text-purple-400" />
+                <p className="text-white">
+                  Connect your Simkl account to see personalized recommendations
+                </p>
+                <Link to="/settings">
+                  <Button variant="link" className="mt-2 text-purple-400">
+                    Connect Simkl Account
+                  </Button>
+                </Link>
+              </div>
+            )}
         </div>
 
         {/* Content Grid */}
@@ -218,11 +237,7 @@ const SimklDiscoverList = () => {
               ))}
             </div>
           ) : (
-            <MediaGrid
-              media={media as Media[]}
-              loading={isLoading}
-              viewMode="grid"
-            />
+            <MediaGrid media={media as any} />
           )}
         </div>
       </div>

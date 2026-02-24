@@ -169,10 +169,9 @@ function shouldSimklOverwrite(
   // For movies: compare completion status
   if (simklItem.movie) {
     // If Firebase has watch position tracking, check if movie was completed
-    const firebaseProgress =
-      firebaseItem.watch_position && firebaseItem.duration
-        ? firebaseItem.watch_position / firebaseItem.duration
-        : 0;
+    const position = Number(firebaseItem.watch_position) || 0;
+    const duration = Number(firebaseItem.duration) || 0;
+    const firebaseProgress = duration > 0 ? position / duration : 0;
 
     // Simkl "completed" status means fully watched
     if (simklItem.status === "completed" && firebaseProgress < 0.9) {

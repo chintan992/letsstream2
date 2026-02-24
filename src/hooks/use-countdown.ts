@@ -22,7 +22,7 @@ export const useCountdown = (targetDate: Date): CountdownTime => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetDate]);
+  }, [targetDate.getTime()]);
 
   return countdown;
 };

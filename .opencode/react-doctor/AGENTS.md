@@ -12,4 +12,4 @@ npx -y react-doctor@latest . --verbose --diff
 
 ## Workflow
 
-Run after making changes to catch issues early. Fix errors first, then re-run to verify the score improved.
+Run after making changes to catch issues early. Fix errors first, then re-run to verify the score improves.

@@ -52,11 +52,12 @@ const SearchSuggestions = ({
           } else {
             // Handle string type suggestions (history items)
             const isHistory = index < 2;
+            const strSuggestion = suggestion as string;
             return (
-              <li key={index}>
+              <li key={strSuggestion}>
                 <button
                   className="group flex w-full items-center px-4 py-2 text-left text-sm text-white transition-colors hover:bg-white/10"
-                  onClick={() => onSuggestionClick(suggestion as string)}
+                  onClick={() => onSuggestionClick(strSuggestion)}
                   type="button"
                 >
                   {isHistory ? (
@@ -64,9 +65,7 @@ const SearchSuggestions = ({
                   ) : (
                     <Search className="mr-2 h-4 w-4 text-white/50 transition-colors group-hover:text-accent" />
                   )}
-                  <span className="flex-1 truncate">
-                    {suggestion as string}
-                  </span>
+                  <span className="flex-1 truncate">{strSuggestion}</span>
                 </button>
               </li>
             );

@@ -125,18 +125,19 @@ export function useChromecast(): UseChromecastResult {
     // If cast SDK is already loaded
     if (window.cast?.framework) {
       initializeCast();
-      return;
+    } else {
+      // Wait for cast SDK to load
+      const prevCb = window.__onGCastApiAvailable;
+      window.__onGCastApiAvailable = (isAvail: boolean) => {
+        if (isAvail) {
+          initializeCast();
+        }
+        if (prevCb) prevCb(isAvail);
+      };
     }
 
-    // Wait for cast SDK to load
-    window.__onGCastApiAvailable = (isAvail: boolean) => {
-      if (isAvail) {
-        initializeCast();
-      }
-    };
-
     return () => {
-      window.__onGCastApiAvailable = undefined;
+      // Don't overwrite window.__onGCastApiAvailable on unmount to prevent breaking other instances
       if (castContextRef.current && sessionStateChangedListenerRef.current) {
         castContextRef.current.removeEventListener(
           window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,

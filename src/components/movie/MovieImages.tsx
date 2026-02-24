@@ -33,9 +33,9 @@ const MovieImages = ({ images, movieName }: MovieImagesProps) => {
 
   const renderImageGrid = (imageList: Image[], type: "backdrop" | "poster") => (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-      {imageList.map((image, index) => (
+      {imageList.map(image => (
         <div
-          key={`${type}-${index}`}
+          key={image.file_path}
           className="group relative overflow-hidden rounded-xl"
         >
           <img

@@ -14,6 +14,7 @@ export default function SimklCallback() {
 
   useEffect(() => {
     let isMounted = true;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const handleCallback = async () => {
       // Guard against double runs
       if (processedRef.current) return;
@@ -31,7 +32,7 @@ export default function SimklCallback() {
           description: "Simkl authentication was denied.",
           variant: "destructive",
         });
-        if (isMounted) setTimeout(() => navigate("/profile"), 2000);
+        if (isMounted) timeoutId = setTimeout(() => navigate("/profile"), 2000);
       } else if (!code) {
         processedRef.current = true;
         errorMsg = "No authentication code received.";
@@ -40,7 +41,7 @@ export default function SimklCallback() {
           description: "No authentication code received.",
           variant: "destructive",
         });
-        if (isMounted) setTimeout(() => navigate("/profile"), 2000);
+        if (isMounted) timeoutId = setTimeout(() => navigate("/profile"), 2000);
       } else if (!processedRef.current) {
         processedRef.current = true;
 
@@ -77,7 +78,8 @@ export default function SimklCallback() {
             description: "Could not connect to Simkl. Please try again.",
             variant: "destructive",
           });
-          if (isMounted) setTimeout(() => navigate("/profile"), 2000);
+          if (isMounted)
+            timeoutId = setTimeout(() => navigate("/profile"), 2000);
         }
       }
 
@@ -89,6 +91,7 @@ export default function SimklCallback() {
     handleCallback();
     return () => {
       isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [location, updatePreferences, navigate, toast]);
 

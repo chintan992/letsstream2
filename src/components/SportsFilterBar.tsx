@@ -154,10 +154,13 @@ const SportsFilterBar = ({
                     className="gap-1 bg-white/10 transition-colors hover:bg-white/20"
                   >
                     Search: "{searchQuery}"
-                    <X
-                      className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
+                    <button
                       onClick={() => onSearchChange("")}
-                    />
+                      className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-accent"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100" />
+                    </button>
                   </Badge>
                 )}
 
@@ -167,10 +170,13 @@ const SportsFilterBar = ({
                     className="gap-1 bg-white/10 transition-colors hover:bg-white/20"
                   >
                     Date: {dateRange}
-                    <X
-                      className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
+                    <button
                       onClick={() => onDateRangeChange("all")}
-                    />
+                      className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-accent"
+                      aria-label="Clear date filter"
+                    >
+                      <X className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100" />
+                    </button>
                   </Badge>
                 )}
 
@@ -182,16 +188,17 @@ const SportsFilterBar = ({
                     Sport:{" "}
                     {sportsList.find(s => s.id === selectedSport)?.name ||
                       selectedSport}
-                    <X
-                      className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
+                    <button
                       onClick={() => {
                         if (onClearSport) {
                           onClearSport();
-                        } else {
-                          onClearFilters();
                         }
                       }}
-                    />
+                      className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-accent"
+                      aria-label="Clear sport filter"
+                    >
+                      <X className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100" />
+                    </button>
                   </Badge>
                 )}
 

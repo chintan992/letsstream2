@@ -20,12 +20,15 @@ const useKeyPress = (
           const active = (document.activeElement as HTMLElement) ?? null;
           const isInteractive =
             !!active &&
-            (active.tagName === "BUTTON" ||
-              active.getAttribute("role") === "button" ||
-              active.tagName === "A" ||
+            (active.tagName.toUpperCase() === "A" ||
+              active.tagName === "BUTTON" ||
               active.tagName === "INPUT" ||
               active.tagName === "SELECT" ||
-              active.tagName === "TEXTAREA");
+              active.tagName === "TEXTAREA" ||
+              active.isContentEditable ||
+              ["button", "link", "tab", "menuitem", "option", "checkbox", "radio", "switch"].includes(
+                (active.getAttribute("role") || "").toLowerCase()
+              ));
           if (isInteractive) {
             return;
           }

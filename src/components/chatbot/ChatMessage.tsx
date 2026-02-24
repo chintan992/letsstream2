@@ -118,16 +118,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             () => {
               const newInterval = setInterval(() => {
                 if (index < text.length) {
+                  const char = text[index];
                   setTypingState(prev => ({
                     ...prev,
-                    displayedText: prev.displayedText + text[index],
+                    displayedText: prev.displayedText + char,
                   }));
 
                   index++;
                 } else {
                   clearInterval(newInterval);
 
-                  setTypingState(prev => ({ ...prev, isTyping: false }));
+                  setTypingState(prev => {
+                    return { ...prev, isTyping: false };
+                  });
                 }
               }, typingSpeed);
             },
@@ -135,10 +138,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             text[index - 1] === "." ? 300 : 150
           );
         }
-      } else {
         clearInterval(typingInterval);
 
-        setTypingState(prev => ({ ...prev, isTyping: false }));
+        setTypingState(prev => {
+          if (prev.isTyping) {
+            return { ...prev, isTyping: false };
+          }
+          return prev;
+        });
       }
     }, typingSpeed); // Dynamic typing speed
 

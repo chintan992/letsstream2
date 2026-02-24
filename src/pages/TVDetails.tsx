@@ -86,22 +86,33 @@ const TVDetailsPage = () => {
 
   // Fetch last watched episode when tvShow changes
   useEffect(() => {
+    let isOutdated = false;
+
     const fetchLastWatched = async () => {
       if (!tvShow?.id) return;
 
+      setLastWatchedState({ episode: null, isLoading: true });
+
       try {
-        setLastWatchedState(prev => ({ ...prev, isLoading: true }));
         const result = await getLastWatchedEpisode();
-        setLastWatchedState({ episode: result, isLoading: false });
+        if (!isOutdated) {
+          setLastWatchedState({ episode: result, isLoading: false });
+        }
       } catch (error) {
         console.error("Error fetching last watched episode:", error);
-        setLastWatchedState({ episode: null, isLoading: false });
+        if (!isOutdated) {
+          setLastWatchedState({ episode: null, isLoading: false });
+        }
       }
     };
 
     if (tvShow?.id) {
       fetchLastWatched();
     }
+
+    return () => {
+      isOutdated = true;
+    };
   }, [tvShow?.id, getLastWatchedEpisode]);
 
   // Handle hydration tracking for different tabs

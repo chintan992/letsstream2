@@ -40,6 +40,7 @@ const Index = () => {
     isLoading: boolean;
     contentVisible: boolean;
     secondaryLoaded: boolean;
+    fetchError: boolean;
   }>({
     trendingMedia: [],
     popularMovies: [],
@@ -48,6 +49,7 @@ const Index = () => {
     isLoading: true,
     contentVisible: false,
     secondaryLoaded: false,
+    fetchError: false,
   });
   const {
     trendingMedia,
@@ -100,17 +102,20 @@ const Index = () => {
           popularTVShows: popularTVData,
           topRatedTVShows: topTVData,
           isLoading: false,
+          fetchError: false,
         }));
+        contentTimer = setTimeout(() => {
+          setPageState(prev => ({ ...prev, contentVisible: true }));
+        }, 100);
+        secondaryTimer = setTimeout(() => {
+          setPageState(prev => ({ ...prev, secondaryLoaded: true }));
+        }, 1000);
       } catch (error) {
         console.error("Error fetching homepage data:", error);
-        setPageState(prev => ({ ...prev, isLoading: false }));
+        setPageState(prev => ({ ...prev, isLoading: false, fetchError: true }));
+        clearTimeout(contentTimer);
+        clearTimeout(secondaryTimer);
       }
-      contentTimer = setTimeout(() => {
-        setPageState(prev => ({ ...prev, contentVisible: true }));
-      }, 100);
-      secondaryTimer = setTimeout(() => {
-        setPageState(prev => ({ ...prev, secondaryLoaded: true }));
-      }, 1000);
     };
 
     fetchPrimaryData();

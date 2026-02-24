@@ -324,9 +324,9 @@ const ChatbotWindow: React.FC = () => {
                   "Add movies to your watchlist for later",
                   "Track your watch history",
                   "Advanced search by genre, rating, or year",
-                ].map((item, i) => (
+                ].map(item => (
                   <li
-                    key={i}
+                    key={item}
                     className="flex items-center space-x-2 text-muted-foreground"
                   >
                     <div className="bg-primary/60 h-1.5 w-1.5 rounded-full" />
@@ -343,9 +343,9 @@ const ChatbotWindow: React.FC = () => {
                   "Suggest a feel-good comedy for the weekend",
                   "Show me trending sci-fi movies",
                   "Add Inception to my watchlist",
-                ].map((text, i) => (
+                ].map(text => (
                   <p
-                    key={i}
+                    key={text}
                     className="bg-muted/40 rounded-lg px-3 py-1.5 text-xs italic text-muted-foreground"
                   >
                     "{text}"

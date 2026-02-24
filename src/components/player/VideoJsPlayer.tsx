@@ -604,10 +604,8 @@ const VideoJsPlayer = ({
 
       {/* Play/Pause center overlay (when paused) */}
       {!isPlaying && playerReady && (
-        <div
-          className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center"
-          role="button"
-          tabIndex={0}
+        <button
+          className="absolute inset-0 z-20 flex w-full cursor-pointer items-center justify-center border-none bg-transparent"
           aria-label="Play video"
           onClick={togglePlay}
           onKeyDown={e => {
@@ -631,7 +629,7 @@ const VideoJsPlayer = ({
               <path d="M8 5v14l11-7z" />
             </svg>
           </m.div>
-        </div>
+        </button>
       )}
 
       {/* Custom Controls Bar */}
@@ -914,7 +912,7 @@ const VideoJsPlayer = ({
                     </button>
                     {currentSubtitles.map((sub, index) => (
                       <button
-                        key={`${sub.label}-${index}`}
+                        key={sub.url}
                         onClick={() => handleSubtitleChange(index)}
                         className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-white/10 ${
                           index === activeSubtitleIndex
@@ -983,7 +981,7 @@ const VideoJsPlayer = ({
                   >
                     {links.map((link, index) => (
                       <button
-                        key={`${link.quality}-${link.tier}-${index}`}
+                        key={`${link.url}-${link.quality}`}
                         onClick={() => handleQualityChange(index)}
                         className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-white/10 ${
                           index === selectedLinkIndex

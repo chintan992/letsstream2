@@ -333,8 +333,8 @@ export function BackupRestore() {
                     <SelectValue placeholder="Choose a suggested filename" />
                   </SelectTrigger>
                   <SelectContent>
-                    {filenameSuggestions.map((suggestion, index) => (
-                      <SelectItem key={index} value={suggestion}>
+                    {filenameSuggestions.map(suggestion => (
+                      <SelectItem key={suggestion} value={suggestion}>
                         <div className="flex items-center">
                           <FileText className="mr-2 h-3 w-3" />
                           {suggestion}
@@ -413,8 +413,8 @@ export function BackupRestore() {
                       <p>Backup file is valid.</p>
                       {validationResult.warnings.length > 0 && (
                         <ul className="mt-2 list-inside list-disc">
-                          {validationResult.warnings.map((warning, index) => (
-                            <li key={index} className="text-sm">
+                          {validationResult.warnings.map((warning, i) => (
+                            <li key={`${warning}-${i}`} className="text-sm">
                               {warning}
                             </li>
                           ))}
@@ -425,8 +425,8 @@ export function BackupRestore() {
                     <div>
                       <p>Backup file has errors:</p>
                       <ul className="mt-2 list-inside list-disc">
-                        {validationResult.errors.map((error, index) => (
-                          <li key={index} className="text-sm">
+                        {validationResult.errors.map((error, i) => (
+                          <li key={`${error}-${i}`} className="text-sm">
                             {error}
                           </li>
                         ))}

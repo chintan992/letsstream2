@@ -136,7 +136,10 @@ export const TVShowEpisodes = ({
 
   // Simulate watched progress - replace with your actual implementation later
   useEffect(() => {
-    updateWatchProgress();
+    const timeout = setTimeout(() => {
+      updateWatchProgress();
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [updateWatchProgress]);
 
   // Handle scrolling for the season selector
@@ -285,9 +288,7 @@ export const TVShowEpisodes = ({
       } catch (e) {
         // Ignore error if scrollend is not supported
       }
-      scrollContainer.removeEventListener("scroll", handleScroll, {
-        passive: true,
-      });
+      scrollContainer.removeEventListener("scroll", handleScroll);
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
@@ -389,15 +390,16 @@ export const TVShowEpisodes = ({
                   key={season.id}
                   data-season={season.season_number}
                   onClick={() => onSeasonChange(season.season_number)}
-                  className={`flex flex-shrink-0 flex-col items-center overflow-hidden rounded-xl shadow-md transition-all duration-300 ${
-                    isActive
-                      ? "ring-accent/80 from-accent/20 to-accent/10 shadow-accent/20 scale-105 transform bg-gradient-to-b ring-2"
-                      : "bg-gradient-to-b from-white/5 to-white/10 hover:scale-105 hover:from-white/10 hover:to-white/20 hover:shadow-lg"
-                  } ${showAllSeasons ? "w-[100px] md:w-[110px]" : "w-[110px] md:w-[120px]"} touch-manipulation border border-white/10 backdrop-blur-sm`}
+                  className={`flex flex-shrink-0 flex-col items-center overflow-hidden rounded-xl shadow-md transition-all duration-300 ${isActive
+                    ? "ring-accent/80 from-accent/20 to-accent/10 shadow-accent/20 scale-105 transform bg-gradient-to-b ring-2"
+                    : "bg-gradient-to-b from-white/5 to-white/10 hover:scale-105 hover:from-white/10 hover:to-white/20 hover:shadow-lg"
+                    } ${showAllSeasons ? "w-[100px] md:w-[110px]" : "w-[110px] md:w-[120px]"} touch-manipulation border border-white/10 backdrop-blur-sm`}
                   style={{
                     scrollSnapAlign: showAllSeasons ? "none" : "center",
                   }}
                   aria-selected={isActive}
+                  id={`season-tab-${season.season_number}`}
+                  aria-controls={`season-panel-${season.season_number}`}
                 >
                   <div
                     className={`w-full border-b ${isActive ? "border-accent/30 from-accent/10 to-accent/5 bg-gradient-to-r" : "border-white/10 bg-gradient-to-r from-white/5 to-white/10"} px-2 py-2 text-center transition-colors duration-300`}
@@ -422,15 +424,14 @@ export const TVShowEpisodes = ({
 
                   <div className="flex w-full flex-col items-center p-2">
                     <div
-                      className={`relative mb-2 flex h-10 w-10 items-center justify-center rounded-full ${
-                        isActive
-                          ? "to-accent/80 ring-accent/50 shadow-accent/30 bg-gradient-to-br from-accent shadow-md ring-2"
-                          : progress === 100
-                            ? "bg-gradient-to-br from-green-500/80 to-green-600/80 shadow-md shadow-green-500/30"
-                            : progress > 0
-                              ? "bg-gradient-to-br from-amber-500/80 to-amber-600/80 shadow-md shadow-amber-500/30"
-                              : "border border-dashed border-white/30 bg-black/50 shadow-sm"
-                      }`}
+                      className={`relative mb-2 flex h-10 w-10 items-center justify-center rounded-full ${isActive
+                        ? "to-accent/80 ring-accent/50 shadow-accent/30 bg-gradient-to-br from-accent shadow-md ring-2"
+                        : progress === 100
+                          ? "bg-gradient-to-br from-green-500/80 to-green-600/80 shadow-md shadow-green-500/30"
+                          : progress > 0
+                            ? "bg-gradient-to-br from-amber-500/80 to-amber-600/80 shadow-md shadow-amber-500/30"
+                            : "border border-dashed border-white/30 bg-black/50 shadow-sm"
+                        }`}
                     >
                       {progress === 100 ? (
                         <Check className="h-4 w-4 text-white" />
@@ -642,9 +643,9 @@ export const TVShowEpisodes = ({
                           <div className="flex flex-wrap gap-2">
                             {guestStars[episode.episode_number]
                               .slice(0, 4)
-                              .map((star: any, idx: number) => (
+                              .map((star: GuestStar, idx: number) => (
                                 <span
-                                  key={idx}
+                                  key={star.id ?? star.name ?? idx}
                                   className="from-accent/10 to-accent/5 hover:from-accent/20 hover:to-accent/10 hover:border-accent/30 flex items-center rounded-full border border-white/10 bg-gradient-to-r px-3 py-1 text-xs text-white/90 transition-all duration-300"
                                 >
                                   {star.name}

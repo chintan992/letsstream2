@@ -53,6 +53,8 @@ export const lazyLoadWithRetry = <T extends ComponentType<any>>(
         }
         if (typeof window !== "undefined") {
           window.location.reload();
+          // Never resolve while the page reloads
+          return new Promise<any>(() => {});
         }
         return Promise.reject(
           new Error("Failed to load component after reload")

@@ -19,7 +19,7 @@ export interface APIMatch {
   category: string;
   date: number; // Unix timestamp in milliseconds
   poster?: string;
-  popular: boolean;
+  popular?: boolean;
   teams?: Teams;
   sources: MatchSource[];
 }

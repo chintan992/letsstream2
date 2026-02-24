@@ -275,6 +275,7 @@ const ChatbotButton: React.FC = () => {
               });
               document.addEventListener("touchmove", clearTimer, {
                 once: true,
+                passive: true,
               });
             }}
           >

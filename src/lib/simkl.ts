@@ -214,24 +214,28 @@ export class SimklService {
     token: string,
     type: "tv" | "movies" | "anime" = "tv"
   ): Promise<SimklTrendingItem[]> {
-    const response = await fetch(
-      `${SIMKL_API_URL}/recommendations/${type}?extended=full`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          "simkl-api-key": SIMKL_CLIENT_ID,
-        },
-      }
-    );
+    try {
+      const response = await fetch(
+        `${SIMKL_API_URL}/recommendations/${type}?extended=full`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "simkl-api-key": SIMKL_CLIENT_ID,
+          },
+        }
+      );
 
-    if (!response.ok) {
-      // Return empty array on error for recommendations
+      if (!response.ok) {
+        return [];
+      }
+
+      return response.json();
+    } catch (error) {
+      console.warn("Failed to fetch recommendations:", error);
       return [];
     }
-
-    return response.json();
   }
 
   /**
@@ -240,19 +244,24 @@ export class SimklService {
   static async getGenres(
     type: "tv" | "movies" | "anime"
   ): Promise<SimklGenre[]> {
-    const response = await fetch(`${SIMKL_API_URL}/genres/${type}/filters`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "simkl-api-key": SIMKL_CLIENT_ID,
-      },
-    });
+    try {
+      const response = await fetch(`${SIMKL_API_URL}/genres/${type}/filters`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "simkl-api-key": SIMKL_CLIENT_ID,
+        },
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
+        return [];
+      }
+
+      return response.json();
+    } catch (error) {
+      console.warn("Failed to fetch genres:", error);
       return [];
     }
-
-    return response.json();
   }
 }
 

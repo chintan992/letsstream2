@@ -27,6 +27,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
   const matchTime = new Date(match.date);
   const countdown = useCountdown(matchTime);
   const isUpcoming = !countdown.isLive && !countdown.isPast;
+  const totalHours = countdown.days * 24 + countdown.hours;
   const favorited = isFavorite(match.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -214,7 +215,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                 <span
                   className={cn(
                     "font-medium",
-                    isUpcoming && countdown.hours < 24 && "text-amber-400"
+                    isUpcoming && totalHours < 24 && "text-amber-400"
                   )}
                 >
                   {isUpcoming
@@ -225,7 +226,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
 
               <div className="flex items-center gap-1.5 rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-white/50">
                 <Tv className="h-3 w-3" />
-                <span>{match.sources.length} Sources</span>
+                <span>{match.sources?.length || 0} Source{(match.sources?.length === 1) ? "" : "s"}</span>
               </div>
             </div>
           </CardContent>

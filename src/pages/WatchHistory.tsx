@@ -171,13 +171,13 @@ const WatchHistory = () => {
     const timer = setTimeout(() => {
       let isTabDataReady = false;
       if (activeTab === "history") {
-        isTabDataReady = !isLoading && watchHistory.length > 0;
+        isTabDataReady = !isLoading;
       } else if (activeTab === "favorites") {
-        isTabDataReady = favorites.length > 0;
+        isTabDataReady = true; // Favorites are loaded synchronously from context/local state usually, or they have no loading state, wait, watchHistory has isLoading.
       } else if (activeTab === "watchlist") {
-        isTabDataReady = watchlist.length > 0;
+        isTabDataReady = true;
       } else if (activeTab === "simkl") {
-        isTabDataReady = !isLoadingSimkl && simklHistory.length > 0;
+        isTabDataReady = !isLoadingSimkl;
       }
       setIsContentHydrated(isTabDataReady);
     }, 100);

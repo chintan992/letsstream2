@@ -31,9 +31,9 @@ const SearchHistory = ({
         </Button>
       </div>
       <div className="flex flex-wrap gap-2">
-        {history.map((term, index) => (
+        {history.map((term, i) => (
           <Button
-            key={index}
+            key={`${term}-${i}`}
             variant="outline"
             size="sm"
             className="border-white/10 text-white hover:bg-white/10"

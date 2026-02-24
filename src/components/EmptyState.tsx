@@ -17,7 +17,7 @@ const EmptyState = ({
   onClearFilters,
 }: EmptyStateProps) => {
   const { userPreferences } = useUserPreferences();
-  const accentColor = userPreferences?.accentColor || "hsl(var(--accent))";
+  const accentColor = userPreferences?.accentColor || "#E63462";
 
   const getContent = () => {
     switch (type) {
@@ -39,7 +39,9 @@ const EmptyState = ({
               variant="outline"
               className="mt-6 border-white/20 bg-white/5 transition-all duration-300 hover:border-white/30 hover:bg-white/10"
               style={{
-                boxShadow: `0 0 20px ${accentColor}20`,
+                boxShadow: /^#([0-9a-fA-F]{6})$/.test(accentColor)
+                  ? `0 0 20px ${accentColor}20`
+                  : undefined,
               }}
             >
               <Search className="mr-2 h-4 w-4" />
@@ -66,7 +68,9 @@ const EmptyState = ({
               variant="outline"
               className="mt-6 border-white/20 bg-white/5 transition-all duration-300 hover:border-white/30 hover:bg-white/10"
               style={{
-                boxShadow: `0 0 20px ${accentColor}20`,
+                boxShadow: /^#([0-9a-fA-F]{6})$/.test(accentColor)
+                  ? `0 0 20px ${accentColor}20`
+                  : undefined,
               }}
             >
               <Sparkles className="mr-2 h-4 w-4" />
@@ -140,7 +144,9 @@ const EmptyState = ({
         <div
           className="mb-6 inline-flex items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-6 shadow-lg backdrop-blur-sm"
           style={{
-            boxShadow: `0 0 40px ${accentColor}15, inset 0 0 20px ${accentColor}10`,
+            boxShadow: /^#([0-9a-fA-F]{6})$/.test(accentColor)
+              ? `0 0 40px ${accentColor}15, inset 0 0 20px ${accentColor}10`
+              : undefined,
           }}
         >
           {content.icon}

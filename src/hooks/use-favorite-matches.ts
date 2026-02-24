@@ -20,7 +20,16 @@ export const useFavoriteMatches = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setFavorites(parsed);
+        if (Array.isArray(parsed)) {
+          const validFavorites = parsed.filter(
+            (item) =>
+              typeof item === "object" &&
+              item !== null &&
+              typeof item.id !== "undefined" &&
+              (typeof item.date === "number" || !isNaN(Date.parse(item.date)))
+          );
+          setFavorites(validFavorites);
+        }
       }
     } catch (error) {
       console.error("Error loading favorite matches:", error);

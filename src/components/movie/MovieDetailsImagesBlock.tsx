@@ -10,7 +10,8 @@ type Props = {
 };
 
 const MovieDetailsImagesBlock: React.FC<Props> = ({ images, movieName }) => {
-  return <MovieImages images={images as BlockImages} movieName={movieName} />;
+  if (!images) return null;
+  return <MovieImages images={images} movieName={movieName} />;
 };
 
 export default MovieDetailsImagesBlock;

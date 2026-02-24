@@ -31,11 +31,12 @@ const ReviewSection = ({ mediaId, mediaType }: ReviewSectionProps) => {
     const fetchReviews = async () => {
       try {
         setReviewState(prev => ({ ...prev, isLoading: true }));
+        setVisibleReviews(3);
         const reviewsData = await getReviews(mediaId, mediaType);
         setReviewState({ reviews: reviewsData, isLoading: false });
       } catch (error) {
         console.error("Error fetching reviews:", error);
-        setReviewState(prev => ({ ...prev, isLoading: false }));
+        setReviewState({ reviews: [], isLoading: false });
       }
     };
 

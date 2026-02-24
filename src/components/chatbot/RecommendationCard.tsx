@@ -191,9 +191,9 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           </div>
           {!isMobile && availability && availability.length > 0 && (
             <div className="flex gap-1">
-              {availability.map((a, i) => (
+              {availability.map(a => (
                 <Badge
-                  key={i}
+                  key={a.providerId}
                   variant="outline"
                   className="bg-background/50 text-xs"
                 >

@@ -357,6 +357,8 @@ const Hero = ({ media, className = "" }: HeroProps) => {
       }
     };
 
+    // Note: Cannot use { passive: true } here because we need to call preventDefault()
+    // to stop page scrolling while swiping the carousel
     node.addEventListener("touchmove", handleTouchMove, { passive: false });
     return () => {
       node.removeEventListener("touchmove", handleTouchMove);
@@ -552,9 +554,9 @@ const Hero = ({ media, className = "" }: HeroProps) => {
 
       {/* Progress bar indicators at top */}
       <div className="absolute left-0 right-0 top-0 flex h-1">
-        {filteredMedia.map((_, index) => (
+        {filteredMedia.map((item, index) => (
           <div
-            key={index}
+            key={item.id ? `${item.id}-${index}` : `slide-${index}`}
             className={`flex-1 transition-all ${
               index === currentIndex ? "bg-primary" : "bg-white/20"
             }`}

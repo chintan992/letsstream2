@@ -53,7 +53,11 @@ const ErrorState = ({
       <div className="mb-6">{content.icon}</div>
 
       <Alert className="mb-6 max-w-md border-red-500/20 bg-red-500/10">
-        <AlertCircle className="h-4 w-4 text-red-400" />
+        {isOffline ? (
+          <WifiOff className="h-4 w-4 text-red-400" />
+        ) : (
+          <AlertCircle className="h-4 w-4 text-red-400" />
+        )}
         <AlertTitle className="text-white">{content.title}</AlertTitle>
         <AlertDescription className="text-white/70">
           {content.description}

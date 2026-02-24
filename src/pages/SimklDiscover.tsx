@@ -21,7 +21,7 @@ function simklToMedia(
     : undefined;
 
   // Use Simkl ID as primary, TMDB as fallback, with index for uniqueness
-  const uniqueId = item.ids.simkl || item.ids.tmdb || index;
+  const uniqueId = item.ids.tmdb || item.ids.simkl || index + 1000000;
 
   return {
     id: uniqueId,
@@ -35,8 +35,8 @@ function simklToMedia(
     overview: item.overview || "",
     vote_average:
       item.ratings?.simkl?.rating || item.ratings?.imdb?.rating || 0,
-    release_date: item.year?.toString(),
-    first_air_date: item.year?.toString(),
+    release_date: item.year ? `${item.year}-01-01` : undefined,
+    first_air_date: item.year ? `${item.year}-01-01` : undefined,
     custom_poster_url: simklPosterUrl,
     genre_ids: [],
   };
@@ -108,13 +108,15 @@ const SimklDiscover = () => {
     trendingTV: SimklTrendingItem[];
     trendingAnime: SimklTrendingItem[];
     isLoading: boolean;
+    error: string | null;
   }>({
     trendingMovies: [],
     trendingTV: [],
     trendingAnime: [],
     isLoading: true,
+    error: null,
   });
-  const { trendingMovies, trendingTV, trendingAnime, isLoading } =
+  const { trendingMovies, trendingTV, trendingAnime, isLoading, error } =
     discoverState;
 
   useEffect(() => {
@@ -132,10 +134,15 @@ const SimklDiscover = () => {
           trendingTV: trendingTVData,
           trendingAnime: trendingAnimeData,
           isLoading: false,
+          error: null,
         });
       } catch (error) {
         console.error("Error fetching Simkl discover content:", error);
-        setDiscoverState(prev => ({ ...prev, isLoading: false }));
+        setDiscoverState(prev => ({
+          ...prev,
+          isLoading: false,
+          error: String(error),
+        }));
       }
     };
 
@@ -160,6 +167,11 @@ const SimklDiscover = () => {
               </p>
             </div>
           </div>
+          {error && (
+            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-red-400">
+              <p>Failed to load content. Please try again later.</p>
+            </div>
+          )}
         </div>
 
         {/* Content Rows */}

@@ -335,7 +335,7 @@ const SecondaryContent = () => {
   useEffect(() => {
     const fetchAllContent = async () => {
       try {
-        const [trueStories] = await Promise.all([getBasedOnTrueStories()]);
+        const trueStories = await getBasedOnTrueStories();
         setContent(prev => ({ ...prev, basedOnTrueStories: trueStories }));
 
         const [

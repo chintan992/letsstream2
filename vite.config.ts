@@ -55,11 +55,14 @@ export default defineConfig(({ mode }) => ({
             if (parts.length > 1) {
               const modulePath = parts[1];
               const segments = modulePath.split("/");
-              // Handle scoped packages like @scope/pkg
-              if (segments[0].startsWith("@") && segments.length > 1) {
-                return `${segments[0]}/${segments[1]}`;
+              let name = segments[0];
+              if (name === ".pnpm" && segments.length > 1) {
+                name = segments[1];
               }
-              return segments[0];
+              if (name.startsWith("@") && segments.length > 1) {
+                return `vendor-${name.replace("@", "")}-${segments[1]}`;
+              }
+              return `vendor-${name.replace("@", "")}`;
             }
           }
         },

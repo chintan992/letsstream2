@@ -78,11 +78,11 @@ export const TVShowImages = ({ images, tvShowName }: TVShowImagesProps) => {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {activeTab === "backdrops" &&
-          backdrops.map((image: any, index: number) => {
+          backdrops.map((image: any) => {
             const imageId = `backdrop-${image.file_path}`;
             return (
               <div
-                key={`backdrop-${index}`}
+                key={imageId}
                 className="group relative overflow-hidden rounded-xl"
               >
                 <img
@@ -121,11 +121,11 @@ export const TVShowImages = ({ images, tvShowName }: TVShowImagesProps) => {
           })}
 
         {activeTab === "posters" &&
-          posters.map((image: any, index: number) => {
+          posters.map((image: any) => {
             const imageId = `poster-${image.file_path}`;
             return (
               <div
-                key={`poster-${index}`}
+                key={imageId}
                 className="group relative overflow-hidden rounded-xl"
               >
                 <img

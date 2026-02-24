@@ -8,7 +8,11 @@ interface SportMatchCardSkeletonProps {
 
 const SportMatchCardSkeleton = ({ className }: SportMatchCardSkeletonProps) => {
   return (
-    <div className={cn("block", className)}>
+    <div
+      className={cn("block", className)}
+      role="status"
+      aria-label="Loading match information"
+    >
       <Card className="bg-card/80 h-full overflow-hidden border-white/10 shadow-md backdrop-blur-sm">
         {/* Image skeleton with shimmer effect */}
         <div className="relative aspect-video overflow-hidden bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800">
@@ -19,15 +23,21 @@ const SportMatchCardSkeleton = ({ className }: SportMatchCardSkeletonProps) => {
 
           {/* Badge skeletons */}
           <div className="absolute right-2 top-2 flex flex-col gap-2">
-            <div className="h-6 w-20 animate-pulse rounded-full bg-white/20" />
+            <div className="relative h-6 w-20 overflow-hidden rounded-full bg-white/20">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            </div>
           </div>
 
           {/* Favorite button skeleton */}
-          <div className="absolute left-2 top-2 h-9 w-9 animate-pulse rounded-full bg-white/20" />
+          <div className="absolute relative left-2 top-2 h-9 w-9 overflow-hidden rounded-full bg-white/20">
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          </div>
 
           {/* Countdown skeleton */}
           <div className="absolute bottom-2 left-2">
-            <div className="h-6 w-24 animate-pulse rounded-full bg-white/20" />
+            <div className="relative h-6 w-24 overflow-hidden rounded-full bg-white/20">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            </div>
           </div>
         </div>
 

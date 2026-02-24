@@ -102,6 +102,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       try {
         if (!user) {
           setUserPreferences(null);
+          setIsLoading(false);
           return;
         }
 
@@ -234,8 +235,8 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
       await setDoc(userPrefsRef, updatedPreferences);
       setUserPreferences(updatedPreferences);
 
-      // Simkl preferences are now strictly cloud-based (Firestore).
-      // Removed local storage sync to prevent "split brain" issues.
+      // Simkl preferences are now primarily cloud-based (Firestore).
+      // localStorage is used as a read-only fallback when Firestore fails.
 
       toast({
         title: "Preferences updated",
@@ -252,8 +253,17 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
         console.warn(
           "Cloud save failed for Simkl preferences, updating local state only."
         );
+        const basePrefs: UserPreferences = userPreferences ?? {
+          user_id: user.uid,
+          isWatchHistoryEnabled: true,
+          isNotificationsEnabled: true,
+          accentColor: "#E63462",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          isSimklEnabled: false,
+        };
         const updatedWithLocal = {
-          ...userPreferences,
+          ...basePrefs,
           ...preferences,
           updated_at: new Date().toISOString(),
         };
