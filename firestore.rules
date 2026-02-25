@@ -52,6 +52,10 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    match /simklSync/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
     match /users/{userId}/watchlist/{document=**} {
       allow read, write: if isOwner(userId);
     }

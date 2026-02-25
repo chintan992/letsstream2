@@ -8,6 +8,7 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 import {
   initializeFirestore,
   persistentLocalCache,
+  persistentMultipleTabManager,
   memoryLocalCache,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -85,14 +86,18 @@ export const getAnalyticsInstance = async () => {
   return analyticsInstance;
 };
 
-// Initialize Firestore with persistent local cache (replaces deprecated enableIndexedDbPersistence)
+// Initialize Firestore with IndexedDB persistence for offline support and multi-tab sync.
+// Falls back to in-memory cache in environments where IndexedDB is unavailable
+// (e.g., private/incognito mode in Safari, certain WebViews).
 let db: ReturnType<typeof initializeFirestore>;
 try {
   db = initializeFirestore(app, {
-    localCache: persistentLocalCache({}),
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
   });
 } catch {
-  // Fallback for environments where IndexedDB persistence is unavailable
+  // Fallback for environments where IndexedDB is unavailable
   db = initializeFirestore(app, {
     localCache: memoryLocalCache(),
   });
