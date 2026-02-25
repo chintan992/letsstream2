@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Camera, User } from "lucide-react";
+import { Camera, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { updateProfile } from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 import { useAuth } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { triggerSuccessHaptic } from "@/utils/haptic-feedback";
@@ -28,15 +31,32 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
 
   const handleSave = async () => {
     if (!user) return;
 
     setIsUpdating(true);
     try {
-      // In a real Firebase app, you would update the user profile
-      // await updateProfile(user, { displayName });
-
+      let photoURL = user.photoURL ?? undefined;
+      if (photoFile) {
+        const ext = photoFile.name.split(".").pop() || "jpg";
+        const storageRef = ref(storage, `users/${user.uid}/profile.${ext}`);
+        const snapshot = await uploadBytes(storageRef, photoFile);
+        photoURL = await getDownloadURL(snapshot.ref);
+      }
+      await updateProfile(user, {
+        displayName: displayName.trim(),
+        ...(photoURL !== user.photoURL ? { photoURL } : {}),
+      });
       triggerSuccessHaptic();
       toast({
         title: "Profile updated",
@@ -55,11 +75,30 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   };
 
   const handlePhotoUpload = () => {
-    // In a real app, this would open a file picker and upload to storage
-    toast({
-      title: "Feature coming soon",
-      description: "Profile photo upload will be available in a future update.",
-    });
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Photo must be under 5 MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
   };
 
   return (
@@ -85,7 +124,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                 <div className="relative">
                   <Avatar className="h-24 w-24 bg-accent text-2xl text-white">
                     <AvatarImage
-                      src={user?.photoURL || ""}
+                      src={photoPreview || user?.photoURL || ""}
                       alt={user?.email || "User"}
                     />
                     <AvatarFallback>
@@ -107,6 +146,14 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
                   Click the camera icon to change your profile picture
                 </p>
               </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
 
               {/* Display Name */}
               <div className="space-y-2">

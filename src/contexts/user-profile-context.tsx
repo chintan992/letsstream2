@@ -5,6 +5,7 @@ import {
   UserInteraction,
   UserPreference,
 } from "./types/user-profile";
+import { useAuth } from "@/hooks";
 import { nlpService } from "@/utils/services/nlp-service";
 import { recommendationEngine } from "@/utils/services/recommendation-engine";
 import { streamingPlatformService } from "@/utils/services/streaming-platform";
@@ -61,6 +62,7 @@ interface UserProfileProviderProps {
 export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({
   children,
 }) => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,8 +70,11 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({
   useEffect(() => {
     const initializeProfile = async () => {
       try {
-        // In a real app, load from backend/localStorage
-        const userId = "user-1"; // This would come from auth
+        const userId = user?.uid ?? null;
+        if (!userId) {
+          setProfile(null);
+          return;
+        }
         const initialProfile: UserProfile = {
           id: userId,
           preferences: DEFAULT_USER_PREFERENCES,
@@ -92,7 +97,7 @@ export const UserProfileProvider: React.FC<UserProfileProviderProps> = ({
     };
 
     initializeProfile();
-  }, []);
+  }, [user]);
 
   const updatePreferences = async (
     preferences: Partial<UserPreference>

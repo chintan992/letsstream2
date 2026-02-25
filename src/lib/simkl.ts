@@ -2,6 +2,14 @@ const SIMKL_API_URL = "https://api.simkl.com";
 const SIMKL_CLIENT_ID = import.meta.env.VITE_SIMKL_CLIENT_ID;
 const SIMKL_CLIENT_SECRET = import.meta.env.VITE_SIMKL_CLIENT_SECRET;
 
+if (SIMKL_CLIENT_SECRET) {
+  console.warn(
+    "[Security] VITE_SIMKL_CLIENT_SECRET is present in the frontend bundle. " +
+      "This secret is visible to users. Move the Simkl OAuth token exchange to a " +
+      "backend function to eliminate this exposure."
+  );
+}
+
 interface SimklTokenResponse {
   access_token: string;
   token_type: string;

@@ -6,10 +6,11 @@ import {
 } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import {
-  getFirestore,
   initializeFirestore,
+  persistentLocalCache,
   memoryLocalCache,
 } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Load Firebase configuration from environment variables - no fallbacks to ensure proper project usage
 const firebaseConfig = {
@@ -84,27 +85,18 @@ export const getAnalyticsInstance = async () => {
   return analyticsInstance;
 };
 
-// Initialize Firestore with persistence enabled
-import { enableIndexedDbPersistence } from "firebase/firestore";
+// Initialize Firestore with persistent local cache (replaces deprecated enableIndexedDbPersistence)
+let db: ReturnType<typeof initializeFirestore>;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({}),
+  });
+} catch {
+  // Fallback for environments where IndexedDB persistence is unavailable
+  db = initializeFirestore(app, {
+    localCache: memoryLocalCache(),
+  });
+}
+export { db };
 
-export const db = initializeFirestore(app, {});
-
-enableIndexedDbPersistence(db).catch(err => {
-  if (err.code == "failed-precondition") {
-    // Multiple tabs open, persistence can only be enabled
-    // in one tab at a a time.
-    // ...
-  } else if (err.code == "unimplemented") {
-    // The current browser does not support all of the
-    // features required to enable persistence
-    // ...
-  }
-});
-
-// Log Firebase configuration for debugging
-// console.log("Firebase config:", firebaseConfig);
-// if (!firebaseConfig.apiKey) {
-//   console.warn("Firebase API key: Missing");
-// } else {
-//   console.log("Firebase API key: Using provided key");
-// }
+export const storage = getStorage(app);
