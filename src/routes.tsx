@@ -8,6 +8,9 @@ import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
 const Index = lazyLoadWithRetry(() => import("./pages/Index"));
 const Login = lazyLoadWithRetry(() => import("./pages/Login"));
 const Signup = lazyLoadWithRetry(() => import("./pages/Signup"));
+const ForgotPassword = lazyLoadWithRetry(
+  () => import("./pages/ForgotPassword")
+);
 const Profile = lazyLoadWithRetry(() => import("./pages/Profile"));
 const Movies = lazyLoadWithRetry(() => import("./pages/Movies"));
 const TVShowsPage = lazyLoadWithRetry(() => import("./pages/tv"));
@@ -72,6 +75,7 @@ export default function AppRoutes() {
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected routes */}
           <Route

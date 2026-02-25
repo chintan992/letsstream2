@@ -7,6 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
@@ -51,9 +53,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await retryWithBackoff(async () => {
+      const userCredential = await retryWithBackoff(async () => {
         return await signInWithEmailAndPassword(auth, email, password);
       });
+
+      // Check if email is verified
+      if (!userCredential.user.emailVerified) {
+        await signOut(auth);
+        toast({
+          title: "Email Not Verified",
+          description:
+            "Please verify your email before signing in. Check your inbox for the verification link.",
+          variant: "destructive",
+        });
+        throw new Error("Email not verified");
+      }
+
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -81,11 +96,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
+    let userCreated = false;
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      userCreated = true;
+
+      // Send email verification with retry mechanism
+      try {
+        await retryWithBackoff(async () => {
+          return await sendEmailVerification(userCredential.user);
+        });
+      } catch (verificationError) {
+        // Still sign out even if verification fails
+        try {
+          await signOut(auth);
+        } catch {
+          // Ignore signout error
+        }
+        toast({
+          title: "Account Created – Verification Failed",
+          description:
+            "Your account was created but we couldn't send the verification email. Please try again later or contact support.",
+          variant: "destructive",
+        });
+        throw verificationError;
+      }
+
+      // Sign out the user until they verify their email
+      try {
+        await retryWithBackoff(async () => {
+          return await signOut(auth);
+        });
+      } catch {
+        // Ignore signout error - user is already created
+      }
+
       toast({
-        title: "Account created",
-        description: "Your account has been created successfully.",
+        title: "Account Created",
+        description:
+          "Please check your email to verify your account before signing in.",
       });
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -191,6 +244,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      await retryWithBackoff(async () => {
+        return await sendPasswordResetEmail(auth, email);
+      });
+      toast({
+        title: "Password Reset Email Sent",
+        description:
+          "Check your email for instructions to reset your password.",
+      });
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        const errorConfig = formatAuthError(error.code);
+        toast({
+          title: errorConfig.title,
+          description: errorConfig.suggestion
+            ? `${errorConfig.description} ${errorConfig.suggestion}`
+            : errorConfig.description,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      toast({
+        title: "Reset Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const sendVerificationEmail = async () => {
+    if (!user) {
+      toast({
+        title: "No User",
+        description: "You must be signed in to verify your email.",
+        variant: "destructive",
+      });
+      throw new Error("No user signed in");
+    }
+    try {
+      await retryWithBackoff(async () => {
+        return await sendEmailVerification(user);
+      });
+      toast({
+        title: "Verification Email Sent",
+        description: "Check your email for the verification link.",
+      });
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        const errorConfig = formatAuthError(error.code);
+        toast({
+          title: errorConfig.title,
+          description: errorConfig.suggestion
+            ? `${errorConfig.description} ${errorConfig.suggestion}`
+            : errorConfig.description,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      toast({
+        title: "Verification Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const logout = async () => {
     console.log("logout function called");
     try {
@@ -217,6 +339,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signInWithGoogle,
         logout,
+        resetPassword,
+        sendVerificationEmail,
       }}
     >
       {!loading && children}

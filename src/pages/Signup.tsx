@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatAuthError } from "@/utils/auth-errors";
+import {
+  validatePassword,
+  getStrengthColor,
+  getStrengthLabel,
+} from "@/utils/password-validation";
 // import { FcGoogle } from 'react-icons/fc'; // Removed colorful icon
 
 export default function Signup() {
@@ -27,6 +32,9 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [passwordValidation, setPasswordValidation] = useState<ReturnType<
+    typeof validatePassword
+  > | null>(null);
   const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -48,15 +56,33 @@ export default function Signup() {
     return "We had trouble creating your account. Please try again.";
   };
 
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (value.length > 0) {
+      setPasswordValidation(validatePassword(value));
+    } else {
+      setPasswordValidation(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     triggerHapticFeedback(20);
+
+    // Validate password before submission
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      setErrorMessage(validation.errors[0]);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setErrorMessage("Passwords do not match");
       return;
     }
+
     setIsLoading(true);
-    setErrorMessage(null); // Clear any previous error
+    setErrorMessage(null);
     try {
       await signUp(email, password);
       triggerSuccessHaptic();
@@ -67,10 +93,9 @@ export default function Signup() {
           email,
         },
       });
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       setErrorMessage(getFriendlyError(error));
-      // Error is also handled in auth context (toast)
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +116,6 @@ export default function Signup() {
       navigate("/");
     } catch (error) {
       setErrorMessage(getFriendlyError(error));
-      // Error is also handled in auth context (toast)
     } finally {
       setIsLoading(false);
     }
@@ -128,9 +152,47 @@ export default function Signup() {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={e => handlePasswordChange(e.target.value)}
                 required
               />
+              {passwordValidation && (
+                <div className="space-y-1">
+                  <div className="flex gap-1" role="none">
+                    <div
+                      aria-hidden="true"
+                      className={`h-1 flex-1 rounded ${passwordValidation.strength === "weak" ? "bg-red-500" : passwordValidation.strength === "fair" ? "bg-orange-500" : passwordValidation.strength === "good" ? "bg-yellow-500" : "bg-green-500"}`}
+                    />
+                    <div
+                      aria-hidden="true"
+                      className={`h-1 flex-1 rounded ${passwordValidation.strength === "fair" || passwordValidation.strength === "good" || passwordValidation.strength === "strong" ? (passwordValidation.strength === "strong" ? "bg-green-500" : passwordValidation.strength === "good" ? "bg-yellow-500" : "bg-orange-500") : "bg-gray-600"}`}
+                    />
+                    <div
+                      aria-hidden="true"
+                      className={`h-1 flex-1 rounded ${passwordValidation.strength === "good" || passwordValidation.strength === "strong" ? (passwordValidation.strength === "strong" ? "bg-green-500" : "bg-yellow-500") : "bg-gray-600"}`}
+                    />
+                    <div
+                      aria-hidden="true"
+                      className={`h-1 flex-1 rounded ${passwordValidation.strength === "strong" ? "bg-green-500" : "bg-gray-600"}`}
+                    />
+                  </div>
+                  <p
+                    aria-live="polite"
+                    role="status"
+                    className={`text-xs ${
+                      passwordValidation.strength === "weak"
+                        ? "text-red-500"
+                        : passwordValidation.strength === "fair"
+                          ? "text-orange-500"
+                          : passwordValidation.strength === "good"
+                            ? "text-yellow-500"
+                            : "text-green-500"
+                    }`}
+                  >
+                    Password strength:{" "}
+                    {getStrengthLabel(passwordValidation.strength)}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>

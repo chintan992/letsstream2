@@ -129,6 +129,14 @@ export default function Login() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
+            <div className="text-center text-sm">
+              <Link
+                to="/forgot-password"
+                className="text-muted-foreground hover:text-white"
+              >
+                Forgot password?
+              </Link>
+            </div>
             {errorMessage && (
               <div
                 className="mt-2 text-center text-sm text-white/70"
