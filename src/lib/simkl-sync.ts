@@ -318,8 +318,12 @@ async function exportToSimkl(
       try {
         // Determine a release year if available on the media item
         const candidateYearFromItem = (() => {
-          const releaseYear = (item as any).release_year;
-          const releaseDate = (item as any).release_date;
+          const itemWithDates = item as WatchHistoryItem & {
+            release_year?: string | number;
+            release_date?: string;
+          };
+          const releaseYear = itemWithDates.release_year;
+          const releaseDate = itemWithDates.release_date;
           if (
             typeof releaseYear === "number" &&
             !Number.isNaN(releaseYear) &&
@@ -351,7 +355,7 @@ async function exportToSimkl(
           return undefined;
         })();
 
-        const payload: any = {
+        const payload: Record<string, unknown> = {
           title: item.title,
           ids: {
             tmdb: item.media_id,

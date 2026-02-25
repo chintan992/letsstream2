@@ -7,15 +7,15 @@ import { lazy, ComponentType, LazyExoticComponent } from "react";
  * @param componentImport The import function for the component (e.g., () => import('./MyComponent'))
  * @returns A React.lazy component
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const lazyLoadWithRetry = <T extends ComponentType<any>>(
   componentImport: () => Promise<{ default: T }>
 ): LazyExoticComponent<T> => {
   return lazy(async () => {
-    // Defensive guards for session storage access
     let pageHasAlreadyBeenForceRefreshed = false;
     try {
-      if (typeof window !== "undefined" && (window as any).sessionStorage) {
-        const raw = (window as any).sessionStorage.getItem(
+      if (typeof window !== "undefined" && window.sessionStorage) {
+        const raw = window.sessionStorage.getItem(
           "page-has-been-force-refreshed"
         );
         pageHasAlreadyBeenForceRefreshed = raw ? JSON.parse(raw) : false;
@@ -26,9 +26,9 @@ export const lazyLoadWithRetry = <T extends ComponentType<any>>(
 
     try {
       const component = await componentImport();
-      if (typeof window !== "undefined" && (window as any).sessionStorage) {
+      if (typeof window !== "undefined" && window.sessionStorage) {
         try {
-          (window as any).sessionStorage.setItem(
+          window.sessionStorage.setItem(
             "page-has-been-force-refreshed",
             "false"
           );
@@ -39,11 +39,10 @@ export const lazyLoadWithRetry = <T extends ComponentType<any>>(
       return component;
     } catch (error) {
       if (!pageHasAlreadyBeenForceRefreshed) {
-        // Attempt to recover by forcing a page reload once
         console.error("Chunk load failed, reloading page...", error);
-        if (typeof window !== "undefined" && (window as any).sessionStorage) {
+        if (typeof window !== "undefined" && window.sessionStorage) {
           try {
-            (window as any).sessionStorage.setItem(
+            window.sessionStorage.setItem(
               "page-has-been-force-refreshed",
               "true"
             );
@@ -53,15 +52,13 @@ export const lazyLoadWithRetry = <T extends ComponentType<any>>(
         }
         if (typeof window !== "undefined") {
           window.location.reload();
-          // Never resolve while the page reloads
-          return new Promise<any>(() => {});
+          return new Promise<never>(() => {});
         }
         return Promise.reject(
           new Error("Failed to load component after reload")
         );
       }
 
-      // Already retried; bubble the error
       console.error("Chunk load failed after reload", error);
       throw error;
     }

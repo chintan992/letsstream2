@@ -160,7 +160,7 @@ export const useMediaPlayer = (
         setIsPlayerLoaded(true);
       }
     },
-    [selectedSource, mediaType]
+    [selectedSource, mediaType, videoSources]
   );
 
   useEffect(() => {
@@ -319,6 +319,7 @@ export const useMediaPlayer = (
     hasInitialized,
     mediaDetails,
     selectedSource,
+    updateIframeUrl,
   ]);
 
   // Calculate next season availability when media details change

@@ -69,8 +69,13 @@ export function HeroControls({
             aria-label={`Go to slide ${index + 1}`}
             aria-current={index === currentIndex ? "true" : undefined}
           >
-            <div className={`absolute bottom-0 left-0 right-0 h-1 transition-all ${index === currentIndex ? "bg-primary" : "bg-white/20 group-hover:bg-white/40"
-              }`}>
+            <div
+              className={`absolute bottom-0 left-0 right-0 h-1 transition-all ${
+                index === currentIndex
+                  ? "bg-primary"
+                  : "bg-white/20 group-hover:bg-white/40"
+              }`}
+            >
               {index === currentIndex && (
                 <m.div
                   ref={el => (paginationProgressRefs.current[index] = el)}

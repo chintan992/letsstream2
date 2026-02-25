@@ -27,7 +27,9 @@ export function useFilteredMatches({
   todayMatches,
   sportAllMatches,
 }: UseFilteredMatchesProps) {
-  const [currentDay, setCurrentDay] = useState(() => new Date().setHours(0, 0, 0, 0));
+  const [currentDay, setCurrentDay] = useState(() =>
+    new Date().setHours(0, 0, 0, 0)
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -34,7 +34,11 @@ export function HeroContent({
           {/* Media type and rating in a horizontal line */}
           <div className="mb-4 flex items-center gap-6">
             <span className="text-sm font-medium uppercase tracking-widest text-primary">
-              {mediaType === "movie" ? "Film" : mediaType === "tv" ? "Series" : "Media"}
+              {mediaType === "movie"
+                ? "Film"
+                : mediaType === "tv"
+                  ? "Series"
+                  : "Media"}
             </span>
 
             <div className="flex items-center gap-4">

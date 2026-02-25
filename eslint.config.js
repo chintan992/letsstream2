@@ -7,12 +7,12 @@ import prettier from "eslint-plugin-prettier";
 import prettierRecommended from "eslint-config-prettier";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { ignores: ["dist", "dev-dist"] },
   {
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
-      prettierRecommended, // Disable ESLint rules that conflict with prettier
+      prettierRecommended,
     ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -28,11 +28,20 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": [
         "warn",
-        { allowConstantExport: true },
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            "badgeVariants",
+            "buttonVariants",
+            "useChatbot",
+            "useUserPreferences",
+            "useUserProfile",
+          ],
+        },
       ],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
-      "prettier/prettier": "error", // Enable Prettier as ESLint rule
+      "prettier/prettier": "error",
     },
   }
 );

@@ -159,7 +159,10 @@ export function ServiceWorkerDebugPanel() {
         );
       }
     };
-    registration?.addEventListener("updatefound", onUpdateFound as any);
+    registration?.addEventListener(
+      "updatefound",
+      onUpdateFound as EventListener
+    );
 
     window.addEventListener("online", handleNetworkChange);
     window.addEventListener("offline", handleNetworkChange);
@@ -180,7 +183,10 @@ export function ServiceWorkerDebugPanel() {
           w.removeEventListener("statechange", handleSwStateChange)
         );
       }
-      registration?.removeEventListener("updatefound", onUpdateFound as any);
+      registration?.removeEventListener(
+        "updatefound",
+        onUpdateFound as EventListener
+      );
       window.removeEventListener("online", handleNetworkChange);
       window.removeEventListener("offline", handleNetworkChange);
       navigator.serviceWorker.removeEventListener("message", handleSwMessage);

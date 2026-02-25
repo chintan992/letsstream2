@@ -29,12 +29,16 @@ export const MediaRecommendations: React.FC<MediaRecommendationsProps> = ({
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3, staggerChildren: 0.1 } }
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3, staggerChildren: 0.1 },
+    },
   };
 
   const childVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
   };
   return (
     <div className="mb-4 flex flex-col space-y-4">
@@ -54,10 +58,7 @@ export const MediaRecommendations: React.FC<MediaRecommendationsProps> = ({
         animate="visible"
       >
         {mediaItems.map(media => (
-          <m.div
-            key={media.id}
-            variants={childVariants}
-          >
+          <m.div key={media.id} variants={childVariants}>
             <RecommendationCard
               media={media}
               onRate={rating => handleRate(rating)}
@@ -86,10 +87,11 @@ export const MediaRecommendations: React.FC<MediaRecommendationsProps> = ({
                 aria-pressed={rating === currentRating}
               >
                 <Star
-                  className={`h-4 w-4 ${rating <= (hoveredRating || currentRating)
+                  className={`h-4 w-4 ${
+                    rating <= (hoveredRating || currentRating)
                       ? "fill-amber-400 text-amber-400"
                       : "text-amber-400"
-                    }`}
+                  }`}
                 />
               </Button>
             ))}

@@ -9,7 +9,7 @@ import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
-  memoryLocalCache,
+  getFirestore,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -87,21 +87,47 @@ export const getAnalyticsInstance = async () => {
 };
 
 // Initialize Firestore with IndexedDB persistence for offline support and multi-tab sync.
-// Falls back to in-memory cache in environments where IndexedDB is unavailable
-// (e.g., private/incognito mode in Safari, certain WebViews).
-let db: ReturnType<typeof initializeFirestore>;
-try {
-  db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
-    }),
-  });
-} catch {
-  // Fallback for environments where IndexedDB is unavailable
-  db = initializeFirestore(app, {
-    localCache: memoryLocalCache(),
-  });
+// Note: persistentLocalCache will throw when IndexedDB is unavailable (e.g., Safari private mode).
+// Historically, a try/catch explicitly switched to memoryLocalCache to handle this failure mode.
+// We now wrap the persistent initializeFirestore in a try/catch and fall back to getFirestore(app)
+// so that a functional db is still returned even if IndexedDB is unavailable.
+// Module-level boolean to track if this module initialized Firestore (for HMR and persistence checks)
+interface FirestoreGlobal {
+  firestoreInitializedInThisModule?: boolean;
 }
+const globalScope = globalThis as FirestoreGlobal;
+let firestoreInitializedInThisModule =
+  globalScope.firestoreInitializedInThisModule || false;
+
+let db: ReturnType<typeof getFirestore>;
+
+if (existingApps.length > 0) {
+  // Check for an already-initialized Firestore instance and reuse it to prevent "failed-precondition"
+  db = getFirestore(app);
+
+  if (!firestoreInitializedInThisModule) {
+    console.warn(
+      "An App exists but firestoreInitializedInThisModule is false. Firestore persistence may not have been enabled. Reusing existing instance."
+    );
+  }
+} else {
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+    firestoreInitializedInThisModule = true;
+    globalScope.firestoreInitializedInThisModule = true;
+  } catch (error) {
+    console.warn(
+      "Firestore initialization failed. Falling back to non-persistent getFirestore:",
+      error
+    );
+    db = getFirestore(app);
+  }
+}
+
 export { db };
 
 export const storage = getStorage(app);

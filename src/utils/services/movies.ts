@@ -1,8 +1,12 @@
 import { tmdb } from "./tmdb";
 import { trackEvent } from "@/lib/analytics";
-import { Media, MovieImagesResponse } from "../types";
+import { Media } from "../types";
 import { MovieDetails } from "../types/movie";
-import { TMDBMovieResult, TMDBMovieDetailsResult } from "../types/tmdb";
+import {
+  TMDBMovieResult,
+  TMDBMovieDetailsResult,
+  TMDBImagesResponse,
+} from "../types/tmdb";
 import { formatMediaResult } from "./media";
 import { TMDB } from "../config/constants";
 
@@ -59,7 +63,7 @@ export async function getMovieDetails(
       tmdb.get<TMDBMovieDetailsResult>(
         `/movie/${id}?append_to_response=release_dates,credits`
       ),
-      tmdb.get<MovieImagesResponse>(`/movie/${id}/images`),
+      tmdb.get<TMDBImagesResponse>(`/movie/${id}/images`),
     ]);
 
     const detailsData = detailsResponse.data;
@@ -135,9 +139,9 @@ export async function getMovieDetails(
 }
 
 // Get movie images
-export async function getMovieImages(id: number): Promise<any> {
+export async function getMovieImages(id: number): Promise<TMDBImagesResponse> {
   try {
-    const response = await tmdb.get<any>(`/movie/${id}/images`);
+    const response = await tmdb.get<TMDBImagesResponse>(`/movie/${id}/images`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching images for movie ${id}:`, error);

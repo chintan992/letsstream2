@@ -42,18 +42,17 @@ const VideoPlayerComponent = ({
 }: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const handleIframeError = () => {
-    onError("Failed to load iframe content");
-  };
+  const iframeElement = useMemo(() => {
+    const onIframeError = () => {
+      onError("Failed to load iframe content");
+    };
 
-  const handleIframeLoad = () => {
-    if (!iframeUrl) return;
-    onLoaded();
-  };
+    const onIframeLoad = () => {
+      if (!iframeUrl) return;
+      onLoaded();
+    };
 
-  // Memoize the iframe element to prevent re-renders on orientation changes
-  const iframeElement = useMemo(
-    () => (
+    return (
       <iframe
         key={iframeUrl}
         ref={iframeRef}
@@ -64,12 +63,11 @@ const VideoPlayerComponent = ({
         allow="autoplay; encrypted-media; picture-in-picture"
         referrerPolicy="no-referrer"
         loading="lazy"
-        onLoad={handleIframeLoad}
-        onError={handleIframeError}
+        onLoad={onIframeLoad}
+        onError={onIframeError}
       />
-    ),
-    [iframeUrl, handleIframeError, handleIframeLoad, title]
-  ); // Re-create iframe when iframeUrl, title, handleIframeError, or handleIframeLoad change
+    );
+  }, [iframeUrl, onError, onLoaded, title]);
 
   // Render Video.js player for API sources
   if (isApiSource) {

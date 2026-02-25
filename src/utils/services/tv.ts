@@ -1,7 +1,16 @@
 import { tmdb } from "./tmdb";
-import { Media, Episode, MovieImagesResponse } from "../types";
+import { Media, Episode } from "../types";
 import { TVDetails } from "../types/tv";
-import { TMDBTVResult, TMDBTVDetailsResult } from "../types/tmdb";
+import {
+  TMDBTVResult,
+  TMDBTVDetailsResult,
+  TMDBImagesResponse,
+  TMDBKeyword,
+  TMDBNetwork,
+  TMDBContentRating,
+  TMDBEpisodeDetails,
+  CastMember,
+} from "../types/tmdb";
 import { formatMediaResult } from "./media";
 import { TMDB } from "../config/constants";
 
@@ -88,7 +97,7 @@ export async function getTVDetails(id: number): Promise<TVDetails | null> {
       tmdb.get<TMDBTVDetailsResult>(
         `/tv/${id}?append_to_response=content_ratings`
       ),
-      tmdb.get<MovieImagesResponse>(`/tv/${id}/images`),
+      tmdb.get<TMDBImagesResponse>(`/tv/${id}/images`),
     ]);
 
     const detailsData = detailsResponse.data;
@@ -145,9 +154,9 @@ export async function getTVDetails(id: number): Promise<TVDetails | null> {
 }
 
 // Get TV show creators
-export async function getTVShowCreators(id: number): Promise<any[]> {
+export async function getTVShowCreators(id: number): Promise<CastMember[]> {
   try {
-    const response = await tmdb.get<{ created_by: any[] }>(`/tv/${id}`);
+    const response = await tmdb.get<{ created_by: CastMember[] }>(`/tv/${id}`);
     return response.data.created_by || [];
   } catch (error) {
     console.error(`Error fetching creators for TV show ${id}:`, error);
@@ -156,9 +165,9 @@ export async function getTVShowCreators(id: number): Promise<any[]> {
 }
 
 // Get TV show images
-export async function getTVShowImages(id: number): Promise<any> {
+export async function getTVShowImages(id: number): Promise<TMDBImagesResponse> {
   try {
-    const response = await tmdb.get<any>(`/tv/${id}/images`);
+    const response = await tmdb.get<TMDBImagesResponse>(`/tv/${id}/images`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching images for TV show ${id}:`, error);
@@ -167,9 +176,11 @@ export async function getTVShowImages(id: number): Promise<any> {
 }
 
 // Get TV show keywords
-export async function getTVShowKeywords(id: number): Promise<any[]> {
+export async function getTVShowKeywords(id: number): Promise<TMDBKeyword[]> {
   try {
-    const response = await tmdb.get<{ results: any[] }>(`/tv/${id}/keywords`);
+    const response = await tmdb.get<{ results: TMDBKeyword[] }>(
+      `/tv/${id}/keywords`
+    );
     return response.data.results || [];
   } catch (error) {
     console.error(`Error fetching keywords for TV show ${id}:`, error);
@@ -178,9 +189,9 @@ export async function getTVShowKeywords(id: number): Promise<any[]> {
 }
 
 // Get TV show networks
-export async function getTVShowNetworks(id: number): Promise<any[]> {
+export async function getTVShowNetworks(id: number): Promise<TMDBNetwork[]> {
   try {
-    const response = await tmdb.get<any>(`/tv/${id}`);
+    const response = await tmdb.get<{ networks: TMDBNetwork[] }>(`/tv/${id}`);
     return response.data.networks || [];
   } catch (error) {
     console.error(`Error fetching networks for TV show ${id}:`, error);
@@ -189,9 +200,13 @@ export async function getTVShowNetworks(id: number): Promise<any[]> {
 }
 
 // Get TV show content ratings
-export async function getTVShowContentRatings(id: number): Promise<any> {
+export async function getTVShowContentRatings(
+  id: number
+): Promise<TMDBContentRating[]> {
   try {
-    const response = await tmdb.get<any>(`/tv/${id}/content_ratings`);
+    const response = await tmdb.get<{ results: TMDBContentRating[] }>(
+      `/tv/${id}/content_ratings`
+    );
     return response.data.results || [];
   } catch (error) {
     console.error(`Error fetching content ratings for TV show ${id}:`, error);
@@ -223,9 +238,9 @@ export async function getTVEpisodeWithGuests(
   id: number,
   seasonNumber: number,
   episodeNumber: number
-): Promise<any> {
+): Promise<TMDBEpisodeDetails | null> {
   try {
-    const response = await tmdb.get<any>(
+    const response = await tmdb.get<TMDBEpisodeDetails>(
       `/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}?append_to_response=credits`
     );
     return response.data;

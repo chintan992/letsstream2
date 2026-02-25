@@ -198,7 +198,15 @@ export const useTVDetails = (id: string | undefined) => {
           const episodesWithCredits = await Promise.all(guestStarsPromises);
 
           // Create a mapping of episode numbers to their guest stars
-          const episodeGuestStarsMap: Record<number, any[]> = {};
+          const episodeGuestStarsMap: Record<
+            number,
+            {
+              id: number;
+              name: string;
+              character: string;
+              profile_path: string | null;
+            }[]
+          > = {};
           episodesWithCredits.forEach((episodeData, index) => {
             if (
               episodeData &&

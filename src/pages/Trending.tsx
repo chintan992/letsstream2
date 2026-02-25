@@ -99,7 +99,7 @@ const Trending = () => {
         // Build the complete array from cached pages
         let accumulatedItems: Media[] = [];
         for (let page = 1; page <= totalPagesNeeded; page++) {
-          const pageData: any[] =
+          const pageData: Media[] =
             queryClient.getQueryData(["trending", timeWindow, page]) || [];
           const mappedItems = pageData.map(item => ({
             ...item,

@@ -7,6 +7,8 @@ import {
   doc,
   setDoc,
   deleteDoc,
+  QuerySnapshot,
+  DocumentData,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -19,7 +21,7 @@ import { trackEvent } from "@/lib/analytics";
 /**
  * Tracks backup and restore events for analytics
  */
-function trackBackupEvent(eventName: string, params: Record<string, any>) {
+function trackBackupEvent(eventName: string, params: Record<string, unknown>) {
   try {
     trackEvent({
       name: `backup_${eventName}`,
@@ -69,7 +71,7 @@ export interface ValidationResult {
 /**
  * Validates backup data structure and content
  */
-export function validateBackupData(data: any): ValidationResult {
+export function validateBackupData(data: unknown): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -79,54 +81,63 @@ export function validateBackupData(data: any): ValidationResult {
     return { isValid: false, errors, warnings };
   }
 
+  const d = data as Record<string, unknown>;
+
   // Check version
-  if (!data.version || typeof data.version !== "string") {
+  if (!d.version || typeof d.version !== "string") {
     errors.push("Missing or invalid version field");
   }
 
   // Check user_id
-  if (!data.user_id || typeof data.user_id !== "string") {
+  if (!d.user_id || typeof d.user_id !== "string") {
     errors.push("Missing or invalid user_id field");
   }
 
   // Check backup_date
-  if (!data.backup_date || typeof data.backup_date !== "string") {
+  if (!d.backup_date || typeof d.backup_date !== "string") {
     errors.push("Missing or invalid backup_date field");
   }
 
   // Check data object
-  if (!data.data || typeof data.data !== "object") {
+  if (!d.data || typeof d.data !== "object") {
     errors.push("Missing or invalid data field");
     return { isValid: false, errors, warnings };
   }
 
+  const innerData = d.data as Record<string, unknown>;
+
   // Validate arrays
   const collections = ["watchHistory", "favorites", "watchlist"];
   for (const collectionName of collections) {
-    if (!Array.isArray(data.data[collectionName])) {
+    if (!Array.isArray(innerData[collectionName])) {
       errors.push(`Missing or invalid ${collectionName} array`);
     } else {
       // Validate each item has required fields
-      data.data[collectionName].forEach((item: any, index: number) => {
-        if (!item.id || typeof item.id !== "string") {
-          errors.push(`${collectionName}[${index}]: Missing or invalid id`);
+      (innerData[collectionName] as Record<string, unknown>[]).forEach(
+        (item: Record<string, unknown>, index: number) => {
+          if (!item.id || typeof item.id !== "string") {
+            errors.push(`${collectionName}[${index}]: Missing or invalid id`);
+          }
+          if (!item.user_id || typeof item.user_id !== "string") {
+            errors.push(
+              `${collectionName}[${index}]: Missing or invalid user_id`
+            );
+          }
+          if (typeof item.media_id !== "number") {
+            errors.push(
+              `${collectionName}[${index}]: Missing or invalid media_id`
+            );
+          }
+          if (
+            typeof item.media_type !== "string" ||
+            !["movie", "tv"].includes(item.media_type)
+          ) {
+            errors.push(
+              `${collectionName}[${index}]: Missing or invalid media_type`
+            );
+          }
         }
-        if (!item.user_id || typeof item.user_id !== "string") {
-          errors.push(
-            `${collectionName}[${index}]: Missing or invalid user_id`
-          );
-        }
-        if (typeof item.media_id !== "number") {
-          errors.push(
-            `${collectionName}[${index}]: Missing or invalid media_id`
-          );
-        }
-        if (!item.media_type || !["movie", "tv"].includes(item.media_type)) {
-          errors.push(
-            `${collectionName}[${index}]: Missing or invalid media_type`
-          );
-        }
-      });
+      );
     }
   }
 
@@ -196,13 +207,12 @@ export async function createBackup(
           )
         ),
       ]);
-      const watchHistorySnapshot = (await watchHistoryPromise) as any;
-      backupData.data.watchHistory = watchHistorySnapshot.docs.map(
-        (doc: any) => ({
-          id: doc.id,
-          ...doc.data(),
-        })
-      ) as WatchHistoryItem[];
+      const watchHistorySnapshot =
+        (await watchHistoryPromise) as QuerySnapshot<DocumentData>;
+      backupData.data.watchHistory = watchHistorySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as WatchHistoryItem[];
 
       // Fetch favorites with timeout
       const favoritesPromise = Promise.race([
@@ -213,8 +223,9 @@ export async function createBackup(
           setTimeout(() => reject(new Error("Favorites fetch timeout")), 30000)
         ),
       ]);
-      const favoritesSnapshot = (await favoritesPromise) as any;
-      backupData.data.favorites = favoritesSnapshot.docs.map((doc: any) => ({
+      const favoritesSnapshot =
+        (await favoritesPromise) as QuerySnapshot<DocumentData>;
+      backupData.data.favorites = favoritesSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       })) as FavoriteItem[];
@@ -228,8 +239,9 @@ export async function createBackup(
           setTimeout(() => reject(new Error("Watchlist fetch timeout")), 30000)
         ),
       ]);
-      const watchlistSnapshot = (await watchlistPromise) as any;
-      backupData.data.watchlist = watchlistSnapshot.docs.map((doc: any) => ({
+      const watchlistSnapshot =
+        (await watchlistPromise) as QuerySnapshot<DocumentData>;
+      backupData.data.watchlist = watchlistSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       })) as WatchlistItem[];

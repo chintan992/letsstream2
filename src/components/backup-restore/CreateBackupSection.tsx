@@ -35,7 +35,9 @@ export function CreateBackupSection({ user }: { user: User }) {
       );
       setFilenameSuggestions(suggestions);
 
-      const filename = customFilename.trim() || (suggestions.length > 0 ? suggestions[0] : `backup-${Date.now()}.json`);
+      const filename =
+        customFilename.trim() ||
+        (suggestions.length > 0 ? suggestions[0] : `backup-${Date.now()}.json`);
       downloadBackup(backupData, filename);
 
       toast({
@@ -95,7 +97,12 @@ export function CreateBackupSection({ user }: { user: User }) {
 
         {filenameSuggestions.length > 0 && (
           <div>
-            <Label htmlFor="suggested-filenames" className="text-sm font-medium">Suggested Filenames</Label>
+            <Label
+              htmlFor="suggested-filenames"
+              className="text-sm font-medium"
+            >
+              Suggested Filenames
+            </Label>
             <Select onValueChange={value => setCustomFilename(value)}>
               <SelectTrigger id="suggested-filenames" className="mt-1">
                 <SelectValue placeholder="Choose a suggested filename" />

@@ -142,7 +142,8 @@ const SimklDiscoverList = () => {
     if (!config) {
       if (category === "recommendations") {
         return items.map((item, index) => {
-          const mediaType = (item as any).__mediaType || "movie";
+          const rawType = (item as Record<string, unknown>).__mediaType;
+          const mediaType: "movie" | "tv" = rawType === "tv" ? "tv" : "movie";
           return simklToMedia(item, mediaType, index);
         });
       }
@@ -237,7 +238,9 @@ const SimklDiscoverList = () => {
               ))}
             </div>
           ) : (
-            <MediaGrid media={media as any} />
+            <MediaGrid
+              media={media as React.ComponentProps<typeof MediaGrid>["media"]}
+            />
           )}
         </div>
       </div>

@@ -557,7 +557,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         // Silently ignore permission errors in migration to avoid console noise
-        const err = error as any;
+        const err = error as { code?: string };
         if (err?.code !== "permission-denied") {
           console.error("Error consolidating TV show episodes:", error);
         }

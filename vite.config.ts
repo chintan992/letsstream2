@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-/// <reference path="./workbox.d.ts" />
+import type {} from "./workbox.d.ts";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";

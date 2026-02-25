@@ -152,7 +152,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
           variant: "destructive",
         });
         // Set default preferences in memory even if save fails
-        const fallbackPrefs = {
+        const fallbackPrefs: UserPreferences = {
           user_id: user.uid,
           isWatchHistoryEnabled: true,
           isNotificationsEnabled: true,
@@ -167,8 +167,9 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
           if (localSimkl) {
             const parsed = JSON.parse(localSimkl);
             fallbackPrefs.isSimklEnabled = parsed.isSimklEnabled ?? false;
-            // Add simklToken to type if needed, or cast
-            (fallbackPrefs as any).simklToken = parsed.simklToken;
+            if (typeof parsed.simklToken === "string") {
+              fallbackPrefs.simklToken = parsed.simklToken;
+            }
           }
         } catch (e) {
           console.warn("Local storage access blocked or failed in fallback", e);
@@ -272,7 +273,7 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if ((error as any).code === "permission-denied") {
+      if ((error as { code?: string }).code === "permission-denied") {
         console.error(
           "Firestore Permission Denied. Check security rules for 'userPreferences' collection."
         );

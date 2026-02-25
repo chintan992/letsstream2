@@ -16,7 +16,13 @@ import {
 import { clearUserData } from "@/utils/services/backup-restore";
 import { User } from "firebase/auth";
 
-export function ClearDataSection({ user, onSuccess }: { user: User; onSuccess?: () => void }) {
+export function ClearDataSection({
+  user,
+  onSuccess,
+}: {
+  user: User;
+  onSuccess?: () => void;
+}) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 

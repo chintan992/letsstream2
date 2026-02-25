@@ -4,7 +4,7 @@ export interface PasswordValidation {
   strength: "weak" | "fair" | "good" | "strong";
 }
 
-const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/;
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/;
 
 export const validatePassword = (password: string): PasswordValidation => {
   const errors: string[] = [];

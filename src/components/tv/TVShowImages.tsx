@@ -78,90 +78,102 @@ export const TVShowImages = ({ images, tvShowName }: TVShowImagesProps) => {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {activeTab === "backdrops" &&
-          backdrops.map((image: any) => {
-            const imageId = `backdrop-${image.file_path}`;
-            return (
-              <div
-                key={imageId}
-                className="group relative overflow-hidden rounded-xl"
-              >
-                <img
-                  src={getImageUrl(image.file_path, backdropSizes.small)}
-                  alt={`Backdrop ${index + 1}`}
-                  className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                {image.vote_average > 0 && (
-                  <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
-                    {image.vote_average.toFixed(1)}
+          backdrops.map(
+            (
+              image: { file_path: string; vote_average: number },
+              index: number
+            ) => {
+              const imageId = `backdrop-${image.file_path}`;
+              return (
+                <div
+                  key={imageId}
+                  className="group relative overflow-hidden rounded-xl"
+                >
+                  <img
+                    src={getImageUrl(image.file_path, backdropSizes.small)}
+                    alt={`Backdrop ${index + 1}`}
+                    className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                  {image.vote_average > 0 && (
+                    <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
+                      {image.vote_average.toFixed(1)}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() =>
+                        handleDownload(image.file_path, "backdrop")
+                      }
+                      disabled={downloadingImage === imageId}
+                      className="hover:bg-accent/90 bg-accent text-white shadow-lg"
+                    >
+                      {downloadingImage === imageId ? (
+                        <span className="flex items-center">
+                          <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
+                          Downloading...
+                        </span>
+                      ) : (
+                        <span className="flex items-center">
+                          <Download className="mr-1 h-4 w-4" />
+                          Download
+                        </span>
+                      )}
+                    </Button>
                   </div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleDownload(image.file_path, "backdrop")}
-                    disabled={downloadingImage === imageId}
-                    className="hover:bg-accent/90 bg-accent text-white shadow-lg"
-                  >
-                    {downloadingImage === imageId ? (
-                      <span className="flex items-center">
-                        <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
-                        Downloading...
-                      </span>
-                    ) : (
-                      <span className="flex items-center">
-                        <Download className="mr-1 h-4 w-4" />
-                        Download
-                      </span>
-                    )}
-                  </Button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
 
         {activeTab === "posters" &&
-          posters.map((image: any) => {
-            const imageId = `poster-${image.file_path}`;
-            return (
-              <div
-                key={imageId}
-                className="group relative overflow-hidden rounded-xl"
-              >
-                <img
-                  src={getImageUrl(image.file_path, posterSizes.medium)}
-                  alt={`Poster ${index + 1}`}
-                  className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                {image.vote_average > 0 && (
-                  <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
-                    {image.vote_average.toFixed(1)}
+          posters.map(
+            (
+              image: { file_path: string; vote_average: number },
+              index: number
+            ) => {
+              const imageId = `poster-${image.file_path}`;
+              return (
+                <div
+                  key={imageId}
+                  className="group relative overflow-hidden rounded-xl"
+                >
+                  <img
+                    src={getImageUrl(image.file_path, posterSizes.medium)}
+                    alt={`Poster ${index + 1}`}
+                    className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                  {image.vote_average > 0 && (
+                    <div className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
+                      {image.vote_average.toFixed(1)}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleDownload(image.file_path, "poster")}
+                      disabled={downloadingImage === imageId}
+                      className="hover:bg-accent/90 bg-accent text-white shadow-lg"
+                    >
+                      {downloadingImage === imageId ? (
+                        <span className="flex items-center">
+                          <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
+                          Downloading...
+                        </span>
+                      ) : (
+                        <span className="flex items-center">
+                          <Download className="mr-1 h-4 w-4" />
+                          Download
+                        </span>
+                      )}
+                    </Button>
                   </div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleDownload(image.file_path, "poster")}
-                    disabled={downloadingImage === imageId}
-                    className="hover:bg-accent/90 bg-accent text-white shadow-lg"
-                  >
-                    {downloadingImage === imageId ? (
-                      <span className="flex items-center">
-                        <span className="mr-2 h-3 w-3 animate-ping rounded-full bg-white"></span>
-                        Downloading...
-                      </span>
-                    ) : (
-                      <span className="flex items-center">
-                        <Download className="mr-1 h-4 w-4" />
-                        Download
-                      </span>
-                    )}
-                  </Button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
       </div>
     </div>
   );

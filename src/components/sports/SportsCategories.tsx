@@ -24,15 +24,17 @@ export function SportsCategories({
           role="tab"
           onClick={() => onSportChange("all")}
           aria-selected={selectedSport === "all"}
-          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${selectedSport === "all"
-            ? "text-white shadow-lg"
-            : "text-white/70 hover:bg-white/5 hover:text-white/90"
-            }`}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+            selectedSport === "all"
+              ? "text-white shadow-lg"
+              : "text-white/70 hover:bg-white/5 hover:text-white/90"
+          }`}
           style={{
             backgroundColor:
               selectedSport === "all" ? accentColor : "transparent",
-            border: `1px solid ${selectedSport === "all" ? "transparent" : "rgba(255,255,255,0.2)"
-              }`,
+            border: `1px solid ${
+              selectedSport === "all" ? "transparent" : "rgba(255,255,255,0.2)"
+            }`,
           }}
         >
           <span aria-hidden="true">🏅</span>
@@ -55,17 +57,19 @@ export function SportsCategories({
               role="tab"
               onClick={() => onSportChange(sport.id)}
               aria-selected={selectedSport === sport.id}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${selectedSport === sport.id
-                ? "text-white shadow-lg"
-                : "text-white/70 hover:bg-white/5 hover:text-white/90"
-                }`}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                selectedSport === sport.id
+                  ? "text-white shadow-lg"
+                  : "text-white/70 hover:bg-white/5 hover:text-white/90"
+              }`}
               style={{
                 backgroundColor:
                   selectedSport === sport.id ? accentColor : "transparent",
-                border: `1px solid ${selectedSport === sport.id
-                  ? "transparent"
-                  : "rgba(255,255,255,0.2)"
-                  }`,
+                border: `1px solid ${
+                  selectedSport === sport.id
+                    ? "transparent"
+                    : "rgba(255,255,255,0.2)"
+                }`,
               }}
             >
               <span aria-hidden="true">{getSportIcon(sport.id)}</span>

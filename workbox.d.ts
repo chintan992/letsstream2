@@ -18,7 +18,7 @@ declare module "workbox-build" {
     requestWillFetch?: (details: {
       event: FetchEvent & { preloadResponse?: Promise<Response> };
     }) => Promise<Request | Response>;
-    fetchDidFail?: (details: any) => Promise<void>;
+    fetchDidFail?: (details: { request: Request }) => Promise<void>;
   }
 
   export interface RuntimeCaching {

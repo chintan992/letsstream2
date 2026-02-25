@@ -195,9 +195,10 @@ export const useElementScrollRestoration = (
     window.addEventListener("beforeunload", saveScrollPositionImmediate);
 
     // Clean up on unmount
+    const element = elementRef.current;
     return () => {
-      if (elementRef.current && scrollListenerAttached) {
-        elementRef.current.removeEventListener("scroll", saveScrollPosition);
+      if (element && scrollListenerAttached) {
+        element.removeEventListener("scroll", saveScrollPosition);
         scrollListenerAttached = false;
       }
       clearInterval(intervalId);

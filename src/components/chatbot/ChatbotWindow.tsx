@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import "./chatbot-mobile.css";
 import { Send, Search, X } from "lucide-react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
@@ -131,6 +131,11 @@ const ChatbotWindow: React.FC = () => {
     }
   };
 
+  const recommendationIds = useMemo(
+    () => recommendations.map(r => r.id).join(","),
+    [recommendations]
+  );
+
   // Load streaming availability for recommendations
   useEffect(() => {
     const loadAvailability = async () => {
@@ -156,7 +161,8 @@ const ChatbotWindow: React.FC = () => {
     };
 
     loadAvailability();
-  }, [recommendations.map(r => r.id).join(","), profile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recommendationIds, profile]);
 
   // Handle rating a recommendation
   const handleRate = async (media: Media, rating: number) => {

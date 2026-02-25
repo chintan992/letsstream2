@@ -300,7 +300,7 @@ const Hero = ({ media, className = "" }: HeroProps) => {
     const node = carouselRef.current;
     if (!node) return;
 
-    const handleTouchMove = (e: TouchEvent) => { };
+    const handleTouchMove = (e: TouchEvent) => {};
 
     node.addEventListener("touchmove", handleTouchMove, { passive: true });
     return () => {

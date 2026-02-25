@@ -65,9 +65,16 @@ export class SimklService {
     }
   ): Promise<void> {
     // Determine if it's a movie or show/episode based on season/episode presence
-    const isEpisode = media.season !== undefined && media.episode !== undefined;
+    const hasSeason = media.season !== undefined;
+    const hasEpisode = media.episode !== undefined;
+    if (hasSeason !== hasEpisode) {
+      throw new Error(
+        `Both season and episode must be provided together (got season=${media.season}, episode=${media.episode})`
+      );
+    }
+    const isEpisode = hasSeason && hasEpisode;
 
-    const body: any = {};
+    const body: Record<string, unknown> = {};
 
     if (isEpisode) {
       body.show = {

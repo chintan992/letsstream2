@@ -238,7 +238,7 @@ const WatchHistory = () => {
         currentObserver.unobserve(currentLoader);
       }
     };
-  }, [hasMore, isLoadingMore, activeTab, handleLoadMore]);
+  }, [hasMore, isLoadingMore, activeTab, handleLoadMore, watchHistory.length]);
 
   const handleClearHistory = () => {
     clearWatchHistory();

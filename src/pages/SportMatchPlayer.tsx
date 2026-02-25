@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -61,19 +61,24 @@ const SportMatchPlayer = () => {
   useEffect(() => {
     if (streams && streams.length > 0) {
       saveLocalData(`sport-streams-${matchId}`, streams, 30 * 60 * 1000); // Cache for 30 minutes
-
-      // Set initial source if not already set
-      if (!selectedStreamId) {
-        const initialStreamId = streams[0]?.id || null;
-        setSelectedStreamId(initialStreamId);
-      }
     }
-  }, [streams, matchId, selectedStreamId]);
+  }, [streams, matchId]);
+
+  const effectiveStreamId = useMemo(() => {
+    if (selectedStreamId) return selectedStreamId;
+    if (streams && streams.length > 0) return streams[0]?.id || null;
+    return null;
+  }, [streams, selectedStreamId]);
+
+  const prevStreamIdRef = useRef(effectiveStreamId);
+  if (prevStreamIdRef.current !== effectiveStreamId) {
+    prevStreamIdRef.current = effectiveStreamId;
+    setIsPlayerLoaded(false);
+    setLoadAttempts(0);
+  }
 
   const handleStreamChange = (streamId: string, sourceName: string) => {
     setSelectedStreamId(streamId);
-    setIsPlayerLoaded(false); // Reset player loaded state when changing source
-    setLoadAttempts(0); // Reset load attempts counter
 
     toast({
       title: "Source changed",
@@ -82,7 +87,7 @@ const SportMatchPlayer = () => {
     });
   };
 
-  const selectedStream = streams?.find(s => s.id === selectedStreamId);
+  const selectedStream = streams?.find(s => s.id === effectiveStreamId);
   const embedUrl = selectedStream?.embedUrl || "";
 
   // Handle iframe load event
@@ -206,7 +211,7 @@ const SportMatchPlayer = () => {
             <div className="relative aspect-video overflow-hidden rounded-xl bg-black shadow-2xl">
               {embedUrl ? (
                 <iframe
-                  key={`${selectedStreamId}-${loadAttempts}`}
+                  key={`${effectiveStreamId}-${loadAttempts}`}
                   src={embedUrl}
                   className="h-full w-full"
                   allowFullScreen
@@ -265,7 +270,7 @@ const SportMatchPlayer = () => {
                       className={cn(
                         "relative flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
-                        selectedStreamId === stream.id
+                        effectiveStreamId === stream.id
                           ? "bg-accent/20 border-accent text-white"
                           : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
                       )}
@@ -277,7 +282,7 @@ const SportMatchPlayer = () => {
                           HD
                         </span>
                       )}
-                      {selectedStreamId === stream.id && (
+                      {effectiveStreamId === stream.id && (
                         <Check className="ml-1 h-3.5 w-3.5 text-accent" />
                       )}
                     </button>
