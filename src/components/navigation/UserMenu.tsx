@@ -27,10 +27,6 @@ const UserMenu = ({ mobile = false, onAction }: UserMenuProps) => {
       await logout();
       setIsOpen(false);
       if (onAction) onAction();
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
     } catch (error) {
       toast({
         title: "Error",

@@ -7,6 +7,9 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  linkWithCredential,
   sendPasswordResetEmail,
   sendEmailVerification,
 } from "firebase/auth";
@@ -27,6 +30,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Handle redirect result for mobile browsers that blocked the popup
+    getRedirectResult(auth)
+      .then(result => {
+        if (result?.user) {
+          toast({
+            title: "Welcome!",
+            description: "You have successfully signed in with Google.",
+          });
+        }
+      })
+      .catch(error => {
+        if (error instanceof FirebaseError) {
+          const errorConfig = formatAuthError(error.code);
+          toast({
+            title: errorConfig.title,
+            description: errorConfig.suggestion
+              ? `${errorConfig.description} ${errorConfig.suggestion}`
+              : errorConfig.description,
+            variant: "destructive",
+          });
+        }
+      });
+
     const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
         // User is signed in
@@ -204,9 +230,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // This is required for secure popup window handling in modern browsers.
 
   const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
     try {
-      const provider = new GoogleAuthProvider();
-      // Use retry mechanism for network-related operations
       await retryWithBackoff(async () => {
         return await signInWithPopup(auth, provider);
       });
@@ -216,14 +241,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (error) {
       if (error instanceof FirebaseError) {
-        const errorConfig = formatAuthError(error.code);
-
-        // Special handling for specific error cases
+        // Silently ignore cancelled popup (user opened multiple)
         if (error.code === "auth/cancelled-popup-request") {
-          // This error can happen when multiple popups are triggered, we can ignore it quietly
-          return; // Just return without throwing for this specific case
+          return;
         }
 
+        // Account linking: credential already belongs to another account
+        if (error.code === "auth/credential-already-in-use") {
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          if (credential && auth.currentUser) {
+            try {
+              await linkWithCredential(auth.currentUser, credential);
+              toast({
+                title: "Account Linked",
+                description:
+                  "Your Google account has been linked successfully.",
+              });
+              return;
+            } catch {
+              // Fall through to generic error handling
+            }
+          }
+        }
+
+        // Mobile popup-blocking fallback: use redirect for popup-blocked errors
+        if (
+          error.code === "auth/popup-blocked" ||
+          error.code === "auth/operation-not-supported-in-this-environment"
+        ) {
+          try {
+            await signInWithRedirect(auth, provider);
+            // Result is handled by getRedirectResult in the useEffect above
+            return;
+          } catch {
+            // If redirect also fails, fall through to show the original error toast
+          }
+        }
+
+        const errorConfig = formatAuthError(error.code);
         toast({
           title: errorConfig.title,
           description: errorConfig.suggestion
@@ -231,16 +286,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             : errorConfig.description,
           variant: "destructive",
         });
-        throw error; // Propagate the error so the calling component can handle it
+        throw error;
       }
-      // Optionally handle non-Firebase errors here
       toast({
         title: "Sign In Failed",
         description:
           "An unexpected error occurred during Google sign-in. Please try again.",
         variant: "destructive",
       });
-      throw error; // Propagate the error so the calling component can handle it
+      throw error;
     }
   };
 
@@ -314,7 +368,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    console.log("logout function called");
     try {
       await signOut(auth);
       toast({

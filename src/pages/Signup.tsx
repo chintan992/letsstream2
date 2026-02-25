@@ -18,13 +18,10 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatAuthError } from "@/utils/auth-errors";
 import {
   validatePassword,
-  getStrengthColor,
   getStrengthLabel,
 } from "@/utils/password-validation";
-// import { FcGoogle } from 'react-icons/fc'; // Removed colorful icon
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -37,24 +34,6 @@ export default function Signup() {
   > | null>(null);
   const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
-
-  // Function to get user-friendly error messages
-  const getFriendlyError = (error: unknown) => {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      typeof (error as { code: unknown }).code === "string"
-    ) {
-      // Use the centralized error mapping
-      const errorConfig = formatAuthError((error as { code: string }).code);
-      // Combine description and suggestion for comprehensive message
-      return errorConfig.suggestion
-        ? `${errorConfig.description} ${errorConfig.suggestion}`
-        : errorConfig.description;
-    }
-    return "We had trouble creating your account. Please try again.";
-  };
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
@@ -95,7 +74,7 @@ export default function Signup() {
       });
       navigate("/login");
     } catch (error) {
-      setErrorMessage(getFriendlyError(error));
+      // Error toast is handled by AuthProvider
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +83,7 @@ export default function Signup() {
   const handleGoogleSignIn = async () => {
     triggerHapticFeedback(20);
     setIsLoading(true);
-    setErrorMessage(null); // Clear any previous error
+    setErrorMessage(null);
     try {
       await signInWithGoogle();
       await trackEvent({
@@ -115,7 +94,7 @@ export default function Signup() {
       });
       navigate("/");
     } catch (error) {
-      setErrorMessage(getFriendlyError(error));
+      // Error toast is handled by AuthProvider
     } finally {
       setIsLoading(false);
     }
@@ -236,17 +215,36 @@ export default function Signup() {
             onClick={handleGoogleSignIn}
             disabled={isLoading}
           >
-            {/* <FcGoogle className="mr-2 h-4 w-4" /> */}{" "}
-            {/* Removed colorful icon */}
-            Google {/* Replaced icon with text */}
+            <svg
+              className="mr-2 h-4 w-4"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            Continue with Google
           </Button>
         </CardContent>
         <CardFooter className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link to="/login" className="text-white hover:underline">
-              {" "}
-              {/* Changed text-primary to text-white */}
               Sign in
             </Link>
           </div>

@@ -31,6 +31,11 @@ const AUTH_ERROR_MESSAGES: Record<string, AuthErrorConfig> = {
     description: "Your password is not correct.",
     suggestion: "Please try again or reset your password.",
   },
+  "auth/invalid-credential": {
+    title: "Invalid Credentials",
+    description: "The email or password you entered is incorrect.",
+    suggestion: "Please double-check your credentials and try again.",
+  },
   "auth/too-many-requests": {
     title: "Too Many Attempts",
     description: "We've noticed multiple failed login attempts.",
