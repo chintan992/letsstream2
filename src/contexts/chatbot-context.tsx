@@ -100,8 +100,9 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
       if (!isMuted && typeof window !== "undefined") {
         try {
           // Simple notification sound using Web Audio API
-          const audioCtx = new (window.AudioContext ||
-            (window as CustomWindow).webkitAudioContext)();
+          const audioCtx = new (
+            window.AudioContext || (window as CustomWindow).webkitAudioContext
+          )();
           const oscillator = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
 

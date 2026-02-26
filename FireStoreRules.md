@@ -1,13 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // --- Helper Functions ---
-    
+match /databases/{database}/documents {
+// --- Helper Functions ---
+
     // Check if user is signed in
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     // Check if the user is accessing their own user document (where docId == userId)
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
@@ -55,7 +55,7 @@ service cloud.firestore {
     match /users/{userId}/watchlist/{document=**} {
       allow read, write: if isOwner(userId);
     }
-    
+
     match /users/{userId}/history/{document=**} {
       allow read, write: if isOwner(userId);
     }
@@ -69,7 +69,7 @@ service cloud.firestore {
       allow update: if isResourceOwner() && isRequestOwner();
       allow delete: if isResourceOwner();
     }
-    
+
     match /favorites/{documentId} {
       allow read: if isResourceOwner();
       allow create: if isRequestOwner();
@@ -85,9 +85,10 @@ service cloud.firestore {
     }
 
     // --- Default Deny ---
-    
+
     match /{document=**} {
       allow read, write: if false;
     }
-  }
+
+}
 }
