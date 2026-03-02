@@ -6,6 +6,8 @@ import {
   Watch32Response,
   Watch32Server,
   Watch32Subtitle,
+  HexaResponse,
+  HexaStream,
 } from "@/utils/types";
 
 /**
@@ -76,6 +78,35 @@ function isStreamFlixResponse(data: unknown): data is StreamFlixResponse {
     "links" in data &&
     Array.isArray((data as StreamFlixResponse).links)
   );
+}
+
+/**
+ * Type guard to check if the API response is a Hexa response.
+ */
+function isHexaResponse(data: unknown): data is HexaResponse {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "provider" in data &&
+    (data as HexaResponse).provider === "hexa" &&
+    "streams" in data &&
+    Array.isArray((data as HexaResponse).streams)
+  );
+}
+
+/**
+ * Converts Hexa streams into LabeledStreamLinks.
+ */
+function convertHexaStreams(streams: HexaStream[]): LabeledStreamLink[] {
+  return streams.map(stream => ({
+    url: stream.url,
+    quality: stream.quality || "Auto",
+    tier: "Hexa",
+    label: stream.quality
+      ? stream.quality.charAt(0).toUpperCase() + stream.quality.slice(1)
+      : stream.title || "Hexa Stream",
+    headers: stream.headers,
+  }));
 }
 
 interface UseStreamFlixApiResult {
@@ -174,9 +205,31 @@ export function useStreamFlixApi(
 
         setLinks(labelLinks(validLinks));
         setTitle(data.title || null);
+      } else if (isHexaResponse(data)) {
+        // Hexa API format: streams array
+        if (!data.success) {
+          throw new Error(data.error || "Hexa API returned an error");
+        }
+
+        if (!data.streams || data.streams.length === 0) {
+          throw new Error("No streaming links found from Hexa source");
+        }
+
+        // Validate that streams have URLs
+        const validStreams = data.streams.filter(
+          (s: HexaStream) => s.url && typeof s.url === "string"
+        );
+
+        if (validStreams.length === 0) {
+          throw new Error("No valid streaming URLs found in Hexa response");
+        }
+
+        setLinks(convertHexaStreams(validStreams));
+        // Use a generic title or null since Hexa response mostly has provider and streams
+        setTitle(null);
       } else {
         throw new Error(
-          "Unrecognized API response format. Expected 'links' or 'servers' array."
+          "Unrecognized API response format. Expected 'links', 'servers', or 'streams' array."
         );
       }
     } catch (err: unknown) {
