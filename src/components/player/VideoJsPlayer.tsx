@@ -62,6 +62,12 @@ const VideoJsPlayer = ({
   const [selectedLinkIndex, setSelectedLinkIndex] = useState(
     defaultIndex >= 0 ? defaultIndex : 0
   );
+
+  const currentLinkRef = useRef(links[selectedLinkIndex] || links[0]);
+  useEffect(() => {
+    currentLinkRef.current = links[selectedLinkIndex] || links[0];
+  }, [links, selectedLinkIndex]);
+
   const [isQualityOpen, setIsQualityOpen] = useState(false);
   const [playerState, setPlayerState] = useState<{
     ready: boolean;
@@ -193,6 +199,7 @@ const VideoJsPlayer = ({
       videoElement.classList.add("vjs-big-play-centered");
       videoElement.style.width = "100%";
       videoElement.style.height = "100%";
+      videoElement.setAttribute("crossorigin", "anonymous");
       videoRef.current.appendChild(videoElement);
 
       const player = videojs(videoElement, {
@@ -216,6 +223,36 @@ const VideoJsPlayer = ({
 
       player.ready(() => {
         playerRef.current = player;
+
+        // Setup VHS interceptor for custom headers if the tech is initialized
+        const tech = player.tech({ IWillNotUseThisInPlugins: true }) as any;
+        if (tech && tech.vhs && tech.vhs.xhr) {
+          const originalBeforeRequest = tech.vhs.xhr.beforeRequest;
+          tech.vhs.xhr.beforeRequest = function (options: any) {
+            options = originalBeforeRequest
+              ? originalBeforeRequest(options)
+              : options;
+            const currentLink = currentLinkRef.current;
+            if (currentLink && currentLink.headers) {
+              options.headers = options.headers || {};
+              for (const [key, value] of Object.entries(
+                currentLink.headers as Record<string, string>
+              )) {
+                const lowerKey = key.toLowerCase();
+                // Browsers refuse unsafe headers natively, avoid errors by not setting them
+                if (
+                  lowerKey !== "origin" &&
+                  lowerKey !== "referer" &&
+                  lowerKey !== "user-agent"
+                ) {
+                  options.headers[key] = value;
+                }
+              }
+            }
+            return options;
+          };
+        }
+
         onLoaded();
 
         const subs = initialLink.subtitles || [];

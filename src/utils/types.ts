@@ -154,6 +154,7 @@ export interface StreamFlixLink {
 export interface LabeledStreamLink extends StreamFlixLink {
   label: string; // e.g. "720p (1)", "1080p (2)" or server name like "UpCloud"
   subtitles?: Watch32Subtitle[];
+  headers?: Record<string, string>;
 }
 
 export interface StreamFlixMovieResponse {
@@ -221,6 +222,28 @@ export interface Watch32Response {
   totalEpisodesInSeason?: number;
   watch32Url?: string;
   servers: Watch32Server[];
+}
+
+// Hexa API types
+export interface HexaStream {
+  url: string;
+  quality: string;
+  title: string;
+  stream_type: string;
+  referer: string;
+  headers?: Record<string, string>;
+  language: string;
+}
+
+export interface HexaResponse {
+  provider: string; // e.g., "hexa"
+  type: "movie" | "tv";
+  tmdb_id: number;
+  season: number | null;
+  episode: number | null;
+  streams: HexaStream[];
+  success: boolean;
+  error: string | null;
 }
 
 // ...existing code...
