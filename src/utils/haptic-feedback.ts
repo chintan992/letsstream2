@@ -1,12 +1,30 @@
-/**
- * Utility for providing haptic feedback on mobile devices
- */
+import { isTauri } from "./platform";
 
-/**
- * Trigger a single haptic pulse
- * @param duration - Duration of vibration in milliseconds
- */
+async function loadTauriHaptics() {
+  if (!isTauri()) return null;
+  try {
+    return await import("@tauri-apps/plugin-haptics");
+  } catch {
+    return null;
+  }
+}
+
+function isMobileTauri(): boolean {
+  return isTauri() && /android|ios/i.test(navigator.userAgent);
+}
+
 export function triggerHapticFeedback(duration: number = 50): void {
+  if (isMobileTauri()) {
+    loadTauriHaptics().then(haptics => {
+      if (!haptics) return;
+      const style =
+        duration <= 15 ? "light" : duration <= 35 ? "medium" : "heavy";
+      haptics.impactFeedback(
+        style as "light" | "medium" | "heavy" | "rigid" | "soft"
+      );
+    });
+    return;
+  }
   try {
     if ("vibrate" in navigator) {
       navigator.vibrate(duration);
@@ -16,11 +34,14 @@ export function triggerHapticFeedback(duration: number = 50): void {
   }
 }
 
-/**
- * Trigger a haptic pattern (multiple pulses)
- * @param pattern - Array of alternating vibration/pause durations
- */
 export function triggerHapticPattern(pattern: number[] = [50, 50, 50]): void {
+  if (isMobileTauri()) {
+    loadTauriHaptics().then(haptics => {
+      if (!haptics) return;
+      haptics.vibrate(pattern[0] / 1000);
+    });
+    return;
+  }
   try {
     if ("vibrate" in navigator) {
       navigator.vibrate(pattern);
@@ -30,16 +51,24 @@ export function triggerHapticPattern(pattern: number[] = [50, 50, 50]): void {
   }
 }
 
-/**
- * Trigger a success haptic pattern
- */
 export function triggerSuccessHaptic(): void {
-  triggerHapticPattern([10, 30, 60]);
+  if (isMobileTauri()) {
+    loadTauriHaptics().then(haptics => {
+      if (!haptics) return;
+      haptics.notificationFeedback("success");
+    });
+  } else {
+    triggerHapticPattern([10, 30, 60]);
+  }
 }
 
-/**
- * Trigger an error haptic pattern
- */
 export function triggerErrorHaptic(): void {
-  triggerHapticPattern([100, 30, 100]);
+  if (isMobileTauri()) {
+    loadTauriHaptics().then(haptics => {
+      if (!haptics) return;
+      haptics.notificationFeedback("error");
+    });
+  } else {
+    triggerHapticPattern([100, 30, 100]);
+  }
 }

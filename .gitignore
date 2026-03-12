@@ -42,3 +42,7 @@ dev-dist/
 
 
 session/
+
+android-release/
+.cargo/
+*.keystore

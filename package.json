@@ -7,6 +7,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
+    "tauri": "tauri",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
@@ -55,6 +56,10 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^5.90.21",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-deep-link": "^2.4.7",
+    "@tauri-apps/plugin-haptics": "^2.3.2",
+    "@tauri-apps/plugin-store": "^2.4.2",
     "@types/video.js": "^7.3.58",
     "@types/workbox-build": "^5.1.0",
     "axios": "~1.7.2",
@@ -93,6 +98,7 @@
     "@eslint/js": "^9.39.3",
     "@tailwindcss/postcss": "^4.2.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^22.19.13",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
