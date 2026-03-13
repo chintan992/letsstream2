@@ -86,6 +86,13 @@
   "categories": ["entertainment", "movies", "tv shows", "streaming"],
   "prefer_related_applications": false,
   "scope": "/",
+  "scope_extensions": [{ "origin": "https://letsstream2.pages.dev" }],
+  "display_override": [
+    "window-controls-overlay",
+    "fullscreen",
+    "browser",
+    "standalone"
+  ],
   "launch_handler": {
     "client_mode": ["navigate-existing", "auto"]
   },

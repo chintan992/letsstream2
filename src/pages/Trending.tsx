@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
+import SEO from "@/components/SEO";
 import {
   useQuery,
   useQueryClient,
@@ -188,6 +189,11 @@ const Trending = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <SEO
+        title="Trending"
+        description="See what's trending now on Let's Stream. Discover the most popular movies and TV shows being watched this week."
+        keywords="trending movies, popular tv shows, what to watch, trending content, viral movies"
+      />
       <Navbar />
 
       <main className="flex-1">

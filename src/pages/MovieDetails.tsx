@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { useParams, useNavigate } from "react-router-dom";
+import SEO from "@/components/SEO";
 import {
   getMovieDetails,
   getMovieRecommendations,
@@ -348,8 +349,68 @@ const MovieDetailsPage = () => {
     );
   }
 
+  const movieSchema = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    name: movie.title,
+    description: movie.overview,
+    image: movie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+      : undefined,
+    datePublished: movie.release_date,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: movie.vote_average,
+      bestRating: "10",
+      worstRating: "1",
+      ratingCount: movie.vote_count,
+    },
+    director: directors.map(d => ({
+      "@type": "Person",
+      name: d.name,
+    })),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://letsstream2.pages.dev/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Movies",
+        item: "https://letsstream2.pages.dev/movie",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: movie.title,
+        item: `https://letsstream2.pages.dev/movie/${movie.id}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={movie.title}
+        description={movie.overview}
+        image={
+          movie.backdrop_path
+            ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
+            : undefined
+        }
+        imageWidth="1280"
+        imageHeight="720"
+        type="video.movie"
+        schema={[movieSchema, breadcrumbSchema]}
+      />
       <Navbar />
 
       {/* External shell component usage */}

@@ -1,5 +1,6 @@
 import React, { useReducer, useEffect, useMemo, useRef } from "react";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
+import SEO from "@/components/SEO";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -247,6 +248,11 @@ const Sports = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
+        <SEO
+          title="Live Sports"
+          description="Watch live sports streams, including football, basketball, tennis, and more. Stay updated with real-time match data and popular sporting events."
+          keywords="live sports, football stream, basketball live, sports streaming, match highlights"
+        />
         <Navbar />
         <SportsHero liveMatchesCount={liveMatches.length} />
 

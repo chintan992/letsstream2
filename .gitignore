@@ -42,3 +42,6 @@ dev-dist/
 
 
 session/
+
+*.keystore
+*.jks

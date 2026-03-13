@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Directories
+Disallow: /profile
+Disallow: /watch-history
+Disallow: /forgot-password
+Disallow: /simkl-callback
+
+# Sitemap
+Sitemap: https://letsstream2.pages.dev/sitemap.xml

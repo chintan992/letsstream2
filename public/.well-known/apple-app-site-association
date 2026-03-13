@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.chintan992.letsstream2",
+        "paths": ["*"]
+      }
+    ]
+  }
+}

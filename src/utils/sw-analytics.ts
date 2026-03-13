@@ -2,6 +2,7 @@
 const isDev = process.env.NODE_ENV === "development";
 
 import { swMonitor } from "./sw-monitor";
+import { performanceMonitor } from "./performance-monitor";
 
 // Add proper type definitions for Google Analytics
 interface GtagParams {
@@ -109,8 +110,6 @@ class ServiceWorkerAnalytics {
   }
 
   private async getWebVitals(): Promise<Record<string, number>> {
-    // Dynamically import to avoid circular dependencies
-    const { performanceMonitor } = await import("./performance-monitor");
     const vitals = performanceMonitor.getWebVitals();
     return vitals.reduce(
       (acc, vital) => {

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { LazyMotion, domAnimation } from "framer-motion";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "./contexts/theme";
 import { UserPreferencesProvider } from "./contexts/user-preferences";
 import { WatchHistoryProvider } from "./contexts/watch-history";
@@ -14,6 +15,7 @@ import { ChatbotProvider } from "./contexts/chatbot-context";
 import ChatbotButton from "./components/chatbot/ChatbotButton";
 import ChatbotWindow from "./components/chatbot/ChatbotWindow";
 import ProactiveSuggestions from "./components/chatbot/ProactiveSuggestions";
+import SEO from "./components/SEO";
 import AppRoutes from "./routes.tsx";
 // ...existing code...
 import { trackPageView } from "./lib/analytics";
@@ -47,34 +49,37 @@ function App() {
    */
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <LazyMotion features={domAnimation}>
-          <ServiceWorkerErrorBoundary>
-            <ThemeProvider>
-              <NotificationProvider>
-                <AuthProvider>
-                  <UserPreferencesProvider>
-                    <WatchHistoryProvider>
-                      <UserProfileProvider>
-                        <ChatbotProvider>
-                          <FeatureNotificationsListener />
-                          {isDevelopment && <ServiceWorkerDebugPanel />}
-                          <AppRoutes />
-                          <ChatbotButton />
-                          <ChatbotWindow />
-                          <ProactiveSuggestions />
-                        </ChatbotProvider>
-                      </UserProfileProvider>
-                    </WatchHistoryProvider>
-                  </UserPreferencesProvider>
-                </AuthProvider>
-              </NotificationProvider>
-            </ThemeProvider>
-          </ServiceWorkerErrorBoundary>
-        </LazyMotion>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <SEO themeColor="#000000" />
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <LazyMotion features={domAnimation}>
+            <ServiceWorkerErrorBoundary>
+              <ThemeProvider>
+                <NotificationProvider>
+                  <AuthProvider>
+                    <UserPreferencesProvider>
+                      <WatchHistoryProvider>
+                        <UserProfileProvider>
+                          <ChatbotProvider>
+                            <FeatureNotificationsListener />
+                            {isDevelopment && <ServiceWorkerDebugPanel />}
+                            <AppRoutes />
+                            <ChatbotButton />
+                            <ChatbotWindow />
+                            <ProactiveSuggestions />
+                          </ChatbotProvider>
+                        </UserProfileProvider>
+                      </WatchHistoryProvider>
+                    </UserPreferencesProvider>
+                  </AuthProvider>
+                </NotificationProvider>
+              </ThemeProvider>
+            </ServiceWorkerErrorBoundary>
+          </LazyMotion>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

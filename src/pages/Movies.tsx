@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
+import SEO from "@/components/SEO";
 import { trackMediaPreference } from "@/lib/analytics";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -105,6 +106,11 @@ const Movies = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
+        <SEO
+          title="Movies"
+          description="Browse and stream the latest popular and top-rated movies. Filter by genre and find your next favorite film on Let's Stream."
+          keywords="movies, stream movies, popular movies, top rated movies, cinema, watch online"
+        />
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <MoviesHeader

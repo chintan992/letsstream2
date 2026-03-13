@@ -1,5 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import { useScrollRestoration } from "@/hooks";
+import SEO from "@/components/SEO";
 import {
   getTrending,
   getPopularMovies,
@@ -128,6 +129,11 @@ const Index = () => {
 
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">
+      <SEO
+        title="Home"
+        description="Stream your favorite movies, TV shows, and live sports on Let's Stream. Enjoy personalized recommendations and a high-quality viewing experience."
+        themeColor="#000000"
+      />
       <Navbar />
 
       <div className="flex w-full flex-1 flex-col items-stretch justify-start">

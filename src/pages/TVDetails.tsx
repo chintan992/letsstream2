@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useScrollRestoration } from "@/hooks";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ContentRow from "@/components/ContentRow";
@@ -198,8 +199,66 @@ const TVDetailsPage = () => {
     );
   }
 
+  const tvSchema = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    name: tvShow.name,
+    description: tvShow.overview,
+    image: tvShow.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tvShow.poster_path}`
+      : undefined,
+    numberOfSeasons: tvShow.number_of_seasons,
+    numberOfEpisodes: tvShow.number_of_episodes,
+    datePublished: tvShow.first_air_date,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: tvShow.vote_average,
+      bestRating: "10",
+      worstRating: "1",
+      ratingCount: tvShow.vote_count,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://letsstream2.pages.dev/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "TV Shows",
+        item: "https://letsstream2.pages.dev/tv",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: tvShow.name,
+        item: `https://letsstream2.pages.dev/tv/${tvShow.id}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={tvShow.name}
+        description={tvShow.overview}
+        image={
+          tvShow.backdrop_path
+            ? `https://image.tmdb.org/t/p/w1280${tvShow.backdrop_path}`
+            : undefined
+        }
+        imageWidth="1280"
+        imageHeight="720"
+        type="video.tv_show"
+        schema={[tvSchema, breadcrumbSchema]}
+      />
       <Navbar />
 
       <div className="relative">

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.chintan992.letsstream2",
+      "sha256_cert_fingerprints": [
+        "71:EE:A8:3B:EC:9C:42:F5:31:B0:D7:E3:CC:78:A0:CB:B7:84:E8:F0:68:18:7D:BB:C3:ED:35:6B:F5:8F:92:F1"
+      ]
+    }
+  }
+]

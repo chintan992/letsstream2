@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import SEO from "@/components/SEO";
 import {
   triggerHapticFeedback,
   triggerSuccessHaptic,
@@ -507,6 +508,14 @@ const Search = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <SEO
+        title={searchQuery ? `Search results for "${searchQuery}"` : "Search"}
+        description={
+          searchQuery
+            ? `Browse search results for "${searchQuery}" on Let's Stream.`
+            : "Search for your favorite movies, TV shows, and sports on Let's Stream."
+        }
+      />
       <Navbar />
 
       <div className="mx-auto w-full max-w-6xl flex-grow px-4 pt-24 md:px-8">

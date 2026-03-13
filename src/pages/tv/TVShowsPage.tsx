@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
+import SEO from "@/components/SEO";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
@@ -120,6 +121,11 @@ const TVShowsPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
+        <SEO
+          title="TV Shows"
+          description="Discover and stream popular TV series, top-rated shows, and trending television content. Stay updated with your favorite series on Let's Stream."
+          keywords="tv shows, stream tv series, popular tv shows, top rated tv series, watch episodes online"
+        />
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <TVShowsHeader />
