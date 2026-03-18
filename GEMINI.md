@@ -1,12 +1,13 @@
 # Project Overview
 
-This is a modern streaming platform built with React, TypeScript, and Firebase. It's a Progressive Web App (PWA) that allows users to stream movies, TV shows, and live sports. The application features personalized watch history, advanced search, and customizable user preferences.
+This is a modern streaming platform built with React, TypeScript, and Firebase. It's a Progressive Web App (PWA) that allows users to stream movies, TV shows, and live sports. The application features personalized watch history, advanced search, customizable user preferences, and offline capabilities.
 
 **Key Technologies:**
 
 - **Frontend:** React 18, TypeScript, Vite, TailwindCSS, Radix UI
 - **Backend & Services:** Firebase (Authentication, Firestore, Analytics)
 - **Development & Build Tools:** ESLint, PostCSS, Vite PWA Plugin
+- **Deployment:** Cloudflare Pages, Netlify, GitHub Pages
 
 # Building and Running
 
@@ -53,61 +54,72 @@ npm run preview
   ```bash
   npm run verify
   ```
-- **Testing:** The project currently lacks a dedicated test framework like Vitest or React Testing Library. However, it uses Playwright for runtime error checking in the CI/CD pipeline.
-- **Code Style:** The project uses Prettier with Tailwind CSS plugin for consistent code formatting across the codebase.
+- **Testing:** The project uses Playwright for runtime error checking in the CI/CD pipeline.
+- **Code Style:** The project uses Prettier with the Tailwind CSS plugin for consistent code formatting across the codebase. Run `npm run format` to auto-format.
 
 # Software Development Life Cycle (SDLC)
 
-The project follows a typical agile development process. The use of a `dev` script in `package.json` suggests a local development environment. The `verify` script, which runs `tsc`, `eslint`, and `build`, indicates a pre-commit or pre-push hook to ensure code quality. The presence of `.github/workflows` suggests a CI/CD pipeline for automated testing and deployment.
+The project follows an agile development process. The `verify` script acts as a pre-commit or pre-push hook to ensure code quality. The CI/CD pipeline configured via `.github/workflows` automates runtime error checks, PR checks, and deployments.
+
+# Deployment
+
+The application is structured to easily deploy across various platforms:
+- **Cloudflare Pages:** Configuration managed in `wrangler.toml`, `_routes.json`, and documented in `docs/cloudflare-pages-guide.md`.
+- **Netlify:** Configuration managed in `netlify.toml`.
+- **GitHub Pages:** Automated through GitHub actions (`.github/workflows/deploy-gh-pages.yml`).
 
 # User Flow
 
-The `src/routes.tsx` file defines the application's routes. The user flow starts with the `Index` page, which is the landing page. From there, users can navigate to `Login`, `Signup`, `Movies`, `TVShows`, `Sports`, `Search`, and `Trending` pages. The `ProtectedRoute` component ensures that certain routes, like `Profile` and `WatchHistory`, are only accessible to authenticated users.
+The application routing starts at the `Index` landing page. Users can navigate across sections such as `Movies`, `TVShows`, `Sports`, `Search`, and `Trending`. A `ProtectedRoute` component ensures authenticated-only access for sections like `Profile`, `WatchHistory`, and the `BackupRestore` functionality.
 
-# User Activity Tracking
+# Core Features
 
-The `src/lib/analytics.ts` file shows that the application uses Firebase Analytics to track user activity. It tracks page views, media views, media completion, media preferences, and media engagement. This data can be used to understand user behavior and improve the application.
+## Data Backup and Restore
+Users can securely backup and restore their data (such as watch history and preferences) directly from the application UI (`src/components/BackupRestore.tsx`, `BACKUP_RESTORE_README.md`).
+
+## Scroll Restoration
+Custom architecture ensures that a user's scroll position is restored effectively when navigating back and forth across different pages. See `docs/SCROLL_RESTORATION_ARCHITECTURE.md` for more.
+
+## Progressive Web App (PWA) and Offline Support
+Configured via `vite-plugin-pwa`, the application operates with a service worker to provide an offline fallback (`public/offline.html`), caching, and a native app-like experience complete with a `PWAInstallPrompt` component. Offline events are managed dynamically (e.g., `analytics-offline.ts`).
+
+## Multi-theme and Customization
+The application supports Light, Dark, and System themes, along with an accent color customization option (`AccentColorPicker.tsx`), managed using `next-themes` and a custom Context.
+
+## Haptic Feedback
+Optimized for mobile interfaces, the application implements distinct vibration feedback patterns for various UI interactions (`DOCS/HAPTIC_FEEDBACK_GUIDE.md`).
+
+## User Activity Tracking
+It uses Firebase Analytics to record key interactions, such as page views, media progression, preferences, and engagements (`src/components/AnalyticsWrapper.tsx`, `src/lib/analytics.ts`).
 
 # UI/UX and Design System
 
-The `src/components/ui` directory contains a set of reusable UI components that form the project's design system. The `button.tsx` file, for example, uses `class-variance-authority` to create a flexible and consistent button component with different variants and sizes. The use of Radix UI components, as seen in `package.json`, provides a solid foundation for building accessible and customizable UI components. The `src/contexts/theme.tsx` file shows that the application has a theme provider that allows users to switch between light, dark, and system themes.
-
-# Component Dependencies
-
-The project uses a variety of libraries to build its UI and functionality. In addition to React and Firebase, it uses `react-router-dom` for routing, `@tanstack/react-query` for data fetching and caching, `framer-motion` for animations, and `recharts` for charts. The `package.json` file provides a complete list of dependencies.
+The `src/components/ui` directory contains the foundational design components using Radix UI for accessibility and Framer Motion for smooth transitions. Tools like `class-variance-authority` simplify building consistent and flexible variants (e.g., buttons and cards). 
 
 # Error Handling and Logging
 
-The application has a robust error handling and logging mechanism. The `ServiceWorkerErrorBoundary` component catches and logs errors related to the service worker to the console and Firebase Analytics. The `auth-context.tsx` file has a comprehensive error handling mechanism for authentication-related errors, providing user-friendly messages and suggestions. The `auth-errors.ts` file contains a mapping of Firebase Auth error codes to user-friendly messages.
-
-# Offline Support
-
-The application has offline support for analytics. The `analytics-offline.ts` file implements a queue for storing analytics events when the user is offline and sends them to Firebase Analytics when the user is back online.
+Robust error boundaries (e.g., `ServiceWorkerErrorBoundary`, `BackupRestoreErrorBoundary`) catch UI thread crashes and log errors cleanly to Firebase. Authentication errors are mapped to user-friendly messages (`auth-errors.ts`). A dedicated `ServiceWorkerDebugPanel.tsx` exists for real-time monitoring and debugging.
 
 # Authentication
 
-The `auth-context.tsx` file provides a detailed implementation of the authentication context. It handles user sign-in, sign-up, sign-out, and sign-in with Google. It also includes a token refresh mechanism to keep the user logged in. It uses `sessionStorage` to store the Firebase token securely.
+The application uses Firebase Auth for a comprehensive authentication layer. `auth-context.tsx` orchestrates sign in, sign out, sign up, and Google single-sign-on (SSO), complete with secure token refreshes and session management.
 
 # API Interaction
 
-The `src/utils/api.ts` file re-exports all the API-related functions from the `src/utils/services` directory. This provides a single entry point for all API interactions. The `src/utils/services` directory contains separate files for different services like movies, TV shows, search, etc. This modular approach makes it easy to manage and maintain the API code.
+The `src/utils/api.ts` file re-exports all API-related functions from `src/utils/services/`, offering a unified entry point. This decoupled modular design splits the logic by domain (movies, TV shows, search, etc.).
 
 # Chatbot
 
-The application has a chatbot that provides movie and TV show recommendations. The `src/utils/chatbot-utils.ts` file contains functions for extracting media items from the chatbot's response and creating media objects for displaying in the UI. The `src/utils/gemini-api.ts` file handles the communication with the Gemini API, which powers the chatbot.
-
-# Haptic Feedback
-
-The application provides haptic feedback on mobile devices to enhance the user experience. The `src/utils/haptic-feedback.ts` file contains functions for triggering different haptic feedback patterns, such as success and error patterns.
+Powered by `@google/generative-ai` (Gemini API), the app features an integrated chatbot that provides custom media recommendations based on context, processing responses into displayable media objects (`chatbot-utils.ts`, `gemini-api.ts`).
 
 # Performance Monitoring
 
-The application monitors its performance using the `web-vitals` library and a custom performance monitor. The `src/utils/performance-monitor.ts` file contains a `PerformanceMonitor` class that tracks custom performance metrics and reports them to Firebase Analytics.
+Performance metrics are captured using the `web-vitals` library and a custom `PerformanceMonitor` class, which dispatches critical load statistics directly to Firebase Analytics for long-term tracking.
 
 # Rate Limiting
 
-The application uses a rate limiter to prevent abuse of the TMDb and Gemini APIs. The `src/utils/rate-limiter.ts` file contains a `RateLimiter` class that limits the number of requests per minute.
+The application embeds a custom client-side rate limiter (`src/utils/rate-limiter.ts`) to manage throughput towards external APIs such as TMDb and Gemini API, mitigating abuse and limiting quota consumption.
 
 # TMDb Search
 
-The application uses the TMDb API to search for movies and TV shows. The `src/utils/tmdb-search.ts` file contains functions for searching and validating TMDb data.
+The application seamlessly interacts with the TMDb API via structured queries, defined across `src/utils/tmdb-search.ts`, to search, fetch, and validate up-to-date movies and TV show content.

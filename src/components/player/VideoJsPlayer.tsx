@@ -73,6 +73,12 @@ const VideoJsPlayer = ({
   const [isSubtitleOpen, setIsSubtitleOpen] = useState(false);
   const subtitleRef = useRef<HTMLDivElement>(null);
 
+  // Audio Tracks
+  const [audioTracks, setAudioTracks] = useState<{label: string, language: string, id: string}[]>([]);
+  const [activeAudioTrackIndex, setActiveAudioTrackIndex] = useState<number>(0);
+  const [isAudioOpen, setIsAudioOpen] = useState(false);
+  const audioRef = useRef<HTMLDivElement>(null);
+
   // Chromecast
   const {
     isAvailable: isCastAvailable,
@@ -105,10 +111,10 @@ const VideoJsPlayer = ({
     setShowControls(true);
     if (hideControlsTimer.current) clearTimeout(hideControlsTimer.current);
     hideControlsTimer.current = setTimeout(() => {
-      if (isPlaying && !isQualityOpen && !isSubtitleOpen)
+      if (isPlaying && !isQualityOpen && !isSubtitleOpen && !isAudioOpen)
         setShowControls(false);
     }, 3000);
-  }, [isPlaying, isQualityOpen, isSubtitleOpen]);
+  }, [isPlaying, isQualityOpen, isSubtitleOpen, isAudioOpen]);
 
   // Show seek indicator briefly
   const flashSeekIndicator = useCallback((text: string) => {
@@ -131,6 +137,12 @@ const VideoJsPlayer = ({
         !subtitleRef.current.contains(e.target as Node)
       ) {
         setIsSubtitleOpen(false);
+      }
+      if (
+        audioRef.current &&
+        !audioRef.current.contains(e.target as Node)
+      ) {
+        setIsAudioOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -225,6 +237,34 @@ const VideoJsPlayer = ({
         setPlayerState({ ready: true, activeSubtitleIndex: initialSubIdx });
         if (subs.length > 0) {
           updateSubtitleTracks(player, subs, initialSubIdx);
+        }
+
+        // Initialize audio tracks
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const audioTrackList = player.audioTracks() as any;
+        const updateAudioTracks = () => {
+          const tracks = [];
+          let activeIdx = 0;
+          for (let i = 0; i < audioTrackList.length; i++) {
+            const track = audioTrackList[i];
+            tracks.push({
+              label: track.label || track.language || track.kind || `Track ${i + 1}`,
+              language: track.language,
+              id: track.id,
+            });
+            if (track.enabled) {
+              activeIdx = i;
+            }
+          }
+          setAudioTracks(tracks);
+          setActiveAudioTrackIndex(activeIdx);
+        };
+
+        if (audioTrackList) {
+          audioTrackList.addEventListener("change", updateAudioTracks);
+          audioTrackList.addEventListener("addtrack", updateAudioTracks);
+          audioTrackList.addEventListener("removetrack", updateAudioTracks);
+          updateAudioTracks();
         }
       });
 
@@ -498,6 +538,22 @@ const VideoJsPlayer = ({
         const track = tracks[i];
         if (track) {
           track.mode = i === index ? "showing" : "disabled";
+        }
+      }
+    }
+  }, []);
+
+  const handleAudioChange = useCallback((index: number) => {
+    setActiveAudioTrackIndex(index);
+    setIsAudioOpen(false);
+
+    if (playerRef.current) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tracks = playerRef.current.audioTracks() as any;
+      if (tracks) {
+        for (let i = 0; i < tracks.length; i++) {
+          const track = tracks[i];
+          track.enabled = i === index;
         }
       }
     }
@@ -849,6 +905,74 @@ const VideoJsPlayer = ({
 
           {/* Spacer */}
           <div className="flex-1" />
+
+          {/* Audio selector */}
+          {audioTracks.length > 1 && (
+            <div ref={audioRef} className="relative">
+              <button
+                onClick={() => setIsAudioOpen(!isAudioOpen)}
+                className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition-all hover:bg-white/15 ${
+                  isAudioOpen
+                    ? "border-blue-400/40 bg-blue-500/20 text-blue-300"
+                    : "border-white/10 bg-white/5 text-white/90"
+                }`}
+                aria-label="Select audio track"
+              >
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                  />
+                </svg>
+                Audio
+              </button>
+
+              <AnimatePresence>
+                {isAudioOpen && (
+                  <m.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute bottom-full right-0 mb-2 max-h-52 w-44 overflow-y-auto rounded-lg border border-white/15 bg-gray-900/95 py-1 shadow-2xl backdrop-blur-lg"
+                  >
+                    {audioTracks.map((track, index) => (
+                      <button
+                        key={track.id || index}
+                        onClick={() => handleAudioChange(index)}
+                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors hover:bg-white/10 ${
+                          index === activeAudioTrackIndex
+                            ? "bg-white/10 text-white"
+                            : "text-white/70"
+                        }`}
+                      >
+                        <span className="font-medium">{track.label}</span>
+                        {index === activeAudioTrackIndex && (
+                          <svg
+                            className="h-3 w-3 text-blue-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           {/* Subtitle selector */}
           {hasSubtitles && (
