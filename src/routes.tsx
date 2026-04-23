@@ -20,6 +20,8 @@ const Search = lazyLoadWithRetry(() => import("./pages/Search"));
 const WatchHistory = lazyLoadWithRetry(() => import("./pages/WatchHistory"));
 const MovieDetails = lazyLoadWithRetry(() => import("./pages/MovieDetails"));
 const TVDetails = lazyLoadWithRetry(() => import("./pages/TVDetails"));
+const MoviePlayer = lazyLoadWithRetry(() => import("./pages/MoviePlayer"));
+const TVPlayer = lazyLoadWithRetry(() => import("./pages/TVPlayer"));
 const SportMatchPlayer = lazyLoadWithRetry(
   () => import("./pages/SportMatchPlayer")
 );
@@ -92,8 +94,10 @@ export default function AppRoutes() {
           {/* Content routes */}
           <Route path="/movie" element={<Movies />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/watch/movie/:id" element={<MoviePlayer />} />
           <Route path="/tv" element={<TVShowsPage />} />
           <Route path="/tv/:id" element={<TVDetails />} />
+          <Route path="/watch/tv/:id/:season/:episode" element={<TVPlayer />} />
           <Route path="/sports" element={<Sports />} />
           <Route path="/sports/player/:id" element={<SportMatchPlayer />} />
           <Route path="/watch/:type/:id" element={<WatchPlaceholder />} />
