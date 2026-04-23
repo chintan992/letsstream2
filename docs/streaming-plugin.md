@@ -171,22 +171,118 @@ https://animestream-addon.keypop3750.workers.dev/tp=q_4k,q_1080,a_dual,n_3/manif
 
 ## Current Status
 
-Currently, the mediadetails page is fully functional. There is a "Play" button on media details page for movies, while for tv show there is a button "Start from Beginning" and "Continue Watching" if they have watched it before.
-There are also episode list on the tv show details page and each episode media card have the dedicated "Play" it show navigate to the player page for the respective episode of respective season. 
+The streaming plugin system is fully implemented with the following components:
 
-## Proposed Design for the Player Page
+### Completed Features (Phases 1-7)
 
-### Desktop Design
-- Video Player: The video player will be the main component of the player page.
-- On right side of video player there should be the list of episodes with season navigation for the tv shows content. For movies there will be no episode list and season navigation.
-- There will also be a navigation buttons for next episode and previous episodes underneath the video player.
-- There should be a lights out button to toggle focus mode and dim all other content from the page and just videplayer is focused. 
+1. **Plugin System Infrastructure (Phase 1)**
+   - TypeScript types for plugins, streams, and analytics
+   - Firestore schema for `plugins` collection
+   - Default plugins configuration (StreamFlix, VidLink, CineStream)
+   - `usePluginManager` hook with CRUD operations
+   - Manifest validation and auto-initialization for new users
 
-## Mobile Design
-- Video Player: The video player will be the main component of the player page.
-- There will be a navigation buttons for next episode and previous episodes underneath the video player.
-- There should be a lights out button aside the navigation buttons to toggle focus mode and dim all other content from the page and just videplayer is focused. 
-- On the bottom of the navigation buttons there should be the list of episodes with season navigation for the tv shows content. For movies there will be no episode list and season navigation.
+2. **Streaming API Integration (Phase 2)**
+   - Stremio-compatible URL builders for movies and TV shows
+   - `useStreamAggregator` hook for parallel multi-plugin fetching
+   - Stream deduplication and error handling
+
+3. **Video Player (Phase 3)**
+   - Video.js v8+ wrapper with built-in HLS support
+   - Custom controls: play/pause, volume, skip, PiP, theater mode, lights out
+   - `usePlayerState` hook for playback control and state management
+
+4. **Player Pages (Phase 4)**
+   - `MoviePlayer.tsx` - Movie playback with stream selection
+   - `TVPlayer.tsx` - TV playback with episode list and season navigation
+   - Auto-save progress tracking (every 30 seconds)
+   - Analytics hooks for playback events
+
+5. **UI/UX Integration (Phase 5)**
+   - `Plugins.tsx` management page at `/settings/plugins`
+   - Add/remove/test/update plugin functionality
+   - Protected route with authentication
+   - Navigation link in ProfileHeader
+
+6. **Analytics (Phase 6)**
+   - Plugin lifecycle events: added, removed, tested, updated, toggled
+   - Stream fetch events: started, completed, failed
+   - Playback events: started, ended, error
+   - Subtitle toggle tracking
+   - Offline queue support for all events
+
+7. **Firestore Security (Phase 7)**
+   - Security rules for `plugins` collection with owner-based access
+   - Prevention of default plugin deletion
+   - Composite indexes for efficient plugin queries
+
+### Architecture
+
+```
+src/
+├── config/
+│   └── default-plugins.ts          # Pre-configured default plugins
+├── hooks/
+│   ├── use-plugin-manager.ts       # Plugin CRUD and Firestore integration
+│   ├── use-stream-aggregator.ts    # Multi-plugin stream aggregation
+│   └── use-player-state.ts         # Player state and control
+├── pages/
+│   ├── MoviePlayer.tsx             # Movie playback page
+│   ├── TVPlayer.tsx                # TV playback page
+│   └── Plugins.tsx                 # Plugin management UI
+├── components/
+│   └── player/
+│       └── VideoPlayer.tsx         # Video.js wrapper component
+├── utils/
+│   ├── types/
+│   │   └── plugin.ts               # TypeScript interfaces
+│   └── services/
+│       └── streaming-plugin-api.ts # Stremio API utilities
+└── lib/
+    └── analytics.ts                # Extended with plugin/streaming events
+```
+
+### Firestore Schema
+
+**Collection: `plugins`**
+```
+{
+  user_id: string,           // Owner UID
+  manifest_url: string,      // Plugin manifest URL
+  plugin_id: string,         // Plugin identifier from manifest
+  name: string,              // Display name
+  version: string,           // Plugin version
+  description: string,       // Plugin description
+  resources: string[],       // Supported resources (meta, stream)
+  types: string[],           // Supported types (movie, series)
+  id_prefixes: string[],     // ID prefixes (tt for IMDB)
+  is_active: boolean,        // Whether plugin is enabled
+  is_default: boolean,       // Whether this is a default plugin
+  last_fetched: timestamp,   // Last manifest fetch time
+  created_at: timestamp,     // Creation time
+  updated_at: timestamp,     // Last update time
+}
+```
+
+### Available Plugin URLs
+
+Test these manifest URLs:
+- https://vidlink-worker.chintanr21.workers.dev/manifest.json
+- https://videasy-worker.chintanr21.workers.dev/manifest.json
+- https://watch32-worker.chintanr21.workers.dev/manifest.json
+- https://yflix-worker.chintanr21.workers.dev/manifest.json
+- https://streamflix-worker.chintanr21.workers.dev/manifest.json
+- https://cinestream-worker.chintanr21.workers.dev/manifest.json
+- https://vidfast-stremio-stremio-addon.zmoualhi.workers.dev/manifest.json
+- https://animestream-addon.keypop3750.workers.dev/tp=q_4k,q_1080,a_dual,n_3/manifest.json
+
+### Pending Tasks
+
+- [ ] Manual testing across all provided plugin URLs
+- [ ] Deploy Firestore security rules and indexes
+- [ ] End-to-end testing of player with different formats
+- [ ] Performance optimization for large plugin lists
+- [ ] Error boundary implementation for player crashes
 
 
 
