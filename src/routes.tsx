@@ -3,6 +3,7 @@ import { Suspense, useEffect } from "react";
 import { lazyLoadWithRetry } from "./utils/lazy-load-with-retry";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
+import WatchPlaceholder from "./pages/WatchPlaceholder";
 
 // Lazy load pages
 const Index = lazyLoadWithRetry(() => import("./pages/Index"));
@@ -22,7 +23,6 @@ const TVDetails = lazyLoadWithRetry(() => import("./pages/TVDetails"));
 const SportMatchPlayer = lazyLoadWithRetry(
   () => import("./pages/SportMatchPlayer")
 );
-const Player = lazyLoadWithRetry(() => import("./pages/Player"));
 const NotFound = lazyLoadWithRetry(() => import("./pages/NotFound"));
 const Trending = lazyLoadWithRetry(() => import("./pages/Trending"));
 
@@ -96,10 +96,10 @@ export default function AppRoutes() {
           <Route path="/tv/:id" element={<TVDetails />} />
           <Route path="/sports" element={<Sports />} />
           <Route path="/sports/player/:id" element={<SportMatchPlayer />} />
-          <Route path="/watch/:type/:id" element={<Player />} />
+          <Route path="/watch/:type/:id" element={<WatchPlaceholder />} />
           <Route
             path="/watch/:type/:id/:season/:episode"
-            element={<Player />}
+            element={<WatchPlaceholder />}
           />
           <Route path="/search" element={<Search />} />
           <Route path="/trending" element={<Trending />} />
