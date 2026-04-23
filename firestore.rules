@@ -88,6 +88,15 @@ service cloud.firestore {
       allow delete: if isResourceOwner();
     }
 
+    // --- Streaming Plugins ---
+    // Plugins collection stores user-specific streaming plugin configurations
+    match /plugins/{pluginId} {
+      allow read: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+      allow update: if isResourceOwner() && isRequestOwner();
+      allow delete: if isResourceOwner() && !resource.data.is_default;
+    }
+
     // --- Default Deny ---
     
     match /{document=**} {
