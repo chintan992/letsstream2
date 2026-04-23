@@ -51,6 +51,9 @@ const SimklDiscoverList = lazyLoadWithRetry(
   () => import("./pages/SimklDiscoverList")
 );
 
+// Plugin management
+const Plugins = lazyLoadWithRetry(() => import("./pages/Plugins"));
+
 export default function AppRoutes() {
   const enableManualRestoration =
     import.meta.env.VITE_SCROLL_RESTORATION_MANUAL === "true";
@@ -89,6 +92,7 @@ export default function AppRoutes() {
           >
             <Route path="/profile" element={<Profile />} />
             <Route path="/watch-history" element={<WatchHistory />} />
+            <Route path="/settings/plugins" element={<Plugins />} />
           </Route>
 
           {/* Content routes */}

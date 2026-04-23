@@ -8,6 +8,7 @@ import {
   Bookmark,
   Database,
   Edit,
+  Plug,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import ProfileStatistics from "./ProfileStatistics";
 import ProfileEditModal from "./ProfileEditModal";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useProfileActions } from "@/hooks/useProfileActions";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileHeaderProps {
   activeTab: string;
@@ -29,6 +31,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const { userDisplayInfo, profileStats } = useProfileData();
   const { handleSignOut, handleTabChange } = useProfileActions();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleNavigateToPlugins = () => {
+    navigate("/settings/plugins");
+  };
 
   const tabs = [
     { value: "overview", label: "Overview", icon: User },
@@ -74,6 +80,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
             <p className="text-white/70">{userDisplayInfo.email}</p>
             <div className="mt-4 flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNavigateToPlugins}
+                className="border-white/20 bg-black/50 text-white hover:bg-black/70"
+              >
+                <Plug className="mr-2 h-4 w-4" />
+                Streaming Plugins
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
