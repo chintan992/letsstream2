@@ -1,0 +1,120 @@
+- generic [ref=e2]:
+    - generic [ref=e3]:
+        - generic [ref=e4]:
+            - heading "Service Worker Debug" [level=2] [ref=e5]
+            - generic [ref=e6]:
+                - button "Refresh Status" [ref=e7]:
+                    - img
+                - button "Minimize Panel" [ref=e8]:
+                    - img
+        - generic [ref=e9]:
+            - tablist [ref=e10]:
+                - tab "Status" [selected] [ref=e11]
+                - tab "Events" [ref=e12]
+                - tab "Performance" [ref=e13]
+                - tab "Network" [ref=e14]
+            - tabpanel "Status" [ref=e15]:
+                - generic [ref=e16]:
+                    - generic [ref=e17]:
+                        - generic [ref=e18]: "Controller:"
+                        - generic [ref=e19]: active
+                    - generic [ref=e20]:
+                        - generic [ref=e21]: "Client ID:"
+                        - generic [ref=e22]: 1776920415472-m4mfb9b
+                    - generic [ref=e23]:
+                        - generic [ref=e24]: "Iframe Proxy Bypass:"
+                        - switch "Toggle iframe proxy bypass" [ref=e25] [cursor=pointer]
+                    - generic [ref=e26]:
+                        - generic [ref=e27]: "Active State:"
+                        - generic [ref=e28]: activated
+                    - generic [ref=e29]:
+                        - generic [ref=e30]: "Log Level:"
+                        - combobox "Log Level" [ref=e31]:
+                            - generic: Info
+                            - img [ref=e32]
+                    - generic [ref=e34]:
+                        - button "Force Update" [ref=e35]:
+                            - img
+                            - text: Force Update
+                        - button "Unregister" [ref=e36]:
+                            - img
+                            - text: Unregister
+    - banner [ref=e790]:
+        - generic [ref=e792]:
+            - button "LS" [ref=e794] [cursor=pointer]
+            - navigation [ref=e796]:
+                - link "Home" [ref=e797] [cursor=pointer]:
+                    - /url: /
+                - link "Movies" [ref=e798] [cursor=pointer]:
+                    - /url: /movie
+                - link "TV Shows" [ref=e799] [cursor=pointer]:
+                    - /url: /tv
+                - link "Sports" [ref=e800] [cursor=pointer]:
+                    - /url: /sports
+                - link "Simkl" [ref=e801] [cursor=pointer]:
+                    - /url: /simkl
+                - link "Trending" [ref=e802] [cursor=pointer]:
+                    - /url: /trending
+            - generic [ref=e803]:
+                - generic [ref=e806]:
+                    - img
+                    - searchbox "Search... (Press /)" [ref=e807]
+                    - button "Search" [ref=e808]:
+                        - img
+                - button "User menu" [ref=e809]:
+                    - generic [ref=e810]: User menu
+                    - img
+        - generic [ref=e811]:
+            - button "Close menu" [ref=e813]:
+                - img [ref=e814]
+            - navigation [ref=e817]:
+                - list [ref=e818]:
+                    - listitem [ref=e819]:
+                        - link "Home" [ref=e820] [cursor=pointer]:
+                            - /url: /
+                            - img [ref=e821]
+                            - text: Home
+                    - listitem [ref=e824]:
+                        - link "Movies" [ref=e825] [cursor=pointer]:
+                            - /url: /movie
+                            - img [ref=e826]
+                            - text: Movies
+                    - listitem [ref=e828]:
+                        - link "TV Shows" [ref=e829] [cursor=pointer]:
+                            - /url: /tv
+                            - img [ref=e830]
+                            - text: TV Shows
+                    - listitem [ref=e832]:
+                        - link "Sports" [ref=e833] [cursor=pointer]:
+                            - /url: /sports
+                            - img [ref=e834]
+                            - text: Sports
+                    - listitem [ref=e840]:
+                        - link "Simkl" [ref=e841] [cursor=pointer]:
+                            - /url: /simkl
+                            - img [ref=e842]
+                            - text: Simkl
+                    - listitem [ref=e844]:
+                        - link "Trending" [ref=e845] [cursor=pointer]:
+                            - /url: /trending
+                            - img [ref=e846]
+                            - text: Trending
+                    - listitem [ref=e848]:
+                        - link "Search" [ref=e849] [cursor=pointer]:
+                            - /url: /search
+                            - img [ref=e850]
+                            - text: Search
+                    - listitem [ref=e853]:
+                        - link "Profile" [ref=e854] [cursor=pointer]:
+                            - /url: /profile
+                            - img [ref=e855]
+                            - text: Profile
+                    - listitem [ref=e858]:
+                        - link "Watch History" [ref=e859] [cursor=pointer]:
+                            - /url: /watch-history
+                            - img [ref=e860]
+                            - text: Watch History
+    - button [ref=e787]:
+        - img
+    - region "Notifications (F8)":
+        - list

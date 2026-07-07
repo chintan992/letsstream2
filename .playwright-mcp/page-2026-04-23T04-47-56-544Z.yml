@@ -1,0 +1,38 @@
+- generic [ref=e2]:
+    - button "Expand Debug Panel" [ref=e3]:
+        - img
+    - generic [ref=e5]:
+        - generic [ref=e6]:
+            - heading "Create an account" [level=3] [ref=e7]
+            - paragraph [ref=e8]: Enter your email below to create your account
+        - generic [ref=e9]:
+            - generic [ref=e10]:
+                - generic [ref=e11]:
+                    - text: Email
+                    - textbox "Email" [ref=e12]:
+                        - /placeholder: Enter your email
+                        - text: test-plugin-user@example.com
+                - generic [ref=e13]:
+                    - text: Password
+                    - textbox "Password" [ref=e14]:
+                        - /placeholder: Enter your password
+                        - text: TestPassword123!
+                    - status [ref=e34]: "Password strength: Strong"
+                - generic [ref=e15]:
+                    - text: Confirm Password
+                    - textbox "Confirm Password" [ref=e16]:
+                        - /placeholder: Confirm your password
+                        - text: TestPassword123!
+                - button "Create account" [ref=e17]
+            - generic [ref=e21]: Or continue with
+            - button "Continue with Google" [ref=e22]:
+                - img
+                - text: Continue with Google
+        - generic [ref=e24]:
+            - text: Already have an account?
+            - link "Sign in" [ref=e25] [cursor=pointer]:
+                - /url: /login
+    - button [ref=e28]:
+        - img
+    - region "Notifications (F8)":
+        - list

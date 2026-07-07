@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,9 @@ const MoviePlayer = () => {
   useScrollRestoration();
 
   const playerRef = useRef<VideoPlayerRef>(null);
+  const [playerInstance, setPlayerInstance] = useState<Player | null>(null);
   const { getActivePlugins } = usePluginManager();
-  const activePlugins = getActivePlugins();
+  const activePlugins = useMemo(() => getActivePlugins(), [getActivePlugins]);
 
   const {
     state: playerState,
@@ -29,17 +30,17 @@ const MoviePlayer = () => {
     toggleTheaterMode,
     skipForward,
     skipBackward,
-  } = usePlayerState(playerRef.current?.player || null);
+  } = usePlayerState(playerInstance);
 
-  const { streams, isLoading: streamsLoading, error: streamsError } =
-    useStreamAggregator(
-      activePlugins,
-      "movie",
-      id ? parseInt(id, 10) : 0
-    );
+  const {
+    streams,
+    isLoading: streamsLoading,
+    error: streamsError,
+  } = useStreamAggregator(activePlugins, "movie", id ? parseInt(id, 10) : 0);
 
   const { updateWatchProgress } = useWatchHistory();
   const [selectedStream, setSelectedStream] = useState(0);
+  const autoSelectRef = useRef(false);
   const [movieTitle, setMovieTitle] = useState("Movie");
   const saveProgressInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -68,7 +69,13 @@ const MoviePlayer = () => {
         clearInterval(saveProgressInterval.current);
       }
     };
-  }, [playerState.isPlaying, playerState.currentTime, playerState.duration, id, movieTitle]);
+  }, [
+    playerState.isPlaying,
+    playerState.currentTime,
+    playerState.duration,
+    id,
+    movieTitle,
+  ]);
 
   // Track media view on mount
   useEffect(() => {
@@ -89,9 +96,10 @@ const MoviePlayer = () => {
     }
   }, [id, movieTitle]);
 
-  const handlePlayerReady = (player: Player) => {
+  const handlePlayerReady = useCallback((player: Player) => {
+    setPlayerInstance(player);
     console.log("Player ready");
-  };
+  }, []);
 
   const handlePlayerError = (error: any) => {
     console.error("Player error:", error);
@@ -121,9 +129,18 @@ const MoviePlayer = () => {
 
   // Select first valid stream
   useEffect(() => {
+    if (autoSelectRef.current) return;
+
     const validStreamIndex = streams.findIndex(s => !s.hasError && s.url);
     if (validStreamIndex >= 0) {
-      setSelectedStream(validStreamIndex);
+      setSelectedStream(prev => {
+        const currentStream = streams[prev];
+        if (currentStream?.hasError || !currentStream?.url) {
+          autoSelectRef.current = true;
+          return validStreamIndex;
+        }
+        return prev;
+      });
     }
   }, [streams]);
 
@@ -135,7 +152,7 @@ const MoviePlayer = () => {
           <div className="container mx-auto px-4 py-6 pt-20">
             <div className="animate-pulse">
               <div className="bg-card/30 aspect-video w-full rounded-lg" />
-              <div className="mt-4 h-8 w-48 rounded bg-card/30" />
+              <div className="bg-card/30 mt-4 h-8 w-48 rounded" />
             </div>
           </div>
         </div>
@@ -162,7 +179,8 @@ const MoviePlayer = () => {
                 No Streams Available
               </h2>
               <p className="mb-6 text-muted-foreground">
-                {streamsError || "No active plugins found. Please add a streaming plugin."}
+                {streamsError ||
+                  "No active plugins found. Please add a streaming plugin."}
               </p>
               <Button onClick={() => navigate("/settings/plugins")}>
                 Manage Plugins
@@ -184,32 +202,23 @@ const MoviePlayer = () => {
         }`}
       >
         <Navbar />
-        <div className={`container mx-auto px-4 py-6 pt-20 ${
-          playerState.isTheaterMode ? "max-w-7xl" : ""
-        }`}>
+        <div
+          className={`container mx-auto px-4 py-6 pt-20 ${
+            playerState.isTheaterMode ? "max-w-7xl" : ""
+          }`}
+        >
           <div className="mb-4 flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-            >
+            <Button variant="ghost" onClick={() => navigate(-1)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Go Back
             </Button>
 
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleLightsOut}
-              >
+              <Button variant="outline" size="sm" onClick={toggleLightsOut}>
                 <Lightbulb className="h-4 w-4" />
                 {playerState.isLightsOut ? "Lights On" : "Lights Out"}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleTheaterMode}
-              >
+              <Button variant="outline" size="sm" onClick={toggleTheaterMode}>
                 {playerState.isTheaterMode ? "Normal" : "Theater"}
               </Button>
             </div>
@@ -234,9 +243,8 @@ const MoviePlayer = () => {
               {movieTitle}
             </h3>
             <div className="flex flex-wrap gap-2">
-              {streams
-                .filter(s => !s.hasError && s.url)
-                .map((stream, index) => (
+              {streams.map((stream, index) =>
+                !stream.hasError && stream.url ? (
                   <Button
                     key={index}
                     variant={selectedStream === index ? "default" : "outline"}
@@ -245,7 +253,8 @@ const MoviePlayer = () => {
                   >
                     {stream.label}
                   </Button>
-                ))}
+                ) : null
+              )}
             </div>
           </div>
         </div>

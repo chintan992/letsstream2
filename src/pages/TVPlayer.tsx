@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,8 +35,9 @@ const TVPlayer = () => {
   const isMobile = useIsMobile();
 
   const playerRef = useRef<VideoPlayerRef>(null);
+  const [playerInstance, setPlayerInstance] = useState<Player | null>(null);
   const { getActivePlugins } = usePluginManager();
-  const activePlugins = getActivePlugins();
+  const activePlugins = useMemo(() => getActivePlugins(), [getActivePlugins]);
 
   const {
     state: playerState,
@@ -45,7 +46,7 @@ const TVPlayer = () => {
     toggleTheaterMode,
     skipForward,
     skipBackward,
-  } = usePlayerState(playerRef.current?.player || null);
+  } = usePlayerState(playerInstance);
 
   const {
     streams,
@@ -61,6 +62,7 @@ const TVPlayer = () => {
 
   const { updateWatchProgress } = useWatchHistory();
   const [selectedStream, setSelectedStream] = useState(0);
+  const autoSelectRef = useRef(false);
   const [showEpisodeList, setShowEpisodeList] = useState(!isMobile);
   const [tvTitle, setTvTitle] = useState("TV Show");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -127,9 +129,10 @@ const TVPlayer = () => {
     }
   }, [id, season, episode, tvTitle]);
 
-  const handlePlayerReady = (player: Player) => {
+  const handlePlayerReady = useCallback((player: Player) => {
+    setPlayerInstance(player);
     console.log("Player ready");
-  };
+  }, []);
 
   const handlePlayerError = (error: any) => {
     console.error("Player error:", error);
@@ -162,7 +165,10 @@ const TVPlayer = () => {
             e.episode_number === parseInt(episode || "1", 10)
         );
 
-        if (currentEpisodeIndex >= 0 && currentEpisodeIndex < episodes.length - 1) {
+        if (
+          currentEpisodeIndex >= 0 &&
+          currentEpisodeIndex < episodes.length - 1
+        ) {
           const nextEpisode = episodes[currentEpisodeIndex + 1];
           setTimeout(() => {
             navigate(
@@ -176,9 +182,18 @@ const TVPlayer = () => {
 
   // Select first valid stream
   useEffect(() => {
+    if (autoSelectRef.current) return;
+
     const validStreamIndex = streams.findIndex(s => !s.hasError && s.url);
     if (validStreamIndex >= 0) {
-      setSelectedStream(validStreamIndex);
+      setSelectedStream(prev => {
+        const currentStream = streams[prev];
+        if (currentStream?.hasError || !currentStream?.url) {
+          autoSelectRef.current = true;
+          return validStreamIndex;
+        }
+        return prev;
+      });
     }
   }, [streams]);
 
@@ -194,7 +209,7 @@ const TVPlayer = () => {
           <div className="container mx-auto px-4 py-6 pt-20">
             <div className="animate-pulse">
               <div className="bg-card/30 aspect-video w-full rounded-lg" />
-              <div className="mt-4 h-8 w-48 rounded bg-card/30" />
+              <div className="bg-card/30 mt-4 h-8 w-48 rounded" />
             </div>
           </div>
         </div>
@@ -221,7 +236,8 @@ const TVPlayer = () => {
                 No Streams Available
               </h2>
               <p className="mb-6 text-muted-foreground">
-                {streamsError || "No active plugins found. Please add a streaming plugin."}
+                {streamsError ||
+                  "No active plugins found. Please add a streaming plugin."}
               </p>
               <Button onClick={() => navigate("/settings/plugins")}>
                 Manage Plugins
@@ -262,18 +278,16 @@ const TVPlayer = () => {
                 {playerState.isLightsOut ? "Lights On" : "Lights Out"}
               </Button>
               {!isMobile && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={toggleTheaterMode}
-                >
+                <Button variant="outline" size="sm" onClick={toggleTheaterMode}>
                   {playerState.isTheaterMode ? "Normal" : "Theater"}
                 </Button>
               )}
             </div>
           </div>
 
-          <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-3"}`}>
+          <div
+            className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-3"}`}
+          >
             {/* Video Player */}
             <div className={isMobile ? "col-span-1" : "col-span-2"}>
               {currentStream && currentStream.url && (
@@ -294,18 +308,20 @@ const TVPlayer = () => {
                   {tvTitle} - S{currentSeasonNum}E{currentEpisodeNum}
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {streams
-                    .filter(s => !s.hasError && s.url)
-                    .map((stream, index) => (
+                  {streams.map((stream, index) =>
+                    !stream.hasError && stream.url ? (
                       <Button
                         key={index}
-                        variant={selectedStream === index ? "default" : "outline"}
+                        variant={
+                          selectedStream === index ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedStream(index)}
                       >
                         {stream.label}
                       </Button>
-                    ))}
+                    ) : null
+                  )}
                 </div>
               </div>
 
@@ -326,10 +342,7 @@ const TVPlayer = () => {
                 <Button
                   variant="outline"
                   onClick={() =>
-                    handleEpisodeClick(
-                      currentEpisodeNum + 1,
-                      currentSeasonNum
-                    )
+                    handleEpisodeClick(currentEpisodeNum + 1, currentSeasonNum)
                   }
                 >
                   Next Episode

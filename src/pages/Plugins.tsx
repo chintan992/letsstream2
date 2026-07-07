@@ -1,9 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, RefreshCw, TestTube, CheckCircle, XCircle } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  RefreshCw,
+  TestTube,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -131,7 +144,8 @@ const Plugins = () => {
       await initializeDefaultPlugins();
       toast({
         title: "Default Plugins Added",
-        description: "Default streaming plugins have been added to your account",
+        description:
+          "Default streaming plugins have been added to your account",
       });
     } catch (err) {
       toast({
@@ -149,7 +163,9 @@ const Plugins = () => {
         <div className="container mx-auto max-w-4xl px-4 py-6 pt-20">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">Streaming Plugins</h1>
+              <h1 className="text-3xl font-bold text-white">
+                Streaming Plugins
+              </h1>
               <p className="mt-1 text-muted-foreground">
                 Manage your streaming service plugins
               </p>
@@ -294,7 +310,7 @@ const Plugins = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleRemovePlugin(plugin.id)}
-                          className="text-destructive hover:bg-destructive/10"
+                          className="hover:bg-destructive/10 text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Remove

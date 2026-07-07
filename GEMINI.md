@@ -64,6 +64,7 @@ The project follows an agile development process. The `verify` script acts as a 
 # Deployment
 
 The application is structured to easily deploy across various platforms:
+
 - **Cloudflare Pages:** Configuration managed in `wrangler.toml`, `_routes.json`, and documented in `docs/cloudflare-pages-guide.md`.
 - **Netlify:** Configuration managed in `netlify.toml`.
 - **GitHub Pages:** Automated through GitHub actions (`.github/workflows/deploy-gh-pages.yml`).
@@ -75,26 +76,32 @@ The application routing starts at the `Index` landing page. Users can navigate a
 # Core Features
 
 ## Data Backup and Restore
+
 Users can securely backup and restore their data (such as watch history and preferences) directly from the application UI (`src/components/BackupRestore.tsx`, `BACKUP_RESTORE_README.md`).
 
 ## Scroll Restoration
+
 Custom architecture ensures that a user's scroll position is restored effectively when navigating back and forth across different pages. See `docs/SCROLL_RESTORATION_ARCHITECTURE.md` for more.
 
 ## Progressive Web App (PWA) and Offline Support
+
 Configured via `vite-plugin-pwa`, the application operates with a service worker to provide an offline fallback (`public/offline.html`), caching, and a native app-like experience complete with a `PWAInstallPrompt` component. Offline events are managed dynamically (e.g., `analytics-offline.ts`).
 
 ## Multi-theme and Customization
+
 The application supports Light, Dark, and System themes, along with an accent color customization option (`AccentColorPicker.tsx`), managed using `next-themes` and a custom Context.
 
 ## Haptic Feedback
+
 Optimized for mobile interfaces, the application implements distinct vibration feedback patterns for various UI interactions (`DOCS/HAPTIC_FEEDBACK_GUIDE.md`).
 
 ## User Activity Tracking
+
 It uses Firebase Analytics to record key interactions, such as page views, media progression, preferences, and engagements (`src/components/AnalyticsWrapper.tsx`, `src/lib/analytics.ts`).
 
 # UI/UX and Design System
 
-The `src/components/ui` directory contains the foundational design components using Radix UI for accessibility and Framer Motion for smooth transitions. Tools like `class-variance-authority` simplify building consistent and flexible variants (e.g., buttons and cards). 
+The `src/components/ui` directory contains the foundational design components using Radix UI for accessibility and Framer Motion for smooth transitions. Tools like `class-variance-authority` simplify building consistent and flexible variants (e.g., buttons and cards).
 
 # Error Handling and Logging
 

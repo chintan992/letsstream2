@@ -59,6 +59,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     useEffect(() => {
       if (!videoRef.current) return;
 
+      // Prevent initialization during React 18 StrictMode double-mount
+      let mounted = true;
+
       // Determine video type based on extension
       let type = "video/mp4";
       if (src.includes(".m3u8")) {
@@ -114,7 +117,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
       // Event listeners
       if (onReady) {
-        player.ready(() => onReady(player));
+        player.ready(() => {
+          if (mounted) onReady(player);
+        });
       }
 
       if (onPlay) {
@@ -131,6 +136,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
       if (onError) {
         player.on("error", () => {
+          if (!mounted) return;
           const error = player.error();
           onError(error);
         });
@@ -138,6 +144,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
       if (onTimeUpdate) {
         player.on("timeupdate", () => {
+          if (!mounted) return;
           const currentTime = player.currentTime();
           const duration = player.duration();
           if (currentTime && duration) {
@@ -148,12 +155,14 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
       if (onFullscreenChange) {
         player.on("fullscreenchange", () => {
+          if (!mounted) return;
           onFullscreenChange(player.isFullscreen());
         });
       }
 
       // Cleanup on unmount
       return () => {
+        mounted = false;
         if (playerRef.current) {
           playerRef.current.dispose();
           playerRef.current = null;

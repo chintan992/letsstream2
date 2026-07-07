@@ -178,9 +178,7 @@ export function useStreamAggregator(
       }
 
       const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch streaming links";
+        err instanceof Error ? err.message : "Failed to fetch streaming links";
       setError(message);
 
       await trackEvent({

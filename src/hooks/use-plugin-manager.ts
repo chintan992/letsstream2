@@ -366,7 +366,9 @@ export function usePluginManager() {
       if (existingDocs.empty) {
         const promises = DEFAULT_PLUGINS.map(async pluginConfig => {
           try {
-            const manifest = await fetchPluginManifest(pluginConfig.manifestUrl);
+            const manifest = await fetchPluginManifest(
+              pluginConfig.manifestUrl
+            );
 
             await addDoc(collection(db, "plugins"), {
               user_id: user.uid,

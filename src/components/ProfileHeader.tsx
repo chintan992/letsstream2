@@ -31,6 +31,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const { userDisplayInfo, profileStats } = useProfileData();
   const { handleSignOut, handleTabChange } = useProfileActions();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleNavigateToPlugins = () => {
     navigate("/settings/plugins");

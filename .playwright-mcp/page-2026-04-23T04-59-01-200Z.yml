@@ -1,0 +1,168 @@
+- generic [ref=e2]:
+    - generic [ref=e3]:
+        - generic [ref=e4]:
+            - heading "Service Worker Debug" [level=2] [ref=e5]
+            - generic [ref=e6]:
+                - button "Refresh Status" [ref=e7]:
+                    - img
+                - button "Minimize Panel" [ref=e8]:
+                    - img
+        - generic [ref=e9]:
+            - tablist [ref=e10]:
+                - tab "Status" [selected] [ref=e11]
+                - tab "Events" [ref=e12]
+                - tab "Performance" [ref=e13]
+                - tab "Network" [ref=e14]
+            - tabpanel "Status" [ref=e15]:
+                - generic [ref=e16]:
+                    - generic [ref=e17]:
+                        - generic [ref=e18]: "Controller:"
+                        - generic [ref=e19]: active
+                    - generic [ref=e20]:
+                        - generic [ref=e21]: "Client ID:"
+                        - generic [ref=e22]: 1776920280891-6xqcrgq
+                    - generic [ref=e23]:
+                        - generic [ref=e24]: "Iframe Proxy Bypass:"
+                        - switch "Toggle iframe proxy bypass" [ref=e25] [cursor=pointer]
+                    - generic [ref=e26]:
+                        - generic [ref=e27]: "Active State:"
+                        - generic [ref=e28]: activated
+                    - generic [ref=e29]:
+                        - generic [ref=e30]: "Log Level:"
+                        - combobox "Log Level" [ref=e31]:
+                            - generic: Info
+                            - img [ref=e32]
+                    - generic [ref=e34]:
+                        - button "Force Update" [ref=e35]:
+                            - img
+                            - text: Force Update
+                        - button "Unregister" [ref=e36]:
+                            - img
+                            - text: Unregister
+    - generic [ref=e38]:
+        - banner [ref=e39]:
+            - generic [ref=e41]:
+                - button "LS" [ref=e43] [cursor=pointer]
+                - generic [ref=e44]:
+                    - button "Search" [ref=e45]:
+                        - img
+                    - button "User menu" [ref=e46]:
+                        - generic [ref=e47]: User menu
+                        - img
+                    - button "Open menu" [ref=e48]:
+                        - img
+            - generic [ref=e49]:
+                - button "Close menu" [ref=e51]:
+                    - img [ref=e52]
+                - navigation [ref=e55]:
+                    - list [ref=e56]:
+                        - listitem [ref=e57]:
+                            - link "Home" [ref=e58] [cursor=pointer]:
+                                - /url: /
+                                - img [ref=e59]
+                                - text: Home
+                        - listitem [ref=e62]:
+                            - link "Movies" [ref=e63] [cursor=pointer]:
+                                - /url: /movie
+                                - img [ref=e64]
+                                - text: Movies
+                        - listitem [ref=e66]:
+                            - link "TV Shows" [ref=e67] [cursor=pointer]:
+                                - /url: /tv
+                                - img [ref=e68]
+                                - text: TV Shows
+                        - listitem [ref=e70]:
+                            - link "Sports" [ref=e71] [cursor=pointer]:
+                                - /url: /sports
+                                - img [ref=e72]
+                                - text: Sports
+                        - listitem [ref=e78]:
+                            - link "Simkl" [ref=e79] [cursor=pointer]:
+                                - /url: /simkl
+                                - img [ref=e80]
+                                - text: Simkl
+                        - listitem [ref=e82]:
+                            - link "Trending" [ref=e83] [cursor=pointer]:
+                                - /url: /trending
+                                - img [ref=e84]
+                                - text: Trending
+                        - listitem [ref=e86]:
+                            - link "Search" [ref=e87] [cursor=pointer]:
+                                - /url: /search
+                                - img [ref=e88]
+                                - text: Search
+                        - listitem [ref=e91]:
+                            - link "Profile" [ref=e92] [cursor=pointer]:
+                                - /url: /profile
+                                - img [ref=e93]
+                                - text: Profile
+                        - listitem [ref=e96]:
+                            - link "Watch History" [ref=e97] [cursor=pointer]:
+                                - /url: /watch-history
+                                - img [ref=e98]
+                                - text: Watch History
+        - generic [ref=e102]:
+            - generic [ref=e103]:
+                - generic [ref=e104]:
+                    - heading "Streaming Plugins" [level=1] [ref=e105]
+                    - paragraph [ref=e106]: Manage your streaming service plugins
+                - button "Back" [ref=e107]
+            - generic [ref=e108]:
+                - generic [ref=e109]:
+                    - heading "Add Plugin" [level=3] [ref=e110]
+                    - paragraph [ref=e111]: Enter the manifest URL of a Stremio-compatible plugin
+                - generic [ref=e113]:
+                    - textbox "https://example.com/manifest.json" [ref=e114]
+                    - button "Add" [ref=e115]:
+                        - img
+                        - text: Add
+            - generic [ref=e116]:
+                - heading "Installed Plugins (2)" [level=2] [ref=e150]
+                - generic [ref=e152]:
+                    - generic [ref=e153]:
+                        - generic [ref=e154]:
+                            - generic [ref=e155]:
+                                - heading "StreamFlix" [level=3] [ref=e156]
+                                - generic [ref=e157]: Active
+                            - paragraph [ref=e158]: StreamFlix video links (accepts IMDB IDs and TMDB IDs, enriched with TMDB)
+                            - paragraph [ref=e159]: Version 1.0.0 • org.streamflix.addon
+                            - paragraph [ref=e160]: "URL: https://streamflix-worker.chintanr21.workers.dev/manifest.json"
+                        - generic [ref=e161]:
+                            - switch [checked] [ref=e162] [cursor=pointer]
+                            - generic [ref=e163]: "On"
+                    - generic [ref=e164]:
+                        - button "Test" [ref=e165]:
+                            - img
+                            - text: Test
+                        - button "Update" [ref=e166]:
+                            - img
+                            - text: Update
+                        - button "Remove" [ref=e167]:
+                            - img
+                            - text: Remove
+                - generic [ref=e119]:
+                    - generic [ref=e120]:
+                        - generic [ref=e121]:
+                            - generic [ref=e122]:
+                                - heading "Vidlink" [level=3] [ref=e123]
+                                - generic [ref=e124]: Active
+                            - paragraph [ref=e125]: Vidlink HLS streams via vidlink.pro — accepts IMDB IDs and TMDB IDs
+                            - paragraph [ref=e126]: Version 1.0.0 • pro.vidlink.addon
+                            - paragraph [ref=e127]: "URL: https://vidlink-worker.chintanr21.workers.dev/manifest.json"
+                        - generic [ref=e128]:
+                            - switch [checked] [ref=e129] [cursor=pointer]
+                            - generic [ref=e130]: "On"
+                    - generic [ref=e131]:
+                        - button "Test" [ref=e132]:
+                            - img
+                            - text: Test
+                        - button "Update" [ref=e133]:
+                            - img
+                            - text: Update
+                        - button "Remove" [ref=e134]:
+                            - img
+                            - text: Remove
+    - button [ref=e137]:
+        - img
+    - region "Notifications (F8)":
+        - list

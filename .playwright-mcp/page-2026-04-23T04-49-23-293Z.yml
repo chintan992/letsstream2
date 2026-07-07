@@ -1,0 +1,72 @@
+- generic [ref=e2]:
+    - generic [ref=e3]:
+        - generic [ref=e4]:
+            - heading "Service Worker Debug" [level=2] [ref=e5]
+            - generic [ref=e6]:
+                - button "Refresh Status" [ref=e7]:
+                    - img
+                - button "Minimize Panel" [ref=e8]:
+                    - img
+        - generic [ref=e9]:
+            - tablist [ref=e10]:
+                - tab "Status" [selected] [ref=e11]
+                - tab "Events" [ref=e12]
+                - tab "Performance" [ref=e13]
+                - tab "Network" [ref=e14]
+            - tabpanel "Status" [ref=e15]:
+                - generic [ref=e16]:
+                    - generic [ref=e17]:
+                        - generic [ref=e18]: "Controller:"
+                        - generic [ref=e19]: active
+                    - generic [ref=e20]:
+                        - generic [ref=e21]: "Client ID:"
+                        - generic [ref=e22]: 1776919761576-iyhe8u0
+                    - generic [ref=e23]:
+                        - generic [ref=e24]: "Iframe Proxy Bypass:"
+                        - switch "Toggle iframe proxy bypass" [ref=e25] [cursor=pointer]
+                    - generic [ref=e26]:
+                        - generic [ref=e27]: "Active State:"
+                        - generic [ref=e28]: activated
+                    - generic [ref=e29]:
+                        - generic [ref=e30]: "Log Level:"
+                        - combobox "Log Level" [ref=e31]:
+                            - generic: Info
+                            - img [ref=e32]
+                    - generic [ref=e34]:
+                        - button "Force Update" [ref=e35]:
+                            - img
+                            - text: Force Update
+                        - button "Unregister" [ref=e36]:
+                            - img
+                            - text: Unregister
+    - generic [ref=e38]:
+        - generic [ref=e39]:
+            - heading "Create an account" [level=3] [ref=e40]
+            - paragraph [ref=e41]: Enter your email below to create your account
+        - generic [ref=e42]:
+            - generic [ref=e43]:
+                - generic [ref=e44]:
+                    - text: Email
+                    - textbox "Email" [ref=e45]:
+                        - /placeholder: Enter your email
+                - generic [ref=e46]:
+                    - text: Password
+                    - textbox "Password" [ref=e47]:
+                        - /placeholder: Enter your password
+                - generic [ref=e48]:
+                    - text: Confirm Password
+                    - textbox "Confirm Password" [ref=e49]:
+                        - /placeholder: Confirm your password
+                - button "Create account" [ref=e50]
+            - generic [ref=e54]: Or continue with
+            - button "Continue with Google" [ref=e55]:
+                - img
+                - text: Continue with Google
+        - generic [ref=e57]:
+            - text: Already have an account?
+            - link "Sign in" [ref=e58] [cursor=pointer]:
+                - /url: /login
+    - button [ref=e61]:
+        - img
+    - region "Notifications (F8)":
+        - list

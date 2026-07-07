@@ -1,0 +1,70 @@
+- generic [ref=e2]:
+    - generic [ref=e3]:
+        - generic [ref=e4]:
+            - heading "Service Worker Debug" [level=2] [ref=e5]
+            - generic [ref=e6]:
+                - button "Refresh Status" [ref=e7]:
+                    - img
+                - button "Minimize Panel" [ref=e8]:
+                    - img
+        - generic [ref=e9]:
+            - tablist [ref=e10]:
+                - tab "Status" [selected] [ref=e11]
+                - tab "Events" [ref=e12]
+                - tab "Performance" [ref=e13]
+                - tab "Network" [ref=e14]
+            - tabpanel "Status" [ref=e15]:
+                - generic [ref=e16]:
+                    - generic [ref=e17]:
+                        - generic [ref=e18]: "Controller:"
+                        - generic [ref=e19]: active
+                    - generic [ref=e20]:
+                        - generic [ref=e21]: "Client ID:"
+                        - generic [ref=e22]: 1776919761576-iyhe8u0
+                    - generic [ref=e23]:
+                        - generic [ref=e24]: "Iframe Proxy Bypass:"
+                        - switch "Toggle iframe proxy bypass" [ref=e25] [cursor=pointer]
+                    - generic [ref=e26]:
+                        - generic [ref=e27]: "Active State:"
+                        - generic [ref=e28]: activated
+                    - generic [ref=e29]:
+                        - generic [ref=e30]: "Log Level:"
+                        - combobox "Log Level" [ref=e31]:
+                            - generic: Info
+                            - img [ref=e32]
+                    - generic [ref=e34]:
+                        - button "Force Update" [ref=e35]:
+                            - img
+                            - text: Force Update
+                        - button "Unregister" [ref=e36]:
+                            - img
+                            - text: Unregister
+    - generic [ref=e69]:
+        - generic [ref=e70]:
+            - heading "Welcome back" [level=3] [ref=e71]
+            - paragraph [ref=e72]: Sign in to your account to continue
+        - generic [ref=e73]:
+            - generic [ref=e74]:
+                - generic [ref=e75]:
+                    - text: Email
+                    - textbox "Email" [ref=e76]:
+                        - /placeholder: Enter your email
+                - generic [ref=e77]:
+                    - text: Password
+                    - textbox "Password" [ref=e78]:
+                        - /placeholder: Enter your password
+                - button "Sign in" [ref=e79]
+                - link "Forgot password?" [ref=e81] [cursor=pointer]:
+                    - /url: /forgot-password
+            - generic [ref=e85]: Or continue with
+            - button "Continue with Google" [ref=e86]:
+                - img
+                - text: Continue with Google
+        - generic [ref=e88]:
+            - text: Don't have an account?
+            - link "Sign up" [ref=e89] [cursor=pointer]:
+                - /url: /signup
+    - button [ref=e61]:
+        - img
+    - region "Notifications (F8)":
+        - list
