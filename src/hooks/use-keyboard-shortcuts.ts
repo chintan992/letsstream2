@@ -12,6 +12,18 @@ interface KeyboardShortcut {
 export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      // Ignore shortcuts while typing in form fields / editable areas
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
       for (const shortcut of shortcuts) {
         const ctrlMatch = shortcut.ctrl
           ? event.ctrlKey || event.metaKey

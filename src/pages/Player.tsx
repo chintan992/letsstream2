@@ -1,17 +1,20 @@
 import { useParams } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronUp } from "lucide-react";
 import { MovieDetails, TVDetails } from "@/utils/types";
 import { m } from "framer-motion";
 import { useState } from "react";
 import { useScrollRestoration } from "@/hooks";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { backdropSizes } from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import Navbar from "@/components/Navbar";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
 import VideoSourceSelector from "@/components/player/VideoSourceSelector";
@@ -77,6 +80,7 @@ const Player = () => {
       undefined)
     : undefined;
 
+  const isTv = mediaType === "tv";
   const episodeSidebarProps = {
     episodes,
     currentEpisodeIndex,
@@ -84,6 +88,19 @@ const Player = () => {
     season: season ? parseInt(season, 10) : 1,
     seasons: (mediaDetails as TVDetails)?.seasons || [],
   };
+
+  // Keyboard shortcuts: ←/→ episode nav, B back, F favorite, W watchlist
+  useKeyboardShortcuts([
+    ...(isTv
+      ? [
+          { key: "ArrowLeft", handler: goToPreviousEpisode },
+          { key: "ArrowRight", handler: goToNextEpisode },
+        ]
+      : []),
+    { key: "b", handler: goBack },
+    { key: "f", handler: toggleFavorite },
+    { key: "w", handler: toggleWatchlist },
+  ]);
 
   const playerElement = (
     <VideoPlayer
@@ -155,31 +172,26 @@ const Player = () => {
         {/* Desktop Layout: Video Player and Episode Sidebar side-by-side */}
         {!isMobile && mediaType === "tv" && episodes.length > 0 ? (
           <div className="flex flex-row gap-4 xl:gap-6">
-            <div className="z-10 min-w-0 flex-1 lg:min-w-[560px] xl:min-w-[700px]">
-              {playerElement}
-            </div>
-            <div className="aspect-video max-h-[70vh] min-h-[350px] w-[280px] flex-shrink-0 md:w-80 lg:w-96 xl:w-[420px]">
+            <div className="z-10 min-w-0 flex-1">{playerElement}</div>
+            <div className="h-[350px] w-[280px] flex-shrink-0 self-start md:h-[420px] md:w-80 lg:h-[480px] lg:w-96 xl:h-[540px] xl:w-[420px]">
               <EpisodeSidebar {...episodeSidebarProps} />
             </div>
           </div>
         ) : (
           <>
             {/* Video Player Section for Mobile or Non-TV content */}
-            <div className="z-10 min-w-0 flex-1 lg:min-w-[560px] xl:min-w-[700px]">
-              {playerElement}
-            </div>
+            <div className="z-10 min-w-0 flex-1">{playerElement}</div>
 
-            {/* Collapsible Episode Sidebar for Mobile/Tablet */}
+            {/* Episode Drawer for Mobile/Tablet */}
             {isMobile && mediaType === "tv" && episodes.length > 0 && (
-              <Collapsible
+              <Drawer
                 open={isEpisodeSidebarOpen}
                 onOpenChange={setIsEpisodeSidebarOpen}
-                className="mt-4"
               >
-                <CollapsibleTrigger asChild>
+                <DrawerTrigger asChild>
                   <Button
                     variant="outline"
-                    className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/95 p-4 backdrop-blur-sm transition-all duration-300 hover:bg-white/5"
+                    className="mt-4 flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/95 p-4 backdrop-blur-sm transition-all duration-300 hover:bg-white/5"
                   >
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-white">Episodes</span>
@@ -187,15 +199,21 @@ const Player = () => {
                         {episodes.length}
                       </span>
                     </div>
-                    <ChevronDown
-                      className={`h-4 w-4 text-white/60 transition-transform duration-300 ${isEpisodeSidebarOpen ? "rotate-180" : ""}`}
-                    />
+                    <ChevronUp className="h-4 w-4 text-white/60" />
                   </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-2 max-h-[60vh] overflow-hidden overflow-y-auto data-[state=closed]:animate-slide-up data-[state=open]:animate-slide-down">
-                  <EpisodeSidebar {...episodeSidebarProps} />
-                </CollapsibleContent>
-              </Collapsible>
+                </DrawerTrigger>
+                <DrawerContent className="max-h-[85vh]">
+                  <DrawerHeader className="sr-only">
+                    <DrawerTitle>Episodes</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="h-[75vh]">
+                    <EpisodeSidebar
+                      {...episodeSidebarProps}
+                      onNavigate={() => setIsEpisodeSidebarOpen(false)}
+                    />
+                  </div>
+                </DrawerContent>
+              </Drawer>
             )}
           </>
         )}

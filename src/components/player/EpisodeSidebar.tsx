@@ -8,6 +8,7 @@ import { Episode } from "@/utils/types";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { backdropSizes } from "@/utils/api";
 import { useElementScrollRestoration } from "@/hooks";
+import { useEpisodeWatched } from "@/hooks/player/use-episode-watched";
 import {
   Select,
   SelectContent,
@@ -32,6 +33,8 @@ interface EpisodeSidebarProps {
   showId: number | string;
   season: number | string;
   seasons?: Season[];
+  /** Called right before navigating to a new episode (e.g. to close a drawer) */
+  onNavigate?: () => void;
 }
 
 const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
@@ -40,6 +43,7 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   showId,
   season,
   seasons = EMPTY_SEASONS,
+  onNavigate,
 }) => {
   const navigate = useNavigate();
   const episodeRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -75,10 +79,17 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   };
 
   const handleEpisodeClick = (episodeNumber: number) => {
+    onNavigate?.();
     navigate(`/watch/tv/${showId}/${season}/${episodeNumber}`);
   };
 
   const currentEpisode = episodes[currentEpisodeIndex];
+
+  // Real watched state from watch history (empty when no history exists)
+  const watchedEpisodes = useEpisodeWatched(
+    typeof showId === "string" ? parseInt(showId, 10) : showId
+  );
+  const seasonNumber = typeof season === "string" ? parseInt(season, 10) : season;
 
   // Compute current episode number once for optimization
   const currentEpisodeNumber = currentEpisode?.episode_number ?? -1;
@@ -197,9 +208,14 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
             filteredEpisodes.map((episode, idx) => {
               const isCurrentEpisode =
                 episode.episode_number === currentEpisodeNumber;
+              // Prefer real watch history; fall back to "earlier than current"
               const hasWatched =
-                currentEpisodeNumber >= 0 &&
-                episode.episode_number < currentEpisodeNumber;
+                watchedEpisodes.size > 0
+                  ? watchedEpisodes.has(
+                      `${seasonNumber}-${episode.episode_number}`
+                    )
+                  : currentEpisodeNumber >= 0 &&
+                    episode.episode_number < currentEpisodeNumber;
 
               return (
                 <div
