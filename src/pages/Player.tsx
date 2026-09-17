@@ -149,6 +149,7 @@ const Player = () => {
           }
           rating={mediaDetails?.vote_average}
           mediaType={mediaType}
+          isLoading={isLoading}
         />
 
         {/* Desktop Layout: Video Player and Episode Sidebar side-by-side */}
@@ -220,6 +221,7 @@ const Player = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-6 space-y-6"
+          id="video-sources"
         >
           <div className="space-y-4">
             <div>

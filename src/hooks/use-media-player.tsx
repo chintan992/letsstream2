@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { getMovieDetails, getTVDetails, getSeasonDetails } from "@/utils/api";
 // Custom API references removed
 import { MovieDetails, TVDetails, VideoSource, Episode } from "@/utils/types";
@@ -26,6 +26,87 @@ export const useMediaPlayer = (
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 
+  // ---------------------------------------------------------------------------
+  // Movie / TV media fetch queries (react‑query) — keepPreviousData prevents
+  // the loading flicker when navigating between episodes.
+  // ---------------------------------------------------------------------------
+
+  const movieQuery = useQuery({
+    queryKey: ["movie-media", id],
+    queryFn: async () => {
+      if (!id || type !== "movie") return null;
+      const mediaId = parseInt(id, 10);
+      return await getMovieDetails(mediaId);
+    },
+    enabled: !!id && type === "movie",
+    staleTime: 1000 * 60 * 60 * 24,
+    placeholderData: keepPreviousData,
+  });
+
+  const tvQuery = useQuery({
+    queryKey: ["tv-media", id, season, episode],
+    queryFn: async () => {
+      if (!id || type !== "tv" || !season || !episode) return null;
+      const mediaId = parseInt(id, 10);
+      const tvDetails = await getTVDetails(mediaId);
+      if (!tvDetails) return null;
+      const seasonData = await getSeasonDetails(
+        mediaId,
+        parseInt(season, 10)
+      );
+      const currentEpisodeNumber = parseInt(episode, 10);
+      const episodeIndex = seasonData.findIndex(
+        ep => ep.episode_number === currentEpisodeNumber
+      );
+      const episodeTitle =
+        seasonData.find(
+          ep => ep.episode_number === currentEpisodeNumber
+        )?.name || "";
+      return {
+        ...tvDetails,
+        episodes: seasonData,
+        currentEpisodeIndex:
+          episodeIndex !== -1 ? episodeIndex : 0,
+        title: `${tvDetails.name || "Untitled Show"} - Season ${season} Episode ${episode}${
+          episodeTitle ? ": " + episodeTitle : ""
+        }`,
+      };
+    },
+    enabled: !!id && type === "tv" && !!season && !!episode,
+    staleTime: 1000 * 60 * 60 * 24,
+    placeholderData: keepPreviousData,
+  });
+
+  // ---------------------------------------------------------------------------
+  // Derived media state from queries
+  // ---------------------------------------------------------------------------
+
+  const mediaDetails = useMemo(() => {
+    if (type === "movie" && movieQuery.data) return movieQuery.data;
+    if (type === "tv" && tvQuery.data) return tvQuery.data as TVDetails;
+    return null;
+  }, [type, movieQuery.data, tvQuery.data]);
+
+  const title = useMemo(() => {
+    if (type === "movie" && movieQuery.data)
+      return movieQuery.data.title || "Untitled Movie";
+    if (type === "tv" && tvQuery.data) return tvQuery.data.title || "Untitled Show";
+    return "";
+  }, [type, movieQuery.data, tvQuery.data]);
+
+  const episodes = useMemo(() => {
+    if (type === "tv" && tvQuery.data?.episodes) return tvQuery.data.episodes;
+    return [] as Episode[];
+  }, [type, tvQuery.data]);
+
+  const currentEpisodeIndex = useMemo(() => {
+    if (type === "tv" && tvQuery.data?.currentEpisodeIndex !== undefined)
+      return tvQuery.data.currentEpisodeIndex;
+    return 0;
+  }, [type, tvQuery.data]);
+
+  const isMediaLoading = movieQuery.isLoading || tvQuery.isLoading || isSourcesLoading;
+
   // Filter sources: hide requiresAuth sources from unauthenticated users
   const videoSources = useMemo(() => {
     return fetchedSources.filter(src => {
@@ -34,45 +115,33 @@ export const useMediaPlayer = (
     });
   }, [fetchedSources, user]);
 
-  const [mediaState, setMediaState] = useState({
-    title: "",
-    mediaDetails: null as MovieDetails | TVDetails | null,
-    episodes: [] as Episode[],
-    currentEpisodeIndex: 0,
-    isLoading: true,
-    hasInitialized: false,
-  });
-  const {
-    title,
-    mediaDetails,
-    episodes,
-    currentEpisodeIndex,
-    isLoading,
-    hasInitialized,
-  } = mediaState;
-  const [selectedSource, setSelectedSource] = useState<string>(
-    userPreferences?.preferred_source || ""
-  );
+  // Selected source: manual override wins, otherwise user preference, otherwise
+  // the first available source. Derived — no effect needed to keep it in sync.
+  const [sourceOverride, setSourceOverride] = useState<string | null>(null);
+  const selectedSource =
+    sourceOverride ??
+    userPreferences?.preferred_source ??
+    (videoSources.length > 0 ? videoSources[0].key : "");
 
-  // Set initial selected source once sources are loaded
-  useEffect(() => {
-    if (videoSources.length > 0 && !selectedSource) {
-      setSelectedSource(
-        userPreferences?.preferred_source || videoSources[0].key
-      );
+  const mediaType: "movie" | "tv" = type === "tv" ? "tv" : "movie";
+
+  // iframe URL derived directly from route params + selected source.
+  // Recomputes on source change; VideoPlayer remounts via key={iframeUrl}.
+  const iframeUrl = useMemo(() => {
+    if (!id) return "";
+    const source = videoSources.find(src => src.key === selectedSource);
+    if (!source) return "";
+    const mediaId = parseInt(id, 10);
+    if (mediaType === "movie") {
+      return source.getMovieUrl(mediaId);
     }
-  }, [videoSources, selectedSource, userPreferences]);
-  const [iframeUrl, setIframeUrl] = useState<string>("");
-  const [mediaType, setMediaType] = useState<"movie" | "tv">("movie");
+    if (mediaType === "tv" && season && episode) {
+      return source.getTVUrl(mediaId, parseInt(season, 10), parseInt(episode, 10));
+    }
+    return "";
+  }, [id, mediaType, season, episode, selectedSource, videoSources]);
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
-  const [nextSeasonInfo, setNextSeasonInfo] = useState({
-    hasNextSeason: false,
-    nextSeasonNumber: null as number | null,
-    nextSeasonHasEpisodes: false,
-  });
-  const { hasNextSeason, nextSeasonNumber, nextSeasonHasEpisodes } =
-    nextSeasonInfo;
-  const watchHistoryRecorded = useRef(false);
+  const watchHistoryRecorded = useRef<string | null>(null);
   // Removed custom source state
   // Custom API state removed
 
@@ -118,50 +187,31 @@ export const useMediaPlayer = (
     error: apiError,
   } = useStreamFlixApi(apiUrl);
 
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
-
-  useEffect(() => {
-    if (user && id && mediaType) {
-      const mediaId = parseInt(id, 10);
-      setIsFavorite(isInFavorites(mediaId, mediaType));
-      setIsInMyWatchlist(isInWatchlist(mediaId, mediaType));
-    }
-  }, [user, id, mediaType, isInFavorites, isInWatchlist]);
-
-  useEffect(() => {
-    if (userPreferences?.preferred_source) {
-      setSelectedSource(userPreferences.preferred_source);
-    }
-  }, [userPreferences?.preferred_source]);
-
-  useEffect(() => {
-    if (type === "movie" || type === "tv") {
-      setMediaType(type);
-    }
-  }, [type]);
+  // Favorite / watchlist membership derived from the reactive watch-history
+  // context — re-renders automatically when the store updates.
+  const mediaIdNumber = id ? parseInt(id, 10) : null;
+  const isFavorite =
+    !!user && mediaIdNumber !== null
+      ? isInFavorites(mediaIdNumber, mediaType)
+      : false;
+  const isInMyWatchlist =
+    !!user && mediaIdNumber !== null
+      ? isInWatchlist(mediaIdNumber, mediaType)
+      : false;
 
   // Custom API effect removed
 
   // Custom API stream fetching effect removed
 
-  const updateIframeUrl = useCallback(
-    (mediaId: number, seasonNum?: number, episodeNum?: number) => {
-      const source = videoSources.find(src => src.key === selectedSource);
-      if (!source) return;
-      let url;
-      if (mediaType === "movie") {
-        url = source.getMovieUrl(mediaId);
-      } else if (mediaType === "tv" && seasonNum && episodeNum) {
-        url = source.getTVUrl(mediaId, seasonNum, episodeNum);
-      }
-      if (url) {
-        setIframeUrl(url);
-        setIsPlayerLoaded(true);
-      }
-    },
-    [selectedSource, mediaType, videoSources]
-  );
+  // Reset player-load state when the route changes (React "adjust state during
+  // render" pattern — no effect needed). Watch-history recording is guarded by
+  // storing the recorded route key in the ref instead of a manual reset.
+  const routeKey = `${id}/${type}/${season}/${episode}`;
+  const [prevRouteKey, setPrevRouteKey] = useState(routeKey);
+  if (routeKey !== prevRouteKey) {
+    setPrevRouteKey(routeKey);
+    setIsPlayerLoaded(false);
+  }
 
   useEffect(() => {
     if (
@@ -169,7 +219,7 @@ export const useMediaPlayer = (
       !user ||
       !mediaDetails ||
       !id ||
-      watchHistoryRecorded.current
+      watchHistoryRecorded.current === routeKey
     )
       return;
 
@@ -179,7 +229,7 @@ export const useMediaPlayer = (
         ? (mediaDetails as MovieDetails).runtime * 60
         : ((mediaDetails as TVDetails).episode_run_time?.[0] || 30) * 60;
 
-    watchHistoryRecorded.current = true;
+    watchHistoryRecorded.current = routeKey;
 
     addToWatchHistory(
       {
@@ -211,184 +261,46 @@ export const useMediaPlayer = (
     episode,
     selectedSource,
     addToWatchHistory,
+    routeKey,
   ]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    setIsPlayerLoaded(false);
-    watchHistoryRecorded.current = false;
-
-    const fetchMediaDetails = async () => {
-      if (!id || !type) return;
-
-      setMediaState(prev => ({
-        ...prev,
-        isLoading: true,
-        mediaDetails: null,
-        episodes: [],
-        currentEpisodeIndex: 0,
-        title: "",
-      }));
-      setIframeUrl("");
-
-      try {
-        const mediaId = parseInt(id, 10);
-        const isTV = type === "tv";
-
-        if (!isTV) {
-          const movieDetails = await getMovieDetails(mediaId);
-          if (movieDetails && isMounted) {
-            setMediaState(prev => ({
-              ...prev,
-              title: movieDetails.title || "Untitled Movie",
-              mediaDetails: movieDetails,
-            }));
-          }
-        } else if (isTV && season && episode) {
-          const tvDetails = await getTVDetails(mediaId);
-          if (tvDetails && isMounted) {
-            const seasonData = await getSeasonDetails(
-              mediaId,
-              parseInt(season, 10)
-            );
-            if (isMounted) {
-              const currentEpisodeNumber = parseInt(episode, 10);
-              const episodeIndex = seasonData.findIndex(
-                ep => ep.episode_number === currentEpisodeNumber
-              );
-              const episodeTitle =
-                seasonData.find(
-                  ep => ep.episode_number === currentEpisodeNumber
-                )?.name || "";
-              setMediaState(prev => ({
-                ...prev,
-                episodes: seasonData,
-                currentEpisodeIndex: episodeIndex !== -1 ? episodeIndex : 0,
-                title: `${tvDetails.name || "Untitled Show"} - Season ${season} Episode ${episode}${episodeTitle ? ": " + episodeTitle : ""}`,
-                mediaDetails: tvDetails,
-              }));
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching media details:", error);
-        if (isMounted) {
-          toast({
-            title: "Error loading content",
-            description:
-              "There was a problem loading the media. Please try again.",
-            variant: "destructive",
-          });
-          navigate("/");
-        }
-      } finally {
-        if (isMounted) {
-          setMediaState(prev => ({
-            ...prev,
-            isLoading: false,
-            hasInitialized: true,
-          }));
-        }
-      }
-    };
-
-    fetchMediaDetails();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id, type, season, episode, navigate, toast]);
-
-  useEffect(() => {
-    if (!id || !hasInitialized || !mediaDetails) return;
-    const mediaId = parseInt(id, 10);
-    if (mediaType === "movie") {
-      updateIframeUrl(mediaId);
-    } else if (mediaType === "tv" && season && episode) {
-      updateIframeUrl(mediaId, parseInt(season, 10), parseInt(episode, 10));
-    }
-  }, [
-    id,
-    mediaType,
-    season,
-    episode,
-    hasInitialized,
-    mediaDetails,
-    selectedSource,
-    updateIframeUrl,
-  ]);
-
-  // Calculate next season availability when media details change
-  useEffect(() => {
-    if (mediaType !== "tv" || !mediaDetails || !season) {
-      setNextSeasonInfo({
-        hasNextSeason: false,
-        nextSeasonNumber: null,
-        nextSeasonHasEpisodes: false,
-      });
-      return;
-    }
-
+  // Derive the next available season from media details (memoized, no setState)
+  const nextSeasonCandidate = useMemo(() => {
+    if (mediaType !== "tv" || !mediaDetails || !season) return null;
     const tvDetails = mediaDetails as TVDetails;
+    if (!tvDetails.seasons) return null;
     const currentSeasonNumber = parseInt(season, 10);
-
-    if (!tvDetails.seasons) {
-      setNextSeasonInfo({
-        hasNextSeason: false,
-        nextSeasonNumber: null,
-        nextSeasonHasEpisodes: false,
-      });
-      return;
-    }
-
-    // Sort seasons by season_number to handle non-sequential numbering
     const sortedSeasons = [...tvDetails.seasons].sort(
       (a, b) => a.season_number - b.season_number
     );
-    const nextSeason = sortedSeasons.find(
-      seasonData => seasonData.season_number > currentSeasonNumber
+    return (
+      sortedSeasons.find(s => s.season_number > currentSeasonNumber) ?? null
     );
+  }, [mediaType, mediaDetails, season]);
 
-    if (nextSeason) {
-      // Validate that the next season actually has episodes
-      const validateNextSeason = async () => {
-        try {
-          const nextSeasonDetails = await getSeasonDetails(
-            parseInt(id!, 10),
-            nextSeason.season_number
-          );
-          const hasEpisodes = nextSeasonDetails && nextSeasonDetails.length > 0;
+  // Validate the next season actually has episodes (react-query, cached)
+  const { data: nextSeasonEpisodes } = useQuery({
+    queryKey: ["tv-season-episodes", id, nextSeasonCandidate?.season_number],
+    queryFn: async () => {
+      if (!id || !nextSeasonCandidate) return [];
+      return await getSeasonDetails(
+        parseInt(id, 10),
+        nextSeasonCandidate.season_number
+      );
+    },
+    enabled: !!id && !!nextSeasonCandidate,
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 
-          setNextSeasonInfo({
-            hasNextSeason: hasEpisodes,
-            nextSeasonNumber: nextSeason.season_number,
-            nextSeasonHasEpisodes: hasEpisodes,
-          });
-        } catch (error) {
-          console.error("Error validating next season episodes:", error);
-          setNextSeasonInfo({
-            hasNextSeason: false,
-            nextSeasonNumber: null,
-            nextSeasonHasEpisodes: false,
-          });
-        }
-      };
-
-      validateNextSeason();
-    } else {
-      setNextSeasonInfo({
-        hasNextSeason: false,
-        nextSeasonNumber: null,
-        nextSeasonHasEpisodes: false,
-      });
-    }
-  }, [mediaType, mediaDetails, season, id]);
+  const nextSeasonNumber = nextSeasonCandidate?.season_number ?? null;
+  const nextSeasonHasEpisodes =
+    !!nextSeasonEpisodes && nextSeasonEpisodes.length > 0;
+  const hasNextSeason = nextSeasonNumber !== null && nextSeasonHasEpisodes;
 
   const handleSourceChange = (sourceKey: string) => {
-    setSelectedSource(sourceKey);
+    setSourceOverride(sourceKey);
     setIsPlayerLoaded(false);
-    watchHistoryRecorded.current = false;
+    watchHistoryRecorded.current = null;
   };
 
   const goToDetails = () => {
@@ -409,11 +321,6 @@ export const useMediaPlayer = (
       // Normal next episode within current season
       const nextEpisode = episodes[currentEpisodeIndex + 1];
       navigate(`/watch/tv/${id}/${season}/${nextEpisode.episode_number}`);
-
-      toast({
-        title: "Navigation",
-        description: `Playing next episode: ${nextEpisode.name}`,
-      });
       return;
     }
 
@@ -468,11 +375,6 @@ export const useMediaPlayer = (
       navigate(
         `/watch/tv/${id}/${nextSeason.season_number}/${firstEp.episode_number}`
       );
-
-      toast({
-        title: "New Season",
-        description: `Moving to Season ${nextSeason.season_number}, Episode ${firstEp.episode_number}`,
-      });
     } catch (error) {
       console.error("Error fetching next season:", error);
       toast({
@@ -496,11 +398,6 @@ export const useMediaPlayer = (
 
     const prevEpisode = episodes[currentEpisodeIndex - 1];
     navigate(`/watch/tv/${id}/${season}/${prevEpisode.episode_number}`);
-
-    toast({
-      title: "Navigation",
-      description: `Playing previous episode: ${prevEpisode.name}`,
-    });
   };
 
   const toggleFavorite = () => {
@@ -510,7 +407,6 @@ export const useMediaPlayer = (
 
     if (isFavorite) {
       removeFromFavorites(mediaId, mediaType);
-      setIsFavorite(false);
       toast({
         title: "Removed from favorites",
         description: `${title} has been removed from your favorites.`,
@@ -528,7 +424,6 @@ export const useMediaPlayer = (
         overview: mediaDetails.overview,
         rating: mediaDetails.vote_average,
       });
-      setIsFavorite(true);
       toast({
         title: "Added to favorites",
         description: `${title} has been added to your favorites.`,
@@ -543,7 +438,6 @@ export const useMediaPlayer = (
 
     if (isInMyWatchlist) {
       removeFromWatchlist(mediaId, mediaType);
-      setIsInMyWatchlist(false);
       toast({
         title: "Removed from watchlist",
         description: `${title} has been removed from your watchlist.`,
@@ -561,7 +455,6 @@ export const useMediaPlayer = (
         overview: mediaDetails.overview,
         rating: mediaDetails.vote_average,
       });
-      setIsInMyWatchlist(true);
       toast({
         title: "Added to watchlist",
         description: `${title} has been added to your watchlist.`,
@@ -588,7 +481,7 @@ export const useMediaPlayer = (
     mediaDetails,
     episodes,
     currentEpisodeIndex,
-    isLoading: isLoading || isSourcesLoading,
+    isLoading: isMediaLoading,
     isPlayerLoaded,
     iframeUrl,
     selectedSource,

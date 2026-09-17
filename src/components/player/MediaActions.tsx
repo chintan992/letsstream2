@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Heart, Bookmark, ArrowLeft, Star, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { m } from "framer-motion";
@@ -23,6 +24,7 @@ interface MediaActionsProps {
   year?: string | number;
   rating?: number;
   mediaType?: "movie" | "tv";
+  isLoading?: boolean;
 }
 
 const MediaActions = ({
@@ -37,6 +39,7 @@ const MediaActions = ({
   year,
   rating,
   mediaType,
+  isLoading = false,
 }: MediaActionsProps) => {
   return (
     <m.div
@@ -58,7 +61,12 @@ const MediaActions = ({
         </Button>
 
         {/* Title Section */}
-        {title && (
+        {isLoading && !title ? (
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-48 bg-white/10" />
+            <Skeleton className="h-3 w-32 bg-white/10" />
+          </div>
+        ) : title ? (
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-semibold text-white md:text-lg">
               {title}
@@ -79,10 +87,10 @@ const MediaActions = ({
               )}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Spacer if no title */}
-        {!title && <div className="flex-1" />}
+        {/* Spacer if no title and not loading */}
+        {!title && !isLoading && <div className="flex-1" />}
 
         {/* Action Buttons */}
         <m.div
