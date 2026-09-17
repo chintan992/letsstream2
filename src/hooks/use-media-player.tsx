@@ -173,37 +173,34 @@ export const useMediaPlayer = (
     )
       return;
 
-    if (!watchHistoryRecorded.current) {
-      const mediaId = parseInt(id, 10);
-      const duration =
-        mediaType === "movie"
-          ? (mediaDetails as MovieDetails).runtime * 60
-          : ((mediaDetails as TVDetails).episode_run_time?.[0] || 30) * 60;
+    const mediaId = parseInt(id, 10);
+    const duration =
+      mediaType === "movie"
+        ? (mediaDetails as MovieDetails).runtime * 60
+        : ((mediaDetails as TVDetails).episode_run_time?.[0] || 30) * 60;
 
-      watchHistoryRecorded.current = true;
+    watchHistoryRecorded.current = true;
 
-      console.log("Recording initial watch history on player load");
-      addToWatchHistory(
-        {
-          id: mediaId,
-          title:
-            (mediaDetails as MovieDetails).title ||
-            (mediaDetails as TVDetails).name ||
-            "",
-          poster_path: mediaDetails.poster_path,
-          backdrop_path: mediaDetails.backdrop_path,
-          overview: mediaDetails.overview,
-          vote_average: mediaDetails.vote_average,
-          media_type: mediaType,
-          genre_ids: mediaDetails.genres.map(g => g.id),
-        },
-        0, // Initial position
-        duration,
-        season ? parseInt(season, 10) : undefined,
-        episode ? parseInt(episode, 10) : undefined,
-        selectedSource
-      );
-    }
+    addToWatchHistory(
+      {
+        id: mediaId,
+        title:
+          (mediaDetails as MovieDetails).title ||
+          (mediaDetails as TVDetails).name ||
+          "",
+        poster_path: mediaDetails.poster_path,
+        backdrop_path: mediaDetails.backdrop_path,
+        overview: mediaDetails.overview,
+        vote_average: mediaDetails.vote_average,
+        media_type: mediaType,
+        genre_ids: mediaDetails.genres.map(g => g.id),
+      },
+      0, // Initial position
+      duration,
+      season ? parseInt(season, 10) : undefined,
+      episode ? parseInt(episode, 10) : undefined,
+      selectedSource
+    );
   }, [
     isPlayerLoaded,
     user,

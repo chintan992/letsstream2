@@ -105,7 +105,7 @@ const EpisodeNavigation = ({
             </div>
 
             {currentEpisode?.air_date && (
-              <span className="text-sm text-white/40">
+              <span className="text-sm text-white/60">
                 Aired: {new Date(currentEpisode.air_date).toLocaleDateString()}
               </span>
             )}

@@ -4,6 +4,8 @@ import { MovieDetails, TVDetails } from "@/utils/types";
 import { m } from "framer-motion";
 import { useState } from "react";
 import { useScrollRestoration } from "@/hooks";
+import { getImageUrl } from "@/utils/services/tmdb";
+import { backdropSizes } from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -35,7 +37,6 @@ const Player = () => {
       : `scroll-player-movie-${id}`;
 
   useScrollRestoration({ storageKey: scrollStorageKey, enabled: true });
-  const { user } = useAuth();
   const [isEpisodeSidebarOpen, setIsEpisodeSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
@@ -72,8 +73,32 @@ const Player = () => {
   } = useMediaPlayer(id, season, episode, type);
 
   const posterUrl = mediaDetails
-    ? `https://image.tmdb.org/t/p/w1280${mediaDetails.backdrop_path}`
+    ? (getImageUrl(mediaDetails.backdrop_path, backdropSizes.large) ??
+      undefined)
     : undefined;
+
+  const episodeSidebarProps = {
+    episodes,
+    currentEpisodeIndex,
+    showId: id ? parseInt(id, 10) : 0,
+    season: season ? parseInt(season, 10) : 1,
+    seasons: (mediaDetails as TVDetails)?.seasons || [],
+  };
+
+  const playerElement = (
+    <VideoPlayer
+      isLoading={isLoading}
+      iframeUrl={iframeUrl}
+      title={title}
+      poster={posterUrl}
+      onLoaded={handlePlayerLoaded}
+      onError={handlePlayerError}
+      isApiSource={isApiSource}
+      streamLinks={streamLinks}
+      apiLoading={apiLoading}
+      apiError={apiError}
+    />
+  );
 
   return (
     <m.div
@@ -130,45 +155,17 @@ const Player = () => {
         {!isMobile && mediaType === "tv" && episodes.length > 0 ? (
           <div className="flex flex-row gap-4 xl:gap-6">
             <div className="z-10 min-w-0 flex-1 lg:min-w-[560px] xl:min-w-[700px]">
-              <VideoPlayer
-                isLoading={isLoading}
-                iframeUrl={iframeUrl}
-                title={title}
-                poster={posterUrl}
-                onLoaded={handlePlayerLoaded}
-                onError={handlePlayerError}
-                isApiSource={isApiSource}
-                streamLinks={streamLinks}
-                apiLoading={apiLoading}
-                apiError={apiError}
-              />
+              {playerElement}
             </div>
             <div className="aspect-video max-h-[70vh] min-h-[350px] w-[280px] flex-shrink-0 md:w-80 lg:w-96 xl:w-[420px]">
-              <EpisodeSidebar
-                episodes={episodes}
-                currentEpisodeIndex={currentEpisodeIndex}
-                showId={id ? parseInt(id, 10) : 0}
-                season={season ? parseInt(season, 10) : 1}
-                seasons={(mediaDetails as TVDetails)?.seasons || []}
-              />
+              <EpisodeSidebar {...episodeSidebarProps} />
             </div>
           </div>
         ) : (
           <>
             {/* Video Player Section for Mobile or Non-TV content */}
             <div className="z-10 min-w-0 flex-1 lg:min-w-[560px] xl:min-w-[700px]">
-              <VideoPlayer
-                isLoading={isLoading}
-                iframeUrl={iframeUrl}
-                title={title}
-                poster={posterUrl}
-                onLoaded={handlePlayerLoaded}
-                onError={handlePlayerError}
-                isApiSource={isApiSource}
-                streamLinks={streamLinks}
-                apiLoading={apiLoading}
-                apiError={apiError}
-              />
+              {playerElement}
             </div>
 
             {/* Collapsible Episode Sidebar for Mobile/Tablet */}
@@ -195,13 +192,7 @@ const Player = () => {
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-2 max-h-[60vh] overflow-hidden overflow-y-auto data-[state=closed]:animate-slide-up data-[state=open]:animate-slide-down">
-                  <EpisodeSidebar
-                    episodes={episodes}
-                    currentEpisodeIndex={currentEpisodeIndex}
-                    showId={id ? parseInt(id, 10) : 0}
-                    season={season ? parseInt(season, 10) : 1}
-                    seasons={(mediaDetails as TVDetails)?.seasons || []}
-                  />
+                  <EpisodeSidebar {...episodeSidebarProps} />
                 </CollapsibleContent>
               </Collapsible>
             )}

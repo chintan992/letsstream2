@@ -162,9 +162,9 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setSearchQuery(e.target.value)
             }
-            className="border-white/10 bg-white/5 pl-9 pr-9 text-white placeholder:text-white/40 focus-visible:ring-accent"
+            className="border-white/10 bg-white/5 pl-9 pr-9 text-white placeholder:text-white/60 focus-visible:ring-accent"
           />
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-white/40" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-white/60" />
           {searchQuery.length > 0 && (
             <button
               onClick={() => setSearchQuery("")}
@@ -189,7 +189,7 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
               <h3 className="mb-1 font-medium text-white/60">
                 No episodes found
               </h3>
-              <p className="text-sm text-white/40">
+              <p className="text-sm text-white/60">
                 Try adjusting your search terms
               </p>
             </div>

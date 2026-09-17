@@ -184,7 +184,7 @@ const VideoSourceSelector = ({
                   Currently active
                 </m.div>
               ) : (
-                <span className="text-xs text-white/50 group-hover:text-white/70">
+                <span className="text-xs text-white/60 group-hover:text-white/80">
                   Click to select
                 </span>
               )}
