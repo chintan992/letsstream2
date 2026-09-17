@@ -86,7 +86,7 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   const currentEpisode = episodes[currentEpisodeIndex];
 
   // Real watched state from watch history (empty when no history exists)
-  const watchedEpisodes = useEpisodeWatched(
+  const { watchedEpisodes, hasHistory } = useEpisodeWatched(
     typeof showId === "string" ? parseInt(showId, 10) : showId
   );
   const seasonNumber = typeof season === "string" ? parseInt(season, 10) : season;
@@ -131,6 +131,7 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
                 s => s.season_number.toString() === value
               );
               if (selectedSeason) {
+                onNavigate?.();
                 // Navigate to the first episode of the selected season
                 // We don't know the episode count or first episode number here without fetching,
                 // but usually it starts at 1. A safer bet might be to just navigate to the season
@@ -187,13 +188,14 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
         </div>
       </div>
 
-      {/* Episode List */}
+      {/* Episode List — data-vaul-no-drag lets this scroll freely inside the
+          mobile vaul drawer without triggering drag-to-dismiss */}
       <ScrollArea
         className="min-h-0 flex-1"
         scrollBarVariant="accent"
         viewportRef={viewportRef}
       >
-        <div className="space-y-4 p-4">
+        <div className="space-y-4 p-4" data-vaul-no-drag>
           {filteredEpisodes.length === 0 && searchQuery.length > 0 ? (
             <div className="px-4 py-12 text-center">
               <Search className="mx-auto mb-3 h-12 w-12 text-white/20" />
@@ -210,7 +212,7 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
                 episode.episode_number === currentEpisodeNumber;
               // Prefer real watch history; fall back to "earlier than current"
               const hasWatched =
-                watchedEpisodes.size > 0
+                hasHistory
                   ? watchedEpisodes.has(
                       `${seasonNumber}-${episode.episode_number}`
                     )

@@ -169,11 +169,13 @@ const Player = () => {
           isLoading={isLoading}
         />
 
-        {/* Desktop Layout: Video Player and Episode Sidebar side-by-side */}
+        {/* Desktop Layout: Video Player and Episode Sidebar side-by-side.
+            Parent stretches children; player sets height via aspect-video,
+            sidebar matches it and scrolls internally. */}
         {!isMobile && mediaType === "tv" && episodes.length > 0 ? (
-          <div className="flex flex-row gap-4 xl:gap-6">
+          <div className="flex flex-row items-stretch gap-4 xl:gap-6">
             <div className="z-10 min-w-0 flex-1">{playerElement}</div>
-            <div className="h-[350px] w-[280px] flex-shrink-0 self-start md:h-[420px] md:w-80 lg:h-[480px] lg:w-96 xl:h-[540px] xl:w-[420px]">
+            <div className="max-h-[80vh] w-[280px] flex-shrink-0 self-stretch md:w-80 lg:w-96 xl:w-[420px]">
               <EpisodeSidebar {...episodeSidebarProps} />
             </div>
           </div>

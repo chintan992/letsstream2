@@ -29,8 +29,14 @@ export const useMediaPlayer = (
 
   const mediaType: "movie" | "tv" = type === "tv" ? "tv" : "movie";
 
-  const { title, mediaDetails, episodes, currentEpisodeIndex, isMediaLoading } =
-    useMediaDetails(id, season, episode, type);
+  const {
+    title,
+    mediaDetails,
+    episodes,
+    currentEpisodeIndex,
+    isMediaLoading,
+    isPlaceholderData,
+  } = useMediaDetails(id, season, episode, type);
 
   const {
     videoSources,
@@ -99,6 +105,7 @@ export const useMediaPlayer = (
       !isPlayerLoaded ||
       !user ||
       !mediaDetails ||
+      isPlaceholderData ||
       !id ||
       watchHistoryRecorded.current === routeKey
     )
@@ -136,6 +143,7 @@ export const useMediaPlayer = (
     isPlayerLoaded,
     user,
     mediaDetails,
+    isPlaceholderData,
     id,
     mediaType,
     season,

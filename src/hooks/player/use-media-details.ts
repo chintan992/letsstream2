@@ -81,6 +81,8 @@ export function useMediaDetails(
   }, [type, tvQuery.data]);
 
   const isMediaLoading = movieQuery.isLoading || tvQuery.isLoading;
+  const isPlaceholderData =
+    type === "movie" ? movieQuery.isPlaceholderData : tvQuery.isPlaceholderData;
 
   return {
     title,
@@ -88,5 +90,6 @@ export function useMediaDetails(
     episodes,
     currentEpisodeIndex,
     isMediaLoading,
+    isPlaceholderData,
   };
 }

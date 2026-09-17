@@ -37,10 +37,24 @@ export function useSourceSelection(
   // Selected source: manual override wins, otherwise user preference, otherwise
   // the first available source. Derived — no effect needed to keep it in sync.
   const [sourceOverride, setSourceOverride] = useState<string | null>(null);
-  const selectedSource =
-    sourceOverride ??
-    userPreferences?.preferred_source ??
-    (videoSources.length > 0 ? videoSources[0].key : "");
+  const selectedSource = useMemo(() => {
+    if (
+      sourceOverride !== null &&
+      videoSources.some(source => source.key === sourceOverride)
+    ) {
+      return sourceOverride;
+    }
+
+    const preferredSource = userPreferences?.preferred_source;
+    if (
+      preferredSource &&
+      videoSources.some(source => source.key === preferredSource)
+    ) {
+      return preferredSource;
+    }
+
+    return videoSources[0]?.key ?? "";
+  }, [sourceOverride, userPreferences?.preferred_source, videoSources]);
 
   const setSelectedSource = (sourceKey: string) => setSourceOverride(sourceKey);
 
