@@ -12,6 +12,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "node_modules/",
         "src/test/",
@@ -31,8 +32,10 @@ export default defineConfig({
         statements: 50,
       },
     },
-    deps: {
-      inline: ["@tanstack/react-query"],
+    server: {
+      deps: {
+        inline: ["@tanstack/react-query"],
+      },
     },
   },
   resolve: {

@@ -49,7 +49,11 @@ function getCachedSources(): VideoSource[] | null {
     return parsed.sources.map(createVideoSource);
   } catch (error) {
     console.error("Error reading video sources cache:", error);
-    localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+    try {
+      localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+    } catch (removeError) {
+      console.error("Error removing video sources cache:", removeError);
+    }
     return null;
   }
 }

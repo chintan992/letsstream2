@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useAuth } from "@/hooks";
 import { useUserPreferences } from "@/hooks/user-preferences";
@@ -130,7 +137,9 @@ export interface WatchHistoryContextType {
   deleteSelectedWatchHistory: (ids: string[]) => Promise<void>;
 }
 
-export const WatchHistoryContext = createContext<WatchHistoryContextType | undefined>(undefined);
+export const WatchHistoryContext = createContext<
+  WatchHistoryContextType | undefined
+>(undefined);
 
 export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -147,7 +156,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     if (!navigator.onLine || watchPositionQueue.size === 0) return;
 
     try {
-      const batch = writeBatch(db);
+      let batch = writeBatch(db);
       let batchCount = 0;
       const now = Date.now();
       const processedKeys = [];
@@ -170,6 +179,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 
         if (batchCount >= 500) {
           await batch.commit();
+          batch = writeBatch(db);
           batchCount = 0;
         }
       }
@@ -310,9 +320,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           const deduplicatedHistory = deduplicateWatchHistory(historyData);
           setWatchHistory(deduplicatedHistory);
         } else {
-          const combinedHistory = [...watchHistory, ...historyData];
-          const deduplicatedHistory = deduplicateWatchHistory(combinedHistory);
-          setWatchHistory(deduplicatedHistory);
+          setWatchHistory(currentHistory =>
+            deduplicateWatchHistory([...currentHistory, ...historyData])
+          );
         }
 
         setHasMore(historySnapshot.docs.length === ITEMS_PER_PAGE);
@@ -333,7 +343,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [user, lastVisible, loadLocalWatchHistory, watchHistory, toast]
+    [user, lastVisible, loadLocalWatchHistory, toast]
   );
 
   useEffect(() => {
@@ -352,7 +362,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     };
 
     fetchAllData();
-  }, [user, initialFetchDone, fetchWatchHistory]);
+  }, [user?.uid]);
 
   // Automatic Simkl bidirectional sync after initial fetch
   useEffect(() => {
@@ -1017,7 +1027,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
 export function useWatchHistory() {
   const context = useContext(WatchHistoryContext);
   if (!context) {
-    throw new Error("useWatchHistory must be used within a WatchHistoryProvider");
+    throw new Error(
+      "useWatchHistory must be used within a WatchHistoryProvider"
+    );
   }
   return context;
 }

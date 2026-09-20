@@ -4,7 +4,7 @@ import React from "react";
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
@@ -16,13 +16,27 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
+const localStorageState = new Map<string, string>();
+
 Object.defineProperty(window, "localStorage", {
   writable: true,
   value: {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
+    get length() {
+      return localStorageState.size;
+    },
+    key: vi.fn(
+      (index: number) => Array.from(localStorageState.keys())[index] ?? null
+    ),
+    getItem: vi.fn((key: string) => localStorageState.get(key) ?? null),
+    setItem: vi.fn((key: string, value: string) => {
+      localStorageState.set(key, String(value));
+    }),
+    removeItem: vi.fn((key: string) => {
+      localStorageState.delete(key);
+    }),
+    clear: vi.fn(() => {
+      localStorageState.clear();
+    }),
   },
 });
 
@@ -102,31 +116,39 @@ vi.mock("@tanstack/react-query", () => ({
     mount: vi.fn(),
     unmount: vi.fn(),
   })),
-  QueryClientProvider: ({ children }: { children: React.ReactNode }) => children,
+  QueryClientProvider: ({ children }: { children: React.ReactNode }) =>
+    children,
 }));
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => vi.fn(),
   useParams: () => ({}),
   useLocation: () => ({ pathname: "/" }),
-  Link: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
-  Routes: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  Link: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  BrowserRouter: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+  Routes: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
   Route: () => null,
   Outlet: () => null,
 }));
 
 vi.mock("react-helmet-async", () => ({
-  HelmetProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  HelmetProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("framer-motion", () => ({
   motion: {
-    div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => React.createElement("div", props, children),
+    div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) =>
+      React.createElement("div", props, children),
   },
-  LazyMotion: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  LazyMotion: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
   domAnimation: [],
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  AnimatePresence: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/hooks/use-toast", () => ({
@@ -164,7 +186,8 @@ vi.mock("@/hooks/auth-context", () => ({
     resetPassword: vi.fn(),
     sendVerificationEmail: vi.fn(),
   }),
-  AuthProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  AuthProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/hooks/user-preferences", () => ({
@@ -176,7 +199,8 @@ vi.mock("@/hooks/user-preferences", () => ({
     },
     loading: false,
   }),
-  UserPreferencesProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  UserPreferencesProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/contexts/watch-history-context", () => ({
@@ -191,7 +215,8 @@ vi.mock("@/contexts/watch-history-context", () => ({
     deleteWatchHistoryItem: vi.fn(),
     deleteSelectedWatchHistory: vi.fn(),
   }),
-  WatchHistoryProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  WatchHistoryProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/contexts/favorites-context", () => ({
@@ -204,7 +229,8 @@ vi.mock("@/contexts/favorites-context", () => ({
     deleteFavoriteItem: vi.fn(),
     deleteSelectedFavorites: vi.fn(),
   }),
-  FavoritesProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  FavoritesProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/contexts/watchlist-context", () => ({
@@ -217,7 +243,8 @@ vi.mock("@/contexts/watchlist-context", () => ({
     deleteWatchlistItem: vi.fn(),
     deleteSelectedWatchlist: vi.fn(),
   }),
-  WatchlistProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  WatchlistProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/contexts/user-profile-context", () => ({
@@ -227,7 +254,8 @@ vi.mock("@/contexts/user-profile-context", () => ({
     updateProfile: vi.fn(),
     uploadAvatar: vi.fn(),
   }),
-  UserProfileProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  UserProfileProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/contexts/notification-context", () => ({
@@ -237,7 +265,8 @@ vi.mock("@/contexts/notification-context", () => ({
     markAsRead: vi.fn(),
     markAllAsRead: vi.fn(),
   }),
-  NotificationProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  NotificationProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/contexts/chatbot-context", () => ({
@@ -247,7 +276,8 @@ vi.mock("@/contexts/chatbot-context", () => ({
     sendMessage: vi.fn(),
     toggleChat: vi.fn(),
   }),
-  ChatbotProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  ChatbotProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("@/lib/firebase", () => ({

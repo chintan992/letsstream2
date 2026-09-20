@@ -19,7 +19,10 @@ export class RateLimiter {
     this.clientId = crypto.randomUUID();
   }
 
-  static getInstance(capacity: number = 100, windowMs: number = 60000): RateLimiter {
+  static getInstance(
+    capacity: number = 100,
+    windowMs: number = 60000
+  ): RateLimiter {
     const refillRate = capacity / (windowMs / 1000);
     const key = `${capacity}-${windowMs}`;
     if (!RateLimiter.instances.has(key)) {
@@ -61,6 +64,10 @@ export class RateLimiter {
   }
 
   async takeTokens(resourceKey: string, tokens: number = 1): Promise<boolean> {
+    if (!Number.isFinite(tokens) || tokens <= 0) {
+      throw new RangeError("tokens must be a finite number greater than zero");
+    }
+
     const bucket = this.getBucket(resourceKey);
     if (bucket.tokens >= tokens) {
       bucket.tokens -= tokens;

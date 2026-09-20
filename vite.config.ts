@@ -192,7 +192,11 @@ export default defineConfig(({ mode }) => ({
                       }
                       return event.request;
                     } catch (error) {
-                      if (ENABLE_SW_LOGS) console.error("Error handling preload response:", error);
+                      if (ENABLE_SW_LOGS)
+                        console.error(
+                          "Error handling preload response:",
+                          error
+                        );
                       return event.request;
                     }
                   },
@@ -217,7 +221,8 @@ export default defineConfig(({ mode }) => ({
                       }
                       return undefined;
                     } catch (error) {
-                      if (ENABLE_SW_LOGS) console.error("Error serving offline page:", error);
+                      if (ENABLE_SW_LOGS)
+                        console.error("Error serving offline page:", error);
                       return undefined;
                     }
                   },
@@ -293,7 +298,8 @@ export default defineConfig(({ mode }) => ({
                           return response;
                         }
                       } catch (error) {
-                        if (ENABLE_SW_LOGS) console.error("Error parsing TMDB response:", error);
+                        if (ENABLE_SW_LOGS)
+                          console.error("Error parsing TMDB response:", error);
                       }
                     }
                     return null;
@@ -329,6 +335,35 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
+            urlPattern: ({ url, request }: { url: URL; request: Request }) => {
+              return (
+                (url.hostname.includes("firestore.googleapis.com") ||
+                  url.hostname.includes("firebase.googleapis.com") ||
+                  url.hostname.includes("firebaseio.com")) &&
+                ["POST", "PUT", "PATCH", "DELETE"].includes(request.method)
+              );
+            },
+            handler: "NetworkOnly",
+            options: {
+              backgroundSync: {
+                name: "firebase-write-queue",
+                options: {
+                  maxRetentionTime: 24 * 60,
+                },
+              },
+              plugins: [
+                {
+                  fetchDidFail: async () => {
+                    if (ENABLE_SW_LOGS)
+                      console.error(
+                        "Firebase request failed - network only strategy"
+                      );
+                  },
+                },
+              ],
+            },
+          },
+          {
             urlPattern: ({ url }: { url: URL }) => {
               return (
                 url.hostname.includes("firestore.googleapis.com") ||
@@ -341,19 +376,10 @@ export default defineConfig(({ mode }) => ({
               plugins: [
                 {
                   fetchDidFail: async () => {
-                    if (ENABLE_SW_LOGS) console.error("Firebase request failed - network only strategy");
-                  },
-                },
-                {
-                  // Add background sync for failed write operations
-                  handlerDidError: async ({ request }: { request: Request }) => {
-                    if (request.method !== "GET") {
-                      // Queue for background sync
-                      const db = await self.caches.open("background-sync");
-                      await db.put(request, request.clone());
-                      if (ENABLE_SW_LOGS) console.log("Queued write for background sync:", request.url);
-                    }
-                    return undefined;
+                    if (ENABLE_SW_LOGS)
+                      console.error(
+                        "Firebase request failed - network only strategy"
+                      );
                   },
                 },
               ],
@@ -377,7 +403,8 @@ export default defineConfig(({ mode }) => ({
                   }: {
                     request: Request;
                   }) => {
-                    if (ENABLE_SW_LOGS) console.error("Google API request failed:", request.url);
+                    if (ENABLE_SW_LOGS)
+                      console.error("Google API request failed:", request.url);
                     return undefined;
                   },
                 },

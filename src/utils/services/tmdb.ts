@@ -40,7 +40,7 @@ export const tmdb = axios.create({
   },
 });
 
-tmdb.interceptors.request.use((config) => {
+tmdb.interceptors.request.use(config => {
   const key = generateCacheKey(config);
 
   const cached = getCachedResponse(key);
@@ -67,13 +67,13 @@ tmdb.interceptors.request.use((config) => {
 });
 
 tmdb.interceptors.response.use(
-  (response) => {
+  response => {
     const key = generateCacheKey(response.config);
     pendingRequests.delete(key);
     setCachedResponse(key, response.data);
     return response;
   },
-  (error) => {
+  error => {
     const key = generateCacheKey(error.config);
     pendingRequests.delete(key);
     return Promise.reject(error);
@@ -98,11 +98,14 @@ tmdb.request = async (config: AxiosRequestConfig) => {
 
   let pending = pendingRequests.get(key);
   if (!pending) {
-    pending = originalRequest(config).then((response) => {
-      setCachedResponse(key, response.data);
-      pendingRequests.delete(key);
-      return response;
-    });
+    pending = originalRequest(config)
+      .then(response => {
+        setCachedResponse(key, response.data);
+        return response;
+      })
+      .finally(() => {
+        pendingRequests.delete(key);
+      });
     pendingRequests.set(key, pending);
   }
 
@@ -114,7 +117,10 @@ export const clearTMDBCache = (): void => {
   pendingRequests.clear();
 };
 
-export const getImageUrl = (path: string | null, size: string): string | null => {
+export const getImageUrl = (
+  path: string | null,
+  size: string
+): string | null => {
   if (!path) return null;
   return `${TMDB.IMAGE_BASE_URL}/${size}${path}`;
 };
@@ -128,11 +134,11 @@ export const getResponsiveImageUrls = (
   const sizes = "(max-width: 640px) 154px, (max-width: 1024px) 342px, 500px";
 
   const srcset = baseSizes
-    .map((size) => `${TMDB.IMAGE_BASE_URL}/w${size}${path} ${size}w`)
+    .map(size => `${TMDB.IMAGE_BASE_URL}/w${size}${path} ${size}w`)
     .join(", ");
 
   const webpSrcset = baseSizes
-    .map((size) => `${TMDB.IMAGE_BASE_URL}/w${size}${path} ${size}w`)
+    .map(size => `${TMDB.IMAGE_BASE_URL}/w${size}${path} ${size}w`)
     .join(", ");
 
   return { srcset, webpSrcset, sizes };
