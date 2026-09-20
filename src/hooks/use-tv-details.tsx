@@ -16,6 +16,8 @@ import {
 } from "@/utils/api";
 import { TVDetails, Episode, Media, CastMember } from "@/utils/types";
 import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
+import { useWatchlist } from "@/hooks/watchlist";
 import { useToast } from "@/hooks/use-toast";
 
 interface Creator {
@@ -87,15 +89,19 @@ export const useTVDetails = (id: string | undefined) => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { watchHistory } = useWatchHistory();
+
   const {
-    watchHistory,
     addToFavorites,
-    addToWatchlist,
     removeFromFavorites,
-    removeFromWatchlist,
     isInFavorites,
+  } = useFavorites();
+
+  const {
+    addToWatchlist,
+    removeFromWatchlist,
     isInWatchlist,
-  } = useWatchHistory();
+  } = useWatchlist();
 
   useEffect(() => {
     const fetchTVData = async () => {

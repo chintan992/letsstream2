@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
+import { visualizer } from "rollup-plugin-visualizer";
 import pkg from "./package.json";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -18,6 +19,9 @@ interface TMDBResponse {
 
 // Cache version based on package version
 const CACHE_VERSION = `v${pkg.version}`;
+
+// Enable/disable debug logging in service worker
+const ENABLE_SW_LOGS = false;
 
 // Cache names with versioning
 const CACHE_NAMES = {
@@ -188,7 +192,7 @@ export default defineConfig(({ mode }) => ({
                       }
                       return event.request;
                     } catch (error) {
-                      console.error("Error handling preload response:", error);
+                      if (ENABLE_SW_LOGS) console.error("Error handling preload response:", error);
                       return event.request;
                     }
                   },
@@ -213,7 +217,7 @@ export default defineConfig(({ mode }) => ({
                       }
                       return undefined;
                     } catch (error) {
-                      console.error("Error serving offline page:", error);
+                      if (ENABLE_SW_LOGS) console.error("Error serving offline page:", error);
                       return undefined;
                     }
                   },
@@ -265,13 +269,12 @@ export default defineConfig(({ mode }) => ({
           },
           {
             urlPattern: /^https:\/\/api\.themoviedb\.org\/3\/.*/i,
-            handler: "NetworkFirst",
+            handler: "StaleWhileRevalidate",
             options: {
               cacheName: CACHE_NAMES.tmdbApi,
-              networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 1 * 24 * 60 * 60,
+                maxEntries: 200,
+                maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
               },
               plugins: [
                 {
@@ -290,7 +293,7 @@ export default defineConfig(({ mode }) => ({
                           return response;
                         }
                       } catch (error) {
-                        console.error("Error parsing TMDB response:", error);
+                        if (ENABLE_SW_LOGS) console.error("Error parsing TMDB response:", error);
                       }
                     }
                     return null;
@@ -338,9 +341,19 @@ export default defineConfig(({ mode }) => ({
               plugins: [
                 {
                   fetchDidFail: async () => {
-                    console.error(
-                      "Firebase request failed - network only strategy"
-                    );
+                    if (ENABLE_SW_LOGS) console.error("Firebase request failed - network only strategy");
+                  },
+                },
+                {
+                  // Add background sync for failed write operations
+                  handlerDidError: async ({ request }: { request: Request }) => {
+                    if (request.method !== "GET") {
+                      // Queue for background sync
+                      const db = await self.caches.open("background-sync");
+                      await db.put(request, request.clone());
+                      if (ENABLE_SW_LOGS) console.log("Queued write for background sync:", request.url);
+                    }
+                    return undefined;
                   },
                 },
               ],
@@ -364,7 +377,7 @@ export default defineConfig(({ mode }) => ({
                   }: {
                     request: Request;
                   }) => {
-                    console.error("Google API request failed:", request.url);
+                    if (ENABLE_SW_LOGS) console.error("Google API request failed:", request.url);
                     return undefined;
                   },
                 },
@@ -381,7 +394,15 @@ export default defineConfig(({ mode }) => ({
         enabled: true,
         type: "module",
         navigateFallback: "index.html",
+        disableDevLogs: true,
       },
+    }),
+    visualizer({
+      filename: "bundle-analysis.html",
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      template: "treemap",
     }),
   ].filter(Boolean),
   resolve: {

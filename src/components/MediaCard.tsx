@@ -1,5 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
+import { useWatchlist } from "@/hooks/watchlist";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -33,10 +35,12 @@ const MediaCard = React.memo(
       addToFavorites,
       removeFromFavorites,
       isInFavorites,
+    } = useFavorites();
+    const {
       addToWatchlist,
       removeFromWatchlist,
       isInWatchlist,
-    } = useWatchHistory();
+    } = useWatchlist();
     const [isFavorite, setIsFavorite] = useState(false);
     const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
     const navigate = useNavigate();

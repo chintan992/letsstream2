@@ -2,14 +2,14 @@ import React from "react";
 import { m } from "framer-motion";
 import { Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
 import { useToast } from "@/hooks/use-toast";
 import MediaGrid from "@/components/MediaGrid";
 import { Media } from "@/utils/types";
 
 const FavoritesTab: React.FC = () => {
   const { favorites, removeFromFavorites, deleteSelectedFavorites } =
-    useWatchHistory();
+    useFavorites();
   const { toast } = useToast();
 
   // Convert favorites to ExtendedMedia format for MediaGrid

@@ -1,5 +1,8 @@
 import { VideoSource } from "./types";
 
+const VIDEO_SOURCES_CACHE_KEY = "video_sources_cache";
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
 interface JsonVideoSource {
   key: string;
   name: string;
@@ -7,6 +10,11 @@ interface JsonVideoSource {
   tvUrlPattern: string;
   isApiSource?: boolean;
   requiresAuth?: boolean;
+}
+
+interface CachedVideoSources {
+  sources: JsonVideoSource[];
+  timestamp: number;
 }
 
 function createVideoSource(source: JsonVideoSource): VideoSource {
@@ -25,7 +33,45 @@ function createVideoSource(source: JsonVideoSource): VideoSource {
   };
 }
 
+function getCachedSources(): VideoSource[] | null {
+  try {
+    const cached = localStorage.getItem(VIDEO_SOURCES_CACHE_KEY);
+    if (!cached) return null;
+
+    const parsed: CachedVideoSources = JSON.parse(cached);
+    const now = Date.now();
+
+    if (now - parsed.timestamp > CACHE_TTL) {
+      localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+      return null;
+    }
+
+    return parsed.sources.map(createVideoSource);
+  } catch (error) {
+    console.error("Error reading video sources cache:", error);
+    localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+    return null;
+  }
+}
+
+function setCachedSources(sources: JsonVideoSource[]): void {
+  try {
+    const data: CachedVideoSources = {
+      sources,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(VIDEO_SOURCES_CACHE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error("Error saving video sources cache:", error);
+  }
+}
+
 export async function fetchVideoSources(): Promise<VideoSource[]> {
+  const cached = getCachedSources();
+  if (cached) {
+    return cached;
+  }
+
   try {
     const apiUrl = import.meta.env.VITE_VIDEO_SOURCE_API;
     if (!apiUrl) {
@@ -44,9 +90,23 @@ export async function fetchVideoSources(): Promise<VideoSource[]> {
       throw new Error(`Failed to fetch video sources: ${response.statusText}`);
     }
     const data = await response.json();
-    return (data.sources as JsonVideoSource[]).map(createVideoSource);
+    const sources = (data.sources as JsonVideoSource[]).map(createVideoSource);
+    setCachedSources(data.sources as JsonVideoSource[]);
+    return sources;
   } catch (error) {
     console.error("Error loading video sources:", error);
     return [];
   }
+}
+
+export function clearVideoSourcesCache(): void {
+  localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+}
+
+export function preloadVideoSources(): Promise<VideoSource[]> | null {
+  const cached = getCachedSources();
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+  return fetchVideoSources();
 }

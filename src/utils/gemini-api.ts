@@ -54,12 +54,6 @@ const rateLimiter = RateLimiter.getInstance(
   60 * 1000 // 1 minute in milliseconds
 );
 
-// Set specific limit for Gemini API
-rateLimiter.setLimit("gemini-api", {
-  maxRequests: DEFAULT_CONFIG.rateLimit.requestsPerMinute,
-  windowMs: 60 * 1000, // 1 minute in milliseconds
-});
-
 // Initialize the Google GenAI only if API key is available
 let genAI: GoogleGenerativeAI | null = null;
 if (DEFAULT_CONFIG.apiKey) {
@@ -279,10 +273,7 @@ export const sendMessageToGemini = async (
     }
 
     // Check rate limit using the specific Gemini API endpoint
-    const canProceed = await rateLimiter.isAllowed(
-      "https://generativelanguage.googleapis.com/v1/chat",
-      "gemini-api"
-    );
+    const canProceed = await rateLimiter.canExecute("gemini-api");
     if (!canProceed) {
       console.warn("Rate limit exceeded, using fallback system");
       return {
@@ -445,10 +436,7 @@ export const searchMedia = async (query: string): Promise<GeminiResponse> => {
     }
 
     // Check rate limit using the specific Gemini API endpoint
-    const canProceed = await rateLimiter.isAllowed(
-      "https://generativelanguage.googleapis.com/v1/generate",
-      "gemini-api"
-    );
+    const canProceed = await rateLimiter.canExecute("gemini-api");
     if (!canProceed) {
       throw new GeminiAPIError(
         "Rate limit exceeded. Please try again later.",

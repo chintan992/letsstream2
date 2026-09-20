@@ -24,6 +24,8 @@ import MovieDetailsCastBlock from "@/components/movie/MovieDetailsCastBlock";
 import MovieDetailsShellExternal from "@/components/movie/MovieDetailsShell";
 import MovieDetailsDownloadsBlock from "@/components/movie/MovieDetailsDownloadsBlock";
 import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
+import { useWatchlist } from "@/hooks/watchlist";
 import { useAuth } from "@/hooks";
 import { useHaptic } from "@/hooks/useHaptic";
 
@@ -139,13 +141,20 @@ const MovieDetailsPage = () => {
   const [ui, uiDispatch] = useReducer(uiReducer, initialUiState);
   // Expose helpers for readability
   const {
-    addToFavorites,
-    addToWatchlist,
-    removeFromFavorites,
-    removeFromWatchlist,
-    isInFavorites,
-    isInWatchlist,
+    addToWatchHistory,
   } = useWatchHistory();
+
+  const {
+    addToFavorites,
+    removeFromFavorites,
+    isInFavorites,
+  } = useFavorites();
+
+  const {
+    addToWatchlist,
+    removeFromWatchlist,
+    isInWatchlist,
+  } = useWatchlist();
   // UI state for favorite/watchlist
   const navigate = useNavigate();
   const { triggerHaptic } = useHaptic();

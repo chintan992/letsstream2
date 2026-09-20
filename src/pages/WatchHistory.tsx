@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { m } from "framer-motion";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
+import { useWatchlist } from "@/hooks/watchlist";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MediaGrid from "@/components/MediaGrid";
@@ -24,20 +26,27 @@ const WatchHistory = () => {
   const {
     watchHistory,
     clearWatchHistory,
-    favorites,
-    watchlist,
     deleteWatchHistoryItem,
     deleteSelectedWatchHistory,
-    deleteFavoriteItem,
-    deleteSelectedFavorites,
-    deleteWatchlistItem,
-    deleteSelectedWatchlist,
-    removeFromFavorites,
-    removeFromWatchlist,
     hasMore,
     isLoading,
     loadMore,
   } = useWatchHistory();
+
+  const {
+    favorites,
+    deleteFavoriteItem,
+    deleteSelectedFavorites,
+    removeFromFavorites,
+  } = useFavorites();
+
+  const {
+    watchlist,
+    deleteWatchlistItem,
+    deleteSelectedWatchlist,
+    removeFromWatchlist,
+  } = useWatchlist();
+
   const { userPreferences } = useUserPreferences();
   const { toast } = useToast();
   const { user } = useAuth();

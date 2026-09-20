@@ -45,8 +45,9 @@ const ContentRow = ({
 
   // Previous scroll position to detect direction and boundaries
   const lastScrollPosition = useRef(0);
-  const scrollEndTimeout = useRef<NodeJS.Timeout | null>(null);
+  const scrollEndTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasScrolledRecently = useRef(false);
+  const scrollSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (!media || media.length === 0) return null;
 
@@ -83,21 +84,17 @@ const ContentRow = ({
     // Update last position
     lastScrollPosition.current = scrollLeft;
 
-    // Handle scroll end detection
-    if (scrollEndTimeout.current) {
-      clearTimeout(scrollEndTimeout.current);
-    }
-
-    scrollEndTimeout.current = setTimeout(() => {
-      // We can add additional haptic feedback for scroll stop if needed
-    }, 150);
-
     // Update arrow visibility
     setShowLeftArrow(scrollLeft > 0);
     setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
 
-    // Save scroll position for restoration using the hook's function
-    saveScrollPosition(true); // Mark as manual call from React event handler
+    // Debounce scroll position saving - only save after scrolling stops
+    if (scrollSaveTimeout.current) {
+      clearTimeout(scrollSaveTimeout.current);
+    }
+    scrollSaveTimeout.current = setTimeout(() => {
+      saveScrollPosition(false); // Use debounced save
+    }, 150);
   };
 
   // Scroll functions

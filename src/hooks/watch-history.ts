@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { WatchHistoryContext } from "@/contexts/types/watch-history";
+import { WatchHistoryContext } from "@/contexts/watch-history-context";
 
 export function useWatchHistory() {
   const context = useContext(WatchHistoryContext);

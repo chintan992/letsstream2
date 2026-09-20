@@ -8,8 +8,6 @@
     <link rel="apple-touch-icon" href="/apple-icon-180.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="description" content="Streaming movies and TV shows" />
-    <!-- Preload critical assets -->
-    <link rel="preload" href="/logo.jpeg" as="image" />
     <!-- Add Playfair Display font for Hero component typography -->
     <link
       rel="stylesheet"
@@ -24,11 +22,8 @@
     <script>
       // URL and base path for easier debugging in console
       window.appBaseUrl = window.location.origin;
-      try {
-        window.appBasePath = import.meta.env?.BASE_URL || "/";
-      } catch (e) {
-        window.appBasePath = "/";
-      }
+      // BASE_URL is injected at build time by Vite
+      window.appBasePath = "/";
     </script>
   </head>
   <body>

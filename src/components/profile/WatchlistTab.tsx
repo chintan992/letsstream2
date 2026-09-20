@@ -2,13 +2,13 @@ import React from "react";
 import { m } from "framer-motion";
 import { Bookmark, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useWatchHistory } from "@/hooks/watch-history";
+import { useWatchlist } from "@/hooks/watchlist";
 import { useToast } from "@/hooks/use-toast";
 import MediaGrid from "@/components/MediaGrid";
 
 const WatchlistTab: React.FC = () => {
   const { watchlist, removeFromWatchlist, deleteSelectedWatchlist } =
-    useWatchHistory();
+    useWatchlist();
   const { toast } = useToast();
 
   // Convert watchlist to ExtendedMedia format for MediaGrid

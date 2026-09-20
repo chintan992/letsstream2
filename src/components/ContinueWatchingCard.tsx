@@ -9,7 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { WatchHistoryItem } from "@/contexts/types/watch-history";
+import { WatchHistoryItem } from "@/contexts/watch-history-context";
 import React, { useState } from "react";
 import { formatLastWatched, formatTimeRemaining } from "@/utils/format";
 

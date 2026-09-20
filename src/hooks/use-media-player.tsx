@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { MovieDetails, TVDetails } from "@/utils/types";
 import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
+import { useWatchlist } from "@/hooks/watchlist";
 import { useAuth } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { useMediaDetails } from "@/hooks/player/use-media-details";
@@ -70,13 +72,19 @@ export const useMediaPlayer = (
 
   const {
     addToWatchHistory,
-    addToFavorites,
-    addToWatchlist,
-    removeFromFavorites,
-    removeFromWatchlist,
-    isInFavorites,
-    isInWatchlist,
   } = useWatchHistory();
+
+  const {
+    addToFavorites,
+    removeFromFavorites,
+    isInFavorites,
+  } = useFavorites();
+
+  const {
+    addToWatchlist,
+    removeFromWatchlist,
+    isInWatchlist,
+  } = useWatchlist();
 
   // Favorite / watchlist membership derived from the reactive watch-history
   // context — re-renders automatically when the store updates.

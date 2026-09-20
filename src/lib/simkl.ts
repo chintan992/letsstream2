@@ -1,14 +1,10 @@
 const SIMKL_API_URL = "https://api.simkl.com";
 const SIMKL_CLIENT_ID = import.meta.env.VITE_SIMKL_CLIENT_ID;
-const SIMKL_CLIENT_SECRET = import.meta.env.VITE_SIMKL_CLIENT_SECRET;
 
-if (SIMKL_CLIENT_SECRET) {
-  console.warn(
-    "[Security] VITE_SIMKL_CLIENT_SECRET is present in the frontend bundle. " +
-      "This secret is visible to users. Move the Simkl OAuth token exchange to a " +
-      "backend function to eliminate this exposure."
-  );
-}
+// Client secret removed from frontend - token exchange handled by backend
+// const SIMKL_CLIENT_SECRET = import.meta.env.VITE_SIMKL_CLIENT_SECRET;
+
+const SIMKL_TOKEN_ENDPOINT = import.meta.env.VITE_SIMKL_TOKEN_ENDPOINT || "/api/simkl/token";
 
 interface SimklTokenResponse {
   access_token: string;
@@ -27,22 +23,20 @@ export class SimklService {
     code: string,
     redirectUri: string
   ): Promise<SimklTokenResponse> {
-    const response = await fetch(`${SIMKL_API_URL}/oauth/token`, {
+    const response = await fetch(SIMKL_TOKEN_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         code,
-        client_id: SIMKL_CLIENT_ID,
-        client_secret: SIMKL_CLIENT_SECRET,
         redirect_uri: redirectUri,
-        grant_type: "authorization_code",
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to exchange code for token");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to exchange code for token");
     }
 
     return response.json();
