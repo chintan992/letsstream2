@@ -55,6 +55,10 @@ export const tmdb = axios.create({
 });
 
 tmdb.interceptors.request.use(config => {
+  if ((config.method ?? "get").toLowerCase() !== "get") {
+    return config;
+  }
+
   const key = generateCacheKey(config);
   const generation = cacheGeneration;
   requestGenerations.set(config, generation);

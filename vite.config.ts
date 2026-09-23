@@ -274,9 +274,10 @@ export default defineConfig(({ mode }) => ({
           },
           {
             urlPattern: /^https:\/\/api\.themoviedb\.org\/3\/.*/i,
-            handler: "StaleWhileRevalidate",
+            handler: "NetworkFirst",
             options: {
               cacheName: CACHE_NAMES.tmdbApi,
+              networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
