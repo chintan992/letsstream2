@@ -13,7 +13,7 @@ describe("RateLimiter", () => {
   });
 
   it("should allow requests within capacity", async () => {
-    const limiter = RateLimiter.getInstance(5, 60000); // 5 requests per minute
+    const limiter = RateLimiter.getInstance(5, 5 / 60); // 5 requests per minute
 
     for (let i = 0; i < 5; i++) {
       const allowed = await limiter.canExecute("test");
@@ -22,7 +22,7 @@ describe("RateLimiter", () => {
   });
 
   it("should reject requests exceeding capacity", async () => {
-    const limiter = RateLimiter.getInstance(3, 60000);
+    const limiter = RateLimiter.getInstance(3, 3 / 60);
 
     for (let i = 0; i < 3; i++) {
       await limiter.canExecute("test");
@@ -33,7 +33,7 @@ describe("RateLimiter", () => {
   });
 
   it("should refill tokens over time", async () => {
-    const limiter = RateLimiter.getInstance(2, 1000); // 2 tokens per second
+    const limiter = RateLimiter.getInstance(2, 2); // 2 tokens per second
 
     await limiter.canExecute("test");
     await limiter.canExecute("test");
@@ -46,7 +46,7 @@ describe("RateLimiter", () => {
   });
 
   it("should track separate buckets per resource key", async () => {
-    const limiter = RateLimiter.getInstance(1, 60000);
+    const limiter = RateLimiter.getInstance(1, 1 / 60);
 
     await limiter.canExecute("resource-a");
     expect(await limiter.canExecute("resource-a")).toBe(false);
@@ -54,7 +54,7 @@ describe("RateLimiter", () => {
   });
 
   it("should return available tokens", async () => {
-    const limiter = RateLimiter.getInstance(5, 60000);
+    const limiter = RateLimiter.getInstance(5, 5 / 60);
 
     expect(limiter.getAvailableTokens("test")).toBe(5);
 
@@ -63,7 +63,7 @@ describe("RateLimiter", () => {
   });
 
   it("should reset bucket", async () => {
-    const limiter = RateLimiter.getInstance(2, 60000);
+    const limiter = RateLimiter.getInstance(2, 2 / 60);
 
     await limiter.canExecute("test");
     await limiter.canExecute("test");

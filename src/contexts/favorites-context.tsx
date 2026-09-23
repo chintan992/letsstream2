@@ -25,7 +25,7 @@ import { Media } from "@/utils/types";
 import { useToast } from "@/components/ui/use-toast";
 import { RateLimiter } from "@/utils/rate-limiter";
 
-const deleteRateLimiter = RateLimiter.getInstance(50, 300000);
+const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
 
 export interface FavoriteItem {
   id: string;
@@ -259,6 +259,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const deleteSelectedFavorites = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
 
+    const committedIds: string[] = [];
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
@@ -273,15 +274,16 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       }
 
       for (let index = 0; index < ids.length; index += 500) {
+        const batchIds = ids.slice(index, index + 500);
         const batch = writeBatch(db);
-        ids.slice(index, index + 500).forEach(id => {
+        batchIds.forEach(id => {
           batch.delete(doc(db, "favorites", id));
         });
         await batch.commit();
+        committedIds.push(...batchIds);
       }
 
-      const updatedFavorites = favorites.filter(item => !ids.includes(item.id));
-      setFavorites(updatedFavorites);
+      setFavorites(current => current.filter(item => !ids.includes(item.id)));
 
       toast({
         title: "Items removed",
@@ -289,6 +291,11 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error("Error deleting favorite items:", error);
+      if (committedIds.length > 0) {
+        setFavorites(current =>
+          current.filter(item => !committedIds.includes(item.id))
+        );
+      }
       toast({
         title: "Error removing items",
         description:

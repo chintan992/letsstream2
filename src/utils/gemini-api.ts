@@ -50,8 +50,8 @@ const DEFAULT_CONFIG: GeminiConfig = {
 
 // Initialize rate limiter as a singleton instance
 const rateLimiter = RateLimiter.getInstance(
-  DEFAULT_CONFIG.rateLimit.requestsPerMinute,
-  60 * 1000 // 1 minute in milliseconds
+  DEFAULT_CONFIG.rateLimit.burstLimit,
+  DEFAULT_CONFIG.rateLimit.requestsPerMinute / 60
 );
 
 // Initialize the Google GenAI only if API key is available

@@ -7,8 +7,15 @@ interface CacheEntry<T> {
   promise?: Promise<AxiosResponse<T>>;
 }
 
+interface PendingRequest {
+  promise: Promise<AxiosResponse<unknown>>;
+  generation: number;
+}
+
 const cache = new Map<string, CacheEntry<unknown>>();
-const pendingRequests = new Map<string, Promise<AxiosResponse<unknown>>>();
+const pendingRequests = new Map<string, PendingRequest>();
+const requestGenerations = new WeakMap<object, number>();
+let cacheGeneration = 0;
 const CACHE_TTL = 1000 * 60 * 10; // 10 minutes
 
 function generateCacheKey(config: AxiosRequestConfig): string {
@@ -42,6 +49,8 @@ export const tmdb = axios.create({
 
 tmdb.interceptors.request.use(config => {
   const key = generateCacheKey(config);
+  const generation = cacheGeneration;
+  requestGenerations.set(config, generation);
 
   const cached = getCachedResponse(key);
   if (cached) {
@@ -58,10 +67,33 @@ tmdb.interceptors.request.use(config => {
   }
 
   const pending = pendingRequests.get(key);
-  if (pending) {
-    config.adapter = () => pending as Promise<AxiosResponse>;
+  if (pending && pending.generation === generation) {
+    config.adapter = () => pending.promise as Promise<AxiosResponse>;
     return config;
   }
+
+  let resolvePending!: (response: AxiosResponse<unknown>) => void;
+  let rejectPending!: (error: unknown) => void;
+  const pendingPromise = new Promise<AxiosResponse<unknown>>(
+    (resolve, reject) => {
+      resolvePending = resolve;
+      rejectPending = reject;
+    }
+  );
+  void pendingPromise.catch(() => undefined);
+  pendingRequests.set(key, { promise: pendingPromise, generation });
+
+  const adapter = axios.getAdapter(config.adapter);
+  config.adapter = async adapterConfig => {
+    try {
+      const response = await adapter(adapterConfig);
+      resolvePending(response);
+      return response;
+    } catch (error) {
+      rejectPending(error);
+      throw error;
+    }
+  };
 
   return config;
 });
@@ -69,50 +101,29 @@ tmdb.interceptors.request.use(config => {
 tmdb.interceptors.response.use(
   response => {
     const key = generateCacheKey(response.config);
-    pendingRequests.delete(key);
-    setCachedResponse(key, response.data);
+    const requestGeneration = requestGenerations.get(response.config);
+    const pending = pendingRequests.get(key);
+    if (requestGeneration !== undefined && pending?.generation === requestGeneration) {
+      pendingRequests.delete(key);
+      setCachedResponse(key, response.data);
+    }
     return response;
   },
   error => {
-    const key = generateCacheKey(error.config);
-    pendingRequests.delete(key);
+    if (error.config) {
+      const key = generateCacheKey(error.config);
+      const pending = pendingRequests.get(key);
+      const requestGeneration = requestGenerations.get(error.config);
+      if (requestGeneration !== undefined && pending?.generation === requestGeneration) {
+        pendingRequests.delete(key);
+      }
+    }
     return Promise.reject(error);
   }
 );
 
-const originalRequest = tmdb.request.bind(tmdb);
-tmdb.request = async (config: AxiosRequestConfig) => {
-  const key = generateCacheKey(config);
-
-  const cached = getCachedResponse(key);
-  if (cached) {
-    return {
-      data: cached,
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config,
-      request: {},
-    } as AxiosResponse;
-  }
-
-  let pending = pendingRequests.get(key);
-  if (!pending) {
-    pending = originalRequest(config)
-      .then(response => {
-        setCachedResponse(key, response.data);
-        return response;
-      })
-      .finally(() => {
-        pendingRequests.delete(key);
-      });
-    pendingRequests.set(key, pending);
-  }
-
-  return pending;
-};
-
 export const clearTMDBCache = (): void => {
+  cacheGeneration += 1;
   cache.clear();
   pendingRequests.clear();
 };

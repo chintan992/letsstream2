@@ -5,6 +5,8 @@ const SIMKL_CLIENT_ID = import.meta.env.VITE_SIMKL_CLIENT_ID;
 // const SIMKL_CLIENT_SECRET = import.meta.env.VITE_SIMKL_CLIENT_SECRET;
 
 const SIMKL_TOKEN_ENDPOINT = import.meta.env.VITE_SIMKL_TOKEN_ENDPOINT || "/api/simkl/token";
+const SIMKL_AUTHORIZATION_START_ENDPOINT =
+  import.meta.env.VITE_SIMKL_AUTHORIZATION_START_ENDPOINT || "/api/simkl/authorize";
 
 interface SimklTokenResponse {
   access_token: string;
@@ -13,24 +15,62 @@ interface SimklTokenResponse {
 }
 
 export class SimklService {
-  static getAuthorizeUrl(redirectUri: string): string {
-    return `https://simkl.com/oauth/authorize?response_type=code&client_id=${SIMKL_CLIENT_ID}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}`;
+  static async startAuthorization(redirectUri: string): Promise<string> {
+    const verifierBytes = new Uint8Array(32);
+    crypto.getRandomValues(verifierBytes);
+    const codeVerifier = Array.from(verifierBytes, byte =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(codeVerifier)
+    );
+    const codeChallenge = btoa(
+      String.fromCharCode(...new Uint8Array(digest))
+    )
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+
+    const response = await fetch(SIMKL_AUTHORIZATION_START_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ redirect_uri: redirectUri, code_challenge: codeChallenge }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to start Simkl authorization");
+    }
+
+    const data = (await response.json()) as {
+      authorization_url: string;
+      state: string;
+    };
+    sessionStorage.setItem("simkl_code_verifier", codeVerifier);
+    sessionStorage.setItem("simkl_oauth_state", data.state);
+    return data.authorization_url;
   }
 
   static async exchangeCodeForToken(
     code: string,
-    redirectUri: string
+    redirectUri: string,
+    state: string
   ): Promise<SimklTokenResponse> {
+    const codeVerifier = sessionStorage.getItem("simkl_code_verifier");
+    if (!codeVerifier) throw new Error("Missing PKCE verifier");
+
     const response = await fetch(SIMKL_TOKEN_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         code,
         redirect_uri: redirectUri,
+        state,
+        code_verifier: codeVerifier,
       }),
     });
 
@@ -39,7 +79,9 @@ export class SimklService {
       throw new Error(errorData.error || "Failed to exchange code for token");
     }
 
-    return response.json();
+  sessionStorage.removeItem("simkl_code_verifier");
+  sessionStorage.removeItem("simkl_oauth_state");
+  return response.json();
   }
 
   static async checkin(

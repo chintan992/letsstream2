@@ -50,10 +50,19 @@ const PreferencesTab: React.FC = () => {
     }
   };
 
-  const handleSimklConnect = () => {
+  const handleSimklConnect = async () => {
     const redirectUri = `${window.location.origin}/simkl-callback`;
-    const authUrl = SimklService.getAuthorizeUrl(redirectUri);
-    window.location.href = authUrl;
+    try {
+      const authUrl = await SimklService.startAuthorization(redirectUri);
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Simkl authorization start failed:", error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not connect to Simkl. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSimklDisconnect = async () => {

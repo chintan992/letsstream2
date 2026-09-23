@@ -17,6 +17,7 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 const localStorageState = new Map<string, string>();
+const sessionStorageState = new Map<string, string>();
 
 beforeEach(() => {
   localStorageState.clear();
@@ -47,10 +48,22 @@ Object.defineProperty(window, "localStorage", {
 Object.defineProperty(window, "sessionStorage", {
   writable: true,
   value: {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
+    get length() {
+      return sessionStorageState.size;
+    },
+    key: vi.fn(
+      (index: number) => Array.from(sessionStorageState.keys())[index] ?? null
+    ),
+    getItem: vi.fn((key: string) => sessionStorageState.get(key) ?? null),
+    setItem: vi.fn((key: string, value: string) => {
+      sessionStorageState.set(key, String(value));
+    }),
+    removeItem: vi.fn((key: string) => {
+      sessionStorageState.delete(key);
+    }),
+    clear: vi.fn(() => {
+      sessionStorageState.clear();
+    }),
   },
 });
 

@@ -4,7 +4,7 @@ import { fetchVideoSources, clearVideoSourcesCache, preloadVideoSources } from "
 describe("Video Source Loader", () => {
   beforeEach(() => {
     clearVideoSourcesCache();
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 
@@ -25,8 +25,7 @@ describe("Video Source Loader", () => {
     expect(removeItemSpy).toHaveBeenCalledWith("video_sources_cache");
   });
 
-  it("should preload return promise", () => {
-    const result = preloadVideoSources();
-    expect(result).toBeInstanceOf(Promise);
+  it("should preload sources successfully", async () => {
+    await expect(preloadVideoSources()).resolves.toEqual([]);
   });
 });

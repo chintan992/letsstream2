@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   ReactNode,
 } from "react";
 import { trackEvent } from "@/lib/analytics";
@@ -49,9 +50,9 @@ const MINIMUM_UPDATE_INTERVAL = 30000; // 30 seconds
 const lastUpdateTimestamps = new Map<string, number>();
 const pendingOperations: Array<() => Promise<void>> = [];
 
-const readRateLimiter = RateLimiter.getInstance(200, 300000);
-const writeRateLimiter = RateLimiter.getInstance(100, 300000);
-const deleteRateLimiter = RateLimiter.getInstance(50, 300000);
+const readRateLimiter = RateLimiter.getInstance(200, 200 / 300);
+const writeRateLimiter = RateLimiter.getInstance(100, 100 / 300);
+const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
 
 const queueOperation = (operation: () => Promise<void>) => {
   pendingOperations.push(operation);
@@ -150,6 +151,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const simklSyncKeyRef = useRef<string | null>(null);
   const { toast } = useToast();
 
   const processWatchPositionQueue = useCallback(async () => {
@@ -368,6 +370,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const performSimklSync = async () => {
       // Only sync if: user is logged in, Simkl is enabled, initial fetch is done, not currently loading
+      if (!user || !userPreferences?.isSimklEnabled || !userPreferences?.simklToken) {
+        simklSyncKeyRef.current = null;
+      }
       if (
         !user ||
         !userPreferences?.isSimklEnabled ||
@@ -377,6 +382,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       ) {
         return;
       }
+
+      const syncKey = `${user.uid}:${userPreferences.simklToken}`;
+      if (simklSyncKeyRef.current === syncKey) return;
+      simklSyncKeyRef.current = syncKey;
 
       try {
         console.log("Starting automatic Simkl sync...");
@@ -419,8 +428,6 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     userPreferences?.isSimklEnabled,
     userPreferences?.simklToken,
     initialFetchDone,
-    isLoading,
-    fetchWatchHistory,
     toast,
   ]);
 

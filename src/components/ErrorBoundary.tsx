@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h1>
             <p className="mb-6 text-white/70">
-              An unexpected error occurred. Our team has been notified.
+              An unexpected error occurred. Please try again or refresh the page.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Button

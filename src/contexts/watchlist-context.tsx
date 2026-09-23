@@ -25,7 +25,7 @@ import { Media } from "@/utils/types";
 import { useToast } from "@/components/ui/use-toast";
 import { RateLimiter } from "@/utils/rate-limiter";
 
-const deleteRateLimiter = RateLimiter.getInstance(50, 300000);
+const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
 
 export interface WatchlistItem {
   id: string;
@@ -260,6 +260,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
   const deleteSelectedWatchlist = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
 
+    const committedIds: string[] = [];
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
@@ -274,15 +275,16 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       }
 
       for (let index = 0; index < ids.length; index += 500) {
+        const batchIds = ids.slice(index, index + 500);
         const batch = writeBatch(db);
-        ids.slice(index, index + 500).forEach(id => {
+        batchIds.forEach(id => {
           batch.delete(doc(db, "watchlist", id));
         });
         await batch.commit();
+        committedIds.push(...batchIds);
       }
 
-      const updatedWatchlist = watchlist.filter(item => !ids.includes(item.id));
-      setWatchlist(updatedWatchlist);
+      setWatchlist(current => current.filter(item => !ids.includes(item.id)));
 
       toast({
         title: "Items removed",
@@ -290,6 +292,11 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error("Error deleting watchlist items:", error);
+      if (committedIds.length > 0) {
+        setWatchlist(current =>
+          current.filter(item => !committedIds.includes(item.id))
+        );
+      }
       toast({
         title: "Error removing items",
         description:

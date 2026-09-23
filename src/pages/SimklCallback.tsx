@@ -21,6 +21,7 @@ export default function SimklCallback() {
 
       const searchParams = new URLSearchParams(location.search);
       const code = searchParams.get("code");
+      const state = searchParams.get("state");
       const errorParam = searchParams.get("error");
       let errorMsg: string | null = null;
 
@@ -33,7 +34,7 @@ export default function SimklCallback() {
           variant: "destructive",
         });
         if (isMounted) timeoutId = setTimeout(() => navigate("/profile"), 2000);
-      } else if (!code) {
+      } else if (!code || !state) {
         processedRef.current = true;
         errorMsg = "No authentication code received.";
         toast({
@@ -49,7 +50,8 @@ export default function SimklCallback() {
           const redirectUri = `${window.location.origin}/simkl-callback`;
           const tokenResponse = await SimklService.exchangeCodeForToken(
             code,
-            redirectUri
+            redirectUri,
+            state
           );
 
           if (!tokenResponse.access_token) {

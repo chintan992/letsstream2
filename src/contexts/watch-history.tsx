@@ -50,9 +50,9 @@ const MINIMUM_UPDATE_INTERVAL = 30000; // 30 seconds
 const lastUpdateTimestamps = new Map<string, number>();
 const pendingOperations: Array<() => Promise<void>> = [];
 
-const readRateLimiter = RateLimiter.getInstance(200, 300000);
-const writeRateLimiter = RateLimiter.getInstance(100, 300000);
-const deleteRateLimiter = RateLimiter.getInstance(50, 300000);
+const readRateLimiter = RateLimiter.getInstance(200, 200 / 300);
+const writeRateLimiter = RateLimiter.getInstance(100, 100 / 300);
+const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
 
 const queueOperation = (operation: () => Promise<void>) => {
   pendingOperations.push(operation);

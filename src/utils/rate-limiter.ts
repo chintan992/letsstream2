@@ -21,12 +21,14 @@ export class RateLimiter {
 
   static getInstance(
     capacity: number = 100,
-    windowMs: number = 60000
+    refillRatePerSecond: number = 100 / 60
   ): RateLimiter {
-    const refillRate = capacity / (windowMs / 1000);
-    const key = `${capacity}-${windowMs}`;
+    const key = `${capacity}-${refillRatePerSecond}`;
     if (!RateLimiter.instances.has(key)) {
-      RateLimiter.instances.set(key, new RateLimiter(capacity, refillRate));
+      RateLimiter.instances.set(
+        key,
+        new RateLimiter(capacity, refillRatePerSecond)
+      );
     }
     return RateLimiter.instances.get(key)!;
   }

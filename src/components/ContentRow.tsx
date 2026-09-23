@@ -50,12 +50,11 @@ const ContentRow = ({
   const scrollSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const scrollSaveTimer = scrollSaveTimeout.current;
-    const scrollEndTimer = scrollEndTimeout.current;
-
     return () => {
-      if (scrollSaveTimer) clearTimeout(scrollSaveTimer);
-      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+      if (scrollSaveTimeout.current) clearTimeout(scrollSaveTimeout.current);
+      if (scrollEndTimeout.current) clearTimeout(scrollEndTimeout.current);
+      scrollSaveTimeout.current = null;
+      scrollEndTimeout.current = null;
     };
   }, []);
 

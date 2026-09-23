@@ -37,6 +37,7 @@ export default {
         : {}),
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Credentials": "true",
       Vary: "Origin",
     };
 
@@ -44,6 +45,59 @@ export default {
       if (!originAllowed)
         return new Response(null, { status: 403, headers: corsHeaders });
       return new Response(null, { headers: corsHeaders });
+    }
+
+    // Authorization start endpoint
+    if (url.pathname === "/api/simkl/authorize" && request.method === "POST") {
+      if (!originAllowed) {
+        return new Response(JSON.stringify({ error: "Origin not allowed" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return new Response(JSON.stringify({ error: "Invalid request" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { redirect_uri, code_challenge } = (body ?? {}) as {
+        redirect_uri?: unknown;
+        code_challenge?: unknown;
+      };
+      if (
+        typeof redirect_uri !== "string" ||
+        !allowedRedirectUris.has(redirect_uri) ||
+        typeof code_challenge !== "string" ||
+        !code_challenge
+      ) {
+        return new Response(JSON.stringify({ error: "Invalid authorization request" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const state = crypto.randomUUID();
+      const authorizationUrl = new URL("https://simkl.com/oauth/authorize");
+      authorizationUrl.searchParams.set("response_type", "code");
+      authorizationUrl.searchParams.set("client_id", env.SIMKL_CLIENT_ID);
+      authorizationUrl.searchParams.set("redirect_uri", redirect_uri);
+      authorizationUrl.searchParams.set("state", state);
+      authorizationUrl.searchParams.set("code_challenge", code_challenge);
+      authorizationUrl.searchParams.set("code_challenge_method", "S256");
+
+      return new Response(JSON.stringify({ authorization_url: authorizationUrl.toString(), state }), {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Set-Cookie": `simkl_oauth_state=${state}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=600`,
+        },
+      });
     }
 
     // Token exchange endpoint
@@ -101,7 +155,7 @@ export default {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (code_verifier !== undefined && typeof code_verifier !== "string") {
+      if (typeof code_verifier !== "string" || !code_verifier) {
         return new Response(
           JSON.stringify({ error: "Invalid PKCE verifier" }),
           {
@@ -123,7 +177,7 @@ export default {
             client_secret: env.SIMKL_CLIENT_SECRET,
             redirect_uri,
             grant_type: "authorization_code",
-            ...(typeof code_verifier === "string" ? { code_verifier } : {}),
+            code_verifier,
           }),
         });
 
