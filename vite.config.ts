@@ -335,57 +335,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: ({ url, request }: { url: URL; request: Request }) => {
-              return (
-                (url.hostname.includes("firestore.googleapis.com") ||
-                  url.hostname.includes("firebase.googleapis.com") ||
-                  url.hostname.includes("firebaseio.com")) &&
-                ["POST", "PUT", "PATCH", "DELETE"].includes(request.method)
-              );
-            },
-            handler: "NetworkOnly",
-            options: {
-              backgroundSync: {
-                name: "firebase-write-queue",
-                options: {
-                  maxRetentionTime: 24 * 60,
-                },
-              },
-              plugins: [
-                {
-                  fetchDidFail: async () => {
-                    if (ENABLE_SW_LOGS)
-                      console.error(
-                        "Firebase request failed - network only strategy"
-                      );
-                  },
-                },
-              ],
-            },
-          },
-          {
-            urlPattern: ({ url }: { url: URL }) => {
-              return (
-                url.hostname.includes("firestore.googleapis.com") ||
-                url.hostname.includes("firebase.googleapis.com") ||
-                url.hostname.includes("firebaseio.com")
-              );
-            },
-            handler: "NetworkOnly",
-            options: {
-              plugins: [
-                {
-                  fetchDidFail: async () => {
-                    if (ENABLE_SW_LOGS)
-                      console.error(
-                        "Firebase request failed - network only strategy"
-                      );
-                  },
-                },
-              ],
-            },
-          },
-          {
             urlPattern:
               /^https:\/\/(apis\.google\.com|www\.googleapis\.com)\/.*/i,
             handler: "NetworkFirst",

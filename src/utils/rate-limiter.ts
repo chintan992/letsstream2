@@ -31,6 +31,10 @@ export class RateLimiter {
     return RateLimiter.instances.get(key)!;
   }
 
+  static resetInstances(): void {
+    RateLimiter.instances.clear();
+  }
+
   private refill(bucket: TokenBucket, now: number): TokenBucket {
     const elapsedSeconds = (now - bucket.lastRefill) / 1000;
     const refillAmount = elapsedSeconds * this.config.refillRate;

@@ -4,7 +4,7 @@ import { RateLimiter } from "@/utils/rate-limiter";
 
 describe("RateLimiter", () => {
   beforeEach(() => {
-    RateLimiter.instances.clear();
+    RateLimiter.resetInstances();
     vi.useFakeTimers();
   });
 

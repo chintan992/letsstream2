@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useAuth } from "@/hooks";
 import {
@@ -56,7 +63,9 @@ export interface WatchlistContextType {
   deleteSelectedWatchlist: (ids: string[]) => Promise<void>;
 }
 
-export const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
+export const WatchlistContext = createContext<WatchlistContextType | undefined>(
+  undefined
+);
 
 export function WatchlistProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -264,13 +273,13 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const batch = writeBatch(db);
-      ids.forEach(id => {
-        const watchlistRef = doc(db, "watchlist", id);
-        batch.delete(watchlistRef);
-      });
-
-      await batch.commit();
+      for (let index = 0; index < ids.length; index += 500) {
+        const batch = writeBatch(db);
+        ids.slice(index, index + 500).forEach(id => {
+          batch.delete(doc(db, "watchlist", id));
+        });
+        await batch.commit();
+      }
 
       const updatedWatchlist = watchlist.filter(item => !ids.includes(item.id));
       setWatchlist(updatedWatchlist);

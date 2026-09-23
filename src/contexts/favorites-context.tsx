@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useAuth } from "@/hooks";
 import {
@@ -56,7 +63,9 @@ export interface FavoritesContextType {
   deleteSelectedFavorites: (ids: string[]) => Promise<void>;
 }
 
-export const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
+export const FavoritesContext = createContext<FavoritesContextType | undefined>(
+  undefined
+);
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -263,13 +272,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const batch = writeBatch(db);
-      ids.forEach(id => {
-        const favoriteRef = doc(db, "favorites", id);
-        batch.delete(favoriteRef);
-      });
-
-      await batch.commit();
+      for (let index = 0; index < ids.length; index += 500) {
+        const batch = writeBatch(db);
+        ids.slice(index, index + 500).forEach(id => {
+          batch.delete(doc(db, "favorites", id));
+        });
+        await batch.commit();
+      }
 
       const updatedFavorites = favorites.filter(item => !ids.includes(item.id));
       setFavorites(updatedFavorites);

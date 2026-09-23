@@ -127,7 +127,7 @@ export const getImageUrl = (
 
 export const getResponsiveImageUrls = (
   path: string | null
-): { srcset: string; webpSrcset: string; sizes: string } | null => {
+): { srcset: string; sizes: string } | null => {
   if (!path) return null;
 
   const baseSizes = [92, 154, 185, 342, 500, 780, 1280];
@@ -137,9 +137,5 @@ export const getResponsiveImageUrls = (
     .map(size => `${TMDB.IMAGE_BASE_URL}/w${size}${path} ${size}w`)
     .join(", ");
 
-  const webpSrcset = baseSizes
-    .map(size => `${TMDB.IMAGE_BASE_URL}/w${size}${path} ${size}w`)
-    .join(", ");
-
-  return { srcset, webpSrcset, sizes };
+  return { srcset, sizes };
 };

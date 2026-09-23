@@ -976,13 +976,13 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const batch = writeBatch(db);
-      ids.forEach(id => {
-        const historyRef = doc(db, "watchHistory", id);
-        batch.delete(historyRef);
-      });
-
-      await batch.commit();
+      for (let index = 0; index < ids.length; index += 500) {
+        const batch = writeBatch(db);
+        ids.slice(index, index + 500).forEach(id => {
+          batch.delete(doc(db, "watchHistory", id));
+        });
+        await batch.commit();
+      }
 
       const updatedHistory = watchHistory.filter(
         item => !ids.includes(item.id)

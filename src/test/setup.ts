@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
 import React from "react";
 
 Object.defineProperty(window, "matchMedia", {
@@ -17,6 +17,10 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 const localStorageState = new Map<string, string>();
+
+beforeEach(() => {
+  localStorageState.clear();
+});
 
 Object.defineProperty(window, "localStorage", {
   writable: true,

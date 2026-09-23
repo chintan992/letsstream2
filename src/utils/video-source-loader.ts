@@ -104,7 +104,11 @@ export async function fetchVideoSources(): Promise<VideoSource[]> {
 }
 
 export function clearVideoSourcesCache(): void {
-  localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+  try {
+    localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+  } catch (error) {
+    console.error("Error removing video sources cache:", error);
+  }
 }
 
 export function preloadVideoSources(): Promise<VideoSource[]> | null {

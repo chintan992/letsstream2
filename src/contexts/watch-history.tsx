@@ -1167,6 +1167,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const deleteSelectedFavorites = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
 
+    const committedIds: string[] = [];
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
@@ -1180,13 +1181,15 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const batch = writeBatch(db);
-      ids.forEach(id => {
-        const favoriteRef = doc(db, "favorites", id);
-        batch.delete(favoriteRef);
-      });
-
-      await batch.commit();
+      for (let index = 0; index < ids.length; index += 500) {
+        const batchIds = ids.slice(index, index + 500);
+        const batch = writeBatch(db);
+        batchIds.forEach(id => {
+          batch.delete(doc(db, "favorites", id));
+        });
+        await batch.commit();
+        committedIds.push(...batchIds);
+      }
 
       const updatedFavorites = favorites.filter(item => !ids.includes(item.id));
       setFavorites(updatedFavorites);
@@ -1196,6 +1199,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         description: `${ids.length} ${ids.length === 1 ? "item has" : "items have"} been removed from your favorites.`,
       });
     } catch (error) {
+      if (committedIds.length > 0) {
+        setFavorites(currentFavorites =>
+          currentFavorites.filter(item => !committedIds.includes(item.id))
+        );
+      }
       console.error("Error deleting favorite items:", error);
       toast({
         title: "Error removing items",
@@ -1359,6 +1367,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const deleteSelectedWatchlist = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
 
+    const committedIds: string[] = [];
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
@@ -1372,13 +1381,15 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const batch = writeBatch(db);
-      ids.forEach(id => {
-        const watchlistRef = doc(db, "watchlist", id);
-        batch.delete(watchlistRef);
-      });
-
-      await batch.commit();
+      for (let index = 0; index < ids.length; index += 500) {
+        const batchIds = ids.slice(index, index + 500);
+        const batch = writeBatch(db);
+        batchIds.forEach(id => {
+          batch.delete(doc(db, "watchlist", id));
+        });
+        await batch.commit();
+        committedIds.push(...batchIds);
+      }
 
       const updatedWatchlist = watchlist.filter(item => !ids.includes(item.id));
       setWatchlist(updatedWatchlist);
@@ -1388,6 +1399,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         description: `${ids.length} ${ids.length === 1 ? "item has" : "items have"} been removed from your watchlist.`,
       });
     } catch (error) {
+      if (committedIds.length > 0) {
+        setWatchlist(currentWatchlist =>
+          currentWatchlist.filter(item => !committedIds.includes(item.id))
+        );
+      }
       console.error("Error deleting watchlist items:", error);
       toast({
         title: "Error removing items",

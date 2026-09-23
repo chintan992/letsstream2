@@ -49,6 +49,16 @@ const ContentRow = ({
   const hasScrolledRecently = useRef(false);
   const scrollSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    const scrollSaveTimer = scrollSaveTimeout.current;
+    const scrollEndTimer = scrollEndTimeout.current;
+
+    return () => {
+      if (scrollSaveTimer) clearTimeout(scrollSaveTimer);
+      if (scrollEndTimer) clearTimeout(scrollEndTimer);
+    };
+  }, []);
+
   if (!media || media.length === 0) return null;
 
   // Handle scroll position to show/hide arrows and save scroll position
