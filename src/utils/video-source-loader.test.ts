@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetchVideoSources, clearVideoSourcesCache, preloadVideoSources } from "@/utils/video-source-loader";
+import {
+  fetchVideoSources,
+  clearVideoSourcesCache,
+  preloadVideoSources,
+} from "@/utils/video-source-loader";
 
 describe("Video Source Loader", () => {
   beforeEach(() => {
@@ -26,6 +30,26 @@ describe("Video Source Loader", () => {
   });
 
   it("should preload sources successfully", async () => {
+    const source = {
+      key: "example",
+      name: "Example",
+      movieUrlPattern: "https://example.test/movie/{id}",
+      tvUrlPattern: "https://example.test/tv/{id}/{season}/{episode}",
+    };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ sources: [source] }), { status: 200 })
+    );
+
+    await expect(preloadVideoSources()).resolves.toEqual([
+      expect.objectContaining({ key: "example", name: "Example" }),
+    ]);
+  });
+
+  it("should return an empty result when the API has no sources", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ sources: [] }), { status: 200 })
+    );
+
     await expect(preloadVideoSources()).resolves.toEqual([]);
   });
 });

@@ -112,6 +112,7 @@ const processPendingOperations = async () => {
 
     const queuedOperation = pendingOperations.shift();
     if (queuedOperation) {
+      let failed = false;
       const inFlight = {
         queuedOperation,
         promise: Promise.resolve(),
@@ -122,6 +123,7 @@ const processPendingOperations = async () => {
           await queuedOperation.operation();
         } catch (error) {
           console.error("Error processing pending operation:", error);
+          failed = true;
           if (!queuedOperation.canceled) {
             pendingOperations.push(queuedOperation);
           }
@@ -130,6 +132,7 @@ const processPendingOperations = async () => {
         }
       })();
       await inFlight.promise;
+      if (failed) break;
     }
   }
 };
@@ -1124,9 +1127,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       await cancelPendingOperations(new Set([id]), user.uid);
       removeQueuedWatchPositions(new Set([id]), user.uid);
 
-      const updatedHistory = watchHistory.filter(item => item.id !== id);
-      setWatchHistory(updatedHistory);
-      saveLocalWatchHistory(updatedHistory);
+      setWatchHistory(current => {
+        const updatedHistory = current.filter(item => item.id !== id);
+        saveLocalWatchHistory(updatedHistory);
+        return updatedHistory;
+      });
 
       toast({
         title: "Item removed",
@@ -1145,6 +1150,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const deleteSelectedWatchHistory = async (ids: string[]) => {
     if (!user || ids.length === 0) return;
 
+    const committedIds: string[] = [];
     try {
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
@@ -1167,15 +1173,16 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           batch.delete(doc(db, "watchHistory", id));
         });
         await batch.commit();
+        committedIds.push(...ids.slice(index, index + 500));
       }
 
       await cancelPendingOperations(deletedIds, user.uid);
       removeQueuedWatchPositions(new Set(ids), user.uid);
-      const updatedHistory = watchHistory.filter(
-        item => !ids.includes(item.id)
-      );
-      setWatchHistory(updatedHistory);
-      saveLocalWatchHistory(updatedHistory);
+      setWatchHistory(current => {
+        const updatedHistory = current.filter(item => !ids.includes(item.id));
+        saveLocalWatchHistory(updatedHistory);
+        return updatedHistory;
+      });
 
       toast({
         title: "Items removed",
@@ -1183,6 +1190,15 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error("Error deleting watch history items:", error);
+      if (committedIds.length > 0) {
+        setWatchHistory(current => {
+          const updatedHistory = current.filter(
+            item => !committedIds.includes(item.id)
+          );
+          saveLocalWatchHistory(updatedHistory);
+          return updatedHistory;
+        });
+      }
       toast({
         title: "Error removing items",
         description:

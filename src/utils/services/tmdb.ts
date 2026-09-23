@@ -17,6 +17,7 @@ const pendingRequests = new Map<string, PendingRequest>();
 const requestGenerations = new WeakMap<object, number>();
 let cacheGeneration = 0;
 const CACHE_TTL = 1000 * 60 * 10; // 10 minutes
+const MAX_CACHE_ENTRIES = 100;
 
 function generateCacheKey(config: AxiosRequestConfig): string {
   const { url = "", method = "get", params, data } = config;
@@ -36,6 +37,12 @@ function getCachedResponse<T>(key: string): T | null {
 }
 
 function setCachedResponse<T>(key: string, data: T): void {
+  cache.delete(key);
+  while (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = cache.keys().next().value;
+    if (oldestKey === undefined) break;
+    cache.delete(oldestKey);
+  }
   cache.set(key, { data, timestamp: Date.now() });
 }
 
@@ -103,7 +110,10 @@ tmdb.interceptors.response.use(
     const key = generateCacheKey(response.config);
     const requestGeneration = requestGenerations.get(response.config);
     const pending = pendingRequests.get(key);
-    if (requestGeneration !== undefined && pending?.generation === requestGeneration) {
+    if (
+      requestGeneration !== undefined &&
+      pending?.generation === requestGeneration
+    ) {
       pendingRequests.delete(key);
       setCachedResponse(key, response.data);
     }
@@ -114,7 +124,10 @@ tmdb.interceptors.response.use(
       const key = generateCacheKey(error.config);
       const pending = pendingRequests.get(key);
       const requestGeneration = requestGenerations.get(error.config);
-      if (requestGeneration !== undefined && pending?.generation === requestGeneration) {
+      if (
+        requestGeneration !== undefined &&
+        pending?.generation === requestGeneration
+      ) {
         pendingRequests.delete(key);
       }
     }
