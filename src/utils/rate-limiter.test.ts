@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RateLimiter } from "@/utils/rate-limiter";
 
@@ -71,5 +71,23 @@ describe("RateLimiter", () => {
 
     limiter.reset("test");
     expect(await limiter.canExecute("test")).toBe(true);
+  });
+
+  it("should configure exported limiters with five-minute refill rates", async () => {
+    const { readRateLimiter, writeRateLimiter, deleteRateLimiter } =
+      await import("@/utils/rate-limiter");
+
+    expect(readRateLimiter.getConfig()).toEqual({
+      capacity: 200,
+      refillRate: 200 / 300,
+    });
+    expect(writeRateLimiter.getConfig()).toEqual({
+      capacity: 100,
+      refillRate: 100 / 300,
+    });
+    expect(deleteRateLimiter.getConfig()).toEqual({
+      capacity: 50,
+      refillRate: 50 / 300,
+    });
   });
 });

@@ -23,6 +23,8 @@ import { db } from "@/lib/firebase";
 import { generateId } from "@/utils/supabase";
 import { Media } from "@/utils/types";
 import { useToast } from "@/components/ui/use-toast";
+
+const pendingFavoriteAdds = new Set<string>();
 import { RateLimiter } from "@/utils/rate-limiter";
 
 const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
@@ -118,18 +120,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const addKey = `${user.uid}:${item.media_type}:${item.media_id}`;
+    if (pendingFavoriteAdds.has(addKey)) return;
+    pendingFavoriteAdds.add(addKey);
+
     try {
       console.log("Adding to favorites:", item);
-      const existingItem = favorites.find(
-        fav =>
-          fav.media_id === item.media_id && fav.media_type === item.media_type
-      );
-
-      if (existingItem) {
-        console.log("Item already in favorites:", existingItem);
-        return;
-      }
-
       const newItem: FavoriteItem = {
         id: generateId(),
         user_id: user.uid,
@@ -143,13 +139,33 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         added_at: new Date().toISOString(),
       };
 
+      if (
+        favorites.some(
+          favorite =>
+            favorite.media_id === item.media_id &&
+            favorite.media_type === item.media_type
+        )
+      ) {
+        return;
+      }
+
       console.log("Saving favorite to Firestore:", newItem);
       const favoriteRef = doc(db, "favorites", newItem.id);
       await setDoc(favoriteRef, newItem);
 
       console.log("Favorite saved successfully");
-      const updatedFavorites = [newItem, ...favorites];
-      setFavorites(updatedFavorites);
+      setFavorites(current => {
+        if (
+          current.some(
+            favorite =>
+              favorite.media_id === item.media_id &&
+              favorite.media_type === item.media_type
+          )
+        ) {
+          return current;
+        }
+        return [newItem, ...current];
+      });
 
       // Analytics event
       trackEvent({
@@ -175,6 +191,8 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
             : "There was a problem adding to your favorites.",
         variant: "destructive",
       });
+    } finally {
+      pendingFavoriteAdds.delete(addKey);
     }
   };
 
@@ -193,10 +211,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         const favoriteRef = doc(db, "favorites", itemToRemove.id);
         await deleteDoc(favoriteRef);
 
-        const updatedFavorites = favorites.filter(
-          item => !(item.media_id === mediaId && item.media_type === mediaType)
+        setFavorites(current =>
+          current.filter(
+            item =>
+              !(item.media_id === mediaId && item.media_type === mediaType)
+          )
         );
-        setFavorites(updatedFavorites);
       }
       // Analytics event
       trackEvent({
@@ -238,8 +258,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       const favoriteRef = doc(db, "favorites", id);
       await deleteDoc(favoriteRef);
 
-      const updatedFavorites = favorites.filter(item => item.id !== id);
-      setFavorites(updatedFavorites);
+      setFavorites(current => current.filter(item => item.id !== id));
 
       toast({
         title: "Item removed",

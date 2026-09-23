@@ -108,6 +108,6 @@ export class RateLimiter {
   }
 }
 
-export const readRateLimiter = RateLimiter.getInstance(200, 300000);
-export const writeRateLimiter = RateLimiter.getInstance(100, 300000);
-export const deleteRateLimiter = RateLimiter.getInstance(50, 300000);
+export const readRateLimiter = RateLimiter.getInstance(200, 200 / 300);
+export const writeRateLimiter = RateLimiter.getInstance(100, 100 / 300);
+export const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);

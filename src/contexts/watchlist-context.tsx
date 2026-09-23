@@ -23,6 +23,8 @@ import { db } from "@/lib/firebase";
 import { generateId } from "@/utils/supabase";
 import { Media } from "@/utils/types";
 import { useToast } from "@/components/ui/use-toast";
+
+const pendingWatchlistAdds = new Set<string>();
 import { RateLimiter } from "@/utils/rate-limiter";
 
 const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
@@ -118,19 +120,12 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const addKey = `${user.uid}:${item.media_type}:${item.media_id}`;
+    if (pendingWatchlistAdds.has(addKey)) return;
+    pendingWatchlistAdds.add(addKey);
+
     try {
       console.log("Adding to watchlist:", item);
-      const existingItem = watchlist.find(
-        watch =>
-          watch.media_id === item.media_id &&
-          watch.media_type === item.media_type
-      );
-
-      if (existingItem) {
-        console.log("Item already in watchlist:", existingItem);
-        return;
-      }
-
       const newItem: WatchlistItem = {
         id: generateId(),
         user_id: user.uid,
@@ -144,13 +139,33 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
         added_at: new Date().toISOString(),
       };
 
+      if (
+        watchlist.some(
+          watch =>
+            watch.media_id === item.media_id &&
+            watch.media_type === item.media_type
+        )
+      ) {
+        return;
+      }
+
       console.log("Saving watchlist item to Firestore:", newItem);
       const watchlistRef = doc(db, "watchlist", newItem.id);
       await setDoc(watchlistRef, newItem);
 
       console.log("Watchlist item saved successfully");
-      const updatedWatchlist = [newItem, ...watchlist];
-      setWatchlist(updatedWatchlist);
+      setWatchlist(current => {
+        if (
+          current.some(
+            watch =>
+              watch.media_id === item.media_id &&
+              watch.media_type === item.media_type
+          )
+        ) {
+          return current;
+        }
+        return [newItem, ...current];
+      });
 
       // Analytics event
       trackEvent({
@@ -176,6 +191,8 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
             : "There was a problem adding to your watchlist.",
         variant: "destructive",
       });
+    } finally {
+      pendingWatchlistAdds.delete(addKey);
     }
   };
 
@@ -194,10 +211,9 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
         const watchlistRef = doc(db, "watchlist", itemToRemove.id);
         await deleteDoc(watchlistRef);
 
-        const updatedWatchlist = watchlist.filter(
-          item => !(item.media_id === mediaId && item.media_type === mediaType)
+        setWatchlist(current =>
+          current.filter(item => item.id !== itemToRemove.id)
         );
-        setWatchlist(updatedWatchlist);
       }
       // Analytics event
       trackEvent({
@@ -239,8 +255,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       const watchlistRef = doc(db, "watchlist", id);
       await deleteDoc(watchlistRef);
 
-      const updatedWatchlist = watchlist.filter(item => item.id !== id);
-      setWatchlist(updatedWatchlist);
+      setWatchlist(current => current.filter(item => item.id !== id));
 
       toast({
         title: "Item removed",

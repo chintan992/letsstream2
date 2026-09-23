@@ -15,6 +15,7 @@ interface JsonVideoSource {
 interface CachedVideoSources {
   sources: JsonVideoSource[];
   timestamp: number;
+  endpoint: string;
 }
 
 function createVideoSource(source: JsonVideoSource): VideoSource {
@@ -35,13 +36,20 @@ function createVideoSource(source: JsonVideoSource): VideoSource {
 
 function getCachedSources(): VideoSource[] | null {
   try {
+    const endpoint = import.meta.env.VITE_VIDEO_SOURCE_API;
+    if (!endpoint) return null;
     const cached = localStorage.getItem(VIDEO_SOURCES_CACHE_KEY);
     if (!cached) return null;
 
     const parsed: CachedVideoSources = JSON.parse(cached);
     const now = Date.now();
 
-    if (now - parsed.timestamp > CACHE_TTL) {
+    if (
+      !Number.isFinite(parsed.timestamp) ||
+      parsed.timestamp < now - CACHE_TTL ||
+      parsed.timestamp > now ||
+      parsed.endpoint !== endpoint
+    ) {
       localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
       return null;
     }
@@ -58,11 +66,12 @@ function getCachedSources(): VideoSource[] | null {
   }
 }
 
-function setCachedSources(sources: JsonVideoSource[]): void {
+function setCachedSources(sources: JsonVideoSource[], endpoint: string): void {
   try {
     const data: CachedVideoSources = {
       sources,
       timestamp: Date.now(),
+      endpoint,
     };
     localStorage.setItem(VIDEO_SOURCES_CACHE_KEY, JSON.stringify(data));
   } catch (error) {
@@ -71,20 +80,18 @@ function setCachedSources(sources: JsonVideoSource[]): void {
 }
 
 export async function fetchVideoSources(): Promise<VideoSource[]> {
+  const apiUrl = import.meta.env.VITE_VIDEO_SOURCE_API;
+  if (!apiUrl) {
+    console.error("VITE_VIDEO_SOURCE_API environment variable is not defined");
+    return [];
+  }
+
   const cached = getCachedSources();
   if (cached) {
     return cached;
   }
 
   try {
-    const apiUrl = import.meta.env.VITE_VIDEO_SOURCE_API;
-    if (!apiUrl) {
-      console.error(
-        "VITE_VIDEO_SOURCE_API environment variable is not defined"
-      );
-      return [];
-    }
-
     const response = await fetch(apiUrl, {
       headers: {
         Origin: window.location.origin,
@@ -95,7 +102,7 @@ export async function fetchVideoSources(): Promise<VideoSource[]> {
     }
     const data = await response.json();
     const sources = (data.sources as JsonVideoSource[]).map(createVideoSource);
-    setCachedSources(data.sources as JsonVideoSource[]);
+    setCachedSources(data.sources as JsonVideoSource[], apiUrl);
     return sources;
   } catch (error) {
     console.error("Error loading video sources:", error);

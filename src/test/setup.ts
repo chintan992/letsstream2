@@ -21,6 +21,7 @@ const sessionStorageState = new Map<string, string>();
 
 beforeEach(() => {
   localStorageState.clear();
+  sessionStorageState.clear();
 });
 
 Object.defineProperty(window, "localStorage", {
@@ -70,6 +71,7 @@ Object.defineProperty(window, "sessionStorage", {
 Object.defineProperty(window, "crypto", {
   writable: true,
   value: {
+    ...window.crypto,
     randomUUID: () => "test-uuid-" + Math.random().toString(36).substring(7),
   },
 });

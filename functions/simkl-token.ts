@@ -196,7 +196,11 @@ export default {
         }
 
         return new Response(JSON.stringify(data), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Set-Cookie": "simkl_oauth_state=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None",
+          },
         });
       } catch {
         return new Response(

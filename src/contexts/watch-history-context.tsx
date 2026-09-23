@@ -48,27 +48,88 @@ const DEBOUNCE_WINDOW = 300000; // 5 minutes
 const SIGNIFICANT_PROGRESS = 60; // 60 seconds
 const MINIMUM_UPDATE_INTERVAL = 30000; // 30 seconds
 const lastUpdateTimestamps = new Map<string, number>();
-const pendingOperations: Array<() => Promise<void>> = [];
+interface PendingOperation {
+  operation: () => Promise<void>;
+  documentIds: Set<string>;
+  userId: string;
+  canceled: boolean;
+}
+
+const pendingOperations: PendingOperation[] = [];
+const inFlightOperations = new Set<{
+  queuedOperation: PendingOperation;
+  promise: Promise<void>;
+}>();
 
 const readRateLimiter = RateLimiter.getInstance(200, 200 / 300);
 const writeRateLimiter = RateLimiter.getInstance(100, 100 / 300);
 const deleteRateLimiter = RateLimiter.getInstance(50, 50 / 300);
 
-const queueOperation = (operation: () => Promise<void>) => {
-  pendingOperations.push(operation);
+const queueOperation = (
+  operation: () => Promise<void>,
+  documentIds: string[],
+  userId: string
+) => {
+  pendingOperations.push({
+    operation,
+    documentIds: new Set(documentIds),
+    userId,
+    canceled: false,
+  });
+};
+
+const cancelPendingOperations = async (
+  documentIds: Set<string> | undefined,
+  userId: string
+) => {
+  const matches = (operation: PendingOperation) =>
+    operation.userId === userId &&
+    (!documentIds ||
+      [...operation.documentIds].some(id => documentIds.has(id)));
+
+  for (let index = pendingOperations.length - 1; index >= 0; index -= 1) {
+    if (matches(pendingOperations[index])) {
+      pendingOperations.splice(index, 1);
+    }
+  }
+
+  const conflictingOperations: Promise<void>[] = [];
+  inFlightOperations.forEach(inFlight => {
+    if (matches(inFlight.queuedOperation)) {
+      inFlight.queuedOperation.canceled = true;
+      conflictingOperations.push(inFlight.promise);
+    }
+  });
+  await Promise.all(conflictingOperations);
 };
 
 const processPendingOperations = async () => {
+  if (!navigator.onLine) return;
+
   while (pendingOperations.length > 0) {
-    const operation = pendingOperations.shift();
-    if (operation) {
-      try {
-        await operation();
-      } catch (error) {
-        console.error("Error processing pending operation:", error);
-        pendingOperations.push(operation);
-        break;
-      }
+    const canExecute = await writeRateLimiter.canExecute();
+    if (!canExecute) break;
+
+    const queuedOperation = pendingOperations.shift();
+    if (queuedOperation) {
+      const inFlight = {
+        queuedOperation,
+        promise: Promise.resolve(),
+      };
+      inFlightOperations.add(inFlight);
+      inFlight.promise = (async () => {
+        try {
+          await queuedOperation.operation();
+        } catch (error) {
+          console.error("Error processing pending operation:", error);
+          if (!queuedOperation.canceled) {
+            pendingOperations.push(queuedOperation);
+          }
+        } finally {
+          inFlightOperations.delete(inFlight);
+        }
+      })();
+      await inFlight.promise;
     }
   }
 };
@@ -83,8 +144,20 @@ const watchPositionQueue = new Map<
   {
     data: QueuedUpdate;
     timestamp: number;
+    userId: string;
   }
 >();
+
+const removeQueuedWatchPositions = (
+  ids: Set<string> | undefined,
+  userId: string
+) => {
+  for (const [key, { data, userId: queuedUserId }] of watchPositionQueue) {
+    if (queuedUserId === userId && (!ids || ids.has(data.historyRef.id))) {
+      watchPositionQueue.delete(key);
+    }
+  }
+};
 
 export interface WatchHistoryItem {
   id: string;
@@ -158,13 +231,30 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     if (!navigator.onLine || watchPositionQueue.size === 0) return;
 
     try {
+      const now = Date.now();
+      const updatesByDocument = new Map<
+        string,
+        Array<{ key: string; data: QueuedUpdate; timestamp: number }>
+      >();
+
+      for (const [key, queuedUpdate] of watchPositionQueue.entries()) {
+        const documentId = queuedUpdate.data.historyRef.id;
+        const updates = updatesByDocument.get(documentId) || [];
+        updates.push({ key, ...queuedUpdate });
+        updatesByDocument.set(documentId, updates);
+      }
+
       let batch = writeBatch(db);
       let batchCount = 0;
-      const now = Date.now();
-      const processedKeys = [];
+      const processedKeys: string[] = [];
 
-      for (const [key, { data, timestamp }] of watchPositionQueue.entries()) {
-        if (now - timestamp < MINIMUM_UPDATE_INTERVAL) continue;
+      for (const updates of updatesByDocument.values()) {
+        const eligibleUpdates = updates.filter(
+          ({ timestamp }) => now - timestamp >= MINIMUM_UPDATE_INTERVAL
+        );
+        if (eligibleUpdates.length === 0) {
+          continue;
+        }
 
         const canExecute = await writeRateLimiter.canExecute();
         if (!canExecute) {
@@ -174,9 +264,40 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           break;
         }
 
-        const { historyRef, updatedItemData } = data;
-        batch.set(historyRef, updatedItemData, { merge: true });
-        processedKeys.push(key);
+        const timestampOrderedUpdates = [...eligibleUpdates].sort(
+          (left, right) => left.timestamp - right.timestamp
+        );
+        const latestUpdate =
+          timestampOrderedUpdates[timestampOrderedUpdates.length - 1];
+        const mergedEpisodes = new Map(
+          (latestUpdate.data.updatedItemData.episodes_watched || []).map(
+            episode =>
+              [`${episode.season}-${episode.episode}`, episode] as const
+          )
+        );
+        timestampOrderedUpdates.forEach(({ data }) => {
+          const { season, episode, episodes_watched } = data.updatedItemData;
+          if (typeof season !== "number" || typeof episode !== "number") {
+            return;
+          }
+          const episodeData = episodes_watched?.find(
+            item => item.season === season && item.episode === episode
+          );
+          if (episodeData) {
+            mergedEpisodes.set(`${season}-${episode}`, episodeData);
+          }
+        });
+
+        const updatedItemData = {
+          ...latestUpdate.data.updatedItemData,
+          ...(mergedEpisodes.size > 0
+            ? { episodes_watched: Array.from(mergedEpisodes.values()) }
+            : {}),
+        };
+        batch.set(latestUpdate.data.historyRef, updatedItemData, {
+          merge: true,
+        });
+        processedKeys.push(...eligibleUpdates.map(({ key }) => key));
         batchCount++;
 
         if (batchCount >= 500) {
@@ -197,10 +318,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(
-      processWatchPositionQueue,
-      MINIMUM_UPDATE_INTERVAL
-    );
+    const processQueuedWrites = async () => {
+      await processPendingOperations();
+      await processWatchPositionQueue();
+    };
+    const interval = setInterval(processQueuedWrites, MINIMUM_UPDATE_INTERVAL);
     return () => clearInterval(interval);
   }, [processWatchPositionQueue]);
 
@@ -370,7 +492,11 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const performSimklSync = async () => {
       // Only sync if: user is logged in, Simkl is enabled, initial fetch is done, not currently loading
-      if (!user || !userPreferences?.isSimklEnabled || !userPreferences?.simklToken) {
+      if (
+        !user ||
+        !userPreferences?.isSimklEnabled ||
+        !userPreferences?.simklToken
+      ) {
         simklSyncKeyRef.current = null;
       }
       if (
@@ -523,35 +649,85 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           });
 
           // Create consolidated entry
+          const episodeEntries = new Map<
+            string,
+            NonNullable<WatchHistoryItem["episodes_watched"]>[number]
+          >();
+          episodes.forEach(episode => {
+            const addEpisode = (
+              season: number,
+              episodeNumber: number,
+              watchPosition: number,
+              episodeDuration: number,
+              watchedAt: string
+            ) => {
+              const key = `${season}-${episodeNumber}`;
+              const current = episodeEntries.get(key);
+              if (
+                !current ||
+                new Date(watchedAt).getTime() >
+                  new Date(current.watched_at).getTime()
+              ) {
+                episodeEntries.set(key, {
+                  season,
+                  episode: episodeNumber,
+                  watch_position: watchPosition,
+                  duration: episodeDuration,
+                  watched_at: watchedAt,
+                });
+              }
+            };
+
+            if (
+              typeof episode.season === "number" &&
+              typeof episode.episode === "number"
+            ) {
+              addEpisode(
+                episode.season,
+                episode.episode,
+                episode.watch_position,
+                episode.duration,
+                episode.created_at
+              );
+            }
+            episode.episodes_watched?.forEach(episodeData =>
+              addEpisode(
+                episodeData.season,
+                episodeData.episode,
+                episodeData.watch_position,
+                episodeData.duration,
+                episodeData.watched_at
+              )
+            );
+          });
+
           const consolidatedEntry: WatchHistoryItem = {
             ...mostRecentEpisode,
-            episodes_watched: episodes.map(episode => ({
-              season: episode.season || 0,
-              episode: episode.episode || 0,
-              watch_position: episode.watch_position,
-              duration: episode.duration,
-              watched_at: episode.created_at,
-            })),
+            episodes_watched: Array.from(episodeEntries.values()),
             last_watched_at: mostRecentEpisode.created_at,
             // Update to point to the main episode that will become the consolidated one
             id: mostRecentEpisode.id,
           };
 
-          // Update the most recent episode's document with consolidated data
           const mainEpisodeRef = doc(db, "watchHistory", mostRecentEpisode.id);
-          await setDoc(mainEpisodeRef, consolidatedEntry, { merge: true });
-
-          // Delete the other episodes
           const otherEpisodes = episodes.filter(
             ep => ep.id !== mostRecentEpisode.id
           );
-          if (otherEpisodes.length > 0) {
-            const deleteBatch = writeBatch(db);
-            otherEpisodes.forEach(episode => {
-              const episodeRef = doc(db, "watchHistory", episode.id);
-              deleteBatch.delete(episodeRef);
+          for (
+            let index = 0;
+            index < otherEpisodes.length || index === 0;
+            index += 499
+          ) {
+            const consolidationBatch = writeBatch(db);
+            if (index === 0) {
+              consolidationBatch.set(mainEpisodeRef, consolidatedEntry, {
+                merge: true,
+              });
+            }
+            otherEpisodes.slice(index, index + 499).forEach(episode => {
+              consolidationBatch.delete(doc(db, "watchHistory", episode.id));
             });
-            await deleteBatch.commit();
+            await consolidationBatch.commit();
           }
         }
       } catch (error) {
@@ -602,7 +778,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     // For the mediaKey, we'll use different logic for TV shows vs movies
     const mediaKey =
       mediaType === "tv"
-        ? `${mediaId}-${mediaType}`
+        ? `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`
         : `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
 
     const now = Date.now();
@@ -669,9 +845,28 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    const persistWatchHistory = async () => {
+      if (mediaType === "tv") {
+        const existingDoc = existingItem || newItem;
+        const historyRef = doc(db, "watchHistory", existingDoc.id);
+        await setDoc(historyRef, existingDoc, { merge: true });
+      } else {
+        if (existingItem) {
+          await deleteDoc(doc(db, "watchHistory", existingItem.id));
+        }
+        await setDoc(doc(db, "watchHistory", newItem.id), newItem);
+      }
+    };
+    const persistDocumentIds =
+      mediaType === "tv"
+        ? [(existingItem || newItem).id]
+        : [existingItem?.id, newItem.id].filter((id): id is string =>
+            Boolean(id)
+          );
+
     if (!navigator.onLine) {
       console.log("Queueing watch history update for later");
-      // For offline mode, we only handle local storage
+      queueOperation(persistWatchHistory, persistDocumentIds, user.uid);
       return;
     }
 
@@ -679,19 +874,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     if (!canExecute) {
       console.log("Write rate limit exceeded. Queueing update for later");
       // Queue the operation to be performed later
-      queueOperation(async () => {
-        // For TV shows, we need to update or create the consolidated document
-        if (mediaType === "tv") {
-          // Update the existing document or create a new one
-          const existingDoc = existingItem || newItem;
-          const historyRef = doc(db, "watchHistory", existingDoc.id);
-          await setDoc(historyRef, existingDoc);
-        } else {
-          // For movies, keep the original approach
-          const historyRef = doc(db, "watchHistory", newItem.id);
-          await setDoc(historyRef, newItem);
-        }
-      });
+      queueOperation(persistWatchHistory, persistDocumentIds, user.uid);
       return;
     }
 
@@ -717,21 +900,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Error adding to watch history:", error);
       // Queue the operation to be performed later
-      queueOperation(async () => {
-        if (mediaType === "tv" && existingItem) {
-          // For TV shows, update the existing consolidated document
-          const historyRef = doc(db, "watchHistory", existingItem.id);
-          await setDoc(historyRef, existingItem, { merge: true });
-        } else if (mediaType === "tv" && !existingItem) {
-          // For new TV shows, create the initial document
-          const historyRef = doc(db, "watchHistory", newItem.id);
-          await setDoc(historyRef, newItem);
-        } else {
-          // For movies, keep the original logic
-          const historyRef = doc(db, "watchHistory", newItem.id);
-          await setDoc(historyRef, newItem);
-        }
-      });
+      queueOperation(persistWatchHistory, persistDocumentIds, user.uid);
     }
   };
 
@@ -748,7 +917,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     // For the mediaKey, we'll use different logic for TV shows vs movies
     const mediaKey =
       mediaType === "tv"
-        ? `${mediaId}-${mediaType}`
+        ? `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`
         : `${mediaId}-${mediaType}-${season || ""}-${episode || ""}`;
 
     const now = Date.now();
@@ -872,6 +1041,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
             updatedItemData: { ...updatedItemData, watch_position: position },
           },
           timestamp: now,
+          userId: user.uid,
         });
 
         const updatedHistory = watchHistory.map(h =>
@@ -894,31 +1064,33 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     if (!navigator.onLine) {
-      setWatchHistory([]);
-      saveLocalWatchHistory([]);
       toast({
-        title: "Watch history cleared",
-        description: "Your watch history has been successfully cleared.",
+        title: "Unable to clear watch history",
+        description: "Reconnect to the internet to clear your watch history.",
+        variant: "destructive",
       });
       return;
     }
 
     try {
-      const historyRef = collection(db, "watchHistory");
-      const historyQuery = query(historyRef, where("user_id", "==", user.uid));
-      const historySnapshot = await getDocs(historyQuery);
-
       const canExecute = await deleteRateLimiter.canExecute();
       if (!canExecute) {
         console.log("Delete rate limit exceeded. Skipping Firestore delete.");
         return;
       }
 
+      const historyRef = collection(db, "watchHistory");
+      const historyQuery = query(historyRef, where("user_id", "==", user.uid));
+      const historySnapshot = await getDocs(historyQuery);
+      await cancelPendingOperations(undefined, user.uid);
+
       const deletePromises = historySnapshot.docs.map(doc =>
         deleteDoc(doc.ref)
       );
 
       await Promise.all(deletePromises);
+      await cancelPendingOperations(undefined, user.uid);
+      removeQueuedWatchPositions(undefined, user.uid);
       setWatchHistory([]);
       saveLocalWatchHistory([]);
 
@@ -947,7 +1119,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       }
 
       const historyRef = doc(db, "watchHistory", id);
+      await cancelPendingOperations(new Set([id]), user.uid);
       await deleteDoc(historyRef);
+      await cancelPendingOperations(new Set([id]), user.uid);
+      removeQueuedWatchPositions(new Set([id]), user.uid);
 
       const updatedHistory = watchHistory.filter(item => item.id !== id);
       setWatchHistory(updatedHistory);
@@ -983,6 +1158,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const deletedIds = new Set(ids);
+      await cancelPendingOperations(deletedIds, user.uid);
+
       for (let index = 0; index < ids.length; index += 500) {
         const batch = writeBatch(db);
         ids.slice(index, index + 500).forEach(id => {
@@ -991,6 +1169,8 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         await batch.commit();
       }
 
+      await cancelPendingOperations(deletedIds, user.uid);
+      removeQueuedWatchPositions(new Set(ids), user.uid);
       const updatedHistory = watchHistory.filter(
         item => !ids.includes(item.id)
       );
