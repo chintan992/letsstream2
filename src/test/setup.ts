@@ -219,50 +219,6 @@ vi.mock("@/hooks/user-preferences", () => ({
     React.createElement(React.Fragment, null, children),
 }));
 
-vi.mock("@/contexts/watch-history-context", () => ({
-  useWatchHistory: () => ({
-    watchHistory: [],
-    hasMore: false,
-    isLoading: false,
-    loadMore: vi.fn(),
-    addToWatchHistory: vi.fn(),
-    updateWatchPosition: vi.fn(),
-    clearWatchHistory: vi.fn(),
-    deleteWatchHistoryItem: vi.fn(),
-    deleteSelectedWatchHistory: vi.fn(),
-  }),
-  WatchHistoryProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-}));
-
-vi.mock("@/contexts/favorites-context", () => ({
-  useFavorites: () => ({
-    favorites: [],
-    isLoading: false,
-    addToFavorites: vi.fn(),
-    removeFromFavorites: vi.fn(),
-    isInFavorites: vi.fn(),
-    deleteFavoriteItem: vi.fn(),
-    deleteSelectedFavorites: vi.fn(),
-  }),
-  FavoritesProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-}));
-
-vi.mock("@/contexts/watchlist-context", () => ({
-  useWatchlist: () => ({
-    watchlist: [],
-    isLoading: false,
-    addToWatchlist: vi.fn(),
-    removeFromWatchlist: vi.fn(),
-    isInWatchlist: vi.fn(),
-    deleteWatchlistItem: vi.fn(),
-    deleteSelectedWatchlist: vi.fn(),
-  }),
-  WatchlistProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-}));
-
 vi.mock("@/contexts/user-profile-context", () => ({
   useUserProfile: () => ({
     profile: null,

@@ -213,12 +213,28 @@ const WatchHistory = () => {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loader = useRef(null);
+  const paginationGeneration = useRef(0);
 
   const handleLoadMore = useCallback(async () => {
+    const generation = paginationGeneration.current;
     setIsLoadingMore(true);
-    await loadMore();
-    setIsLoadingMore(false);
-  }, [loadMore]);
+    await loadMore(sortOrder);
+    if (generation === paginationGeneration.current) {
+      setIsLoadingMore(false);
+    }
+  }, [loadMore, sortOrder]);
+
+  const handleSortOrderChange = useCallback(() => {
+    const nextSortOrder = sortOrder === "newest" ? "oldest" : "newest";
+    const generation = ++paginationGeneration.current;
+    setSortOrder(nextSortOrder);
+    setIsLoadingMore(true);
+    loadMore(nextSortOrder, true).finally(() => {
+      if (generation === paginationGeneration.current) {
+        setIsLoadingMore(false);
+      }
+    });
+  }, [loadMore, sortOrder]);
 
   useEffect(() => {
     const currentLoader = loader.current;
@@ -374,9 +390,7 @@ const WatchHistory = () => {
           <WatchHistoryHeader
             activeTab={activeTab}
             sortOrder={sortOrder}
-            onSortOrderChange={() =>
-              setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
-            }
+            onSortOrderChange={handleSortOrderChange}
             onClearHistory={handleClearHistory}
             showClearButton={activeTab === "history" && watchHistory.length > 0}
             isSimklEnabled={userPreferences?.isSimklEnabled || false}

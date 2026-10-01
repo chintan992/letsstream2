@@ -34,6 +34,17 @@ function createVideoSource(source: JsonVideoSource): VideoSource {
   };
 }
 
+function isValidSource(source: unknown): source is JsonVideoSource {
+  if (!source || typeof source !== "object") return false;
+  const candidate = source as Partial<JsonVideoSource>;
+  return [
+    candidate.key,
+    candidate.name,
+    candidate.movieUrlPattern,
+    candidate.tvUrlPattern,
+  ].every(value => typeof value === "string" && value.length > 0);
+}
+
 function getCachedSources(): VideoSource[] | null {
   try {
     const endpoint = import.meta.env.VITE_VIDEO_SOURCE_API;
@@ -54,7 +65,16 @@ function getCachedSources(): VideoSource[] | null {
       return null;
     }
 
-    return parsed.sources.map(createVideoSource);
+    if (!Array.isArray(parsed.sources)) {
+      localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+      return null;
+    }
+    const validSources = parsed.sources.filter(isValidSource);
+    if (validSources.length !== parsed.sources.length) {
+      localStorage.removeItem(VIDEO_SOURCES_CACHE_KEY);
+      return null;
+    }
+    return validSources.map(createVideoSource);
   } catch (error) {
     console.error("Error reading video sources cache:", error);
     try {
@@ -101,8 +121,11 @@ export async function fetchVideoSources(): Promise<VideoSource[]> {
       throw new Error(`Failed to fetch video sources: ${response.statusText}`);
     }
     const data = await response.json();
-    const sources = (data.sources as JsonVideoSource[]).map(createVideoSource);
-    setCachedSources(data.sources as JsonVideoSource[], apiUrl);
+    if (!Array.isArray(data.sources)) return [];
+    const validSources = data.sources.filter(isValidSource);
+    if (validSources.length !== data.sources.length) return [];
+    const sources = validSources.map(createVideoSource);
+    setCachedSources(validSources, apiUrl);
     return sources;
   } catch (error) {
     console.error("Error loading video sources:", error);

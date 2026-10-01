@@ -192,7 +192,7 @@ export interface WatchHistoryContextType {
   watchHistory: WatchHistoryItem[];
   hasMore: boolean;
   isLoading: boolean;
-  loadMore: () => Promise<void>;
+  loadMore: (sortOrder?: "newest" | "oldest", reset?: boolean) => Promise<void>;
   addToWatchHistory: (
     media: Media,
     position: number,
@@ -228,6 +228,8 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
   const simklSyncKeyRef = useRef<string | null>(null);
+  const historyRequestIdRef = useRef(0);
+  const historySortOrderRef = useRef<"newest" | "oldest">("newest");
   const { toast } = useToast();
 
   const processWatchPositionQueue = useCallback(async () => {
@@ -377,7 +379,10 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchWatchHistory = useCallback(
-    async (isInitial: boolean = false) => {
+    async (
+      isInitial: boolean = false,
+      sortOrder: "newest" | "oldest" = "newest"
+    ) => {
       if (!user) {
         const localHistory = loadLocalWatchHistory();
         const deduplicatedHistory = deduplicateWatchHistory(localHistory);
@@ -389,6 +394,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      let requestId: number | null = null;
       try {
         setIsLoading(true);
         const historyRef = collection(db, "watchHistory");
@@ -398,14 +404,14 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           historyQuery = query(
             historyRef,
             where("user_id", "==", user.uid),
-            orderBy("created_at", "desc"),
+            orderBy("created_at", sortOrder === "newest" ? "desc" : "asc"),
             limit(ITEMS_PER_PAGE)
           );
         } else if (lastVisible) {
           historyQuery = query(
             historyRef,
             where("user_id", "==", user.uid),
-            orderBy("created_at", "desc"),
+            orderBy("created_at", sortOrder === "newest" ? "desc" : "asc"),
             startAfter(lastVisible),
             limit(ITEMS_PER_PAGE)
           );
@@ -419,7 +425,16 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        requestId = ++historyRequestIdRef.current;
+        historySortOrderRef.current = sortOrder;
+
+        if (isInitial) {
+          setLastVisible(null);
+        }
+
         const historySnapshot = await getDocs(historyQuery);
+
+        if (requestId !== historyRequestIdRef.current) return;
 
         if (historySnapshot.empty) {
           setHasMore(false);
@@ -457,6 +472,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           setInitialFetchDone(true);
         }
       } catch (error) {
+        if (requestId !== historyRequestIdRef.current) return;
         console.error("Error fetching watch history:", error);
         toast({
           title: "Error loading watch history",
@@ -467,7 +483,9 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
           setInitialFetchDone(true);
         }
       } finally {
-        setIsLoading(false);
+        if (requestId === historyRequestIdRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     [user, lastVisible, loadLocalWatchHistory, toast]
@@ -478,7 +496,7 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
       if (!initialFetchDone || user) {
         setIsLoading(true);
         try {
-          await fetchWatchHistory(true);
+          await fetchWatchHistory(true, historySortOrderRef.current);
         } catch (error) {
           console.error("Error fetching data:", error);
         }
@@ -1214,7 +1232,8 @@ export function WatchHistoryProvider({ children }: { children: ReactNode }) {
         watchHistory,
         hasMore,
         isLoading,
-        loadMore: () => fetchWatchHistory(false),
+        loadMore: (sortOrder = "newest", reset = false) =>
+          fetchWatchHistory(reset, sortOrder),
         addToWatchHistory,
         updateWatchPosition,
         clearWatchHistory,
