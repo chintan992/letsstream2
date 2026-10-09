@@ -130,8 +130,8 @@ class PerformanceMonitor {
     if (!this.isEnabled) return;
 
     // Report Web Vitals metrics
+    // Note: onFID was removed in web-vitals v5+ (replaced by INP)
     webVitals.onCLS(metric => this.reportWebVital(metric));
-    webVitals.onFID(metric => this.reportWebVital(metric));
     webVitals.onLCP(metric => this.reportWebVital(metric));
     webVitals.onTTFB(metric => this.reportWebVital(metric));
     webVitals.onFCP(metric => this.reportWebVital(metric));
