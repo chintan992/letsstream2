@@ -79,7 +79,6 @@
     "motion": "^14.0.0",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
-    "react-day-picker": "9.11.1",
     "react-dom": "^18.3.1",
     "react-firebase-hooks": "^5.1.1",
     "react-helmet-async": "^3.0.0",
