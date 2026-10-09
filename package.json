@@ -30,7 +30,7 @@
     "@docusaurus/theme-classic": "^3.8.0",
     "@firebase/analytics": "^0.10.0",
     "@firebase/auth": "^1.13.7",
-    "@google/generative-ai": "^0.24.0",
+    "@google/genai": "^2.28.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.21",
     "@radix-ui/react-alert-dialog": "^1.1.24",
