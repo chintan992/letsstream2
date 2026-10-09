@@ -1,5 +1,5 @@
 import React from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { ThumbsUp, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RecommendationCard from "./RecommendationCard";

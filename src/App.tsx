@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { LazyMotion, domAnimation } from "framer-motion";
+import { LazyMotion, domAnimation } from "motion/react";
 import { BrowserRouter } from "react-router-dom";
 import {
   QueryClient,

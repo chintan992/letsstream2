@@ -1,5 +1,5 @@
 import React from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { Database } from "lucide-react";
 import { BackupRestore } from "@/components/BackupRestore";
 import { BackupRestoreErrorBoundary } from "@/components/BackupRestoreErrorBoundary";

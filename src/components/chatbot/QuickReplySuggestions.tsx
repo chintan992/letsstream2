@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 
 interface QuickReplySuggestionsProps {
   suggestions: string[];

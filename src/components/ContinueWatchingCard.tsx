@@ -1,4 +1,4 @@
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 import { Play, Clock, Info, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";

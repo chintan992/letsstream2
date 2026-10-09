@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useScrollRestoration, usePageStatePersistence } from "@/hooks";
 import { useQuery } from "@tanstack/react-query";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

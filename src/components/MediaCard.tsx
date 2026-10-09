@@ -12,7 +12,7 @@ import { Media } from "@/utils/types";
 import { posterSizes } from "@/utils/api";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { Star, Info, Heart, Play } from "lucide-react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { trackMediaPreference, trackMediaView } from "@/lib/analytics";
 import { useWillChange } from "@/hooks/useWillChange";
 

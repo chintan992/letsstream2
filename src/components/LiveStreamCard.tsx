@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { Play } from "lucide-react";
 // ...existing code...

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Heart, Bookmark, ArrowLeft, Star, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 
 /**
  * Z-INDEX STRATEGY:

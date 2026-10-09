@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Play, Info, Calendar, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

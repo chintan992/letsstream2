@@ -3,7 +3,7 @@ import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
 import { LabeledStreamLink, Watch32Subtitle } from "@/utils/types";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "motion/react";
 import { useChromecast } from "@/hooks/use-chromecast";
 
 /**

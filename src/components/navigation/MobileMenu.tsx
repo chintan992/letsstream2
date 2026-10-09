@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import {
   Home,
   Film,

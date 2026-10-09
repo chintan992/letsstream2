@@ -4,7 +4,7 @@ import { APIMatch } from "@/utils/sports-types";
 import SportMatchCard from "./SportMatchCard";
 import SportMatchCardSkeleton from "./SportMatchCardSkeleton";
 import EmptyState from "./EmptyState";
-import { m, Variants } from "framer-motion";
+import { m, Variants } from "motion/react";
 
 interface SportMatchGridProps {
   matches: APIMatch[];

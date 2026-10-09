@@ -3,7 +3,7 @@ import { useChatbot } from "@/contexts/chatbot-context";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { Button } from "@/components/ui/button";
 import { Sparkles, X } from "lucide-react";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 
 /**

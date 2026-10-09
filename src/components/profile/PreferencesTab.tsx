@@ -1,5 +1,5 @@
 import React from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { Settings, CircleDashed, CloudOff } from "lucide-react";
 import { SimklService } from "@/lib/simkl";
 import { useUserPreferences } from "@/hooks/user-preferences";

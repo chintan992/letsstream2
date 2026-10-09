@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Media } from "@/utils/types";
 import { backdropSizes } from "@/utils/api";
 import { getImageUrl } from "@/utils/services/tmdb";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "motion/react";
 import { useMediaPreferences } from "@/hooks/use-media-preferences";
 import { trackMediaPreference } from "@/lib/analytics";
 import useKeyPress from "@/hooks/use-key-press";

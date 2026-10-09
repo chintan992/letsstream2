@@ -7,7 +7,7 @@ import {
   triggerHapticFeedback,
   triggerHapticPattern,
 } from "@/utils/haptic-feedback";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "motion/react";
 import {
   Tooltip,
   TooltipContent,

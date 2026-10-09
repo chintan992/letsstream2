@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { Link } from "react-router-dom";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { useFavorites } from "@/hooks/favorites";

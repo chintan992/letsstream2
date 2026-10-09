@@ -11,7 +11,7 @@ import { useUserPreferences } from "@/hooks/user-preferences";
 import { useCountdown, formatCountdown } from "@/hooks/use-countdown";
 import { useFavoriteMatches } from "@/hooks/use-favorite-matches";
 import { Button } from "@/components/ui/button";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 
 interface SportMatchCardProps {
   match: APIMatch;
