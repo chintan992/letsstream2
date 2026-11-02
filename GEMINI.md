@@ -13,7 +13,7 @@ This is a modern streaming platform built with React, TypeScript, and Firebase. 
 
 **Prerequisites:**
 
-- Node.js 20.19+ or 22.12+
+- Node.js 24.12+
 - npm or yarn
 - Firebase account and project
 

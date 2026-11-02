@@ -10,7 +10,7 @@
   status = 200
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "24.12.0"
 
 # These settings also work for Cloudflare Pages deployment
 # Cloudflare Pages will use the same build command and output directory

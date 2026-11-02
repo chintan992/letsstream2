@@ -70,7 +70,7 @@ VITE_FIREBASE_MEASUREMENT_ID=
      ```
      Build command: npm run build
      Build output directory: dist
-     Node.js version: 18.x
+     Node.js version: 24.12.x
      ```
 
 2. **Manual Deploy**

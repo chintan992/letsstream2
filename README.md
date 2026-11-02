@@ -47,7 +47,7 @@ _Note: Several dependencies are installed but unused and should be removed in a 
 
 ### Prerequisites
 
-- Node.js 20.19+ or 22.12+ (required for Vite 7 and Firebase 12) - Check with `node --version`
+- Node.js 24.12+ (required by the current Firebase packages) - Check with `node --version`
 - npm or yarn
 - Firebase account and project
 - Supabase account and project (not currently used in codebase)
@@ -96,7 +96,7 @@ Preview production build:
 npm run preview
 ```
 
-> **Note**: Ensure you're using Node.js 20.19+ or 22.12+. Check with `node --version`
+> **Note**: Ensure you're using Node.js 24.12+. Check with `node --version`
 
 ### Verification
 
@@ -156,7 +156,7 @@ Future improvements should include adding Vitest for unit testing and React Test
 3. Configure the build settings:
    - Build command: `npm run build`
    - Build output directory: `dist`
-   - Node.js version: `20.x` (or `20.19+`)
+   - Node.js version: `24.x` (or `24.12+`)
 4. Add your environment variables in the Pages settings
 5. Your site will be automatically deployed
 

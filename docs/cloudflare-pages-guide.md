@@ -75,6 +75,11 @@ Use these build settings:
 - **Build command**: `npm run build`
 - **Build output directory**: `dist`
 - **Root directory**: `/` (root of repository)
+- **Node.js version**: `24.12.0` or newer
+
+The repository includes `.nvmrc` and `wrangler.toml` with the matching runtime
+and Pages output configuration. If the Cloudflare project has a `NODE_VERSION`
+environment variable configured, set it to `24.12.0` or newer as well.
 
 ### 3. Environment Variables
 

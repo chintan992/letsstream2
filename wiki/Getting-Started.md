@@ -6,7 +6,7 @@ This guide will help you set up Let's Stream V2.0 for development.
 
 Before you begin, ensure you have:
 
-- Node.js (LTS version 20.x or higher)
+- Node.js 24.12 or higher
 - npm or yarn
 - Git
 - A code editor (VS Code recommended)

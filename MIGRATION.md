@@ -4,6 +4,17 @@
 
 This document summarizes the dependency update from the previous version to the current one, focusing on core build infrastructure updates: Vite, TypeScript, ESLint ecosystem, TailwindCSS, PostCSS, and Vite plugins.
 
+## Current Deployment Runtime
+
+The current Firebase dependency set requires Node.js 24.12 or newer. Cloudflare
+Pages, Netlify, GitHub Actions, and local development should use the version
+recorded in `.nvmrc`.
+
+The remaining `node-domexception`, `uuid@8`, and `glob@11` deprecation notices
+are transitive dependencies of Google authentication, Docusaurus, and Workbox.
+They are retained until their upstream packages provide compatible replacements;
+forcing overrides would risk breaking the build.
+
 ## Node.js Requirement Change
 
 - **Old**: Node.js 20.0.0+
