@@ -21,6 +21,11 @@ export interface GeminiResponse {
   error?: string;
 }
 
+export interface ChatHistoryTurn {
+  text: string;
+  isUser: boolean;
+}
+
 // Custom error types
 class GeminiAPIError extends Error {
   constructor(
@@ -251,7 +256,7 @@ const generateFallbackResponse = (query: string): string => {
  */
 export const sendMessageToGemini = async (
   message: string,
-  chatHistory: string[] = []
+  chatHistory: ChatHistoryTurn[] = []
 ): Promise<GeminiResponse> => {
   // Track start time for performance monitoring
   const startTime = Date.now();
@@ -306,31 +311,23 @@ export const sendMessageToGemini = async (
     };
 
     // Build chat history for the new SDK (system prompt + recent messages)
-    const history: { role: string; parts: { text: string }[] }[] = [];
-    const pushHistory = (text: string, role: "user" | "model" = "user") => {
+    const history: {
+      role: "user" | "model";
+      parts: { text: string }[];
+    }[] = [];
+    const pushHistory = (text: string, isUser: boolean) => {
+      const role = isUser ? "user" : "model";
       history.push({ role, parts: [{ text }] });
     };
 
     // Process chat history with improved handling
     if (chatHistory.length > 0) {
-      // Add system prompt first if not present
-      if (!chatHistory.some(msg => msg.includes(MOVIE_RECOMMENDATION_PROMPT))) {
-        pushHistory(MOVIE_RECOMMENDATION_PROMPT);
-      }
-
-      // Add only the most relevant historical messages to avoid context overflow
-      // If we have many messages, only use the first one (system) and the most recent ones
-      const relevantHistory =
-        chatHistory.length > 5
-          ? [chatHistory[0], ...chatHistory.slice(-4)]
-          : chatHistory;
+      // Add only the most recent messages to avoid context overflow.
+      const relevantHistory = chatHistory.slice(-5);
 
       for (const msg of relevantHistory) {
-        pushHistory(msg);
+        pushHistory(msg.text, msg.isUser);
       }
-    } else {
-      // Initialize with system prompt
-      pushHistory(MOVIE_RECOMMENDATION_PROMPT);
     }
 
     const chat = genAI.chats.create({
@@ -339,6 +336,7 @@ export const sendMessageToGemini = async (
       config: {
         ...generationConfig,
         safetySettings,
+        systemInstruction: MOVIE_RECOMMENDATION_PROMPT,
       },
     });
 

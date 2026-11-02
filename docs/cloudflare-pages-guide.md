@@ -102,12 +102,27 @@ The `_routes.json` file specifies which routes should be handled by functions:
 ```json
 {
   "version": 1,
-  "include": ["/*"]
+  "include": ["/*"],
+  "exclude": [
+    "/assets/*",
+    "/icons/*",
+    "/screenshots/*",
+    "/.well-known/*",
+    "/favicon.ico",
+    "/manifest.json",
+    "/offline.html",
+    "/placeholder.svg",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/google35be8c7506db4c1b.html"
+  ]
 }
 ```
 
-This allows the hostname redirect middleware to run for every request while
-`context.next()` continues to serve the normal static site and API functions.
+Static assets bypass Functions and are served directly. HTML navigations still
+reach the middleware for the legacy-host redirect, while `/api/*` remains
+available to Functions. The middleware keeps legacy-host `POST` requests to
+`/api/*` on the existing host so their method and body are preserved.
 
 ## Local Development
 

@@ -12,7 +12,16 @@ export async function onRequest({
 }: PagesFunctionContext): Promise<Response> {
   const url = new URL(request.url);
 
-  if (url.hostname === LEGACY_HOST) {
+  const isLegacyApiPost =
+    url.hostname === LEGACY_HOST &&
+    request.method === "POST" &&
+    url.pathname.startsWith("/api/");
+  const isHtmlNavigation = request.headers
+    .get("Accept")
+    ?.toLowerCase()
+    .includes("text/html");
+
+  if (url.hostname === LEGACY_HOST && isHtmlNavigation && !isLegacyApiPost) {
     url.hostname = CANONICAL_HOST;
     return Response.redirect(url, 301);
   }

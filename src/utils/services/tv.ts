@@ -94,25 +94,27 @@ interface TVEpisodeResult {
 // Get TV show details
 export async function getTVDetails(id: number): Promise<TVDetails | null> {
   try {
-    const detailsResponse = await tmdb.get<TMDBTVDetailsResult>(
+    const detailsPromise = tmdb.get<TMDBTVDetailsResult>(
       `/tv/${id}?append_to_response=content_ratings`
     );
-    let imagesData: TMDBImagesResponse = {
-      backdrops: [],
-      posters: [],
-      logos: [],
-    };
-
-    try {
-      const imagesResponse = await tmdb.get<TMDBImagesResponse>(
-        `/tv/${id}/images`
-      );
-      imagesData = imagesResponse.data;
-    } catch (error) {
-      if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+    const imagesPromise = tmdb
+      .get<TMDBImagesResponse>(`/tv/${id}/images`)
+      .then(response => response.data)
+      .catch(error => {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          return {
+            backdrops: [],
+            posters: [],
+            logos: [],
+          };
+        }
         throw error;
-      }
-    }
+      });
+
+    const [detailsResponse, imagesData] = await Promise.all([
+      detailsPromise,
+      imagesPromise,
+    ]);
 
     const detailsData = detailsResponse.data;
 

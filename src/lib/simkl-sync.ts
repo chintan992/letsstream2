@@ -328,6 +328,16 @@ async function exportToSimkl(
     const key = `${item.media_type}_${item.media_id}`;
     if (!simklTmdbIds.has(key)) {
       try {
+        const hasCompletedProgress = (position: number, duration: number) =>
+          duration > 0 && position / duration >= 0.9;
+
+        if (
+          item.media_type === "movie" &&
+          !hasCompletedProgress(item.watch_position, item.duration)
+        ) {
+          continue;
+        }
+
         // Determine a release year if available on the media item
         const candidateYearFromItem = (() => {
           const itemWithDates = item as WatchHistoryItem & {
@@ -367,7 +377,11 @@ async function exportToSimkl(
           return undefined;
         })();
 
-        const media = {
+        const media: {
+          title: string;
+          ids: { tmdb: number };
+          year?: number;
+        } = {
           title: item.title,
           ids: { tmdb: item.media_id },
         };
@@ -393,7 +407,11 @@ async function exportToSimkl(
         const watchedEpisodes = item.episodes_watched?.filter(
           watchedEpisode =>
             Number.isInteger(watchedEpisode.season) &&
-            Number.isInteger(watchedEpisode.episode)
+            Number.isInteger(watchedEpisode.episode) &&
+            hasCompletedProgress(
+              watchedEpisode.watch_position,
+              watchedEpisode.duration
+            )
         );
         const episodes =
           watchedEpisodes && watchedEpisodes.length > 0
@@ -405,8 +423,12 @@ async function exportToSimkl(
                     season: item.season,
                     episode: item.episode,
                     watched_at: item.last_watched_at || item.created_at,
+                    watch_position: item.watch_position,
+                    duration: item.duration,
                   },
-                ]
+                ].filter(episode =>
+                  hasCompletedProgress(episode.watch_position, episode.duration)
+                )
               : [];
 
         for (const watchedEpisode of episodes) {
@@ -433,8 +455,6 @@ async function exportToSimkl(
               })
             ),
           });
-        } else {
-          shows.push({ ...media, status: "watching" });
         }
       } catch (error) {
         result.errors.push(
