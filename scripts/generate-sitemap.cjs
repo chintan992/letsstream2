@@ -1,22 +1,23 @@
 const fs = require("fs");
 const path = require("path");
 
-const BASE_URL = "https://letsstream2.pages.dev";
+const BASE_URL = "https://letsstream.chintan992.dev";
 const PAGES_DIR = path.resolve(__dirname, "../src/pages");
 const PUBLIC_DIR = path.resolve(__dirname, "../public");
 
-// Static routes from src/routes.tsx analysis
+// Static public routes suitable for search engine indexing
 const staticRoutes = [
-  "/",
-  "/movie",
-  "/tv",
-  "/sports",
-  "/trending",
-  "/search",
-  "/login",
-  "/signup",
-  "/privacy",
-  "/terms",
+  { path: "/", priority: "1.0", changefreq: "daily" },
+  { path: "/movie", priority: "0.8", changefreq: "weekly" },
+  { path: "/tv", priority: "0.8", changefreq: "weekly" },
+  { path: "/sports", priority: "0.7", changefreq: "weekly" },
+  { path: "/live", priority: "0.7", changefreq: "weekly" },
+  { path: "/trending", priority: "0.7", changefreq: "weekly" },
+  { path: "/simkl", priority: "0.7", changefreq: "weekly" },
+  { path: "/privacy", priority: "0.3", changefreq: "monthly" },
+  { path: "/terms", priority: "0.3", changefreq: "monthly" },
+  { path: "/dmca", priority: "0.3", changefreq: "monthly" },
+  { path: "/content-removal", priority: "0.3", changefreq: "monthly" },
 ];
 
 function generateSitemap() {
@@ -27,10 +28,10 @@ function generateSitemap() {
 ${staticRoutes
   .map(
     route => `  <url>
-    <loc>${BASE_URL}${route}</loc>
+    <loc>${BASE_URL}${route.path}</loc>
     <lastmod>${lastmod}</lastmod>
-    <changefreq>${route === "/" ? "daily" : "weekly"}</changefreq>
-    <priority>${route === "/" ? "1.0" : route.includes("movie") || route.includes("tv") ? "0.8" : "0.5"}</priority>
+    <changefreq>${route.changefreq}</changefreq>
+    <priority>${route.priority}</priority>
   </url>`
   )
   .join("\n")}

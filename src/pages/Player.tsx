@@ -23,6 +23,14 @@ import EpisodeSidebar from "@/components/player/EpisodeSidebar";
 import MediaActions from "@/components/player/MediaActions";
 import { useMediaPlayer } from "@/hooks/use-media-player";
 import { useAuth } from "@/hooks";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Player = () => {
@@ -89,7 +97,7 @@ const Player = () => {
     seasons: (mediaDetails as TVDetails)?.seasons || [],
   };
 
-  // Keyboard shortcuts: ←/→ episode nav, B back, F favorite, W watchlist
+  // Keyboard shortcuts: â†/â†’ episode nav, B back, F favorite, W watchlist
   useKeyboardShortcuts([
     ...(isTv
       ? [
@@ -142,6 +150,35 @@ const Player = () => {
       </m.nav>
 
       <div className="container mx-auto px-4 py-4 md:px-6 md:py-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink to="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink to={mediaType === "movie" ? "/movie" : "/tv"}>
+                {mediaType === "movie" ? "Movies" : "TV Shows"}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink to={`/${mediaType}/${id}`}>
+                {mediaType === "movie"
+                  ? (mediaDetails as MovieDetails)?.title || "Details"
+                  : (mediaDetails as TVDetails)?.name || "Details"}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>
+                {mediaType === "tv" && season && episode
+                  ? `S${season}:E${episode}`
+                  : "Watch"}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <MediaActions
           isFavorite={isFavorite}
           isInWatchlist={isInMyWatchlist}
@@ -156,7 +193,7 @@ const Player = () => {
           }
           subtitle={
             mediaType === "tv" && season && episode
-              ? `Season ${season} • Episode ${episode}`
+              ? `Season ${season} â€¢ Episode ${episode}`
               : undefined
           }
           year={

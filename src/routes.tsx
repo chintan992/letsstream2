@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate, useParams } from "react-router-dom";
 import { Suspense, useEffect } from "react";
 import { lazyLoadWithRetry } from "./utils/lazy-load-with-retry";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -49,6 +49,11 @@ const SimklDiscoverList = lazyLoadWithRetry(
   () => import("./pages/SimklDiscoverList")
 );
 
+function MovieRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/movie/${id || ""}`} replace />;
+}
+
 export default function AppRoutes() {
   const enableManualRestoration =
     import.meta.env.VITE_SCROLL_RESTORATION_MANUAL === "true";
@@ -91,9 +96,17 @@ export default function AppRoutes() {
 
           {/* Content routes */}
           <Route path="/movie" element={<Movies />} />
+          <Route path="/movies" element={<Navigate to="/movie" replace />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
+          <Route path="/movies/:id" element={<MovieRedirect />} />
           <Route path="/tv" element={<TVShowsPage />} />
+          <Route path="/tv-shows" element={<Navigate to="/tv" replace />} />
+          <Route path="/tvshows" element={<Navigate to="/tv" replace />} />
           <Route path="/tv/:id" element={<TVDetails />} />
+          <Route
+            path="/settings"
+            element={<Navigate to="/profile" replace />}
+          />
           <Route path="/sports" element={<Sports />} />
           <Route path="/sports/player/:id" element={<SportMatchPlayer />} />
           <Route path="/watch/:type/:id" element={<Player />} />

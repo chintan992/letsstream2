@@ -21,6 +21,14 @@ import { useTVDetails } from "@/hooks/use-tv-details";
 import { TVDownloadSection } from "@/components/tv/TVDownloadSection";
 import { useAuth } from "@/hooks";
 import { useHaptic } from "@/hooks/useHaptic";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 type TabType =
   | "episodes"
@@ -227,19 +235,19 @@ const TVDetailsPage = () => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://letsstream2.pages.dev/",
+        item: "https://letsstream.chintan992.dev/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "TV Shows",
-        item: "https://letsstream2.pages.dev/tv",
+        item: "https://letsstream.chintan992.dev/tv",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: tvShow.name,
-        item: `https://letsstream2.pages.dev/tv/${tvShow.id}`,
+        item: `https://letsstream.chintan992.dev/tv/${tvShow.id}`,
       },
     ],
   };
@@ -295,6 +303,21 @@ const TVDetailsPage = () => {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink to="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink to="/tv">TV Shows</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{tvShow.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <Tabs
           value={activeTab}
           onValueChange={value => {

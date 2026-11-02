@@ -44,6 +44,41 @@ const SEO_CONFIG = {
       "Search for your favorite movies, TV shows, and sports on Let's Stream.",
     keywords: "search movies, find tv shows, sports search",
   },
+  "/live": {
+    title: "Live Streams | Let's Stream",
+    description:
+      "Watch live sports and event streams on Let's Stream. Real-time updates and high-quality streaming.",
+    keywords: "live streams, sports streams, live sports, online streaming",
+  },
+  "/simkl": {
+    title: "Simkl Discover | Let's Stream",
+    description:
+      "Discover trending movies, TV shows, and personalized anime recommendations from Simkl on Let's Stream.",
+    keywords:
+      "simkl discover, trending movies, anime recommendations, tv shows",
+  },
+  "/terms": {
+    title: "Terms of Service | Let's Stream",
+    description: "Terms of service and legal notice for Let's Stream V2.0.",
+    keywords: "terms of service, legal, streaming terms",
+  },
+  "/privacy": {
+    title: "Privacy Policy | Let's Stream",
+    description:
+      "Privacy policy and data handling practices for Let's Stream V2.0.",
+    keywords: "privacy policy, data protection, privacy",
+  },
+  "/dmca": {
+    title: "DMCA Notice | Let's Stream",
+    description:
+      "Digital Millennium Copyright Act (DMCA) policy for Let's Stream V2.0.",
+    keywords: "dmca, copyright, content policy",
+  },
+  "/content-removal": {
+    title: "Content Removal | Let's Stream",
+    description: "Content removal policy and guidelines for Let's Stream V2.0.",
+    keywords: "content removal, copyright request, takedown policy",
+  },
 };
 
 function injectSEO() {
@@ -70,7 +105,7 @@ function injectSEO() {
     <meta name="keywords" content="${config.keywords}" />
     <meta property="og:title" content="${config.title}" />
     <meta property="og:description" content="${config.description}" />
-    <meta property="og:url" content="https://letsstream2.pages.dev${route}" />
+    <meta property="og:url" content="https://letsstream.chintan992.dev${route}" />
     <meta property="twitter:title" content="${config.title}" />
     <meta property="twitter:description" content="${config.description}" />
     `;

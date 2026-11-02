@@ -9,6 +9,15 @@ import MediaGrid from "@/components/MediaGrid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, TrendingUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SEO from "@/components/SEO";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 // Category configuration
 const CATEGORY_CONFIG: Record<
@@ -187,20 +196,30 @@ const SimklDiscoverList = () => {
 
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">
+      <SEO
+        title={`${title} - Simkl Discover`}
+        description={`Explore ${title} on Let's Stream powered by Simkl.`}
+      />
       <Navbar />
 
       <div className="flex w-full flex-1 flex-col items-stretch justify-start pt-20">
         {/* Header */}
         <div className="container mx-auto mb-8 px-6 md:px-10 lg:px-16">
-          <Link to="/simkl">
-            <Button
-              variant="ghost"
-              className="mb-4 text-white/60 hover:text-white"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Discover
-            </Button>
-          </Link>
+          <Breadcrumb className="mb-4">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink to="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink to="/simkl">Simkl</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <div className="flex items-center gap-3">
             <div className={iconColor}>{icon}</div>
             <h1 className="text-3xl font-bold text-white">{title}</h1>
@@ -220,7 +239,7 @@ const SimklDiscoverList = () => {
                 <p className="text-white">
                   Connect your Simkl account to see personalized recommendations
                 </p>
-                <Link to="/settings">
+                <Link to="/profile">
                   <Button variant="link" className="mt-2 text-purple-400">
                     Connect Simkl Account
                   </Button>

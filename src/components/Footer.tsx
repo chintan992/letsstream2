@@ -152,7 +152,7 @@ const Footer = () => {
 
               <li>
                 <Link
-                  to="/movies"
+                  to="/movie"
                   className="flex items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
@@ -167,6 +167,36 @@ const Footer = () => {
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   TV Shows
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/sports"
+                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                >
+                  <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
+                  Sports
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/live"
+                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                >
+                  <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
+                  Live Streams
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/simkl"
+                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                >
+                  <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
+                  Simkl
                 </Link>
               </li>
 

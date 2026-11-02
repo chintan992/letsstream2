@@ -87,7 +87,7 @@
   "prefer_related_applications": false,
   "scope": "/",
   "scope_extensions": [
-    { "origin": "https://letsstream2.pages.dev", "type": "origin" }
+    { "origin": "https://letsstream.chintan992.dev", "type": "origin" }
   ],
   "display_override": [
     "window-controls-overlay",

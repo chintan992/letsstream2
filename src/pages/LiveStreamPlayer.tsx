@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import PageTransition from "@/components/PageTransition";
 import { useLiveStreams } from "@/hooks/use-live-streams";
 import { LiveStream } from "@/pages/LiveStreams";
@@ -86,6 +88,16 @@ const LiveStreamPlayer = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
+        <SEO
+          title={
+            stream ? `${stream.match_name} - Live Stream` : "Live Stream Player"
+          }
+          description={
+            stream
+              ? `Watch ${stream.match_name} live online. High-quality live stream on Let's Stream.`
+              : "Live stream video player on Let's Stream."
+          }
+        />
         <Navbar />
         <div className="container mx-auto px-4 py-6 pt-20">
           <Button
@@ -207,6 +219,7 @@ const LiveStreamPlayer = () => {
             </>
           )}
         </div>
+        <Footer />
       </div>
     </PageTransition>
   );

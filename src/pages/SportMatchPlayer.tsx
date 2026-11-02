@@ -6,6 +6,15 @@ import { ArrowLeft, Check, Radio } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+import SEO from "@/components/SEO";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { getMatchStreamsById, getMatchById } from "@/utils/sports-api";
 import { useToast } from "@/hooks/use-toast";
@@ -174,10 +183,38 @@ const SportMatchPlayer = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
+        <SEO
+          title={
+            match ? `${match.title} - Sports Player` : "Sports Match Player"
+          }
+          description={
+            match
+              ? `Watch ${match.title} live on Let's Stream. High-quality sports streams.`
+              : "Live sports match player on Let's Stream."
+          }
+        />
         <Navbar />
 
         <div className="pb-12 pt-20">
           <div className="container mx-auto px-4 md:px-6">
+            <Breadcrumb className="mb-4">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink to="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink to="/sports">Sports</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>
+                    {match ? match.title : "Match Player"}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
             {/* Header with back button */}
             <div className="mb-6 flex items-center gap-4">
               <Button
@@ -203,7 +240,7 @@ const SportMatchPlayer = () => {
                 {match.title}
               </h1>
               <p className="text-white/60">
-                {match.category} • {new Date(match.date).toLocaleString()}
+                {match.category} â€¢ {new Date(match.date).toLocaleString()}
               </p>
             </div>
 
@@ -240,7 +277,7 @@ const SportMatchPlayer = () => {
                     <p className="text-sm text-white/80">Loading stream...</p>
                     {selectedStream && (
                       <p className="mt-1 text-xs text-white/50">
-                        {selectedStream.source} • Stream{" "}
+                        {selectedStream.source} â€¢ Stream{" "}
                         {selectedStream.streamNo}
                       </p>
                     )}

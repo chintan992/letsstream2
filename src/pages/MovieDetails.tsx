@@ -378,19 +378,19 @@ const MovieDetailsPage = () => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://letsstream2.pages.dev/",
+        item: "https://letsstream.chintan992.dev/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Movies",
-        item: "https://letsstream2.pages.dev/movie",
+        item: "https://letsstream.chintan992.dev/movie",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: movie.title,
-        item: `https://letsstream2.pages.dev/movie/${movie.id}`,
+        item: `https://letsstream.chintan992.dev/movie/${movie.id}`,
       },
     ],
   };

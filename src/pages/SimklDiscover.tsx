@@ -5,6 +5,7 @@ import { useUserPreferences } from "@/contexts/user-preferences";
 import { Media } from "@/utils/types";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import ContentRow from "@/components/ContentRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, TrendingUp, Sparkles } from "lucide-react";
@@ -151,6 +152,11 @@ const SimklDiscover = () => {
 
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">
+      <SEO
+        title="Simkl Discover"
+        description="Discover trending movies, TV shows, and personalized anime recommendations from Simkl on Let's Stream."
+        keywords="simkl discover, trending movies, anime recommendations, tv shows"
+      />
       <Navbar />
 
       <div className="flex w-full flex-1 flex-col items-stretch justify-start pt-20">

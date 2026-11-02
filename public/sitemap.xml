@@ -1,63 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://letsstream2.pages.dev/</loc>
+    <loc>https://letsstream.chintan992.dev/</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/movie</loc>
+    <loc>https://letsstream.chintan992.dev/movie</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/tv</loc>
+    <loc>https://letsstream.chintan992.dev/tv</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/sports</loc>
+    <loc>https://letsstream.chintan992.dev/sports</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/trending</loc>
+    <loc>https://letsstream.chintan992.dev/live</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/search</loc>
+    <loc>https://letsstream.chintan992.dev/trending</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/login</loc>
+    <loc>https://letsstream.chintan992.dev/simkl</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/signup</loc>
+    <loc>https://letsstream.chintan992.dev/privacy</loc>
     <lastmod>2026-11-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/privacy</loc>
+    <loc>https://letsstream.chintan992.dev/terms</loc>
     <lastmod>2026-11-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://letsstream2.pages.dev/terms</loc>
+    <loc>https://letsstream.chintan992.dev/dmca</loc>
     <lastmod>2026-11-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://letsstream.chintan992.dev/content-removal</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

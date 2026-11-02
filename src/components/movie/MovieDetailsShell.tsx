@@ -3,7 +3,14 @@ import { MovieDetails } from "@/utils/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovieHeader } from "@/components/movie";
 import { useEffect } from "react";
-// no direct button usage here
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 type TabTypeExternal = "about" | "cast" | "images" | "reviews" | "downloads";
 
@@ -52,6 +59,21 @@ const MovieDetailsShell: React.FC<MovieDetailsShellProps> = ({
         onPlayMovie={onPlayMovie}
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink to="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink to="/movie">Movies</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{movie.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <Tabs
           value={activeTab}
           onValueChange={t => onTabChange(t as TabTypeExternal)}

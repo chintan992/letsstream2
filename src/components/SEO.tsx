@@ -20,7 +20,7 @@ const SEO: React.FC<SEOProps> = ({
   image = "/icons/icon-512x512.png",
   imageWidth = "512",
   imageHeight = "512",
-  url = window.location.href,
+  url,
   type = "website",
   keywords = "streaming, movies, tv shows, sports, live sports, cinema, entertainment",
   schema,
@@ -29,6 +29,13 @@ const SEO: React.FC<SEOProps> = ({
   const siteTitle = title
     ? `${title} | Let's Stream`
     : "Let's Stream | Watch Movies & TV Shows";
+
+  // Clean canonical URL without search parameters to prevent duplicate content indexing
+  const canonicalUrl =
+    url ||
+    (typeof window !== "undefined"
+      ? `${window.location.origin}${window.location.pathname}`
+      : "https://letsstream.chintan992.dev");
 
   return (
     <Helmet>
@@ -40,7 +47,7 @@ const SEO: React.FC<SEOProps> = ({
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
+      <meta property="og:url" content={canonicalUrl} />
       <meta property="og:site_name" content="Let's Stream" />
       <meta property="og:title" content={siteTitle} />
       <meta property="og:description" content={description} />
@@ -50,13 +57,13 @@ const SEO: React.FC<SEOProps> = ({
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
+      <meta property="twitter:url" content={canonicalUrl} />
       <meta property="twitter:title" content={siteTitle} />
       <meta property="twitter:description" content={description} />
       <meta property="twitter:image" content={image} />
 
       {/* Canonical Link */}
-      <link rel="canonical" href={url} />
+      <link rel="canonical" href={canonicalUrl} />
 
       {/* Structured Data */}
       {schema && (
