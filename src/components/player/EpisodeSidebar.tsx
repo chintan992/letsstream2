@@ -89,7 +89,8 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
   const { watchedEpisodes, hasHistory } = useEpisodeWatched(
     typeof showId === "string" ? parseInt(showId, 10) : showId
   );
-  const seasonNumber = typeof season === "string" ? parseInt(season, 10) : season;
+  const seasonNumber =
+    typeof season === "string" ? parseInt(season, 10) : season;
 
   // Compute current episode number once for optimization
   const currentEpisodeNumber = currentEpisode?.episode_number ?? -1;
@@ -211,13 +212,12 @@ const EpisodeSidebar: React.FC<EpisodeSidebarProps> = ({
               const isCurrentEpisode =
                 episode.episode_number === currentEpisodeNumber;
               // Prefer real watch history; fall back to "earlier than current"
-              const hasWatched =
-                hasHistory
-                  ? watchedEpisodes.has(
-                      `${seasonNumber}-${episode.episode_number}`
-                    )
-                  : currentEpisodeNumber >= 0 &&
-                    episode.episode_number < currentEpisodeNumber;
+              const hasWatched = hasHistory
+                ? watchedEpisodes.has(
+                    `${seasonNumber}-${episode.episode_number}`
+                  )
+                : currentEpisodeNumber >= 0 &&
+                  episode.episode_number < currentEpisodeNumber;
 
               return (
                 <div

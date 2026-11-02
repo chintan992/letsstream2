@@ -42,10 +42,7 @@ const Movies = () => {
   const urlGenre = urlParams.get("genre") || "all";
   const urlSortBy =
     (urlParams.get("sort") as
-      | "default"
-      | "title"
-      | "release_date"
-      | "rating") || "default";
+      "default" | "title" | "release_date" | "rating") || "default";
 
   const initialShouldUsePersistedRef = useRef(
     persistedState.genreFilter === urlGenre &&

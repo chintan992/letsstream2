@@ -31,16 +31,10 @@ const MediaCard = React.memo(
   ({ media, className, featured = false, minimal = false }: MediaCardProps) => {
     const [imageError, setImageError] = useState(false);
     const [imgLoading, setImgLoading] = useState(true);
-    const {
-      addToFavorites,
-      removeFromFavorites,
-      isInFavorites,
-    } = useFavorites();
-    const {
-      addToWatchlist,
-      removeFromWatchlist,
-      isInWatchlist,
-    } = useWatchlist();
+    const { addToFavorites, removeFromFavorites, isInFavorites } =
+      useFavorites();
+    const { addToWatchlist, removeFromWatchlist, isInWatchlist } =
+      useWatchlist();
     const [isFavorite, setIsFavorite] = useState(false);
     const [isInMyWatchlist, setIsInMyWatchlist] = useState(false);
     const navigate = useNavigate();

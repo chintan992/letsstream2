@@ -12,11 +12,7 @@ interface SportMatchGridProps {
   emptyMessage?: string;
   isLoading?: boolean;
   emptyType?:
-    | "search"
-    | "no-matches"
-    | "no-popular"
-    | "no-live"
-    | "no-favorites";
+    "search" | "no-matches" | "no-popular" | "no-live" | "no-favorites";
   searchQuery?: string;
   sportName?: string;
   onClearFilters?: () => void;

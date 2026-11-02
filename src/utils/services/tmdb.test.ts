@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { tmdb, clearTMDBCache, getImageUrl, getResponsiveImageUrls } from "@/utils/services/tmdb";
+import {
+  tmdb,
+  clearTMDBCache,
+  getImageUrl,
+  getResponsiveImageUrls,
+} from "@/utils/services/tmdb";
 
 describe("TMDB Service", () => {
   beforeEach(() => {

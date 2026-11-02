@@ -18,6 +18,12 @@ Your project has been set up with the following Cloudflare-specific files:
 - `_routes.json` - Defines which routes are handled by functions
 - `wrangler.toml` - Cloudflare project configuration
 
+The `functions/_middleware.ts` file redirects the legacy
+`letsstream2.pages.dev` hostname to `letsstream.chintan992.dev` with a
+permanent redirect. The redirect preserves the requested path and query
+string, and only applies to the legacy hostname so the custom domain does not
+redirect to itself.
+
 ## Setting up Functions
 
 ### 1. Creating Functions
@@ -83,6 +89,12 @@ Add all the variables you normally put in `.env` file, such as:
 - `VITE_FIREBASE_PROJECT_ID`
 - etc.
 
+For Simkl OAuth, configure `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET`,
+`SIMKL_ALLOWED_ORIGINS`, and `SIMKL_ALLOWED_REDIRECT_URIS` as server-side
+function variables. The client secret must not use the `VITE_` prefix because
+Vite exposes prefixed variables to browser code. The API routes are
+`/api/simkl/authorize` and `/api/simkl/token`.
+
 ### 4. Custom Routes
 
 The `_routes.json` file specifies which routes should be handled by functions:
@@ -90,12 +102,12 @@ The `_routes.json` file specifies which routes should be handled by functions:
 ```json
 {
   "version": 1,
-  "include": ["/api/*"],
-  "exclude": ["/assets/*", "/favicon.ico"]
+  "include": ["/*"]
 }
 ```
 
-This means only requests to `/api/*` will trigger server-side functions.
+This allows the hostname redirect middleware to run for every request while
+`context.next()` continues to serve the normal static site and API functions.
 
 ## Local Development
 
@@ -116,6 +128,9 @@ Note: This is for testing functions locally. The main application can still be d
 ```bash
 npm run dev
 ```
+
+Vite also serves the Simkl API locally. Add `VITE_SIMKL_CLIENT_ID` and
+`SIMKL_CLIENT_SECRET` to `.env` before connecting.
 
 ## Example Function
 

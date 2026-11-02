@@ -69,7 +69,11 @@ export function useSourceSelection(
       return source.getMovieUrl(mediaId);
     }
     if (mediaType === "tv" && season && episode) {
-      return source.getTVUrl(mediaId, parseInt(season, 10), parseInt(episode, 10));
+      return source.getTVUrl(
+        mediaId,
+        parseInt(season, 10),
+        parseInt(episode, 10)
+      );
     }
     return "";
   }, [id, mediaType, season, episode, selectedSource, videoSources]);

@@ -1,17 +1,51 @@
 const SIMKL_API_URL = "https://api.simkl.com";
 const SIMKL_CLIENT_ID = import.meta.env.VITE_SIMKL_CLIENT_ID;
 
-// Client secret removed from frontend - token exchange handled by backend
-// const SIMKL_CLIENT_SECRET = import.meta.env.VITE_SIMKL_CLIENT_SECRET;
-
-const SIMKL_TOKEN_ENDPOINT = import.meta.env.VITE_SIMKL_TOKEN_ENDPOINT || "/api/simkl/token";
+const SIMKL_TOKEN_ENDPOINT =
+  import.meta.env.VITE_SIMKL_TOKEN_ENDPOINT || "/api/simkl/token";
 const SIMKL_AUTHORIZATION_START_ENDPOINT =
-  import.meta.env.VITE_SIMKL_AUTHORIZATION_START_ENDPOINT || "/api/simkl/authorize";
+  import.meta.env.VITE_SIMKL_AUTHORIZATION_START_ENDPOINT ||
+  "/api/simkl/authorize";
 
 interface SimklTokenResponse {
   access_token: string;
   token_type: string;
   scope: string;
+}
+
+interface SimklHistoryMedia {
+  title?: string;
+  year?: number;
+  watched_at?: string;
+  ids: {
+    simkl?: number;
+    imdb?: string;
+    tmdb?: number;
+    tvdb?: number;
+    slug?: string;
+  };
+}
+
+interface SimklHistoryShow extends SimklHistoryMedia {
+  status?: "watching" | "completed";
+  seasons?: Array<{
+    number: number;
+    episodes: Array<{ number: number; watched_at?: string }>;
+  }>;
+}
+
+interface SimklHistorySyncResponse {
+  added?: {
+    movies?: number;
+    shows?: number;
+    episodes?: number;
+  };
+  not_found?: {
+    movies?: unknown[];
+    shows?: unknown[];
+    episodes?: unknown[];
+  };
+  error?: string;
 }
 
 export class SimklService {
@@ -25,9 +59,7 @@ export class SimklService {
       "SHA-256",
       new TextEncoder().encode(codeVerifier)
     );
-    const codeChallenge = btoa(
-      String.fromCharCode(...new Uint8Array(digest))
-    )
+    const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=+$/, "");
@@ -36,7 +68,10 @@ export class SimklService {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ redirect_uri: redirectUri, code_challenge: codeChallenge }),
+      body: JSON.stringify({
+        redirect_uri: redirectUri,
+        code_challenge: codeChallenge,
+      }),
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -79,9 +114,9 @@ export class SimklService {
       throw new Error(errorData.error || "Failed to exchange code for token");
     }
 
-  sessionStorage.removeItem("simkl_code_verifier");
-  sessionStorage.removeItem("simkl_oauth_state");
-  return response.json();
+    sessionStorage.removeItem("simkl_code_verifier");
+    sessionStorage.removeItem("simkl_oauth_state");
+    return response.json();
   }
 
   static async checkin(
@@ -145,6 +180,50 @@ export class SimklService {
       if (response.status === 409) return;
       throw new Error("Failed to check in");
     }
+  }
+
+  static async addToHistory(
+    token: string,
+    items: {
+      movies?: SimklHistoryMedia[];
+      shows?: SimklHistoryShow[];
+    }
+  ): Promise<{ added: number; notFound: number }> {
+    const response = await fetch(`${SIMKL_API_URL}/sync/history`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "simkl-api-key": SIMKL_CLIENT_ID,
+      },
+      body: JSON.stringify(items),
+    });
+
+    let data: SimklHistorySyncResponse;
+    try {
+      data = (await response.json()) as SimklHistorySyncResponse;
+    } catch {
+      throw new Error(
+        `Invalid response from Simkl history sync (${response.status})`
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || `Simkl history sync failed (${response.status})`
+      );
+    }
+
+    return {
+      added:
+        (data.added?.movies ?? 0) +
+        (data.added?.shows ?? 0) +
+        (data.added?.episodes ?? 0),
+      notFound:
+        (data.not_found?.movies?.length ?? 0) +
+        (data.not_found?.shows?.length ?? 0) +
+        (data.not_found?.episodes?.length ?? 0),
+    };
   }
 
   // Types for Simkl list items

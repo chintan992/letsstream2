@@ -43,7 +43,8 @@ export class ErrorBoundary extends Component<Props, State> {
       new CustomEvent("app-error", {
         detail: {
           title: "Something went wrong",
-          description: "An unexpected error occurred. Please try refreshing the page.",
+          description:
+            "An unexpected error occurred. Please try refreshing the page.",
           variant: "destructive",
         },
       })
@@ -66,7 +67,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div
-          className="flex min-h-[400px] items-center justify-center px-4 bg-background"
+          className="flex min-h-[400px] items-center justify-center bg-background px-4"
           role="alert"
         >
           <div className="text-center">
@@ -75,14 +76,11 @@ export class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h1>
             <p className="mb-6 text-white/70">
-              An unexpected error occurred. Please try again or refresh the page.
+              An unexpected error occurred. Please try again or refresh the
+              page.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Button
-                onClick={this.handleRetry}
-                className="gap-2"
-                size="lg"
-              >
+              <Button onClick={this.handleRetry} className="gap-2" size="lg">
                 <RefreshCw className="h-4 w-4" />
                 Try Again
               </Button>
@@ -96,7 +94,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </Button>
             </div>
             {import.meta.env.DEV && this.state.error && (
-              <details className="mt-8 text-left max-w-md mx-auto">
+              <details className="mx-auto mt-8 max-w-md text-left">
                 <summary className="cursor-pointer text-sm text-white/50">
                   Error Details (Development)
                 </summary>

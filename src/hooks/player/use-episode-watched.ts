@@ -28,7 +28,8 @@ export function useEpisodeWatched(showId: number) {
     for (const ep of entry.episodes_watched) {
       const started = ep.watch_position > 0;
       const completed =
-        ep.duration > 0 && ep.watch_position / ep.duration >= COMPLETION_THRESHOLD;
+        ep.duration > 0 &&
+        ep.watch_position / ep.duration >= COMPLETION_THRESHOLD;
       if (started || completed) {
         watched.add(`${ep.season}-${ep.episode}`);
       }

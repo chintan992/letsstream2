@@ -287,6 +287,7 @@ const WatchHistory = () => {
     title: item.title,
     name: item.title,
     poster_path: item.poster_path,
+    custom_poster_url: item.custom_poster_url,
     backdrop_path: item.backdrop_path,
     overview: item.overview || "",
     vote_average: item.rating || 0,
