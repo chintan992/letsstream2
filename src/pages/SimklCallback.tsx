@@ -15,7 +15,6 @@ export default function SimklCallback() {
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: ReturnType<typeof setTimeout>;
     if (!connectionPromiseRef.current) {
       const searchParams = new URLSearchParams(location.search);
       const code = searchParams.get("code");
@@ -64,7 +63,6 @@ export default function SimklCallback() {
           description: errorMsg,
           variant: "destructive",
         });
-        timeoutId = setTimeout(() => navigate("/profile"), 2000);
         return;
       }
 
@@ -77,9 +75,14 @@ export default function SimklCallback() {
 
     return () => {
       isMounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [location.search, updatePreferences, navigate, toast]);
+
+  useEffect(() => {
+    if (!error) return;
+    const timeoutId = setTimeout(() => navigate("/profile"), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [error, navigate]);
 
   if (error) {
     return (

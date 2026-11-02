@@ -16,10 +16,10 @@ export function simklApiPlugin(values: Record<string, string>): Plugin {
     SIMKL_CLIENT_SECRET: values.SIMKL_CLIENT_SECRET,
     SIMKL_ALLOWED_ORIGINS:
       values.SIMKL_ALLOWED_ORIGINS ||
-      "http://localhost:8080,http://127.0.0.1:8080",
+      "https://localhost:8080,https://127.0.0.1:8080",
     SIMKL_ALLOWED_REDIRECT_URIS:
       values.SIMKL_ALLOWED_REDIRECT_URIS ||
-      "http://localhost:8080/simkl-callback,http://127.0.0.1:8080/simkl-callback",
+      "https://localhost:8080/simkl-callback,https://127.0.0.1:8080/simkl-callback",
   };
 
   return {
