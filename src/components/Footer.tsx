@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ExternalLink,
-  Github,
-  Twitter,
-  Facebook,
-  Instagram,
   Mail,
   ChevronDown,
   Heart,
   Smartphone,
 } from "lucide-react";
+import {
+  GithubIcon,
+  XIcon,
+  FacebookIcon,
+  InstagramIcon,
+} from "./icons/brand-icons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 
@@ -257,7 +259,7 @@ const Footer = () => {
                 className="hover:bg-accent/20 rounded-full bg-white/5 p-2 transition-all duration-200 hover:scale-105"
                 aria-label="GitHub"
               >
-                <Github className="h-5 w-5 text-white" />
+                <GithubIcon className="h-5 w-5 text-white" />
               </a>
 
               <a
@@ -265,7 +267,7 @@ const Footer = () => {
                 className="hover:bg-accent/20 rounded-full bg-white/5 p-2 transition-all duration-200 hover:scale-105"
                 aria-label="Twitter"
               >
-                <Twitter className="h-5 w-5 text-white" />
+                <XIcon className="h-5 w-5 text-white" />
               </a>
 
               <a
@@ -273,7 +275,7 @@ const Footer = () => {
                 className="hover:bg-accent/20 rounded-full bg-white/5 p-2 transition-all duration-200 hover:scale-105"
                 aria-label="Facebook"
               >
-                <Facebook className="h-5 w-5 text-white" />
+                <FacebookIcon className="h-5 w-5 text-white" />
               </a>
 
               <a
@@ -281,7 +283,7 @@ const Footer = () => {
                 className="hover:bg-accent/20 rounded-full bg-white/5 p-2 transition-all duration-200 hover:scale-105"
                 aria-label="Instagram"
               >
-                <Instagram className="h-5 w-5 text-white" />
+                <InstagramIcon className="h-5 w-5 text-white" />
               </a>
 
               <a

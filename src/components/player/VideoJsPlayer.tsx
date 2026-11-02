@@ -3,7 +3,7 @@ import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
 import { LabeledStreamLink, Watch32Subtitle } from "@/utils/types";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "motion/react";
 import { useChromecast } from "@/hooks/use-chromecast";
 
 /**
@@ -74,7 +74,9 @@ const VideoJsPlayer = ({
   const subtitleRef = useRef<HTMLDivElement>(null);
 
   // Audio Tracks
-  const [audioTracks, setAudioTracks] = useState<{label: string, language: string, id: string}[]>([]);
+  const [audioTracks, setAudioTracks] = useState<
+    { label: string; language: string; id: string }[]
+  >([]);
   const [activeAudioTrackIndex, setActiveAudioTrackIndex] = useState<number>(0);
   const [isAudioOpen, setIsAudioOpen] = useState(false);
   const audioRef = useRef<HTMLDivElement>(null);
@@ -138,10 +140,7 @@ const VideoJsPlayer = ({
       ) {
         setIsSubtitleOpen(false);
       }
-      if (
-        audioRef.current &&
-        !audioRef.current.contains(e.target as Node)
-      ) {
+      if (audioRef.current && !audioRef.current.contains(e.target as Node)) {
         setIsAudioOpen(false);
       }
     };
@@ -248,7 +247,8 @@ const VideoJsPlayer = ({
           for (let i = 0; i < audioTrackList.length; i++) {
             const track = audioTrackList[i];
             tracks.push({
-              label: track.label || track.language || track.kind || `Track ${i + 1}`,
+              label:
+                track.label || track.language || track.kind || `Track ${i + 1}`,
               language: track.language,
               id: track.id,
             });

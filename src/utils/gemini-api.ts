@@ -1,9 +1,4 @@
-import {
-  GoogleGenerativeAI,
-  GenerateContentResult,
-  HarmCategory,
-  HarmBlockThreshold,
-} from "@google/generative-ai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { RateLimiter } from "./rate-limiter";
 import env from "@/config/env";
 import { TV_SHOW_EXAMPLE, formatTVShowRequirements } from "./tv-show-prompt";
@@ -24,6 +19,11 @@ export interface GeminiResponse {
   text: string;
   status: "success" | "error";
   error?: string;
+}
+
+export interface ChatHistoryTurn {
+  text: string;
+  isUser: boolean;
 }
 
 // Custom error types
@@ -54,10 +54,10 @@ const rateLimiter = RateLimiter.getInstance(
   DEFAULT_CONFIG.rateLimit.requestsPerMinute / 60
 );
 
-// Initialize the Google GenAI only if API key is available
-let genAI: GoogleGenerativeAI | null = null;
+// Initialize the Google GenAI client only if API key is available
+let genAI: GoogleGenAI | null = null;
 if (DEFAULT_CONFIG.apiKey) {
-  genAI = new GoogleGenerativeAI(DEFAULT_CONFIG.apiKey);
+  genAI = new GoogleGenAI({ apiKey: DEFAULT_CONFIG.apiKey });
 }
 
 // Helper function for delay
@@ -256,7 +256,7 @@ const generateFallbackResponse = (query: string): string => {
  */
 export const sendMessageToGemini = async (
   message: string,
-  chatHistory: string[] = []
+  chatHistory: ChatHistoryTurn[] = []
 ): Promise<GeminiResponse> => {
   // Track start time for performance monitoring
   const startTime = Date.now();
@@ -284,80 +284,61 @@ export const sendMessageToGemini = async (
       };
     }
 
-    // Get the chat model with enhanced safety settings
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-      ],
-    });
-
-    const chat = model.startChat({
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
+    const MODEL_NAME = "gemini-2.0-flash-lite";
+    const safetySettings = [
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
       },
-    });
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+      },
+    ];
+    const generationConfig = {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 1024,
+    };
+
+    // Build chat history for the new SDK (system prompt + recent messages)
+    const history: {
+      role: "user" | "model";
+      parts: { text: string }[];
+    }[] = [];
+    const pushHistory = (text: string, isUser: boolean) => {
+      const role = isUser ? "user" : "model";
+      history.push({ role, parts: [{ text }] });
+    };
 
     // Process chat history with improved handling
     if (chatHistory.length > 0) {
-      // Add system prompt first if not present
-      if (!chatHistory.some(msg => msg.includes(MOVIE_RECOMMENDATION_PROMPT))) {
-        try {
-          await withRetry(() => chat.sendMessage(MOVIE_RECOMMENDATION_PROMPT));
-        } catch (error) {
-          console.warn(
-            "Failed to send system prompt, continuing with chat history",
-            error
-          );
-        }
-      }
-
-      // Add only the most relevant historical messages to avoid context overflow
-      // If we have many messages, only use the first one (system) and the most recent ones
-      const relevantHistory =
-        chatHistory.length > 5
-          ? [chatHistory[0], ...chatHistory.slice(-4)]
-          : chatHistory;
+      // Add only the most recent messages to avoid context overflow.
+      const relevantHistory = chatHistory.slice(-5);
 
       for (const msg of relevantHistory) {
-        try {
-          await withRetry(() => chat.sendMessage(msg));
-        } catch (error) {
-          console.warn(
-            "Failed to send chat history message, continuing",
-            error
-          );
-        }
-      }
-    } else {
-      // Initialize with system prompt
-      try {
-        await withRetry(() => chat.sendMessage(MOVIE_RECOMMENDATION_PROMPT));
-      } catch (error) {
-        throw new GeminiAPIError(
-          "Failed to initialize chat with system prompt",
-          "SYSTEM_PROMPT_FAILED"
-        );
+        pushHistory(msg.text, msg.isUser);
       }
     }
+
+    const chat = genAI.chats.create({
+      model: MODEL_NAME,
+      history,
+      config: {
+        ...generationConfig,
+        safetySettings,
+        systemInstruction: MOVIE_RECOMMENDATION_PROMPT,
+      },
+    });
 
     // Add timeout protection
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -369,7 +350,7 @@ export const sendMessageToGemini = async (
 
     // Send the user message with retry logic and timeout protection
     const result = await Promise.race([
-      withRetry(() => chat.sendMessage(message)),
+      withRetry(() => chat.sendMessage({ message })),
       timeoutPromise,
     ]);
 
@@ -378,7 +359,7 @@ export const sendMessageToGemini = async (
     console.log(`API response time: ${responseTime}ms`);
 
     return {
-      text: result.response.text() || "No response generated.",
+      text: result.text || "No response generated.",
       status: "success",
       responseTime,
     };
@@ -445,39 +426,41 @@ export const searchMedia = async (query: string): Promise<GeminiResponse> => {
     }
 
     // Use the same model as sendMessageToGemini for consistency
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-      ],
-    });
-    const result = await withRetry<GenerateContentResult>(() =>
-      model.generateContent(`Please search for movies or TV shows that match: "${query}".
+    const result = await withRetry(() =>
+      genAI.models.generateContent({
+        model: "gemini-2.0-flash-lite",
+        contents: `Please search for movies or TV shows that match: "${query}".
         Provide up to 3 results with title, year, brief description, genre, and TMDB ID.
         For each result:
         - For movies: Include Type: movie and TMDB_ID
         - For TV shows: Include Type: tv, TMDB_ID, Season, and Episode numbers
         - For any TV show result, indicate which episode to start with
-        Format each result in a clear, structured way that can be easily parsed.`)
+        Format each result in a clear, structured way that can be easily parsed.`,
+        config: {
+          safetySettings: [
+            {
+              category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+              threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            },
+            {
+              category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+              threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            },
+            {
+              category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+              threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            },
+            {
+              category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+              threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            },
+          ],
+        },
+      })
     );
 
     return {
-      text: result.response.text() || "No results found.",
+      text: result.text || "No results found.",
       status: "success",
     };
   } catch (error) {

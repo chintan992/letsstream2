@@ -1,5 +1,5 @@
 import React, { MutableRefObject } from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { Pause, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 

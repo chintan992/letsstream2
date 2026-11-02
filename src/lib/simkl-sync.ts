@@ -226,17 +226,21 @@ async function createFirebaseItemFromSimkl(
   mediaType: "movie" | "tv"
 ): Promise<void> {
   // Fetch full media details from TMDB
-  let title = "";
+  const simklMedia = simklItem.movie || simklItem.show || simklItem.anime;
+  let title = simklMedia?.title || "Unknown";
   let posterPath = "";
   let backdropPath = "";
   let overview = "";
   let rating = 0;
+  const customPosterUrl = simklMedia?.poster
+    ? `https://wsrv.nl/?url=https://simkl.in/posters/${simklMedia.poster}_m.webp`
+    : "";
 
   try {
     if (mediaType === "movie") {
       const details = await getMovieDetails(tmdbId);
       if (details) {
-        title = details.title;
+        title = details.title || title;
         posterPath = details.poster_path || "";
         backdropPath = details.backdrop_path || "";
         overview = details.overview || "";
@@ -245,7 +249,7 @@ async function createFirebaseItemFromSimkl(
     } else {
       const details = await getTVDetails(tmdbId);
       if (details) {
-        title = details.name;
+        title = details.name || title;
         posterPath = details.poster_path || "";
         backdropPath = details.backdrop_path || "";
         overview = details.overview || "";
@@ -253,9 +257,10 @@ async function createFirebaseItemFromSimkl(
       }
     }
   } catch (error) {
-    // Use Simkl data as fallback
-    const media = simklItem.movie || simklItem.show || simklItem.anime;
-    title = media?.title || "Unknown";
+    console.warn(
+      `Could not fetch TMDB details for Simkl item "${title}" (${mediaType} ${tmdbId}); importing Simkl metadata instead.`,
+      error
+    );
   }
 
   const lastEpisode = getLastWatchedEpisode(simklItem);
@@ -269,6 +274,7 @@ async function createFirebaseItemFromSimkl(
     media_type: mediaType,
     title: title || "Unknown",
     poster_path: posterPath || "",
+    custom_poster_url: customPosterUrl,
     backdrop_path: backdropPath || "",
     overview: overview || "",
     rating: rating || 0,
@@ -301,6 +307,12 @@ async function exportToSimkl(
   simklItems: SimklListItem[]
 ): Promise<{ exported: number; errors: string[] }> {
   const result = { exported: 0, errors: [] as string[] };
+  const movies: NonNullable<
+    Parameters<typeof SimklService.addToHistory>[1]["movies"]
+  > = [];
+  const shows: NonNullable<
+    Parameters<typeof SimklService.addToHistory>[1]["shows"]
+  > = [];
 
   // Create a set of Simkl TMDB IDs for quick lookup
   const simklTmdbIds = new Set<string>();
@@ -316,6 +328,16 @@ async function exportToSimkl(
     const key = `${item.media_type}_${item.media_id}`;
     if (!simklTmdbIds.has(key)) {
       try {
+        const hasCompletedProgress = (position: number, duration: number) =>
+          duration > 0 && position / duration >= 0.9;
+
+        if (
+          item.media_type === "movie" &&
+          !hasCompletedProgress(item.watch_position, item.duration)
+        ) {
+          continue;
+        }
+
         // Determine a release year if available on the media item
         const candidateYearFromItem = (() => {
           const itemWithDates = item as WatchHistoryItem & {
@@ -355,28 +377,109 @@ async function exportToSimkl(
           return undefined;
         })();
 
-        const payload: Record<string, unknown> = {
+        const media: {
+          title: string;
+          ids: { tmdb: number };
+          year?: number;
+        } = {
           title: item.title,
-          ids: {
-            tmdb: item.media_id,
-          },
-          season: item.season,
-          episode: item.episode,
+          ids: { tmdb: item.media_id },
         };
         if (
           typeof candidateYearFromItem === "number" &&
           !Number.isNaN(candidateYearFromItem)
         ) {
-          payload.year = candidateYearFromItem;
+          media.year = candidateYearFromItem;
         }
 
-        await SimklService.checkin(simklToken, payload);
-        result.exported++;
+        if (item.media_type === "movie") {
+          movies.push({
+            ...media,
+            watched_at: item.last_watched_at || item.created_at,
+          });
+          continue;
+        }
+
+        const episodesBySeason = new Map<
+          number,
+          Array<{ number: number; watched_at?: string }>
+        >();
+        const watchedEpisodes = item.episodes_watched?.filter(
+          watchedEpisode =>
+            Number.isInteger(watchedEpisode.season) &&
+            Number.isInteger(watchedEpisode.episode) &&
+            hasCompletedProgress(
+              watchedEpisode.watch_position,
+              watchedEpisode.duration
+            )
+        );
+        const episodes =
+          watchedEpisodes && watchedEpisodes.length > 0
+            ? watchedEpisodes
+            : typeof item.season === "number" &&
+                typeof item.episode === "number"
+              ? [
+                  {
+                    season: item.season,
+                    episode: item.episode,
+                    watched_at: item.last_watched_at || item.created_at,
+                    watch_position: item.watch_position,
+                    duration: item.duration,
+                  },
+                ].filter(episode =>
+                  hasCompletedProgress(episode.watch_position, episode.duration)
+                )
+              : [];
+
+        for (const watchedEpisode of episodes) {
+          const seasonEpisodes =
+            episodesBySeason.get(watchedEpisode.season) ?? [];
+          seasonEpisodes.push({
+            number: watchedEpisode.episode,
+            watched_at:
+              watchedEpisode.watched_at ||
+              item.last_watched_at ||
+              item.created_at,
+          });
+          episodesBySeason.set(watchedEpisode.season, seasonEpisodes);
+        }
+
+        if (episodesBySeason.size > 0) {
+          shows.push({
+            ...media,
+            seasons: Array.from(
+              episodesBySeason,
+              ([number, seasonEpisodes]) => ({
+                number,
+                episodes: seasonEpisodes,
+              })
+            ),
+          });
+        }
       } catch (error) {
         result.errors.push(
           `Failed to export ${item.title}: ${error instanceof Error ? error.message : "Unknown error"}`
         );
       }
+    }
+  }
+
+  if (movies.length > 0 || shows.length > 0) {
+    try {
+      const syncResult = await SimklService.addToHistory(simklToken, {
+        movies,
+        shows,
+      });
+      result.exported = syncResult.added;
+      if (syncResult.notFound > 0) {
+        result.errors.push(
+          `Simkl could not match ${syncResult.notFound} exported watch-history item(s).`
+        );
+      }
+    } catch (error) {
+      result.errors.push(
+        `Failed to export watch history: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
   }
 

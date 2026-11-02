@@ -140,21 +140,11 @@ const MovieDetailsPage = () => {
     state;
   const [ui, uiDispatch] = useReducer(uiReducer, initialUiState);
   // Expose helpers for readability
-  const {
-    addToWatchHistory,
-  } = useWatchHistory();
+  const { addToWatchHistory } = useWatchHistory();
 
-  const {
-    addToFavorites,
-    removeFromFavorites,
-    isInFavorites,
-  } = useFavorites();
+  const { addToFavorites, removeFromFavorites, isInFavorites } = useFavorites();
 
-  const {
-    addToWatchlist,
-    removeFromWatchlist,
-    isInWatchlist,
-  } = useWatchlist();
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
   // UI state for favorite/watchlist
   const navigate = useNavigate();
   const { triggerHaptic } = useHaptic();

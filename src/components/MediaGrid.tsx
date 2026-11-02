@@ -1,6 +1,6 @@
 import { Media } from "@/utils/types";
 import MediaCard from "./MediaCard";
-import { m, Variants } from "framer-motion";
+import { m, Variants } from "motion/react";
 import { formatDistanceToNow } from "date-fns";
 import { Clock, Trash2, SquareCheck, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";

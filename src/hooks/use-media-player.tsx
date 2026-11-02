@@ -70,21 +70,11 @@ export const useMediaPlayer = (
   const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
   const watchHistoryRecorded = useRef<string | null>(null);
 
-  const {
-    addToWatchHistory,
-  } = useWatchHistory();
+  const { addToWatchHistory } = useWatchHistory();
 
-  const {
-    addToFavorites,
-    removeFromFavorites,
-    isInFavorites,
-  } = useFavorites();
+  const { addToFavorites, removeFromFavorites, isInFavorites } = useFavorites();
 
-  const {
-    addToWatchlist,
-    removeFromWatchlist,
-    isInWatchlist,
-  } = useWatchlist();
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
 
   // Favorite / watchlist membership derived from the reactive watch-history
   // context — re-renders automatically when the store updates.

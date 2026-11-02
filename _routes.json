@@ -1,5 +1,17 @@
 {
   "version": 1,
-  "include": ["/api/*"],
-  "exclude": ["/assets/*", "/_next/static/*", "/favicon.ico"]
+  "include": ["/*"],
+  "exclude": [
+    "/assets/*",
+    "/icons/*",
+    "/screenshots/*",
+    "/.well-known/*",
+    "/favicon.ico",
+    "/manifest.json",
+    "/offline.html",
+    "/placeholder.svg",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/google35be8c7506db4c1b.html"
+  ]
 }

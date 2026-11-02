@@ -11,7 +11,7 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    ctx: ExecutionContext
+    _ctx?: ExecutionContext
   ): Promise<Response> {
     const url = new URL(request.url);
     const allowedOrigins = new Set(
@@ -76,10 +76,13 @@ export default {
         typeof code_challenge !== "string" ||
         !code_challenge
       ) {
-        return new Response(JSON.stringify({ error: "Invalid authorization request" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Invalid authorization request" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
 
       const state = crypto.randomUUID();
@@ -91,13 +94,19 @@ export default {
       authorizationUrl.searchParams.set("code_challenge", code_challenge);
       authorizationUrl.searchParams.set("code_challenge_method", "S256");
 
-      return new Response(JSON.stringify({ authorization_url: authorizationUrl.toString(), state }), {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-          "Set-Cookie": `simkl_oauth_state=${state}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=600`,
-        },
-      });
+      return new Response(
+        JSON.stringify({
+          authorization_url: authorizationUrl.toString(),
+          state,
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Set-Cookie": `simkl_oauth_state=${state}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=600`,
+          },
+        }
+      );
     }
 
     // Token exchange endpoint
@@ -199,7 +208,8 @@ export default {
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
-            "Set-Cookie": "simkl_oauth_state=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None",
+            "Set-Cookie":
+              "simkl_oauth_state=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=None",
           },
         });
       } catch {

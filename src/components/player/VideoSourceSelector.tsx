@@ -3,7 +3,7 @@ import {
   triggerHapticFeedback,
   triggerSuccessHaptic,
 } from "@/utils/haptic-feedback";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { cn } from "@/lib/utils";
 import { VideoSource } from "@/utils/types";
 import { useToast } from "@/hooks/use-toast";

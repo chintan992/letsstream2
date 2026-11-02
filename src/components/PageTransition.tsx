@@ -1,4 +1,4 @@
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import React, { ReactNode } from "react";
 
 interface PageTransitionProps {

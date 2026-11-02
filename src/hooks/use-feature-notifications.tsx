@@ -21,8 +21,7 @@ export function useFeatureNotifications(): void {
         const userPreferencesRef = doc(db, "userPreferences", user.uid);
         const userPreferencesDoc = await getDoc(userPreferencesRef);
         const userPreferences = userPreferencesDoc.data() as
-          | UserPreferences
-          | undefined;
+          UserPreferences | undefined;
 
         // If notifications are explicitly disabled, do not show any notifications
         if (userPreferences?.isNotificationsEnabled === false) {

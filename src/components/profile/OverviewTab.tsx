@@ -1,5 +1,5 @@
 import React from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { TrendingUp, Clock, Star, Heart, Bookmark, Play } from "lucide-react";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useWatchHistory } from "@/hooks/watch-history";

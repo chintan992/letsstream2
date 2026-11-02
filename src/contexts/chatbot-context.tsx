@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 import {
   sendMessageToGemini,
   searchMedia,
+  type ChatHistoryTurn,
   type GeminiResponse,
 } from "@/utils/gemini-api";
 import { extractMediaFromResponse } from "@/utils/chatbot-utils";
@@ -100,8 +101,9 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
       if (!isMuted && typeof window !== "undefined") {
         try {
           // Simple notification sound using Web Audio API
-          const audioCtx = new (window.AudioContext ||
-            (window as CustomWindow).webkitAudioContext)();
+          const audioCtx = new (
+            window.AudioContext || (window as CustomWindow).webkitAudioContext
+          )();
           const oscillator = audioCtx.createOscillator();
           const gainNode = audioCtx.createGain();
 
@@ -160,7 +162,10 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
 
     try {
       // Get chat history with optimized context window (last 8 messages max to prevent overflow)
-      const chatHistory = messages.slice(-8).map(msg => msg.text);
+      const chatHistory: ChatHistoryTurn[] = messages.slice(-8).map(msg => ({
+        text: msg.text,
+        isUser: msg.isUser,
+      }));
 
       // Enhanced message formatting with more context
       const formattedMessage = `
@@ -296,11 +301,14 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
       console.log("Sending rating feedback:", rating, feedbackText);
 
       // Send feedback to AI with full conversation context (but don't add to visible messages)
-      const messageTexts = messages.map(msg => msg.text);
+      const messageHistory: ChatHistoryTurn[] = messages.map(msg => ({
+        text: msg.text,
+        isUser: msg.isUser,
+      }));
 
       // Only send rating feedback to improve future recommendations
       // Don't add this as a visible chat message to avoid cluttering the conversation
-      sendMessageToGemini(ratingMessage, messageTexts).catch(error => {
+      sendMessageToGemini(ratingMessage, messageHistory).catch(error => {
         console.error("Error sending rating to Gemini:", error);
       });
 

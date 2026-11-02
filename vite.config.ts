@@ -1,11 +1,14 @@
 /// <reference lib="webworker" />
 import type {} from "./workbox.d.ts";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import basicSsl from "@vitejs/plugin-basic-ssl";
+import { readFileSync } from "fs";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
 import pkg from "./package.json";
+import { simklApiPlugin } from "./scripts/vite-simkl-plugin";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -22,6 +25,17 @@ const CACHE_VERSION = `v${pkg.version}`;
 
 // Enable/disable debug logging in service worker
 const ENABLE_SW_LOGS = false;
+
+const routesConfigPlugin = () => ({
+  name: "copy-pages-routes-config",
+  generateBundle() {
+    this.emitFile({
+      type: "asset",
+      fileName: "_routes.json",
+      source: readFileSync("_routes.json", "utf8"),
+    });
+  },
+});
 
 // Cache names with versioning
 const CACHE_NAMES = {
@@ -83,6 +97,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    basicSsl(),
+    routesConfigPlugin(),
+    simklApiPlugin(loadEnv(mode, process.cwd(), "")),
     VitePWA({
       strategies: "generateSW",
       registerType: "autoUpdate",

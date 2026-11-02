@@ -1,3 +1,4 @@
+import axios from "axios";
 import { tmdb } from "./tmdb";
 import { Media, Episode } from "../types";
 import { TVDetails } from "../types/tv";
@@ -93,15 +94,29 @@ interface TVEpisodeResult {
 // Get TV show details
 export async function getTVDetails(id: number): Promise<TVDetails | null> {
   try {
-    const [detailsResponse, imagesResponse] = await Promise.all([
-      tmdb.get<TMDBTVDetailsResult>(
-        `/tv/${id}?append_to_response=content_ratings`
-      ),
-      tmdb.get<TMDBImagesResponse>(`/tv/${id}/images`),
+    const detailsPromise = tmdb.get<TMDBTVDetailsResult>(
+      `/tv/${id}?append_to_response=content_ratings`
+    );
+    const imagesPromise = tmdb
+      .get<TMDBImagesResponse>(`/tv/${id}/images`)
+      .then(response => response.data)
+      .catch(error => {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          return {
+            backdrops: [],
+            posters: [],
+            logos: [],
+          };
+        }
+        throw error;
+      });
+
+    const [detailsResponse, imagesData] = await Promise.all([
+      detailsPromise,
+      imagesPromise,
     ]);
 
     const detailsData = detailsResponse.data;
-    const imagesData = imagesResponse.data;
 
     let certification = "";
     if (detailsData.content_ratings && detailsData.content_ratings.results) {
@@ -148,6 +163,9 @@ export async function getTVDetails(id: number): Promise<TVDetails | null> {
       logo_path: bestLogo ? bestLogo.file_path : null,
     };
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
     console.error(`Error fetching TV details for id ${id}:`, error);
     return null;
   }

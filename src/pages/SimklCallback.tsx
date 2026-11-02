@@ -10,41 +10,20 @@ export default function SimklCallback() {
   const { updatePreferences } = useUserPreferences();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
-  const processedRef = useRef(false);
+  const connectionPromiseRef = useRef<Promise<string | null> | null>(null);
+  const completionHandledRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const handleCallback = async () => {
-      // Guard against double runs
-      if (processedRef.current) return;
-
+    if (!connectionPromiseRef.current) {
       const searchParams = new URLSearchParams(location.search);
       const code = searchParams.get("code");
       const state = searchParams.get("state");
       const errorParam = searchParams.get("error");
-      let errorMsg: string | null = null;
 
-      if (errorParam) {
-        processedRef.current = true;
-        errorMsg = "Simkl authentication denied.";
-        toast({
-          title: "Authentication Failed",
-          description: "Simkl authentication was denied.",
-          variant: "destructive",
-        });
-        if (isMounted) timeoutId = setTimeout(() => navigate("/profile"), 2000);
-      } else if (!code || !state) {
-        processedRef.current = true;
-        errorMsg = "No authentication code received.";
-        toast({
-          title: "Authentication Failed",
-          description: "No authentication code received.",
-          variant: "destructive",
-        });
-        if (isMounted) timeoutId = setTimeout(() => navigate("/profile"), 2000);
-      } else if (!processedRef.current) {
-        processedRef.current = true;
+      connectionPromiseRef.current = (async (): Promise<string | null> => {
+        if (errorParam) return "Simkl authentication was denied.";
+        if (!code || !state) return "No authentication code received.";
 
         try {
           const redirectUri = `${window.location.origin}/simkl-callback`;
@@ -62,40 +41,48 @@ export default function SimklCallback() {
             simklToken: tokenResponse.access_token,
             isSimklEnabled: true,
           });
-
-          if (isMounted) {
-            toast({
-              title: "Simkl Connected",
-              description:
-                "Your Simkl account has been successfully connected.",
-            });
-            navigate("/profile");
-          }
+          return null;
         } catch (err) {
-          if (!isMounted) return;
           console.error("Simkl authentication error:", err);
-          errorMsg = "Failed to connect to Simkl. Please try again.";
-          toast({
-            title: "Connection Failed",
-            description: "Could not connect to Simkl. Please try again.",
-            variant: "destructive",
-          });
-          if (isMounted)
-            timeoutId = setTimeout(() => navigate("/profile"), 2000);
+          return "Failed to connect to Simkl. Please try again.";
         }
-      }
+      })();
+    }
+
+    void connectionPromiseRef.current.then(errorMsg => {
+      if (!isMounted || completionHandledRef.current) return;
+      completionHandledRef.current = true;
 
       if (errorMsg) {
-        if (isMounted) setError(errorMsg);
+        setError(errorMsg);
+        toast({
+          title:
+            errorMsg === "Failed to connect to Simkl. Please try again."
+              ? "Connection Failed"
+              : "Authentication Failed",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        return;
       }
-    };
 
-    handleCallback();
+      toast({
+        title: "Simkl Connected",
+        description: "Your Simkl account has been successfully connected.",
+      });
+      navigate("/profile");
+    });
+
     return () => {
       isMounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [location, updatePreferences, navigate, toast]);
+  }, [location.search, updatePreferences, navigate, toast]);
+
+  useEffect(() => {
+    if (!error) return;
+    const timeoutId = setTimeout(() => navigate("/profile"), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [error, navigate]);
 
   if (error) {
     return (

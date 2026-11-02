@@ -1,4 +1,4 @@
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { useRef, useMemo, useState } from "react";
 import { memo, lazy, Suspense } from "react";
 import { AlertCircle, RotateCcw } from "lucide-react";

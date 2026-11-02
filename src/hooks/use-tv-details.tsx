@@ -91,17 +91,9 @@ export const useTVDetails = (id: string | undefined) => {
   const { toast } = useToast();
   const { watchHistory } = useWatchHistory();
 
-  const {
-    addToFavorites,
-    removeFromFavorites,
-    isInFavorites,
-  } = useFavorites();
+  const { addToFavorites, removeFromFavorites, isInFavorites } = useFavorites();
 
-  const {
-    addToWatchlist,
-    removeFromWatchlist,
-    isInWatchlist,
-  } = useWatchlist();
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
 
   useEffect(() => {
     const fetchTVData = async () => {

@@ -1,10 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { LazyMotion, domAnimation } from "framer-motion";
+import { LazyMotion, domAnimation } from "motion/react";
 import { BrowserRouter } from "react-router-dom";
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "./contexts/theme";
 import { UserPreferencesProvider } from "./contexts/user-preferences";
@@ -43,7 +40,11 @@ const createQueryClient = () =>
     },
   });
 
-function QueryClientProviderWrapper({ children }: { children: React.ReactNode }) {
+function QueryClientProviderWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [queryClient, setQueryClient] = useState<QueryClient | null>(null);
   const initializedRef = useRef(false);
 
@@ -59,7 +60,9 @@ function QueryClientProviderWrapper({ children }: { children: React.ReactNode })
     return <div>Initializing...</div>;
   }
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }
 
 function App() {
@@ -73,7 +76,8 @@ function App() {
     };
 
     window.addEventListener("app-error", handleError as EventListener);
-    return () => window.removeEventListener("app-error", handleError as EventListener);
+    return () =>
+      window.removeEventListener("app-error", handleError as EventListener);
   }, [toast]);
 
   return (

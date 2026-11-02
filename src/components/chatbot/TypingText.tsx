@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 
 interface TypingTextProps {
   text: string;

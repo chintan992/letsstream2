@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks";
 import { useWatchHistory } from "@/hooks/watch-history";
+import { useFavorites } from "@/hooks/favorites";
+import { useWatchlist } from "@/hooks/watchlist";
 import { useUserPreferences } from "@/hooks/user-preferences";
 import { Media } from "@/utils/types";
 
@@ -14,7 +16,9 @@ export interface ProfileStats {
 
 export const useProfileData = () => {
   const { user } = useAuth();
-  const { watchHistory, favorites, watchlist } = useWatchHistory();
+  const { watchHistory } = useWatchHistory();
+  const { favorites } = useFavorites();
+  const { watchlist } = useWatchlist();
   const { userPreferences } = useUserPreferences();
 
   // Memoized watch history conversion to Media format
@@ -25,6 +29,7 @@ export const useProfileData = () => {
       title: item.title,
       name: item.title,
       poster_path: item.poster_path,
+      custom_poster_url: item.custom_poster_url,
       backdrop_path: item.backdrop_path,
       overview: item.overview || "",
       vote_average: item.rating || 0,

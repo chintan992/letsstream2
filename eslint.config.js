@@ -26,6 +26,11 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "no-useless-assignment": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "preserve-caught-error": "off",
       "react-refresh/only-export-components": [
         "warn",
         {

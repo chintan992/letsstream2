@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { triggerHapticFeedback } from "@/utils/haptic-feedback";
 import { useNavigate } from "react-router-dom";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { useAuth } from "@/hooks";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { WatchHistoryItem } from "@/contexts/types/watch-history";

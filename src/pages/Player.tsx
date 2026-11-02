@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { ChevronUp } from "lucide-react";
 import { MovieDetails, TVDetails } from "@/utils/types";
-import { m } from "framer-motion";
+import { m } from "motion/react";
 import { useState } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";

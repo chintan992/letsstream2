@@ -8,6 +8,7 @@ export interface WatchHistoryItem {
   media_type: "movie" | "tv";
   title: string;
   poster_path: string;
+  custom_poster_url?: string;
   backdrop_path: string;
   overview?: string;
   rating?: number;

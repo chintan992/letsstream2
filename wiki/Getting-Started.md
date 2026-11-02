@@ -54,7 +54,7 @@ VITE_FIREBASE_MEASUREMENT_ID=
 npm run dev
 ```
 
-Access the app at `http://localhost:8080`
+Access the app at `https://localhost:8080` and trust the local development certificate when prompted.
 
 ## Project Structure
 
