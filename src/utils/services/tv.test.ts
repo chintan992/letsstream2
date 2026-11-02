@@ -17,7 +17,7 @@ describe("getTVDetails", () => {
 
     await expect(getTVDetails(532321)).resolves.toBeNull();
 
-    expect(request).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(2);
     expect(errorLog).not.toHaveBeenCalled();
   });
 });
