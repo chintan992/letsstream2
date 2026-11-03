@@ -47,3 +47,6 @@ session/
 
 *.keystore
 *.jks
+# Local Cloudflare Wrangler folder
+.wrangler
+_worker.bundle
