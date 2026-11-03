@@ -97,6 +97,7 @@ const LiveStreamPlayer = () => {
               ? `Watch ${stream.match_name} live online. High-quality live stream on Let's Stream.`
               : "Live stream video player on Let's Stream."
           }
+          noIndex={!stream || isError}
         />
         <Navbar />
         <div className="container mx-auto px-4 py-6 pt-20">

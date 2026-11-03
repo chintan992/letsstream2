@@ -249,8 +249,8 @@ const Sports = () => {
     <PageTransition>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Live Sports"
-          description="Watch live sports streams, including football, basketball, tennis, and more. Stay updated with real-time match data and popular sporting events."
+          title="Live Sports Streaming - Football, Basketball & More | Let's Stream"
+          description="Watch live sports streams, including football, basketball, tennis, and more. Stay updated with real-time match data and popular sporting events on Let's Stream."
           keywords="live sports, football stream, basketball live, sports streaming, match highlights"
         />
         <Navbar />

@@ -21,6 +21,7 @@ import {
 } from "@/lib/simkl";
 import { performBidirectionalSync } from "@/lib/simkl-sync";
 import { WatchHistoryHeader, HistoryEmptyState } from "@/components/history";
+import SEO from "@/components/SEO";
 
 const WatchHistory = () => {
   const {
@@ -379,6 +380,7 @@ const WatchHistory = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16">
+      <SEO title="Watch History" noIndex={true} />
       <Navbar />
 
       <m.div

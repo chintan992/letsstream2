@@ -16,6 +16,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import SEO from "@/components/SEO";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -44,6 +45,7 @@ export default function ForgotPassword() {
   if (emailSent) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <SEO title="Password Reset Sent" noIndex={true} />
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">
@@ -69,6 +71,11 @@ export default function ForgotPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <SEO
+        title="Reset Password"
+        description="Reset your Let's Stream account password."
+        noIndex={true}
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>

@@ -188,6 +188,11 @@ const TVDetailsPage = () => {
   if (error) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <SEO
+          title="TV Show Not Found"
+          description="The requested TV show could not be found on Let's Stream."
+          noIndex={true}
+        />
         <h1 className="mb-4 text-2xl text-white">{error}</h1>
         <Button onClick={() => navigate("/")} variant="outline">
           Return to Home
@@ -199,6 +204,11 @@ const TVDetailsPage = () => {
   if (!tvShow) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <SEO
+          title="TV Show Not Found"
+          description="The requested TV show could not be found on Let's Stream."
+          noIndex={true}
+        />
         <h1 className="mb-4 text-2xl text-white">TV Show not found</h1>
         <Button onClick={() => navigate("/")} variant="outline">
           Return to Home

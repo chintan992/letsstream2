@@ -8,6 +8,7 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { backdropSizes } from "@/utils/api";
 import { Button } from "@/components/ui/button";
+import SEO from "@/components/SEO";
 import {
   Drawer,
   DrawerContent,
@@ -132,6 +133,20 @@ const Player = () => {
       exit={{ opacity: 0 }}
       className="relative min-h-screen bg-background"
     >
+      <SEO
+        title={title ? `Watch ${title}` : "Video Player"}
+        description={
+          title
+            ? `Stream ${title} online on Let's Stream.`
+            : "Watch movies and TV shows on Let's Stream."
+        }
+        url={
+          mediaType === "tv"
+            ? `https://letsstream.chintan992.dev/tv/${id}`
+            : `https://letsstream.chintan992.dev/movie/${id}`
+        }
+        noIndex={true}
+      />
       <div className="from-background/95 pointer-events-none fixed inset-0 bg-gradient-to-b to-background" />
 
       {/* Z-INDEX HIERARCHY:

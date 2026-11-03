@@ -153,7 +153,7 @@ const SimklDiscover = () => {
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">
       <SEO
-        title="Simkl Discover"
+        title="Discover Anime & Trending Media (Simkl Hub) | Let's Stream"
         description="Discover trending movies, TV shows, and personalized anime recommendations from Simkl on Let's Stream."
         keywords="simkl discover, trending movies, anime recommendations, tv shows"
       />

@@ -515,6 +515,7 @@ const Search = () => {
             ? `Browse search results for "${searchQuery}" on Let's Stream.`
             : "Search for your favorite movies, TV shows, and sports on Let's Stream."
         }
+        noIndex={true}
       />
       <Navbar />
 

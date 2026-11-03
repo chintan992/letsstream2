@@ -85,8 +85,8 @@ const LiveStreams = () => {
     <PageTransition>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Live Streams"
-          description="Watch live sports and event streams on Let's Stream. Real-time updates and high-quality streaming."
+          title="Live Event Streams - Free Online Broadcasts | Let's Stream"
+          description="Watch live sports and event streams on Let's Stream. Real-time updates and high-quality streaming across all devices."
           keywords="live streams, sports streams, live sports, online streaming"
         />
         <Navbar />

@@ -43,6 +43,24 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://letsstream.chintan992.dev/simkl/trending-movies</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://letsstream.chintan992.dev/simkl/trending-tv</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://letsstream.chintan992.dev/simkl/trending-anime</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://letsstream.chintan992.dev/privacy</loc>
     <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>

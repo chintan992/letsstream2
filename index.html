@@ -7,7 +7,15 @@
     <meta name="theme-color" content="#000000" />
     <link rel="apple-touch-icon" href="/apple-icon-180.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="description" content="Streaming movies and TV shows" />
+    <meta
+      name="description"
+      content="Stream your favorite movies, TV shows, and live sports on Let's Stream. Enjoy personalized recommendations and a high-quality viewing experience."
+    />
+    <!-- Preconnect & DNS-prefetch for critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://image.tmdb.org" />
+    <link rel="dns-prefetch" href="https://image.tmdb.org" />
     <!-- Add Playfair Display font for Hero component typography -->
     <link
       rel="stylesheet"
@@ -18,7 +26,7 @@
       src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
       async
     ></script>
-    <title>Let's Stream</title>
+    <title>Let's Stream - Watch Movies, TV Shows & Live Sports Online</title>
     <script>
       // URL and base path for easier debugging in console
       window.appBaseUrl = window.location.origin;
@@ -31,6 +39,5 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <!-- Service worker registration happens in src/utils/register-sw.ts -->
     <script type="module" src="/src/main.tsx"></script>
-    <script src="https://cdn.gpteng.co/gptengineer.js" defer></script>
   </body>
 </html>

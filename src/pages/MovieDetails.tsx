@@ -338,6 +338,11 @@ const MovieDetailsPage = () => {
   if (error || !movie) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <SEO
+          title="Movie Not Found"
+          description="The requested movie could not be found on Let's Stream."
+          noIndex={true}
+        />
         <h1 className="mb-4 text-2xl text-white">
           {error || "Movie not found"}
         </h1>

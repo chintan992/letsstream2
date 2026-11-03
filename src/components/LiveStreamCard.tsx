@@ -1,8 +1,7 @@
 import { FC } from "react";
 import { m } from "motion/react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Play } from "lucide-react";
-// ...existing code...
 import { LiveStream } from "@/pages/LiveStreams";
 import { Button } from "./ui/button";
 
@@ -11,12 +10,6 @@ interface LiveStreamCardProps {
 }
 
 const LiveStreamCard: FC<LiveStreamCardProps> = ({ stream }) => {
-  const navigate = useNavigate();
-
-  const handleWatchClick = () => {
-    navigate(`/watch/live/${stream.match_id}`, { state: { stream } });
-  };
-
   // Use direct URLs for images (proxy removed)
   const banner = stream.banner;
   const team1Flag = stream.team_1_flag;
@@ -79,13 +72,15 @@ const LiveStreamCard: FC<LiveStreamCardProps> = ({ stream }) => {
           </div>
         </div>
 
-        {/* Watch Button */}
+        {/* Watch Button with semantic Link for crawlability */}
         <Button
-          onClick={handleWatchClick}
+          asChild
           className="hover:bg-accent/90 mt-3 w-full bg-accent text-accent-foreground"
         >
-          <Play className="mr-2 h-4 w-4" />
-          Watch Live
+          <Link to={`/watch/live/${stream.match_id}`} state={{ stream }}>
+            <Play className="mr-2 h-4 w-4" />
+            Watch Live
+          </Link>
         </Button>
       </div>
     </m.div>

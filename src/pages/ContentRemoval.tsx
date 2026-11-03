@@ -20,10 +20,9 @@ const ContentRemoval = () => {
             {" "}
             {/* Apply Card and glass effect */}
             <CardHeader>
-              <CardTitle className="text-3xl font-bold">
+              <h1 className="text-3xl font-bold leading-none tracking-tight text-white">
                 Content Removal
-              </CardTitle>{" "}
-              {/* Use CardTitle */}
+              </h1>
             </CardHeader>
             <CardContent className="prose prose-invert">
               {" "}

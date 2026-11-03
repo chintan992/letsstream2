@@ -153,6 +153,8 @@ vi.mock("react-router-dom", () => ({
 vi.mock("react-helmet-async", () => ({
   HelmetProvider: ({ children }: { children: React.ReactNode }) =>
     React.createElement(React.Fragment, null, children),
+  Helmet: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 vi.mock("framer-motion", () => ({

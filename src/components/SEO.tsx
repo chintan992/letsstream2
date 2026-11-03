@@ -1,6 +1,8 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 
+const CANONICAL_ORIGIN = "https://letsstream.chintan992.dev";
+
 interface SEOProps {
   title?: string;
   description?: string;
@@ -10,8 +12,9 @@ interface SEOProps {
   url?: string;
   type?: string;
   keywords?: string;
-  schema?: object;
+  schema?: object | object[];
   themeColor?: string;
+  noIndex?: boolean;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -25,17 +28,26 @@ const SEO: React.FC<SEOProps> = ({
   keywords = "streaming, movies, tv shows, sports, live sports, cinema, entertainment",
   schema,
   themeColor = "#000000",
+  noIndex = false,
 }) => {
-  const siteTitle = title
-    ? `${title} | Let's Stream`
-    : "Let's Stream | Watch Movies & TV Shows";
+  const siteTitle = !title
+    ? "Let's Stream - Watch Movies, TV Shows & Live Sports Online"
+    : title.includes("Let's Stream")
+      ? title
+      : `${title} | Let's Stream`;
 
-  // Clean canonical URL without search parameters to prevent duplicate content indexing
+  // Clean canonical URL strictly anchored to the authoritative canonical origin
   const canonicalUrl =
     url ||
     (typeof window !== "undefined"
-      ? `${window.location.origin}${window.location.pathname}`
-      : "https://letsstream.chintan992.dev");
+      ? `${CANONICAL_ORIGIN}${window.location.pathname}`
+      : CANONICAL_ORIGIN);
+
+  // Fully-qualified absolute URL for social crawlers (Twitter, Open Graph, WhatsApp, Slack)
+  const absoluteImage =
+    image.startsWith("http://") || image.startsWith("https://")
+      ? image
+      : `${CANONICAL_ORIGIN}${image.startsWith("/") ? "" : "/"}${image}`;
 
   return (
     <Helmet>
@@ -45,22 +57,29 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="keywords" content={keywords} />
       <meta name="theme-color" content={themeColor} />
 
+      {/* Robots indexing control */}
+      {noIndex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow" />
+      )}
+
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:site_name" content="Let's Stream" />
       <meta property="og:title" content={siteTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={absoluteImage} />
       <meta property="og:image:width" content={imageWidth} />
       <meta property="og:image:height" content={imageHeight} />
 
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={canonicalUrl} />
-      <meta property="twitter:title" content={siteTitle} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={image} />
+      {/* Twitter Standard Name Tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:url" content={canonicalUrl} />
+      <meta name="twitter:title" content={siteTitle} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={absoluteImage} />
 
       {/* Canonical Link */}
       <link rel="canonical" href={canonicalUrl} />

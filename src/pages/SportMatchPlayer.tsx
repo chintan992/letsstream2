@@ -154,6 +154,11 @@ const SportMatchPlayer = () => {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
+        <SEO
+          title="Error Loading Player"
+          description="Could not load the sports match player."
+          noIndex={true}
+        />
         <div className="max-w-md p-6 text-center text-white">
           <h2 className="mb-4 text-2xl font-bold">Error Loading Player</h2>
           <p className="mb-4 text-white/70">
@@ -170,6 +175,11 @@ const SportMatchPlayer = () => {
   if (!match) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
+        <SEO
+          title="Match Not Found"
+          description="The requested sports match could not be found."
+          noIndex={true}
+        />
         <div className="max-w-md p-6 text-center text-white">
           <h2 className="mb-4 text-2xl font-bold">Match Not Found</h2>
           <p className="text-white/70">

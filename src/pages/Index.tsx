@@ -127,13 +127,43 @@ const Index = () => {
     };
   }, []);
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Let's Stream",
+    url: "https://letsstream.chintan992.dev/",
+    description:
+      "Stream your favorite movies, TV shows, and live sports on Let's Stream. Enjoy personalized recommendations and a high-quality viewing experience.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate:
+          "https://letsstream.chintan992.dev/search?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Let's Stream",
+    url: "https://letsstream.chintan992.dev/",
+    logo: "https://letsstream.chintan992.dev/icons/icon-512x512.png",
+  };
+
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">
       <SEO
-        title="Home"
+        title="Let's Stream - Watch Movies, TV Shows & Live Sports Online"
         description="Stream your favorite movies, TV shows, and live sports on Let's Stream. Enjoy personalized recommendations and a high-quality viewing experience."
         themeColor="#000000"
+        schema={[websiteSchema, organizationSchema]}
       />
+      <h1 className="sr-only">
+        Let's Stream - Watch Movies, TV Shows & Live Sports Online
+      </h1>
       <Navbar />
 
       <div className="flex w-full flex-1 flex-col items-stretch justify-start">

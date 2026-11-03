@@ -15,6 +15,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useProfileActions } from "@/hooks/useProfileActions";
 import ProfileHeader from "@/components/ProfileHeader";
+import SEO from "@/components/SEO";
 
 // Lazy load tab components for better performance
 const OverviewTab = lazy(() => import("../components/profile/OverviewTab"));
@@ -87,6 +88,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16">
+      <SEO title="User Profile" noIndex={true} />
       <Navbar />
 
       <ProfileHeader activeTab={activeTab} onTabChange={setActiveTab} />

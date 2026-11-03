@@ -104,8 +104,8 @@ const Movies = () => {
     <PageTransition>
       <div className="min-h-screen bg-background">
         <SEO
-          title="Movies"
-          description="Browse and stream the latest popular and top-rated movies. Filter by genre and find your next favorite film on Let's Stream."
+          title="Watch Free Movies Online - Popular & Top Rated | Let's Stream"
+          description="Browse and stream the latest popular and top-rated movies in HD. Filter by genre and find your next favorite film on Let's Stream."
           keywords="movies, stream movies, popular movies, top rated movies, cinema, watch online"
         />
         <Navbar />

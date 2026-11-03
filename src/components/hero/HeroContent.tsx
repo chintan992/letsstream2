@@ -59,12 +59,12 @@ export function HeroContent({
           </div>
 
           {/* Title with elegant styling */}
-          <h1
+          <h2
             className="mb-4 text-5xl font-bold tracking-tight text-white md:text-7xl"
             style={{ textShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
           >
             {title}
-          </h1>
+          </h2>
 
           {/* Overview with controlled width */}
           <p className="mb-8 line-clamp-2 max-w-2xl text-base text-white/90 md:line-clamp-3 md:text-lg">

@@ -122,7 +122,7 @@ const TVShowsPage = () => {
     <PageTransition>
       <div className="min-h-screen bg-background">
         <SEO
-          title="TV Shows"
+          title="Watch TV Shows Online - Popular Series & Episodes | Let's Stream"
           description="Discover and stream popular TV series, top-rated shows, and trending television content. Stay updated with your favorite series on Let's Stream."
           keywords="tv shows, stream tv series, popular tv shows, top rated tv series, watch episodes online"
         />

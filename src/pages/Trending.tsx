@@ -190,7 +190,7 @@ const Trending = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SEO
-        title="Trending"
+        title="Trending Movies & TV Shows This Week | Let's Stream"
         description="See what's trending now on Let's Stream. Discover the most popular movies and TV shows being watched this week."
         keywords="trending movies, popular tv shows, what to watch, trending content, viral movies"
       />

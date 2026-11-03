@@ -166,6 +166,11 @@ const SimklDiscoverList = () => {
   if (!config && category !== "recommendations") {
     return (
       <main className="flex min-h-screen w-full flex-col bg-background">
+        <SEO
+          title="Category Not Found"
+          description="The requested Simkl category could not be found."
+          noIndex={true}
+        />
         <Navbar />
         <div className="container mx-auto px-6 pt-24 text-center">
           <h1 className="text-2xl font-bold text-white">Category not found</h1>
@@ -197,8 +202,8 @@ const SimklDiscoverList = () => {
   return (
     <main className="flex min-h-screen min-h-svh w-full flex-col overflow-x-hidden bg-background">
       <SEO
-        title={`${title} - Simkl Discover`}
-        description={`Explore ${title} on Let's Stream powered by Simkl.`}
+        title={`${title} - Simkl Recommendations | Let's Stream`}
+        description={`Explore ${title} on Let's Stream powered by Simkl community ratings and recommendations.`}
       />
       <Navbar />
 

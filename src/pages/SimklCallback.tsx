@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { SimklService } from "@/lib/simkl";
 import { useUserPreferences } from "@/contexts/user-preferences";
 import { useToast } from "@/components/ui/use-toast";
+import SEO from "@/components/SEO";
 
 export default function SimklCallback() {
   const navigate = useNavigate();
@@ -87,6 +88,7 @@ export default function SimklCallback() {
   if (error) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <SEO title="Simkl Error" noIndex={true} />
         <h1 className="mb-4 text-2xl font-bold text-red-500">Error</h1>
         <p className="text-muted-foreground">{error}</p>
       </div>
@@ -95,6 +97,7 @@ export default function SimklCallback() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+      <SEO title="Connecting to Simkl" noIndex={true} />
       <h1 className="mb-4 text-2xl font-bold">Connecting to Simkl...</h1>
       <p className="text-muted-foreground">
         Please wait while we complete the setup.

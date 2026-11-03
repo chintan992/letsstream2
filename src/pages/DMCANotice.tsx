@@ -20,8 +20,9 @@ const DMCANotice = () => {
             {" "}
             {/* Apply Card and glass effect */}
             <CardHeader>
-              <CardTitle className="text-3xl font-bold">DMCA Notice</CardTitle>{" "}
-              {/* Use CardTitle */}
+              <h1 className="text-3xl font-bold leading-none tracking-tight text-white">
+                DMCA Notice
+              </h1>
             </CardHeader>
             <CardContent className="prose prose-invert">
               {" "}
