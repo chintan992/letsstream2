@@ -1,3 +1,5 @@
+
+
 # Let's Stream V2.0
 
 A modern streaming platform built with React, TypeScript, and Firebase, featuring movies, TV shows, and sports content with PWA support.
@@ -106,7 +108,7 @@ Run all verification checks before committing:
 npm run verify
 ```
 
-This runs TypeScript type checking, linting, and production build.
+This runs TypeScript type checking, linting, formatting, and production build.
 
 Run individual checks:
 
