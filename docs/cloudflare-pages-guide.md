@@ -18,11 +18,9 @@ Your project has been set up with the following Cloudflare-specific files:
 - `_routes.json` - Defines which routes are handled by functions
 - `wrangler.toml` - Cloudflare project configuration
 
-The `functions/_middleware.ts` file redirects the legacy
-`letsstream2.pages.dev` hostname to `letsstream.chintan992.dev` with a
-permanent redirect. The redirect preserves the requested path and query
-string, and only applies to the legacy hostname so the custom domain does not
-redirect to itself.
+Both the custom domain `letsstream.chintan992.dev` and the default
+`letsstream2.pages.dev` hostname serve the same Cloudflare Pages deployment
+directly. There is no host-based redirect between them.
 
 ## Setting up Functions
 
@@ -124,10 +122,8 @@ The `_routes.json` file specifies which routes should be handled by functions:
 }
 ```
 
-Static assets bypass Functions and are served directly. HTML navigations still
-reach the middleware for the legacy-host redirect, while `/api/*` remains
-available to Functions. The middleware keeps legacy-host `POST` requests to
-`/api/*` on the existing host so their method and body are preserved.
+Static assets bypass Functions and are served directly. HTML navigations and
+`/api/*` requests reach Functions as needed, on either hostname.
 
 ## Local Development
 

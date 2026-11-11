@@ -2,7 +2,7 @@
 
 **Project:** Let's Stream V2.0 (`letsstream2`)  
 **Canonical Domain:** `https://letsstream.chintan992.dev/`  
-**Legacy Domain (301 Redirected):** `https://letsstream2.pages.dev/`  
+**Alias Domain (No Redirect):** `https://letsstream2.pages.dev/`  
 **Framework:** React 18 (Vite SPA) + Cloudflare Pages + Pre-rendered Static HTML  
 **Audit Date:** November 2026  
 **Status:** Audit Complete & Action Plan Prioritized  

@@ -2,7 +2,7 @@
 
 **Project:** Let's Stream V2.0 (`letsstream2`)  
 **Canonical Domain:** `https://letsstream.chintan992.dev/`  
-**Legacy Domain (301 Redirected):** `https://letsstream2.pages.dev/`  
+**Alias Domain (No Redirect):** `https://letsstream2.pages.dev/`  
 **Routing Engine:** React Router v6 (`react-router-dom`)  
 **Audit Date:** November 2026  
 **Status:** Post-Remediation Hardened State
@@ -272,7 +272,7 @@ Simkl Category:    Home (/) > Simkl (/simkl) > [Category Title]
 
 ### 7.1 Canonical Domain
 - Canonical Host: **`https://letsstream.chintan992.dev/`**
-- Legacy Host: **`https://letsstream2.pages.dev/`** (301 redirected via Cloudflare Pages middleware)
+- Alias Host: **`https://letsstream2.pages.dev/`** (serves the same deployment directly; no redirect)
 
 ### 7.2 XML Sitemap (`public/sitemap.xml`)
 - Contains **11 curated, indexable URLs**.
@@ -303,8 +303,8 @@ Simkl Category:    Home (/) > Simkl (/simkl) > [Category Title]
 - Strips URL query parameters (`?genre=...`, `?sort=...`, `?search=...`) before rendering `<link rel="canonical">` and `og:url` tags.
 - Consolidates all index equity to canonical path roots, preventing duplicate content penalties from faceted browsing.
 
-### 7.5 Edge Middleware Redirects (`functions/_middleware.ts`)
-- Cloudflare Pages middleware intercepts legacy requests to `letsstream2.pages.dev` and issues HTTP 301 Permanent Redirects to `letsstream.chintan992.dev` while preserving paths and query strings.
+### 7.5 Edge Host Handling
+- No host-based redirect middleware is deployed. Both `letsstream.chintan992.dev` and the default `letsstream2.pages.dev` hostname serve the same Cloudflare Pages deployment directly.
 
 ---
 
