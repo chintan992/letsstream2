@@ -24,14 +24,9 @@
     "verify": "npm run tsc && npm run lint && npm run format && npm run build"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.8.0",
-    "@docusaurus/plugin-content-docs": "^3.8.0",
-    "@docusaurus/preset-classic": "^3.8.0",
-    "@docusaurus/theme-classic": "^3.8.0",
     "@firebase/analytics": "^0.10.0",
     "@firebase/auth": "^1.13.7",
     "@google/genai": "^2.28.0",
-    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.21",
     "@radix-ui/react-alert-dialog": "^1.1.24",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -63,7 +58,7 @@
     "@tanstack/react-query": "^5.56.2",
     "@types/video.js": "^7.3.58",
     "@types/workbox-build": "^5.0.1",
-    "axios": "^1.8.4",
+    "axios": "^1.21.1",
     "baseline-browser-mapping": "^2.11.25",
     "caniuse-lite": "^1.0.30001810",
     "class-variance-authority": "^0.7.1",
@@ -72,7 +67,7 @@
     "date-fns": "^4.4.0",
     "developer-tools-detector": "^1.0.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^13.0.0",
+    "firebase": "^13.3.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^1.54.0",
     "motion": "^14.0.0",
@@ -81,7 +76,6 @@
     "react-dom": "^19.3.0",
     "react-firebase-hooks": "^5.1.1",
     "react-helmet-async": "^3.0.0",
-    "react-hook-form": "^7.65.0",
     "react-resizable-panels": "^4.14.3",
     "react-router-dom": "^7.18.4",
     "recharts": "^3.10.1",
@@ -90,13 +84,12 @@
     "tailwindcss-animate": "1.0.7",
     "vaul": "^1.1.2",
     "video.js": "^8.23.7",
-    "web-vitals": "^6.2.3",
-    "zod": "^4.1.12"
+    "web-vitals": "^6.2.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.1.17",
-    "@tailwindcss/typography": "^0.5.15",
+    "@tailwindcss/typography": "^0.5.20",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
@@ -105,16 +98,16 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react-swc": "^4.3.3",
-    "@vitest/coverage-v8": "^5.0.3",
-    "@vitest/ui": "^5.0.3",
+    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/ui": "^5.1.0",
     "autoprefixer": "^10.4.21",
-    "eslint": "^10.12.0",
+    "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
-    "happy-dom": "^20.14.5",
+    "happy-dom": "^21.0.4",
     "jsdom": "^30.1.0",
     "postcss": "^8.5.6",
     "prettier": "^3.9.9",
@@ -125,7 +118,13 @@
     "typescript-eslint": "^8.46.3",
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^2.0.0",
-    "vitest": "^5.0.3",
+    "vitest": "^5.1.0",
     "workbox-window": "^7.4.1"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.13.6",
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "^6.1.5"
+    }
   }
 }
