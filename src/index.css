@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "./styles/animations.css";
 
+@plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
+
 @theme {
   --color-border: 240 3.7% 15.9%;
   --color-input: 240 3.7% 15.9%;
