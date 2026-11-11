@@ -328,4 +328,29 @@ Additional checks performed:
 
 The project's **shipped dependency tree is clean**: zero production vulnerabilities, no vulnerable library code in `dist`, and verified registry signatures for every root dependency. The remaining advisories are three development/build packages with no compatible fix yet.
 
-The actionable work is hygiene and process: remove unused dependencies, fix the inactive Tailwind plugins, stop masking CI failures, pin CI actions, and — most importantly — stop shipping the Gemini API key in the browser bundle.
+The actionable work is hygiene and process: remove unused dependencies, fix the inactive Tailwind plugins, stop masking CI failures, pin CI actions, and - most importantly - stop shipping the Gemini API key in the browser bundle.
+
+---
+
+## 9. Post-Cleanup Addendum (commit `7dd4b8d`)
+
+The P1 hygiene items were applied after this audit:
+
+- Removed 18 unused runtime dependencies and 3 unused dev dependencies (`jsdom`, `@testing-library/user-event`, `workbox-window`); kept `@tailwindcss/typography` and activated it.
+- Moved `@types/video.js`, `@types/workbox-build`, `baseline-browser-mapping`, `caniuse-lite`, and `tailwindcss-animate` to `devDependencies`.
+- Declared `workbox-build` explicitly instead of relying on the transitive copy.
+- Added `@plugin "tailwindcss-animate";` and `@plugin "@tailwindcss/typography";` to `src/index.css`.
+
+| Measure | Before cleanup | After cleanup |
+|:---|:---:|:---:|
+| Lockfile entries | 987 | 893 |
+| Unique locked `name@version` pairs | 965 | 875 |
+| `npm audit --omit=dev` | 0 | **0** |
+| OSV advisories | 3 dev-only | **3 dev-only** (`glob`, `minimatch`, `deepmerge`) |
+| Tailwind animation/typography utilities in built CSS | Absent | **Present** |
+
+Verification after cleanup: clean `npm ci`; `npm run tsc` clean; `npm run lint` 0 errors (8 pre-existing warnings); `npm test` 6 files / 22 tests passed; `npm run build` and `postbuild` succeeded. The built stylesheet now contains `animate-in`/`animate-out`, `fade-in-0`/`fade-out-0`, `zoom-in-95`/`zoom-out-95`, `slide-in-from-*`, `prose`, and `prose-invert`; no vulnerable library code is present in `dist`.
+
+Dependabot state after the push: GitHub regenerated the dependency-graph SBOM at `2026-11-11T22:45:40Z` with 882 packages, and the removed packages (`tinypool`, `lodash`, `joi`, `undici`, `body-parser`, `qs`, `uuid`) are no longer present. The alerts API still returned 49 open alerts, all with `updated_at` on or before `2026-11-02`; this is alert-evaluation lag behind the refreshed graph, not a lockfile regression. The expected steady state is the three development advisories in §2.1.
+
+The P0 items remain open: rotate/proxy `VITE_GEMINI_API_KEY`, make production audit a CI gate, and stop masking test failures in CI.
