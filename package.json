@@ -76,7 +76,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/video.js": "^7.3.58",
-    "@types/workbox-build": "^5.0.1",
+    "@types/workbox-build": "^5.1.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react-swc": "^4.3.3",
     "@vitest/coverage-v8": "^5.1.0",
