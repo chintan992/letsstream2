@@ -1,5 +1,28 @@
-import { swAnalytics } from "./sw-analytics";
 import * as webVitals from "web-vitals";
+
+type PerformanceEvent = {
+  name: string;
+  value: number;
+  type: "web-vital" | "custom" | "resource" | "navigation" | "sw-status";
+  url?: string;
+};
+
+type PerformanceEventReporter = (event: PerformanceEvent) => void;
+
+// Set by sw-analytics after its singleton is created. Keeping this as an
+// injected callback avoids a circular import between the two modules, which
+// previously left `performanceMonitor` undefined during initialization.
+let performanceEventReporter: PerformanceEventReporter | null = null;
+
+export function setPerformanceEventReporter(
+  reporter: PerformanceEventReporter
+) {
+  performanceEventReporter = reporter;
+}
+
+function reportPerformanceEvent(event: PerformanceEvent) {
+  performanceEventReporter?.(event);
+}
 
 type VitalMetric = {
   name: string;
@@ -50,7 +73,7 @@ class PerformanceMonitor {
 
     // Report to analytics if duration is significant (> 100ms)
     if (duration > 100) {
-      swAnalytics.trackPerformanceEvent({
+      reportPerformanceEvent({
         name: `${category}_${name}`,
         value: Math.round(duration),
         type: "custom",
@@ -102,7 +125,7 @@ class PerformanceMonitor {
     this.webVitalsData.set(metric.name, vitalData);
     this.notifySubscribers();
 
-    swAnalytics.trackPerformanceEvent({
+    reportPerformanceEvent({
       name: metric.name,
       value: Math.round(
         metric.name === "CLS" ? metric.value * 1000 : metric.value
@@ -154,14 +177,14 @@ class PerformanceMonitor {
     // Check for service worker controller
     if ("serviceWorker" in navigator) {
       if (navigator.serviceWorker.controller) {
-        swAnalytics.trackPerformanceEvent({
+        reportPerformanceEvent({
           name: "ServiceWorkerStatus",
           value: 1, // 1 = active
           type: "sw-status",
         });
       } else {
         const swListener = () => {
-          swAnalytics.trackPerformanceEvent({
+          reportPerformanceEvent({
             name: "ServiceWorkerStatus",
             value: 1, // 1 = active
             type: "sw-status",
@@ -178,7 +201,7 @@ class PerformanceMonitor {
         );
 
         // Initial state (no controller)
-        swAnalytics.trackPerformanceEvent({
+        reportPerformanceEvent({
           name: "ServiceWorkerStatus",
           value: 0, // 0 = not active
           type: "sw-status",
@@ -194,7 +217,7 @@ class PerformanceMonitor {
       for (const entry of entryList.getEntries()) {
         // Only measure resources that took longer than 1 second
         if (entry.duration > 1000) {
-          swAnalytics.trackPerformanceEvent({
+          reportPerformanceEvent({
             name: "ResourceTiming",
             value: Math.round(entry.duration),
             type: "resource",
@@ -218,7 +241,7 @@ class PerformanceMonitor {
           navigation.responseStart - navigation.requestStart
         );
         if (ttfb > 0) {
-          swAnalytics.trackPerformanceEvent({
+          reportPerformanceEvent({
             name: "TTFB",
             value: ttfb,
             type: "navigation",
@@ -228,7 +251,7 @@ class PerformanceMonitor {
         // DOM Interactive
         const domInteractive = Math.round(navigation.domInteractive);
         if (domInteractive > 0) {
-          swAnalytics.trackPerformanceEvent({
+          reportPerformanceEvent({
             name: "DOMInteractive",
             value: domInteractive,
             type: "navigation",
@@ -238,7 +261,7 @@ class PerformanceMonitor {
         // DOM Complete
         const domComplete = Math.round(navigation.domComplete);
         if (domComplete > 0) {
-          swAnalytics.trackPerformanceEvent({
+          reportPerformanceEvent({
             name: "DOMComplete",
             value: domComplete,
             type: "navigation",

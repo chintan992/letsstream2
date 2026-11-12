@@ -178,6 +178,7 @@ You can create additional API routes by adding files to the `functions/api/` dir
 1. **Functions not triggering**: Check your `_routes.json` configuration
 2. **Build failures**: Ensure your `vite.config.ts` is properly configured with `outDir: "dist"`
 3. **Environment variables not available**: Make sure to add them in the Cloudflare Pages dashboard
+4. **Blank page at `/`**: A build without the six `VITE_FIREBASE_*` variables (or with an empty API key) cannot initialize Firebase, so the app never mounts. Add all six variables under `Settings` > `Environment Variables`, then redeploy. Since the boot guard was added, a misconfigured deployment now shows a "Configuration required" screen listing the missing variables instead of a blank page.
 
 ### Testing Functions Locally:
 

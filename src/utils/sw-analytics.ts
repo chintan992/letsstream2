@@ -2,7 +2,10 @@
 const isDev = process.env.NODE_ENV === "development";
 
 import { swMonitor } from "./sw-monitor";
-import { performanceMonitor } from "./performance-monitor";
+import {
+  performanceMonitor,
+  setPerformanceEventReporter,
+} from "./performance-monitor";
 
 // Add proper type definitions for Google Analytics
 interface GtagParams {
@@ -171,3 +174,7 @@ class ServiceWorkerAnalytics {
 }
 
 export const swAnalytics = ServiceWorkerAnalytics.getInstance();
+
+// Route performance events from the performance monitor into analytics without
+// creating an import cycle between the two modules.
+setPerformanceEventReporter(event => swAnalytics.trackPerformanceEvent(event));
