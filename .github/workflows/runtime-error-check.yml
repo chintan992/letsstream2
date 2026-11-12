@@ -3,6 +3,9 @@ name: Runtime Error Check
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   runtime-check:
     name: Build, Serve, and Runtime Error Check
@@ -12,9 +15,9 @@ jobs:
       matrix:
         node-version: ["24.x"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
@@ -31,9 +34,9 @@ jobs:
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: npx --no-install playwright install --with-deps
       - name: Serve build
-        run: npx serve -s dist -l 4173 &
+        run: nohup npx --no-install serve -s dist -l 4173 > serve.log 2>&1 &
       - name: Wait for server
         run: |
           for i in {1..20}; do
@@ -61,12 +64,12 @@ jobs:
           });
           EOF
       - name: Run Playwright runtime error check
-        run: npx playwright test runtime-error-check.spec.mjs --reporter=list
+        run: npx --no-install playwright test runtime-error-check.spec.mjs --reporter=list
         env:
           CI: true
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: playwright-report
           path: playwright-report/

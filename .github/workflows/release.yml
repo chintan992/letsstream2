@@ -6,6 +6,9 @@ on:
       - main
       - master
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
@@ -13,15 +16,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
       - name: Get version from commit message
         id: get_version
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          VERSION=$(echo "${{ github.event.head_commit.message }}" | sed -n 's/Release \(.*\)/\1/p')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          VERSION=$(printf '%s\n' "$COMMIT_MESSAGE" | sed -n 's/Release \(.*\)/\1/p')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Generate changelog
         id: changelog
@@ -35,12 +40,12 @@ jobs:
             CHANGELOG=$(git log --pretty=format:"* %s" ${PREVIOUS_TAG}..HEAD --no-merges)
           fi
           # Escape newlines and set output
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release ${{ steps.get_version.outputs.version }}

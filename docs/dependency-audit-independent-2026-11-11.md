@@ -351,6 +351,21 @@ The P1 hygiene items were applied after this audit:
 
 Verification after cleanup: clean `npm ci`; `npm run tsc` clean; `npm run lint` 0 errors (8 pre-existing warnings); `npm test` 6 files / 22 tests passed; `npm run build` and `postbuild` succeeded. The built stylesheet now contains `animate-in`/`animate-out`, `fade-in-0`/`fade-out-0`, `zoom-in-95`/`zoom-out-95`, `slide-in-from-*`, `prose`, and `prose-invert`; no vulnerable library code is present in `dist`.
 
-Dependabot state after the push: GitHub regenerated the dependency-graph SBOM at `2026-11-11T22:45:40Z` with 882 packages, and the removed packages (`tinypool`, `lodash`, `joi`, `undici`, `body-parser`, `qs`, `uuid`) are no longer present. The alerts API still returned 49 open alerts, all with `updated_at` on or before `2026-11-02`; this is alert-evaluation lag behind the refreshed graph, not a lockfile regression. The expected steady state is the three development advisories in §2.1.
+Dependabot state after the push: GitHub regenerated the dependency-graph SBOM at `2026-11-11T22:45:40Z` with 882 packages, and the removed packages (`tinypool`, `lodash`, `joi`, `undici`, `body-parser`, `qs`, `uuid`) are no longer present. The alerts API still returned 49 open alerts, all with `updated_at` on or before `2026-11-02`; this is alert-evaluation lag behind the refreshed graph, not a lockfile regression. Dependabot subsequently converged: 49 alerts closed automatically, leaving only `minimatch` (medium) and `deepmerge` (low), consistent with the development-only findings in §2.1.
 
-The P0 items remain open: rotate/proxy `VITE_GEMINI_API_KEY`, make production audit a CI gate, and stop masking test failures in CI.
+The remaining P0 item is rotating or proxying `VITE_GEMINI_API_KEY`. The CI gates are addressed in §10.
+
+---
+
+## 10. CI Hardening Applied
+
+The CI-related P0 and P1 items were implemented after the post-cleanup addendum:
+
+- `pr-checks.yml` now fails on production dependency vulnerabilities (`npm audit --omit=dev --audit-level=high`), on the test suite (`npm test`), and on formatting (`npm run format:check`).
+- Coverage generation remains informational (`continue-on-error`) because the configured 50% global thresholds are not yet met (current coverage is ~1.6%). The actual test suite is blocking, so test failures can no longer pass CI.
+- All GitHub Actions are pinned to commit SHAs, and every workflow declares least-privilege `permissions`.
+- `release.yml` now uses `actions/checkout@v4` and `softprops/action-gh-release@v2`; the commit message is passed through an environment variable to prevent shell injection.
+- `runtime-error-check.yml` uses locally declared, version-pinned `@playwright/test` and `serve` instead of downloading unpinned packages with `npx`.
+- The bundle-size job no longer installs a global tool or masks failures. `scripts/bundle-size-report.cjs` writes `bundle-size.json` from the built assets.
+- `.github/dependabot.yml` adds weekly grouped updates for npm dependencies and GitHub Actions.
+- `format:check` passes repo-wide after fixing `wiki/_Footer.md`, so it is now a blocking gate.
