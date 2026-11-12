@@ -365,7 +365,7 @@ The CI-related P0 and P1 items were implemented after the post-cleanup addendum:
 - Coverage generation remains informational (`continue-on-error`) because the configured 50% global thresholds are not yet met (current coverage is ~1.6%). The actual test suite is blocking, so test failures can no longer pass CI.
 - All GitHub Actions are pinned to commit SHAs, and every workflow declares least-privilege `permissions`.
 - `release.yml` now uses `actions/checkout@v4` and `softprops/action-gh-release@v2`; the commit message is passed through an environment variable to prevent shell injection.
-- `runtime-error-check.yml` uses locally declared, version-pinned `@playwright/test` and `serve` instead of downloading unpinned packages with `npx`.
+- `runtime-error-check.yml` uses locally declared, version-pinned `@playwright/test` and a dependency-free Node static server instead of downloading unpinned packages with `npx`; this also avoided the vulnerable `compression` package that `serve` would add.
 - The bundle-size job no longer installs a global tool or masks failures. `scripts/bundle-size-report.cjs` writes `bundle-size.json` from the built assets.
 - `.github/dependabot.yml` adds weekly grouped updates for npm dependencies and GitHub Actions.
 - `format:check` passes repo-wide after fixing `wiki/_Footer.md`, so it is now a blocking gate.

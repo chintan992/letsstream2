@@ -36,11 +36,11 @@ jobs:
       - name: Install Playwright
         run: npx --no-install playwright install --with-deps
       - name: Serve build
-        run: nohup npx --no-install serve -s dist -l 4173 > serve.log 2>&1 &
+        run: nohup npm run serve:dist > serve.log 2>&1 &
       - name: Wait for server
         run: |
           for i in {1..20}; do
-            if curl -s http://localhost:4173 > /dev/null; then
+            if curl -s http://127.0.0.1:4173 > /dev/null; then
               echo 'Server is up!';
               exit 0;
             fi;
@@ -59,7 +59,7 @@ jobs:
             page.on('console', (msg) => {
               if (msg.type() === 'error') errors.push('Console error: ' + msg.text());
             });
-            await page.goto('http://localhost:4173', { waitUntil: 'networkidle' });
+            await page.goto('http://127.0.0.1:4173', { waitUntil: 'networkidle' });
             expect(errors, `Runtime errors found:\n${errors.join('\n')}`).toEqual([]);
           });
           EOF
