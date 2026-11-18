@@ -88,19 +88,11 @@ const TabContent = ({
     );
   }
 
-  // Determine the title based on the type
-  const title =
-    type === "popular"
-      ? "Popular TV Shows"
-      : type === "top_rated"
-        ? "Top Rated TV Shows"
-        : "Trending TV Shows";
-
+  // The active tab already names this list, so no duplicate heading here.
   return (
     <>
       <MediaGrid
         media={ensureExtendedMediaArray(filteredShows)}
-        title={title}
         listView={viewMode === "list"}
       />
       {hasNextPage && (

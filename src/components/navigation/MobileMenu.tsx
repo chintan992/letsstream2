@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { m } from "motion/react";
 import {
@@ -6,7 +6,6 @@ import {
   Film,
   Tv2,
   Trophy,
-  Radio,
   Flame,
   Search,
   User,
@@ -24,6 +23,19 @@ interface MobileMenuProps {
 const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   const location = useLocation();
   const { user } = useAuth();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // The drawer is always mounted so it can slide, which left ten off-screen links
+  // in the tab order and no way to dismiss it from the keyboard.
+  useEffect(() => {
+    if (!isOpen) return;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -69,7 +81,6 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
     { name: "Movies", path: "/movie", icon: Film },
     { name: "TV Shows", path: "/tv", icon: Tv2 },
     { name: "Sports", path: "/sports", icon: Trophy },
-    { name: "Live", path: "/live", icon: Radio },
     { name: "Simkl", path: "/simkl", icon: Flame },
     { name: "Trending", path: "/trending", icon: Flame },
     { name: "Search", path: "/search", icon: Search },
@@ -102,13 +113,25 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
       {/* Menu */}
       <m.div
+        id="mobile-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Main menu"
+        aria-hidden={!isOpen}
         className="bg-background/95 fixed bottom-0 right-0 top-0 z-50 w-64 overflow-y-auto shadow-lg backdrop-blur-lg"
+        style={{
+          // visibility removes the closed drawer from the tab order, delayed so it
+          // still slides out before disappearing.
+          visibility: isOpen ? "visible" : "hidden",
+          transition: isOpen ? "visibility 0s" : "visibility 0s linear 0.3s",
+        }}
         variants={menuVariants}
         initial="closed"
         animate={isOpen ? "open" : "closed"}
       >
         <div className="flex justify-end p-4">
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             className="p-2 text-white/80 transition-colors hover:text-white"
             aria-label="Close menu"

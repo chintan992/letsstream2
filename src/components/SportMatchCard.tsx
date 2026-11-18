@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { APIMatch } from "@/utils/sports-types";
-import { getMatchPosterUrl, getTeamBadgeUrl } from "@/utils/sports-api";
+import { getMatchPosterUrl } from "@/utils/sports-api";
 import { format } from "date-fns";
 import { Tv, Heart, PlayCircle, Calendar, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,11 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
 
   const matchTime = new Date(match.date);
   const countdown = useCountdown(matchTime);
-  const isUpcoming = !countdown.isLive && !countdown.isPast;
+  // Provider liveness wins over the local countdown: 24/7 channels have no
+  // start time at all, and a stream can still be live while the countdown's
+  // three-hour window says otherwise.
+  const isLive = !!match.live || countdown.isLive;
+  const isUpcoming = !isLive && !match.alwaysLive && !countdown.isPast;
   const totalHours = countdown.days * 24 + countdown.hours;
   const favorited = isFavorite(match.id);
 
@@ -113,11 +117,11 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                 variant="outline"
                 className="border-white/10 bg-black/50 text-xs font-medium uppercase tracking-wider text-white/90 backdrop-blur-lg"
               >
-                {match.category}
+                {match.categoryName ?? match.category}
               </Badge>
 
               <div className="flex flex-col items-end gap-2">
-                {countdown.isLive && (
+                {isLive && (
                   <Badge
                     className="relative overflow-hidden border-none px-3 py-1 text-sm font-bold"
                     style={{
@@ -132,7 +136,7 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                   </Badge>
                 )}
 
-                {match.popular && !countdown.isLive && (
+                {match.popular && !isLive && (
                   <Badge className="border-none bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-sm font-semibold text-white shadow-lg">
                     🔥 Popular
                   </Badge>
@@ -162,50 +166,13 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
           </div>
 
           <CardContent className="relative p-4">
-            {/* Teams / Title */}
-            <div className="mb-4 min-h-[6rem]">
-              {match.teams?.home && match.teams?.away ? (
-                <div className="relative flex items-center justify-center">
-                  {/* Home Team */}
-                  <div className="flex flex-1 flex-col items-center gap-2 text-center">
-                    <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
-                      <img
-                        src={getTeamBadgeUrl(match.teams.home.badge)}
-                        alt={match.teams.home.name}
-                        className="h-full w-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-                    <span className="line-clamp-2 text-sm font-semibold text-white/90">
-                      {match.teams.home.name}
-                    </span>
-                  </div>
-
-                  {/* VS Divider */}
-                  <div className="flex-shrink-0 px-2">
-                    <span className="text-xl font-bold text-white/40">VS</span>
-                  </div>
-
-                  {/* Away Team */}
-                  <div className="flex flex-1 flex-col items-center gap-2 text-center">
-                    <div className="relative h-12 w-12 rounded-full bg-white/5 p-2 ring-1 ring-white/10">
-                      <img
-                        src={getTeamBadgeUrl(match.teams.away.badge)}
-                        alt={match.teams.away.name}
-                        className="h-full w-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-                    <span className="line-clamp-2 text-sm font-semibold text-white/90">
-                      {match.teams.away.name}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <h3 className="line-clamp-2 flex h-full items-center text-lg font-bold leading-snug text-white">
-                  {match.title}
-                </h3>
-              )}
+            {/* Title — ppv.st has no home/away data, so events show their name.
+                The reserved height fits two clamped lines; it used to hold the
+                old home/away badge block. */}
+            <div className="mb-4 min-h-[3.5rem]">
+              <h3 className="line-clamp-2 flex h-full items-center text-lg font-bold leading-snug text-white">
+                {match.title}
+              </h3>
             </div>
 
             {/* Footer Info */}
@@ -218,9 +185,11 @@ const SportMatchCard = ({ match, className }: SportMatchCardProps) => {
                     isUpcoming && totalHours < 24 && "text-amber-400"
                   )}
                 >
-                  {isUpcoming
-                    ? formatCountdown(countdown)
-                    : format(matchTime, "MMM d, h:mm a")}
+                  {match.alwaysLive
+                    ? "24/7 channel"
+                    : isUpcoming
+                      ? formatCountdown(countdown)
+                      : format(matchTime, "MMM d, h:mm a")}
                 </span>
               </div>
 

@@ -7,7 +7,7 @@ interface SportsHeroProps {
 
 const SportsHero: React.FC<SportsHeroProps> = ({ liveMatchesCount }) => {
   return (
-    <div className="relative pb-12 pt-20">
+    <div className="relative pb-6 pt-20 md:pb-12">
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <m.div

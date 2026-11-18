@@ -148,6 +148,8 @@ const Navbar = () => {
                     setIsMobileMenuOpen(true);
                   }}
                   aria-label="Open menu"
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="mobile-menu"
                 >
                   <Menu className="h-6 w-6" />
                 </Button>

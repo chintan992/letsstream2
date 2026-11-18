@@ -95,6 +95,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Email not verified");
       }
 
+      // onAuthStateChanged lands on a later tick, and callers navigate as soon as
+      // this resolves. Publishing the user here keeps a protected route from
+      // seeing "no user" and bouncing straight back to /login.
+      setUser(userCredential.user);
+
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -232,9 +237,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await retryWithBackoff(async () => {
+      const credential = await retryWithBackoff(async () => {
         return await signInWithPopup(auth, provider);
       });
+      if (credential?.user) {
+        setUser(credential.user);
+      }
       toast({
         title: "Welcome!",
         description: "You have successfully signed in with Google.",

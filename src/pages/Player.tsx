@@ -33,6 +33,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
+import NotFound from "@/pages/NotFound";
 
 const Player = () => {
   const { id, season, episode, type } = useParams<{
@@ -111,6 +112,12 @@ const Player = () => {
     { key: "w", handler: toggleWatchlist },
   ]);
 
+  // /watch/:type/:id would otherwise match any type, so a stale /watch/live/:id
+  // link rendered a movie player against a live id. Only movie and tv exist.
+  if (type !== "movie" && type !== "tv") {
+    return <NotFound />;
+  }
+
   const playerElement = (
     <VideoPlayer
       isLoading={isLoading}
@@ -147,7 +154,9 @@ const Player = () => {
         }
         noIndex={true}
       />
-      <div className="from-background/95 pointer-events-none fixed inset-0 bg-gradient-to-b to-background" />
+      {/* Veils only the top edge (to blend under the sticky navbar). As an
+          inset-0 layer it washed out the breadcrumb and every heading below it. */}
+      <div className="from-background/95 pointer-events-none fixed inset-x-0 top-0 h-28 bg-gradient-to-b to-transparent" />
 
       {/* Z-INDEX HIERARCHY:
          - Navbar & Sheet overlays: z-50 (highest - always visible)
@@ -164,7 +173,7 @@ const Player = () => {
         <Navbar />
       </m.nav>
 
-      <div className="container mx-auto px-4 py-4 md:px-6 md:py-6">
+      <div className="container mx-auto px-4 pb-4 pt-24 md:px-6 md:pb-6">
         <Breadcrumb className="mb-4">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -208,7 +217,7 @@ const Player = () => {
           }
           subtitle={
             mediaType === "tv" && season && episode
-              ? `Season ${season} â€¢ Episode ${episode}`
+              ? `Season ${season} • Episode ${episode}`
               : undefined
           }
           year={
@@ -288,27 +297,32 @@ const Player = () => {
           </div>
         )}
 
-        {/* Existing components below video player */}
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-6 space-y-6"
-          id="video-sources"
-        >
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-medium text-white">Video Sources</h3>
-              <p className="text-sm text-white/60">
-                Select your preferred streaming source
-              </p>
+        {/* Existing components below video player. With no sources configured the
+            heading promised a choice that did not exist, so it is not rendered. */}
+        {videoSources.length > 0 && (
+          <m.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 space-y-6"
+            id="video-sources"
+          >
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-medium text-white">
+                  Video Sources
+                </h3>
+                <p className="text-sm text-white/60">
+                  Select your preferred streaming source
+                </p>
+              </div>
+              <VideoSourceSelector
+                videoSources={videoSources}
+                selectedSource={selectedSource}
+                onSourceChange={handleSourceChange}
+              />
             </div>
-            <VideoSourceSelector
-              videoSources={videoSources}
-              selectedSource={selectedSource}
-              onSourceChange={handleSourceChange}
-            />
-          </div>
-        </m.div>
+          </m.div>
+        )}
       </div>
     </m.div>
   );

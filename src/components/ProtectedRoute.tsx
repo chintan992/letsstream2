@@ -1,5 +1,6 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks";
+import RouteLoading from "@/components/ui/route-loading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -7,19 +8,22 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse-slow font-medium text-white">
-          Loading...
-        </div>
-      </div>
-    );
+    return <RouteLoading label="Checking your session" />;
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    // Remember where the user was heading so signing in can return them there
+    // instead of dropping them on the homepage.
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname + location.search }}
+      />
+    );
   }
 
   return <>{children}</>;

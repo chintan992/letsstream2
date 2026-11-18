@@ -23,6 +23,8 @@ import ErrorState from "@/components/ErrorState";
 import { SportsCategories } from "@/components/sports/SportsCategories";
 import { SportsTabs } from "@/components/sports/SportsTabs";
 import { useFilteredMatches } from "@/hooks/use-filtered-matches";
+import { useFavoriteMatches } from "@/hooks/use-favorite-matches";
+import { APIMatch } from "@/utils/sports-types";
 
 interface SportsPageState {
   activeTab: string;
@@ -164,8 +166,10 @@ const Sports = () => {
   const { data: liveMatches = [], isLoading: liveLoading } = useQuery({
     queryKey: ["sports-live-matches"],
     queryFn: getLiveMatches,
-    staleTime: 30 * 1000,
-    refetchInterval: 30000,
+    // The provider asks for roughly one poll per minute, and sports-api caches
+    // its snapshot for the same window.
+    staleTime: 60 * 1000,
+    refetchInterval: 60000,
   });
 
   // Fetch today's matches
@@ -192,6 +196,42 @@ const Sports = () => {
     staleTime: 2 * 60 * 1000,
   });
 
+  const { favorites } = useFavoriteMatches();
+
+  // Favourites are stored as plain records, so re-attach them to the current
+  // feed to get posters and stream sources back. Records whose event has left
+  // the feed keep whatever was stored.
+  const favoriteMatches = useMemo<APIMatch[]>(() => {
+    if (favorites.length === 0) return [];
+
+    const pool = [
+      ...popularMatches,
+      ...liveMatches,
+      ...todayMatches,
+      ...sportAllMatches,
+      ...sportPopularMatches,
+    ];
+    const byId = new Map(pool.map(match => [match.id, match]));
+
+    return favorites.map(
+      favorite =>
+        byId.get(favorite.id) ?? {
+          id: favorite.id,
+          title: favorite.title,
+          category: favorite.category,
+          date: favorite.date,
+          sources: [],
+        }
+    );
+  }, [
+    favorites,
+    popularMatches,
+    liveMatches,
+    todayMatches,
+    sportAllMatches,
+    sportPopularMatches,
+  ]);
+
   const clearFilters = () => {
     dispatch({ searchQuery: "", selectedSport: "all", dateRange: "all" });
   };
@@ -211,6 +251,7 @@ const Sports = () => {
     liveMatches,
     todayMatches,
     sportAllMatches,
+    favoriteMatches,
   });
 
   const isLoading = useMemo(() => {
@@ -218,6 +259,8 @@ const Sports = () => {
       return selectedSport === "all" ? popularLoading : sportPopularLoading;
     } else if (activeTab === "live") {
       return liveLoading;
+    } else if (activeTab === "favorites") {
+      return false;
     } else {
       return selectedSport === "all" ? todayLoading : sportAllLoading;
     }
@@ -234,20 +277,20 @@ const Sports = () => {
   if (sportsError) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background">
+        <main className="min-h-screen bg-background">
           <Navbar />
           <div className="container mx-auto px-4 pt-24">
             <ErrorState error={sportsError as Error} onRetry={retryFetch} />
           </div>
           <Footer />
-        </div>
+        </main>
       </PageTransition>
     );
   }
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background">
         <SEO
           title="Live Sports Streaming - Football, Basketball & More | Let's Stream"
           description="Watch live sports streams, including football, basketball, tennis, and more. Stay updated with real-time match data and popular sporting events on Let's Stream."
@@ -286,6 +329,7 @@ const Sports = () => {
             accentColor={accentColor}
             displayedMatches={displayedMatches}
             liveMatches={liveMatches}
+            favoritesCount={favoriteMatches.length}
             selectedSport={selectedSport}
             searchQuery={searchQuery}
             isLoading={isLoading}
@@ -296,7 +340,7 @@ const Sports = () => {
         </div>
 
         <Footer />
-      </div>
+      </main>
     </PageTransition>
   );
 };

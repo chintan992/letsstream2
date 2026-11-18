@@ -149,6 +149,22 @@ const SearchBar = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Escape closes the open list, then releases the field, before the other
+    // keys bail out on a closed panel.
+    if (e.key === "Escape") {
+      if (showSuggestions) {
+        e.preventDefault();
+        setSearchState(prev => ({
+          ...prev,
+          showSuggestions: false,
+          selectedIndex: -1,
+        }));
+      } else if (searchQuery) {
+        searchInputRef.current?.blur();
+      }
+      return;
+    }
+
     if (!showSuggestions && searchQuery) return;
 
     if (e.key === "ArrowDown") {
@@ -214,6 +230,15 @@ const SearchBar = ({
           onChange={e => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           ref={searchInputRef}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={showSuggestions}
+          aria-controls="search-suggestions"
+          aria-activedescendant={
+            selectedIndex >= 0
+              ? `search-suggestion-${selectedIndex}`
+              : undefined
+          }
         />
 
         {searchQuery && (
@@ -239,7 +264,13 @@ const SearchBar = ({
         </Button>
 
         {showSuggestions && (
-          <div ref={suggestionsRef} className="search-suggestions">
+          <div
+            ref={suggestionsRef}
+            id="search-suggestions"
+            role="listbox"
+            aria-label="Search suggestions"
+            className="search-suggestions"
+          >
             {isLoading ? (
               <div className="flex items-center justify-center py-4 text-white/70">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -250,6 +281,9 @@ const SearchBar = ({
                 {searchSuggestions.map((item, index) => (
                   <button
                     key={`${item.media_type}-${item.id}`}
+                    id={`search-suggestion-${index}`}
+                    role="option"
+                    aria-selected={index === selectedIndex}
                     className={`suggestion-item ${
                       index === selectedIndex ? "bg-white/10" : ""
                     }`}

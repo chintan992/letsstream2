@@ -175,18 +175,20 @@ const MediaGrid = ({
 
   return (
     <div className="px-4 py-6 md:px-8">
-      <div className="mb-6 flex flex-col justify-between md:flex-row md:items-center">
-        {title && <h2 className="text-2xl font-bold text-white">{title}</h2>}
-        <SelectionButtons
-          selectable={selectable}
-          selectMode={selectMode}
-          onToggleSelectMode={toggleSelectMode}
-          onSelectAll={handleSelectAll}
-          selectedItems={selectedItems}
-          mediaLength={media.length}
-          onDeleteSelected={onDeleteSelected}
-        />
-      </div>
+      {(title || selectable) && (
+        <div className="mb-6 flex flex-col justify-between md:flex-row md:items-center">
+          {title && <h2 className="text-2xl font-bold text-white">{title}</h2>}
+          <SelectionButtons
+            selectable={selectable}
+            selectMode={selectMode}
+            onToggleSelectMode={toggleSelectMode}
+            onSelectAll={handleSelectAll}
+            selectedItems={selectedItems}
+            mediaLength={media.length}
+            onDeleteSelected={onDeleteSelected}
+          />
+        </div>
+      )}
 
       {listView ? (
         <m.div

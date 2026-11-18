@@ -9,12 +9,13 @@ import {
   Shield,
   Heart,
   Bookmark,
+  Film,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getImageUrl } from "@/utils/services/tmdb";
 import { backdropSizes, posterSizes } from "@/utils/api";
 import { MovieDetails } from "@/utils/types";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MovieHeaderProps {
   movie: MovieDetails;
@@ -42,9 +43,9 @@ const MovieHeader = ({
   onPlayMovie,
 }: MovieHeaderProps) => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [backdropLoaded, setBackdropLoaded] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [isTrailerPlaying, setIsTrailerPlaying] = useState(false);
 
   return (
     <div className="relative h-[70vh] w-full">
@@ -56,7 +57,7 @@ const MovieHeader = ({
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
-        className="absolute left-6 top-20 z-10 rounded-full bg-black/30 p-2 text-white transition-colors hover:bg-black/50"
+        className="absolute left-6 top-20 z-10 hidden rounded-full bg-black/30 p-2 text-white transition-colors hover:bg-black/50 md:block"
         aria-label="Go back"
       >
         <ArrowLeft className="h-5 w-5" />
@@ -74,16 +75,24 @@ const MovieHeader = ({
       {/* Gradient overlay */}
       <div className="details-gradient absolute inset-0" />
 
-      {/* Trailer section - only show on desktop */}
-      {!isMobile && trailerKey && (
-        <div className="absolute inset-0 bg-black/60">
+      {/* Trailer plays only when the user asks for it, so the poster, title and
+          actions stay legible instead of competing with an autoplaying video. */}
+      {trailerKey && isTrailerPlaying && (
+        <div className="absolute inset-0 z-20 bg-black">
           <iframe
             className="h-full w-full"
-            src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}`}
+            src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             title={`Trailer for ${movie?.title || "movie"}`}
           />
+          <button
+            onClick={() => setIsTrailerPlaying(false)}
+            className="absolute right-4 top-20 z-30 rounded-full bg-black/70 p-2 text-white transition-colors hover:bg-black/90"
+            aria-label="Close trailer"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
       )}
 
@@ -106,6 +115,7 @@ const MovieHeader = ({
                   <div className="image-skeleton absolute inset-0 rounded-lg bg-background" />
                 )}
 
+                <h1 className="sr-only">{movie.title}</h1>
                 <img
                   src={getImageUrl(movie.logo_path, backdropSizes.original)}
                   alt={movie.title}
@@ -178,6 +188,17 @@ const MovieHeader = ({
                 <Play className="mr-2 h-4 w-4" />
                 Play
               </Button>
+
+              {trailerKey && (
+                <Button
+                  onClick={() => setIsTrailerPlaying(true)}
+                  variant="outline"
+                  className="border-white/20 bg-black/50 text-white hover:bg-black/70"
+                >
+                  <Film className="mr-2 h-4 w-4" />
+                  Watch Trailer
+                </Button>
+              )}
 
               <Button
                 onClick={onToggleFavorite}

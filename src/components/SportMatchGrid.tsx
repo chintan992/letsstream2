@@ -14,6 +14,8 @@ interface SportMatchGridProps {
   emptyType?:
     "search" | "no-matches" | "no-popular" | "no-live" | "no-favorites";
   searchQuery?: string;
+  onEmptyAction?: () => void;
+  emptyActionLabel?: string;
   sportName?: string;
   onClearFilters?: () => void;
   className?: string;
@@ -28,6 +30,8 @@ const SportMatchGrid = ({
   searchQuery,
   sportName,
   onClearFilters,
+  onEmptyAction,
+  emptyActionLabel,
   className,
 }: SportMatchGridProps) => {
   // Show skeleton loading state
@@ -58,6 +62,8 @@ const SportMatchGrid = ({
           searchQuery={searchQuery}
           sportName={sportName}
           onClearFilters={onClearFilters}
+          onAction={onEmptyAction}
+          actionLabel={emptyActionLabel}
         />
       </div>
     );

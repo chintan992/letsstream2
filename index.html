@@ -33,9 +33,64 @@
       // BASE_URL is injected at build time by Vite
       window.appBasePath = "/";
     </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #09090b;
+        color: #a1a1aa;
+      }
+      #root > noscript {
+        display: block;
+        padding: 24px;
+      }
+      .boot-screen {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: #09090b;
+        color: #a1a1aa;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .boot-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        border-top-color: #e63462;
+        border-radius: 9999px;
+        animation: boot-spin 0.8s linear infinite;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-spinner {
+          animation-duration: 2.4s;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Replaced as soon as React mounts. Without it the first paint on a slow
+           connection was an empty dark screen with no sign anything was loading. -->
+      <div class="boot-screen">
+        <div class="boot-spinner" aria-hidden="true"></div>
+        <p>Loading Let's Stream</p>
+      </div>
+    </div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <!-- Service worker registration happens in src/utils/register-sw.ts -->
     <script type="module" src="/src/main.tsx"></script>

@@ -38,7 +38,6 @@ These components have frequent user interactions and should be updated first:
 
 - **Hero.tsx**: Swipe detection for carousel navigation
 - **ContentRow.tsx**: Scroll edge detection
-- **ChatbotButton.tsx**: Drag and long-press detection
 
 ## Implementation Approaches
 

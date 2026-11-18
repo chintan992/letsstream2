@@ -10,24 +10,25 @@ import ContentRow from "@/components/ContentRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, TrendingUp, Sparkles } from "lucide-react";
 
-// Convert Simkl item to Media format for ContentRow compatibility
-// Uses index to ensure unique keys when TMDB ID is missing
+// Convert a Simkl item to Media for ContentRow. Returns null when the item cannot
+// be shown honestly: the browser-facing trending response often omits `title` and
+// `ids.tmdb`, which used to render untitled posters linking to /movie/1000000.
 function simklToMedia(
   item: SimklTrendingItem,
-  mediaType: "movie" | "tv",
-  index: number
-): Media {
+  mediaType: "movie" | "tv"
+): Media | null {
+  const title = item.title?.trim();
+  const tmdbId = item.ids?.tmdb;
+  if (!title || !tmdbId) return null;
+
   const simklPosterUrl = item.poster
     ? `https://simkl.in/posters/${item.poster}_m.webp`
     : undefined;
 
-  // Use Simkl ID as primary, TMDB as fallback, with index for uniqueness
-  const uniqueId = item.ids.tmdb || item.ids.simkl || index + 1000000;
-
   return {
-    id: uniqueId,
-    title: item.title,
-    name: item.title,
+    id: tmdbId,
+    title,
+    name: title,
     media_type: mediaType,
     poster_path: null, // Will use custom_poster_url instead
     backdrop_path: item.fanart
@@ -80,7 +81,10 @@ const CategoryRow = ({
 
   const media = items
     .slice(0, 20)
-    .map((item, index) => simklToMedia(item, mediaType, index));
+    .map(item => simklToMedia(item, mediaType))
+    .filter((item): item is Media => item !== null);
+
+  if (media.length === 0) return null;
 
   return (
     <div className="mb-6">
@@ -182,6 +186,28 @@ const SimklDiscover = () => {
 
         {/* Content Rows */}
         <div className="container mx-auto px-6 md:px-10 lg:px-16">
+          {!isLoading &&
+            !error &&
+            ![trendingMovies, trendingTV, trendingAnime].some(list =>
+              list.some(item => item.title?.trim() && item.ids?.tmdb)
+            ) && (
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+                <p className="text-lg font-medium text-white">
+                  Simkl is not returning usable titles right now
+                </p>
+                <p className="mx-auto mt-2 max-w-md text-sm text-white/60">
+                  The trending feed came back without titles this time, so there
+                  is nothing here to show. Movies and TV shows are unaffected.
+                </p>
+                <Link
+                  to="/movie"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+                >
+                  Browse movies
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
           {/* Trending Movies */}
           <CategoryRow
             title="Trending Movies"

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScrollRestoration } from "@/hooks";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Radio } from "lucide-react";
+import { ArrowLeft, CalendarClock, Check, Radio } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
@@ -241,16 +241,31 @@ const SportMatchPlayer = () => {
             {/* Match Info */}
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2">
-                <Radio className="h-4 w-4 animate-pulse text-red-500" />
-                <span className="text-xs font-medium uppercase tracking-wider text-red-400">
-                  Live
-                </span>
+                {match.live ? (
+                  <>
+                    <Radio className="h-4 w-4 animate-pulse text-red-500" />
+                    <span className="text-xs font-medium uppercase tracking-wider text-red-400">
+                      Live now
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <CalendarClock className="h-4 w-4 text-white/50" />
+                    <span className="text-xs font-medium uppercase tracking-wider text-white/50">
+                      Upcoming
+                    </span>
+                  </>
+                )}
               </div>
               <h1 className="mb-2 text-2xl font-bold text-white md:text-3xl">
                 {match.title}
               </h1>
               <p className="text-white/60">
-                {match.category} â€¢ {new Date(match.date).toLocaleString()}
+                {match.categoryName ?? match.category}
+                {" • "}
+                {match.alwaysLive
+                  ? "24/7 channel"
+                  : new Date(match.date).toLocaleString()}
               </p>
             </div>
 
@@ -287,7 +302,7 @@ const SportMatchPlayer = () => {
                     <p className="text-sm text-white/80">Loading stream...</p>
                     {selectedStream && (
                       <p className="mt-1 text-xs text-white/50">
-                        {selectedStream.source} â€¢ Stream{" "}
+                        {selectedStream.source} • Stream{" "}
                         {selectedStream.streamNo}
                       </p>
                     )}

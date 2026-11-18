@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useWatchHistory } from "@/hooks/watch-history";
 import { useFavorites } from "@/hooks/favorites";
 import { useWatchlist } from "@/hooks/watchlist";
@@ -14,7 +14,6 @@ import { getImageUrl } from "@/utils/services/tmdb";
 import { Star, Info, Heart, Play } from "lucide-react";
 import { m } from "motion/react";
 import { trackMediaPreference, trackMediaView } from "@/lib/analytics";
-import { useWillChange } from "@/hooks/useWillChange";
 
 interface MediaCardProps {
   media: Media;
@@ -69,6 +68,20 @@ const MediaCard = React.memo(
           title: media.title || media.name || "",
         }),
       ]);
+    };
+
+    // The Play chip sits inside the card link, so stop the click from opening
+    // the details page and go straight to the player instead.
+    const handlePlayClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      triggerHapticFeedback(25);
+
+      if (media.media_type === "tv") {
+        navigate(`/watch/tv/${mediaId}/1/1`);
+      } else {
+        navigate(`/watch/${media.media_type}/${mediaId}`);
+      }
     };
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
@@ -216,21 +229,28 @@ const MediaCard = React.memo(
               onLoad={handleImageLoad}
             />
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100" />
-            <div className="absolute bottom-0 left-0 right-0 translate-y-full bg-gradient-to-t from-black/90 to-transparent p-3 transition-transform duration-300 group-hover/card:translate-y-0">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-focus-within/card:opacity-100 group-hover/card:opacity-100" />
+            <div className="absolute bottom-0 left-0 right-0 translate-y-full bg-gradient-to-t from-black/90 to-transparent p-3 transition-transform duration-300 group-focus-within/card:translate-y-0 group-hover/card:translate-y-0">
               <p className="line-clamp-3 text-xs text-white/80">
                 {media.overview}
               </p>
               <div className="mt-2 flex justify-center gap-2">
-                <PlayButtonWithWillChange />
-                <div className="glass flex items-center gap-1 rounded px-3 py-1 text-xs text-white transition-colors hover:bg-white/20">
+                <button
+                  type="button"
+                  onClick={handlePlayClick}
+                  className="glass flex items-center gap-1 rounded px-3 py-1 text-xs text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  aria-label={`Play ${media.title || media.name}`}
+                >
+                  <Play size={12} /> Play
+                </button>
+                <span className="glass flex items-center gap-1 rounded px-3 py-1 text-xs text-white/70">
                   <Info size={12} /> Details
-                </div>
+                </span>
               </div>
             </div>
           </div>
           <div className="mt-2 px-1 transition-all duration-300 group-hover/card:translate-y-0">
-            <h3 className="line-clamp-1 text-balance font-medium text-white">
+            <h3 className="line-clamp-1 font-medium text-white">
               {media.title || media.name}
             </h3>
             <div className="mt-1 flex items-center justify-between text-sm text-white/70">
@@ -249,12 +269,14 @@ const MediaCard = React.memo(
           </div>
         </Link>
 
-        {/* Action Buttons - Positioned absolutely on top of the link */}
-        <div className="absolute right-2 top-2 z-20 flex flex-col gap-2">
+        {/* Action buttons sit on top of the artwork, so they stay out of the way
+            until the card is hovered or focused. Pointer-less devices have no
+            hover state, so there they remain visible. */}
+        <div className="absolute right-2 top-2 z-20 flex flex-col gap-2 transition-opacity duration-200 group-focus-within/card:opacity-100 group-hover/card:opacity-100 md:opacity-0 [@media(hover:none)]:opacity-100">
           <button
             className={cn(
-              "rounded-full bg-black/60 p-1 transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400",
-              isFavorite ? "text-red-500" : "text-white"
+              "rounded-full bg-black/60 p-1 transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-accent",
+              isFavorite ? "text-accent" : "text-white"
             )}
             aria-label={
               isFavorite ? "Remove from favorites" : "Add to favorites"
@@ -262,12 +284,15 @@ const MediaCard = React.memo(
             onClick={handleFavoriteClick}
             type="button"
           >
-            <Heart size={20} fill={isFavorite ? "#ef4444" : "none"} />
+            <Heart
+              size={20}
+              fill={isFavorite ? "var(--color-accent)" : "none"}
+            />
           </button>
           <button
             className={cn(
-              "rounded-full bg-black/60 p-1 transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400",
-              isInMyWatchlist ? "text-blue-400" : "text-white"
+              "rounded-full bg-black/60 p-1 transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/40",
+              isInMyWatchlist ? "text-white" : "text-white/70"
             )}
             aria-label={
               isInMyWatchlist ? "Remove from watchlist" : "Add to watchlist"
@@ -291,54 +316,5 @@ const MediaCard = React.memo(
     );
   }
 );
-
-// Play button with will-change management for animations
-const PlayButtonWithWillChange = () => {
-  const playButtonRef = useRef<HTMLDivElement>(null);
-  const { setupVisibilityHandler, isReducedMotion } = useWillChange(
-    playButtonRef,
-    "transform, filter",
-    {
-      respectReducedMotion: true,
-      cleanupOnUnmount: false, // Since this is a reusable component
-    }
-  );
-
-  // Set up visibility handler to apply will-change only when visible
-  React.useEffect(() => {
-    if (isReducedMotion) return;
-
-    const cleanup = setupVisibilityHandler(isVisible => {
-      if (playButtonRef.current) {
-        if (isVisible) {
-          // Apply will-change when element becomes visible
-          playButtonRef.current.style.willChange = "transform, filter";
-        } else {
-          // Remove will-change when element goes out of view
-          playButtonRef.current.style.willChange = "auto";
-        }
-      }
-    });
-
-    return cleanup;
-  }, [setupVisibilityHandler, isReducedMotion]);
-
-  // On hover, ensure will-change is applied
-  const handleMouseEnter = () => {
-    if (!isReducedMotion && playButtonRef.current) {
-      playButtonRef.current.style.willChange = "transform, filter";
-    }
-  };
-
-  return (
-    <div
-      ref={playButtonRef}
-      className="play-icon glass flex items-center gap-1 rounded px-3 py-1 text-xs text-white transition-colors hover:bg-white/20"
-      onMouseEnter={handleMouseEnter}
-    >
-      <Play size={12} /> Play
-    </div>
-  );
-};
 
 export default MediaCard;

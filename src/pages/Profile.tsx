@@ -20,6 +20,7 @@ import SEO from "@/components/SEO";
 // Lazy load tab components for better performance
 const OverviewTab = lazy(() => import("../components/profile/OverviewTab"));
 const FavoritesTab = lazy(() => import("../components/profile/FavoritesTab"));
+const HistoryTab = lazy(() => import("../components/profile/HistoryTab"));
 const WatchlistTab = lazy(() => import("../components/profile/WatchlistTab"));
 const PreferencesTab = lazy(
   () => import("../components/profile/PreferencesTab")
@@ -103,7 +104,7 @@ const Profile = () => {
 
           <TabsContent value="history" className="pt-4">
             <Suspense fallback={<LoadingFallback />}>
-              <OverviewTab />
+              <HistoryTab />
             </Suspense>
           </TabsContent>
 

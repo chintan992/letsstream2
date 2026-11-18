@@ -64,6 +64,10 @@ const VideoPlayerComponent = ({
       onLoaded();
     };
 
+    // Never mount an iframe with an empty src: it renders a dead black box and
+    // makes the browser re-request the document. The failure overlay handles it.
+    if (!iframeUrl) return null;
+
     return (
       <iframe
         key={`${iframeUrl}-${retryNonce}`}
@@ -107,9 +111,12 @@ const VideoPlayerComponent = ({
   }
 
   // Default: render iframe player (existing behavior + error recovery overlay)
+  const hasSource = Boolean(iframeUrl);
+  const showFailure = iframeFailed || (!hasSource && !isLoading);
+
   return (
     <div className="relative aspect-video overflow-hidden rounded-lg shadow-2xl">
-      {isLoading && !iframeFailed ? (
+      {isLoading && !showFailure ? (
         <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -119,28 +126,34 @@ const VideoPlayerComponent = ({
           <div className="h-16 w-16 animate-spin rounded-full border-4 border-white/30 border-t-white" />
         </m.div>
       ) : null}
-      {iframeFailed && (
+      {showFailure && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-black/80 px-6 text-center">
           <AlertCircle className="h-10 w-10 text-red-400" />
           <div>
-            <p className="font-medium text-white">Playback failed to load</p>
+            <p className="font-medium text-white">
+              {iframeFailed ? "Playback failed to load" : "No playable source"}
+            </p>
             <p className="mt-1 text-sm text-white/60">
-              The video source could not be reached.
+              {iframeFailed
+                ? "The video source could not be reached."
+                : "We couldn't find a working stream for this title. Try another source below."}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
-              onClick={() => {
-                setIframeFailed(false);
-                setRetryNonce(n => n + 1);
-              }}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Retry
-            </Button>
+            {iframeFailed && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+                onClick={() => {
+                  setIframeFailed(false);
+                  setRetryNonce(n => n + 1);
+                }}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Retry
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"

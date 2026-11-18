@@ -119,27 +119,6 @@ const Search = () => {
     }
   });
 
-  // Keyboard shortcut for search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key === "/" &&
-        document.activeElement?.tagName !== "INPUT" &&
-        document.activeElement?.tagName !== "TEXTAREA"
-      ) {
-        e.preventDefault();
-        toast({
-          title: "Search Shortcut",
-          description: "Press / anytime to quickly search",
-          duration: 2000,
-        });
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toast]);
-
   // Debounce search term for suggestions
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -519,7 +498,7 @@ const Search = () => {
       />
       <Navbar />
 
-      <div className="mx-auto w-full max-w-6xl flex-grow px-4 pt-24 md:px-8">
+      <main className="mx-auto w-full max-w-6xl flex-grow px-4 pt-24 md:px-8">
         <h1 className="mb-6 text-2xl font-bold text-white md:text-3xl">
           Search
         </h1>
@@ -573,8 +552,9 @@ const Search = () => {
           query={searchParams.get("q") || ""}
           hasMore={hasMoreResults}
           onShowMore={handleShowMore}
+          onClear={handleClearSearch}
         />
-      </div>
+      </main>
 
       <Footer />
     </div>

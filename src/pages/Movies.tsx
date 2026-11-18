@@ -109,7 +109,7 @@ const Movies = () => {
           keywords="movies, stream movies, popular movies, top rated movies, cinema, watch online"
         />
         <Navbar />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 pb-8 pt-24">
           <MoviesHeader
             sortBy={sortBy}
             onSortChange={handleSortChange}

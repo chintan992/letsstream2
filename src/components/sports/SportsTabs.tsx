@@ -12,6 +12,7 @@ interface SportsTabsProps {
   accentColor: string;
   displayedMatches: APIMatch[];
   liveMatches: APIMatch[];
+  favoritesCount: number;
   selectedSport: string;
   searchQuery: string;
   isLoading: boolean;
@@ -26,6 +27,7 @@ export function SportsTabs({
   accentColor,
   displayedMatches,
   liveMatches,
+  favoritesCount,
   selectedSport,
   searchQuery,
   isLoading,
@@ -37,6 +39,7 @@ export function SportsTabs({
 
   const getCountForTab = (tabValue: string) => {
     if (tabValue === "live") return liveMatches.length;
+    if (tabValue === "favorites") return favoritesCount;
     return activeTab === tabValue ? displayedMatches.length : 0;
   };
 
@@ -147,6 +150,22 @@ export function SportsTabs({
           searchQuery={searchQuery}
           sportName={sportName}
           onClearFilters={onClearFilters}
+          onEmptyAction={
+            searchQuery
+              ? undefined
+              : () => {
+                  // "Popular" can be empty while "All" has matches, so offer the
+                  // step that actually finds them.
+                  if (selectedSport !== "all") {
+                    onClearFilters();
+                  } else {
+                    onTabChange("all");
+                  }
+                }
+          }
+          emptyActionLabel={
+            selectedSport !== "all" ? "Clear filters" : "Show all matches"
+          }
         />
       </TabsContent>
 
@@ -158,6 +177,8 @@ export function SportsTabs({
           searchQuery={searchQuery}
           sportName={sportName}
           onClearFilters={onClearFilters}
+          onEmptyAction={searchQuery ? undefined : () => onTabChange("popular")}
+          emptyActionLabel="See upcoming matches"
         />
       </TabsContent>
 
@@ -165,10 +186,12 @@ export function SportsTabs({
         <SportMatchGrid
           matches={displayedMatches}
           isLoading={isLoading}
-          emptyType="no-favorites"
+          emptyType={searchQuery ? "search" : "no-favorites"}
           searchQuery={searchQuery}
           sportName={sportName}
           onClearFilters={onClearFilters}
+          onEmptyAction={searchQuery ? undefined : () => onTabChange("popular")}
+          emptyActionLabel="Browse popular matches"
         />
       </TabsContent>
 

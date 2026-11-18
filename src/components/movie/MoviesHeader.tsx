@@ -38,21 +38,24 @@ const MoviesHeader = ({
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-white/60" />
           <Select value={sortBy} onValueChange={onSortChange}>
-            <SelectTrigger className="w-[160px] border-white/10 bg-white/5 text-white">
+            <SelectTrigger
+              className="w-[160px] border-white/10 bg-white/5 text-white"
+              aria-label="Sort movies"
+            >
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-background">
-              <SelectItem value="popularity.desc" className="text-white">
+              <SelectItem value="default" className="text-white">
                 Most Popular
               </SelectItem>
-              <SelectItem value="vote_average.desc" className="text-white">
+              <SelectItem value="rating" className="text-white">
                 Highest Rated
               </SelectItem>
-              <SelectItem value="release_date.desc" className="text-white">
+              <SelectItem value="release_date" className="text-white">
                 Newest First
               </SelectItem>
-              <SelectItem value="release_date.asc" className="text-white">
-                Oldest First
+              <SelectItem value="title" className="text-white">
+                Title (A–Z)
               </SelectItem>
             </SelectContent>
           </Select>

@@ -3,7 +3,7 @@ import {
   triggerHapticFeedback,
   triggerSuccessHaptic,
 } from "@/utils/haptic-feedback";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link, Navigate } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { useAuth } from "@/hooks";
 import { Button } from "@/components/ui/button";
@@ -12,20 +12,23 @@ import { Label } from "@/components/ui/label";
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import SEO from "@/components/SEO";
+import AuthLayout from "@/components/auth/AuthLayout";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Set by ProtectedRoute so a sign-in returns to the page that sent us here.
+  const redirectTo = (location.state as { from?: string } | null)?.from || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +44,7 @@ export default function Login() {
           email,
         },
       });
-      navigate("/");
+      navigate(redirectTo, { replace: true });
     } catch (error: unknown) {
       // Error toast is handled by AuthProvider
     } finally {
@@ -60,7 +63,7 @@ export default function Login() {
           method: "google",
         },
       });
-      navigate("/");
+      navigate(redirectTo, { replace: true });
     } catch (error: unknown) {
       // Error toast is handled by AuthProvider
     } finally {
@@ -68,15 +71,20 @@ export default function Login() {
     }
   };
 
+  // Already signed in (or a sign-in landed us back here): do not show the form.
+  if (!loading && user) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <AuthLayout>
       <SEO
         title="Sign In"
         description="Sign in to Let's Stream to access your watch history, watchlist, and personalized recommendations."
       />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <h1 className="text-2xl font-bold">Welcome back</h1>
           <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent>
@@ -171,6 +179,6 @@ export default function Login() {
           </div>
         </CardFooter>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

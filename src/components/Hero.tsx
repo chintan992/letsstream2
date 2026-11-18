@@ -7,7 +7,6 @@ import { getImageUrl } from "@/utils/services/tmdb";
 import { m, AnimatePresence } from "motion/react";
 import { useMediaPreferences } from "@/hooks/use-media-preferences";
 import { trackMediaPreference } from "@/lib/analytics";
-import useKeyPress from "@/hooks/use-key-press";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWillChange } from "@/hooks/useWillChange";
 import { HeroContent } from "./hero/HeroContent";
@@ -187,9 +186,9 @@ const Hero = ({ media, className = "" }: HeroProps) => {
 
   const featuredMedia = filteredMedia[currentIndex] as ExtendedMedia;
 
-  useKeyPress("ArrowRight", goToNext);
-  useKeyPress("ArrowLeft", goToPrev);
-  useKeyPress("Space", toggleAutoRotation);
+  // No window-level key handlers here: they swallowed Space and the arrow keys
+  // for the whole page, so the homepage could not be scrolled with the keyboard.
+  // The hero's own controls are real buttons, so they stay reachable by Tab.
 
   const minSwipeDistance = isMobile ? 15 : 40;
   const touchSensitivity = isMobile ? 1.5 : 1.2;

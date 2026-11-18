@@ -98,14 +98,12 @@ const MovieTabContent = ({
     );
   }
 
-  // Determine the title based on the type
-  const title = type === "popular" ? "Popular Movies" : "Top Rated Movies";
-
+  // The active tab already names this list ("Popular" / "Top Rated"), so a
+  // second heading here only added dead vertical space above the grid.
   return (
     <>
       <MediaGrid
         media={ensureExtendedMediaArray(filteredMovies)}
-        title={title}
         listView={viewMode === "list"}
       />
       {hasNextPage && (

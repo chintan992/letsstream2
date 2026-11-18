@@ -26,9 +26,10 @@ export function HeroControls({
 }: HeroControlsProps) {
   return (
     <>
-      {/* Side navigation arrows */}
+      {/* Side navigation arrows. Touch devices swipe instead, and at phone
+          widths these sat on top of the metadata row and the title. */}
       {mediaLength > 1 && (
-        <div className="pointer-events-none absolute left-0 right-0 top-1/2 flex -translate-y-1/2 justify-between px-4 md:px-6">
+        <div className="pointer-events-none absolute left-0 right-0 top-1/2 hidden -translate-y-1/2 justify-between px-4 md:flex md:px-6">
           <button
             onClick={onGoToPrev}
             className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm transition-all hover:bg-black/40"

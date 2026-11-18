@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import SEO from "@/components/SEO";
+import AuthLayout from "@/components/auth/AuthLayout";
 import {
   validatePassword,
   getStrengthLabel,
@@ -102,16 +103,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <AuthLayout>
       <SEO
         title="Create Account"
         description="Create an account on Let's Stream to sync watch history, favorites, and watchlist across all your devices."
       />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">
-            Create an account
-          </CardTitle>
+          <h1 className="text-2xl font-bold">Create an account</h1>
           <CardDescription>
             Enter your email below to create your account
           </CardDescription>
@@ -255,6 +254,6 @@ export default function Signup() {
           </div>
         </CardFooter>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

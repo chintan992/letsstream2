@@ -127,6 +127,26 @@ const AUTH_ERROR_MESSAGES: Record<string, AuthErrorConfig> = {
     description: "Your email address has not been verified.",
     suggestion: "Please check your email for a verification link.",
   },
+  // Configuration failures: the request never reached the account check, so a
+  // generic "unexpected error" would send people looking for the wrong cause.
+  "auth/requests-from-referer-blocked": {
+    title: "Sign-In Unavailable On This Address",
+    description:
+      "This site address is not authorised to sign in to Let's Stream.",
+    suggestion:
+      "Try signing in from the main site, or contact support if the problem continues.",
+  },
+  "auth/unauthorized-domain": {
+    title: "Sign-In Unavailable On This Domain",
+    description: "This domain is not authorised for sign-in.",
+    suggestion:
+      "Try signing in from the main site, or contact support if the problem continues.",
+  },
+  "auth/operation-not-supported-in-this-environment": {
+    title: "Sign-In Not Supported Here",
+    description: "This browser cannot complete that sign-in method.",
+    suggestion: "Try a different browser, or sign in with email and password.",
+  },
 };
 
 // Default error configuration for unknown errors
@@ -137,12 +157,27 @@ const DEFAULT_ERROR_CONFIG: AuthErrorConfig = {
 };
 
 /**
+ * Firebase embeds the offending origin in the code, e.g.
+ * `auth/requests-from-referer-http://localhost:5199/-are-blocked.`, so the
+ * dynamic suffix has to be collapsed onto a stable key before lookup.
+ */
+const normalizeAuthErrorCode = (errorCode: string): string => {
+  if (/^auth\/requests-from-referer-.*-are-blocked\.?$/.test(errorCode)) {
+    return "auth/requests-from-referer-blocked";
+  }
+  return errorCode;
+};
+
+/**
  * Gets the appropriate error configuration based on the Firebase error code
  * @param errorCode The Firebase Auth error code
  * @returns The corresponding AuthErrorConfig object
  */
 export const getAuthErrorConfig = (errorCode: string): AuthErrorConfig => {
-  return AUTH_ERROR_MESSAGES[errorCode] || DEFAULT_ERROR_CONFIG;
+  return (
+    AUTH_ERROR_MESSAGES[normalizeAuthErrorCode(errorCode)] ||
+    DEFAULT_ERROR_CONFIG
+  );
 };
 
 /**

@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { MovieDetails } from "@/utils/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovieHeader } from "@/components/movie";
@@ -41,6 +43,8 @@ const MovieDetailsShell: React.FC<MovieDetailsShellProps> = ({
   showDownloads,
   children,
 }) => {
+  const navigate = useNavigate();
+
   // Guard: if downloads tab is not visible, ensure active tab doesn't remain on downloads
   useEffect(() => {
     if (activeTab === "downloads" && !showDownloads) {
@@ -59,6 +63,15 @@ const MovieDetailsShell: React.FC<MovieDetailsShellProps> = ({
         onPlayMovie={onPlayMovie}
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
+        {/* Phones get an in-flow back control: the floating one sits on top of
+            the title art at narrow widths. */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-4 inline-flex items-center gap-1.5 text-sm text-white/70 transition-colors hover:text-white md:hidden"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>

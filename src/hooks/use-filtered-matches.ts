@@ -13,6 +13,7 @@ interface UseFilteredMatchesProps {
   liveMatches: APIMatch[];
   todayMatches: APIMatch[];
   sportAllMatches: APIMatch[];
+  favoriteMatches: APIMatch[];
 }
 
 export function useFilteredMatches({
@@ -26,6 +27,7 @@ export function useFilteredMatches({
   liveMatches,
   todayMatches,
   sportAllMatches,
+  favoriteMatches,
 }: UseFilteredMatchesProps) {
   const [currentDay, setCurrentDay] = useState(() =>
     new Date().setHours(0, 0, 0, 0)
@@ -46,6 +48,8 @@ export function useFilteredMatches({
       matches = selectedSport === "all" ? popularMatches : sportPopularMatches;
     } else if (activeTab === "live") {
       matches = liveMatches;
+    } else if (activeTab === "favorites") {
+      matches = favoriteMatches;
     } else {
       matches = selectedSport === "all" ? todayMatches : sportAllMatches;
     }
@@ -85,8 +89,8 @@ export function useFilteredMatches({
         match =>
           match.title?.toLowerCase().includes(query) ||
           match.category?.toLowerCase().includes(query) ||
-          match.teams?.home?.name?.toLowerCase().includes(query) ||
-          match.teams?.away?.name?.toLowerCase().includes(query)
+          match.categoryName?.toLowerCase().includes(query) ||
+          match.league?.toLowerCase().includes(query)
       );
     }
 
@@ -113,6 +117,7 @@ export function useFilteredMatches({
     liveMatches,
     todayMatches,
     sportAllMatches,
+    favoriteMatches,
     searchQuery,
     sortOrder,
     dateRange,

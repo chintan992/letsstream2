@@ -12,6 +12,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import MediaGrid from "@/components/MediaGrid";
+import EmptyState from "@/components/EmptyState";
 
 // Match the ExtendedMedia interface from MediaGrid
 interface ExtendedMedia {
@@ -36,6 +37,7 @@ interface SearchResultsProps {
   query: string;
   hasMore: boolean;
   onShowMore: () => void;
+  onClear: () => void;
 }
 
 const SearchResults = ({
@@ -45,6 +47,7 @@ const SearchResults = ({
   query,
   hasMore,
   onShowMore,
+  onClear,
 }: SearchResultsProps) => {
   if (isLoading) {
     return (
@@ -62,6 +65,13 @@ const SearchResults = ({
           Pro tip: Press "/" anywhere to quickly search
         </p>
       </div>
+    );
+  }
+
+  // Nothing matched: give the user a way forward instead of a bare sentence.
+  if (allResults.length === 0) {
+    return (
+      <EmptyState type="search" searchQuery={query} onClearFilters={onClear} />
     );
   }
 

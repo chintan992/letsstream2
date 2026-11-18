@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MediaGrid from "@/components/MediaGrid";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, TrendingUp, Sparkles } from "lucide-react";
+import { ArrowLeft, ChevronRight, TrendingUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import {
@@ -53,25 +53,26 @@ const CATEGORY_CONFIG: Record<
   },
 };
 
-// Convert Simkl item to Media format
-// Uses index to ensure unique keys when IDs are missing
+// Convert a Simkl item to Media. Returns null when the item cannot be shown
+// honestly: the browser-facing trending response often omits `title` and
+// `ids.tmdb`, which rendered untitled posters linking to made-up ids.
 function simklToMedia(
   item: SimklTrendingItem,
-  mediaType: "movie" | "tv",
-  index: number
-): Media & { media_id: number } {
+  mediaType: "movie" | "tv"
+): (Media & { media_id: number }) | null {
+  const title = item.title?.trim();
+  const tmdbId = item.ids?.tmdb;
+  if (!title || !tmdbId) return null;
+
   const simklPosterUrl = item.poster
     ? `https://simkl.in/posters/${item.poster}_m.webp`
     : undefined;
 
-  // Use Simkl ID as primary, TMDB as fallback, index for uniqueness
-  const uniqueId = item.ids.simkl || item.ids.tmdb || index;
-
   return {
-    id: uniqueId,
-    media_id: typeof uniqueId === "number" ? uniqueId : index,
-    title: item.title,
-    name: item.title,
+    id: tmdbId,
+    media_id: tmdbId,
+    title,
+    name: title,
     media_type: mediaType,
     poster_path: null,
     backdrop_path: item.fanart
@@ -109,15 +110,15 @@ const SimklDiscoverList = () => {
       setFetchState({ items: [], isLoading: true });
       try {
         let data: SimklTrendingItem[] = [];
-        if (category === "recommendations" && userPreferences.simklToken) {
+        if (category === "recommendations" && userPreferences?.simklToken) {
           const [recMovies, recTV, recAnime] = await Promise.all([
             SimklService.getRecommendations(
-              userPreferences.simklToken,
+              userPreferences?.simklToken,
               "movies"
             ),
-            SimklService.getRecommendations(userPreferences.simklToken, "tv"),
+            SimklService.getRecommendations(userPreferences?.simklToken, "tv"),
             SimklService.getRecommendations(
-              userPreferences.simklToken,
+              userPreferences?.simklToken,
               "anime"
             ),
           ]);
@@ -145,21 +146,21 @@ const SimklDiscoverList = () => {
     };
 
     fetchContent();
-  }, [category, config, userPreferences.simklToken]);
+  }, [category, config, userPreferences?.simklToken]);
 
   const media = useMemo(() => {
-    if (!config) {
-      if (category === "recommendations") {
-        return items.map((item, index) => {
-          const rawType = (item as Record<string, unknown>).__mediaType;
-          const mediaType: "movie" | "tv" = rawType === "tv" ? "tv" : "movie";
-          return simklToMedia(item, mediaType, index);
-        });
-      }
-      return [];
-    }
-    return items.map((item, index) =>
-      simklToMedia(item, config.mediaType, index)
+    const mapped = !config
+      ? category === "recommendations"
+        ? items.map(item => {
+            const rawType = (item as Record<string, unknown>).__mediaType;
+            const mediaType: "movie" | "tv" = rawType === "tv" ? "tv" : "movie";
+            return simklToMedia(item, mediaType);
+          })
+        : []
+      : items.map(item => simklToMedia(item, config.mediaType));
+
+    return mapped.filter(
+      (item): item is Media & { media_id: number } => item !== null
     );
   }, [items, config, category]);
 
@@ -233,11 +234,11 @@ const SimklDiscoverList = () => {
             {isLoading
               ? ""
               : items.length > 0
-                ? `${items.length} items from Simkl`
+                ? `${media.length} of ${items.length} items from Simkl`
                 : ""}
           </p>
           {category === "recommendations" &&
-            !userPreferences.simklToken &&
+            !userPreferences?.simklToken &&
             !isLoading && (
               <div className="mt-4 rounded-lg border border-purple-500/20 bg-purple-500/10 p-6 text-center">
                 <Sparkles className="mx-auto mb-2 h-8 w-8 text-purple-400" />
@@ -260,6 +261,23 @@ const SimklDiscoverList = () => {
               {Array.from({ length: 18 }).map((_, i) => (
                 <Skeleton key={i} className="aspect-[2/3] rounded-lg" />
               ))}
+            </div>
+          ) : media.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+              <p className="text-lg font-medium text-white">
+                Nothing from Simkl to show here
+              </p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-white/60">
+                The feed came back without titles this time. Movies and TV shows
+                are unaffected.
+              </p>
+              <Link
+                to="/movie"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              >
+                Browse movies
+                <ChevronRight className="h-4 w-4" />
+              </Link>
             </div>
           ) : (
             <MediaGrid

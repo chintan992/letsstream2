@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Play, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useScrollRestoration } from "@/hooks";
 import SEO from "@/components/SEO";
@@ -46,6 +46,7 @@ const TVDetailsPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>("episodes");
+  const [isTrailerPlaying, setIsTrailerPlaying] = useState(false);
   const [isContentHydrated, setIsContentHydrated] = useState(false);
   const [lastWatchedState, setLastWatchedState] = useState<{
     episode: {
@@ -263,7 +264,7 @@ const TVDetailsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <SEO
         title={tvShow.name}
         description={tvShow.overview}
@@ -282,21 +283,40 @@ const TVDetailsPage = () => {
       <div className="relative">
         <button
           onClick={() => navigate(-1)}
-          className="absolute left-6 top-20 z-10 rounded-full bg-black/30 p-2 text-white transition-colors hover:bg-black/50"
+          className="absolute left-6 top-20 z-10 hidden rounded-full bg-black/30 p-2 text-white transition-colors hover:bg-black/50 md:block"
           aria-label="Go back"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
 
-        {!isMobile && trailerKey && (
-          <div className="absolute inset-0 bg-black/60">
+        {!isMobile && trailerKey && !isTrailerPlaying && (
+          <button
+            onClick={() => setIsTrailerPlaying(true)}
+            className="absolute right-6 top-20 z-10 inline-flex items-center gap-2 rounded-full bg-black/40 px-4 py-2 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-black/60"
+          >
+            <Play className="h-4 w-4" aria-hidden="true" />
+            Watch Trailer
+          </button>
+        )}
+
+        {/* The trailer only loads on request, so the artwork and the show
+            details stay readable instead of competing with a muted video. */}
+        {!isMobile && trailerKey && isTrailerPlaying && (
+          <div className="absolute inset-0 z-20 bg-black">
             <iframe
               className="h-full w-full"
-              title="TV Show Trailer"
-              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&loop=1&playlist=${trailerKey}`}
+              title={`Trailer for ${tvShow.name}`}
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
+            <button
+              onClick={() => setIsTrailerPlaying(false)}
+              className="absolute right-4 top-20 z-30 rounded-full bg-black/70 p-2 text-white transition-colors hover:bg-black/90"
+              aria-label="Close trailer"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         )}
 
@@ -470,7 +490,7 @@ const TVDetailsPage = () => {
       {recommendations.length > 0 && (
         <ContentRow title="More Like This" media={recommendations} />
       )}
-    </div>
+    </main>
   );
 };
 

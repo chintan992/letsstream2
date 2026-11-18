@@ -12,6 +12,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MediaGrid from "@/components/MediaGrid";
 import { MediaGridSkeleton } from "@/components/MediaSkeleton";
+import ErrorState from "@/components/ErrorState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, ChevronDown } from "lucide-react";
@@ -197,8 +198,8 @@ const Trending = () => {
       <Navbar />
 
       <main className="flex-1">
-        <div className="container px-4 py-8">
-          <div className="mb-8 flex items-center gap-3 pt-10">
+        <div className="container mx-auto px-4 pb-8 pt-24">
+          <div className="mb-8 flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-accent" />
             <h1 className="text-3xl font-bold text-white">Trending</h1>
           </div>
@@ -218,9 +219,12 @@ const Trending = () => {
               {trendingQuery.isLoading ? (
                 <MediaGridSkeleton />
               ) : trendingQuery.isError ? (
-                <div className="py-12 text-center text-white">
-                  Error loading trending content. Please try again.
-                </div>
+                <ErrorState
+                  error={trendingQuery.error as Error | null}
+                  title="Couldn't load trending titles"
+                  description="Something went wrong while fetching trending content. Check your connection and try again."
+                  onRetry={() => void trendingQuery.refetch()}
+                />
               ) : (
                 <>
                   <MediaGrid media={extendedMedia} title="Trending Today" />
@@ -251,9 +255,12 @@ const Trending = () => {
               {trendingQuery.isLoading ? (
                 <MediaGridSkeleton />
               ) : trendingQuery.isError ? (
-                <div className="py-12 text-center text-white">
-                  Error loading trending content. Please try again.
-                </div>
+                <ErrorState
+                  error={trendingQuery.error as Error | null}
+                  title="Couldn't load trending titles"
+                  description="Something went wrong while fetching trending content. Check your connection and try again."
+                  onRetry={() => void trendingQuery.refetch()}
+                />
               ) : (
                 <>
                   <MediaGrid media={extendedMedia} title="Trending This Week" />

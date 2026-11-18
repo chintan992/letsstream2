@@ -29,7 +29,9 @@ const ContentRow = ({
   const location = useLocation();
   const rowRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(true);
+  // Measured, not assumed: a row that fits on screen must not render a
+  // right-hand arrow that scrolls nowhere.
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   // Generate unique storage key for horizontal scroll restoration
   const sanitizedTitle = encodeURIComponent(title);
@@ -57,6 +59,30 @@ const ContentRow = ({
       scrollEndTimeout.current = null;
     };
   }, []);
+
+  // Arrow visibility depends on overflow, which is only known after layout and
+  // changes with viewport size and with the number of loaded items.
+  useEffect(() => {
+    const measure = () => {
+      const el = rowRef.current;
+      if (!el) return;
+      setShowLeftArrow(el.scrollLeft > 1);
+      setShowRightArrow(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    };
+
+    measure();
+    const frame = requestAnimationFrame(measure);
+    const el = rowRef.current;
+    const observer = el ? new ResizeObserver(measure) : null;
+    if (el && observer) observer.observe(el);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [media.length]);
 
   if (!media || media.length === 0) return null;
 

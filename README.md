@@ -84,6 +84,19 @@ Run the development server:
 npm run dev
 ```
 
+The dev server runs over HTTPS on <https://localhost:8080>. To get rid of the
+browser's `NET::ERR_CERT_AUTHORITY_INVALID` warning, create a local certificate
+authority once and trust it:
+
+```bash
+npm run cert:dev        # writes .certs/ (git-ignored)
+certutil -addstore -user Root .certs/dev-ca.crt   # Windows; script prints macOS/Linux equivalents
+```
+
+Restart the dev server and the browser afterwards. Without `.certs/` the config
+falls back to `@vitejs/plugin-basic-ssl`, which works but warns on every launch
+and re-issues its self-signed certificate every 30 days.
+
 Build for production:
 
 ```bash

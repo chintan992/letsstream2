@@ -102,6 +102,7 @@ export const TVShowHeader = ({
                   <div className="image-skeleton absolute inset-0 rounded-lg bg-background" />
                 )}
 
+                <h1 className="sr-only">{tvShow.name}</h1>
                 <img
                   src={getImageUrl(tvShow.logo_path, backdropSizes.original)}
                   alt={tvShow.name}

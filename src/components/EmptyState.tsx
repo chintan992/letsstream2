@@ -1,13 +1,23 @@
 import React from "react";
-import { Search, Calendar, TrendingUp, Wifi, Sparkles } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  TrendingUp,
+  Wifi,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserPreferences } from "@/hooks/user-preferences";
 
 interface EmptyStateProps {
-  type: "search" | "no-matches" | "no-popular" | "no-live";
+  type: "search" | "no-matches" | "no-popular" | "no-live" | "no-favorites";
   searchQuery?: string;
   sportName?: string;
   onClearFilters?: () => void;
+  /** Recovery action offered by the "nothing here, but there is elsewhere" states. */
+  onAction?: () => void;
+  actionLabel?: string;
 }
 
 const EmptyState = ({
@@ -15,6 +25,8 @@ const EmptyState = ({
   searchQuery,
   sportName,
   onClearFilters,
+  onAction,
+  actionLabel,
 }: EmptyStateProps) => {
   const { userPreferences } = useUserPreferences();
   const accentColor = userPreferences?.accentColor || "#E63462";
@@ -91,7 +103,16 @@ const EmptyState = ({
             "Check live matches",
             "Browse other sports",
           ],
-          action: null,
+          action: onAction && actionLabel && (
+            <Button
+              onClick={onAction}
+              variant="outline"
+              className="mt-6 border-white/20 bg-white/5 transition-all duration-300 hover:border-white/30 hover:bg-white/10"
+            >
+              {actionLabel}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          ),
         };
 
       case "no-live":
@@ -106,7 +127,38 @@ const EmptyState = ({
             "View popular matches",
             "Browse match schedule",
           ],
-          action: null,
+          action: onAction && actionLabel && (
+            <Button
+              onClick={onAction}
+              variant="outline"
+              className="mt-6 border-white/20 bg-white/5 transition-all duration-300 hover:border-white/30 hover:bg-white/10"
+            >
+              {actionLabel}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          ),
+        };
+
+      case "no-favorites":
+        return {
+          icon: <Sparkles className="h-20 w-20" />,
+          title: "No favourite matches yet",
+          description:
+            "Tap the heart on any match to keep it here, with its start time and streams one click away.",
+          suggestions: [
+            "Save matches from Popular or Live",
+            "Favourites are stored on this device",
+          ],
+          action: onAction && actionLabel && (
+            <Button
+              onClick={onAction}
+              variant="outline"
+              className="mt-6 border-white/20 bg-white/5 transition-all duration-300 hover:border-white/30 hover:bg-white/10"
+            >
+              {actionLabel}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          ),
         };
 
       default:
@@ -123,7 +175,7 @@ const EmptyState = ({
   const content = getContent();
 
   return (
-    <div className="relative flex min-h-[500px] flex-col items-center justify-center px-4 py-16 text-center">
+    <div className="relative flex min-h-[320px] flex-col items-center justify-center px-4 py-8 text-center sm:min-h-[500px] sm:py-16">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -142,7 +194,7 @@ const EmptyState = ({
       <div className="relative z-10">
         {/* Icon with gradient */}
         <div
-          className="mb-6 inline-flex items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-6 shadow-lg backdrop-blur-sm"
+          className="mb-4 inline-flex items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-lg backdrop-blur-sm sm:mb-6 sm:p-6 [&>svg]:h-12 [&>svg]:w-12 sm:[&>svg]:h-20 sm:[&>svg]:w-20"
           style={{
             boxShadow: /^#([0-9a-fA-F]{6})$/.test(accentColor)
               ? `0 0 40px ${accentColor}15, inset 0 0 20px ${accentColor}10`

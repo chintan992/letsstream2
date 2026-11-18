@@ -5,41 +5,41 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-border: 240 3.7% 15.9%;
-  --color-input: 240 3.7% 15.9%;
-  --color-ring: 240 4.9% 83.9%;
-  --color-background: 240 10% 3.9%;
-  --color-foreground: 0 0% 98%;
-  --color-primary: 0 0% 98%;
-  --color-primary-foreground: 240 5.9% 10%;
-  --color-secondary: 240 3.7% 15.9%;
-  --color-secondary-foreground: 0 0% 98%;
-  --color-destructive: 0 62.8% 30.6%;
-  --color-destructive-foreground: 0 0% 98%;
-  --color-muted: 240 3.7% 15.9%;
-  --color-muted-foreground: 240 5% 64.9%;
-  --color-accent: 347 80% 55%;
-  --color-accent-foreground: 210 40% 98%;
-  --color-popover: 240 10% 3.9%;
-  --color-popover-foreground: 0 0% 98%;
-  --color-card: 240 10% 3.9%;
-  --color-card-foreground: 0 0% 98%;
-  --color-sidebar: 240 10% 3.9%;
-  --color-sidebar-foreground: 0 0% 98%;
-  --color-sidebar-primary: 0 0% 98%;
-  --color-sidebar-primary-foreground: 240 5.9% 10%;
-  --color-sidebar-accent: 347 80% 55%;
-  --color-sidebar-accent-foreground: 210 40% 98%;
-  --color-sidebar-border: 240 3.7% 15.9%;
-  --color-sidebar-ring: 240 4.9% 83.9%;
-  --color-success: 142 71% 45%;
-  --color-success-foreground: 0 0% 98%;
-  --color-warning: 38 92% 50%;
-  --color-warning-foreground: 0 0% 98%;
-  --color-error: 0 72% 51%;
-  --color-error-foreground: 0 0% 98%;
-  --color-info: 217 91% 60%;
-  --color-info-foreground: 0 0% 98%;
+  --color-border: hsl(240 3.7% 15.9%);
+  --color-input: hsl(240 3.7% 15.9%);
+  --color-ring: hsl(240 4.9% 83.9%);
+  --color-background: hsl(240 10% 3.9%);
+  --color-foreground: hsl(0 0% 98%);
+  --color-primary: hsl(0 0% 98%);
+  --color-primary-foreground: hsl(240 5.9% 10%);
+  --color-secondary: hsl(240 3.7% 15.9%);
+  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-destructive: hsl(0 62.8% 30.6%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(240 3.7% 15.9%);
+  --color-muted-foreground: hsl(240 5% 64.9%);
+  --color-accent: hsl(347 80% 55%);
+  --color-accent-foreground: hsl(210 40% 98%);
+  --color-popover: hsl(240 10% 3.9%);
+  --color-popover-foreground: hsl(0 0% 98%);
+  --color-card: hsl(240 10% 3.9%);
+  --color-card-foreground: hsl(0 0% 98%);
+  --color-sidebar: hsl(240 10% 3.9%);
+  --color-sidebar-foreground: hsl(0 0% 98%);
+  --color-sidebar-primary: hsl(0 0% 98%);
+  --color-sidebar-primary-foreground: hsl(240 5.9% 10%);
+  --color-sidebar-accent: hsl(347 80% 55%);
+  --color-sidebar-accent-foreground: hsl(210 40% 98%);
+  --color-sidebar-border: hsl(240 3.7% 15.9%);
+  --color-sidebar-ring: hsl(240 4.9% 83.9%);
+  --color-success: hsl(142 71% 45%);
+  --color-success-foreground: hsl(0 0% 98%);
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-foreground: hsl(0 0% 98%);
+  --color-error: hsl(0 72% 51%);
+  --color-error-foreground: hsl(0 0% 98%);
+  --color-info: hsl(217 91% 60%);
+  --color-info-foreground: hsl(0 0% 98%);
   --radius: 0.75rem;
   --tracking-tight: -0.025em;
   --leading-relaxed: 1.625;
@@ -581,6 +581,13 @@
     color 200ms ease,
     box-shadow 200ms ease;
 }
+/* Chrome draws its own clear button on type="search", which duplicated the
+   in-house "Clear search" control right next to it. */
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
 .search-input::placeholder {
   color: hsl(var(--foreground) / 0.5);
 }
@@ -781,12 +788,6 @@
   pointer-events: none;
   filter: blur(1px);
   border-radius: 8px;
-}
-
-.play-icon {
-  animation:
-    pulse-glow 2s ease-in-out infinite,
-    float 3s ease-in-out infinite;
 }
 
 /* Enhanced footer styling */

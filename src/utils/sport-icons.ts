@@ -14,6 +14,7 @@ const sportIcons: Record<string, string> = {
   afl: "🏉",
   darts: "🎯",
   cricket: "🏏",
+  "24-7": "📺",
   other: "🏅",
 };
 

@@ -11,12 +11,12 @@ import { Label } from "@/components/ui/label";
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
 import SEO from "@/components/SEO";
+import AuthLayout from "@/components/auth/AuthLayout";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -44,13 +44,11 @@ export default function ForgotPassword() {
 
   if (emailSent) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <AuthLayout>
         <SEO title="Password Reset Sent" noIndex={true} />
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">
-              Check Your Email
-            </CardTitle>
+            <h1 className="text-2xl font-bold">Check Your Email</h1>
             <CardDescription>
               We've sent a password reset link to <strong>{email}</strong>
             </CardDescription>
@@ -65,12 +63,12 @@ export default function ForgotPassword() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <AuthLayout>
       <SEO
         title="Reset Password"
         description="Reset your Let's Stream account password."
@@ -78,7 +76,7 @@ export default function ForgotPassword() {
       />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+          <h1 className="text-2xl font-bold">Reset Password</h1>
           <CardDescription>
             Enter your email address and we'll send you a link to reset your
             password
@@ -112,6 +110,6 @@ export default function ForgotPassword() {
           </div>
         </CardFooter>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

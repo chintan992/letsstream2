@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-interface FavoriteMatch {
+export interface FavoriteMatch {
   id: string;
   title: string;
   category: string;
@@ -10,101 +10,110 @@ interface FavoriteMatch {
 
 const STORAGE_KEY = "sports-favorite-matches";
 
-export const useFavoriteMatches = () => {
-  const [favorites, setFavorites] = useState<FavoriteMatch[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+function readStorage(): FavoriteMatch[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
 
-  // Load favorites from localStorage on mount
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter(
+      item =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof item.id !== "undefined" &&
+        (typeof item.date === "number" || !isNaN(Date.parse(item.date)))
+    );
+  } catch (error) {
+    console.error("Error loading favorite matches:", error);
+    return [];
+  }
+}
+
+/**
+ * Favourites live in a module-level store rather than per-hook state: the cards,
+ * the sports page and the tab counter all read the same list, so favouriting a
+ * card updates every one of them (and other tabs) without a reload.
+ */
+let favorites: FavoriteMatch[] =
+  typeof window === "undefined" ? [] : readStorage();
+const listeners = new Set<() => void>();
+
+const emit = () => listeners.forEach(listener => listener());
+
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
+
+const getSnapshot = () => favorites;
+
+function commit(next: FavoriteMatch[]) {
+  favorites = next;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+  } catch (error) {
+    console.error("Error saving favorite matches:", error);
+  }
+  emit();
+}
+
+export const useFavoriteMatches = () => {
+  const current = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  // Keep other tabs/windows in step.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          const validFavorites = parsed.filter(
-            item =>
-              typeof item === "object" &&
-              item !== null &&
-              typeof item.id !== "undefined" &&
-              (typeof item.date === "number" || !isNaN(Date.parse(item.date)))
-          );
-          setFavorites(validFavorites);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading favorite matches:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return;
+      favorites = readStorage();
+      emit();
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  // Save favorites to localStorage whenever they change
-  useEffect(() => {
-    if (!isLoading) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
-      } catch (error) {
-        console.error("Error saving favorite matches:", error);
+  const isFavorite = useCallback(
+    (matchId: string) => current.some(favorite => favorite.id === matchId),
+    [current]
+  );
+
+  const addFavorite = useCallback(
+    (match: { id: string; title: string; category: string; date: number }) => {
+      if (favorites.some(favorite => favorite.id === match.id)) return;
+      commit([...favorites, { ...match, addedAt: Date.now() }]);
+    },
+    []
+  );
+
+  const removeFavorite = useCallback((matchId: string) => {
+    commit(favorites.filter(favorite => favorite.id !== matchId));
+  }, []);
+
+  const toggleFavorite = useCallback(
+    (match: { id: string; title: string; category: string; date: number }) => {
+      if (favorites.some(favorite => favorite.id === match.id)) {
+        commit(favorites.filter(favorite => favorite.id !== match.id));
+      } else {
+        commit([...favorites, { ...match, addedAt: Date.now() }]);
       }
-    }
-  }, [favorites, isLoading]);
+    },
+    []
+  );
 
-  const addFavorite = (match: {
-    id: string;
-    title: string;
-    category: string;
-    date: number;
-  }) => {
-    setFavorites(prev => {
-      // Check if already favorited
-      if (prev.some(fav => fav.id === match.id)) {
-        return prev;
-      }
+  const clearFavorites = useCallback(() => commit([]), []);
 
-      return [
-        ...prev,
-        {
-          ...match,
-          addedAt: Date.now(),
-        },
-      ];
-    });
-  };
-
-  const removeFavorite = (matchId: string) => {
-    setFavorites(prev => prev.filter(fav => fav.id !== matchId));
-  };
-
-  const toggleFavorite = (match: {
-    id: string;
-    title: string;
-    category: string;
-    date: number;
-  }) => {
-    if (isFavorite(match.id)) {
-      removeFavorite(match.id);
-    } else {
-      addFavorite(match);
-    }
-  };
-
-  const isFavorite = (matchId: string): boolean => {
-    return favorites.some(fav => fav.id === matchId);
-  };
-
-  const clearFavorites = () => {
-    setFavorites([]);
-  };
-
-  // Clean up old favorites (matches that have passed by more than 7 days)
-  const cleanupOldFavorites = () => {
+  const cleanupOldFavorites = useCallback(() => {
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    setFavorites(prev => prev.filter(fav => fav.date > sevenDaysAgo));
-  };
+    commit(favorites.filter(favorite => favorite.date > sevenDaysAgo));
+  }, []);
 
   return {
-    favorites,
-    isLoading,
+    favorites: current,
+    isLoading: false,
     addFavorite,
     removeFavorite,
     toggleFavorite,

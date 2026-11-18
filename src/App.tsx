@@ -3,6 +3,7 @@ import { LazyMotion, domAnimation } from "motion/react";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
+import RouteLoading from "@/components/ui/route-loading";
 import { ThemeProvider } from "./contexts/theme";
 import { UserPreferencesProvider } from "./contexts/user-preferences";
 import { WatchHistoryProvider } from "./contexts/watch-history-context";
@@ -14,13 +15,10 @@ import { ServiceWorkerErrorBoundary } from "./components/ServiceWorkerErrorBound
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ServiceWorkerDebugPanel } from "./components/ServiceWorkerDebugPanel";
 import { AuthProvider } from "./hooks/auth-context";
-import { ChatbotProvider } from "./contexts/chatbot-context";
-import ChatbotButton from "./components/chatbot/ChatbotButton";
-import ChatbotWindow from "./components/chatbot/ChatbotWindow";
-import ProactiveSuggestions from "./components/chatbot/ProactiveSuggestions";
 import SEO from "./components/SEO";
 import AppRoutes from "./routes.tsx";
 import { useToast } from "./components/ui/use-toast";
+import { Toaster } from "./components/ui/toaster";
 import "./styles/notifications.css";
 import { FeatureNotificationsListener } from "./hooks/FeatureNotificationsListener";
 
@@ -57,7 +55,7 @@ function QueryClientProviderWrapper({
   }, []);
 
   if (!queryClient) {
-    return <div>Initializing...</div>;
+    return <RouteLoading label="Starting up" />;
   }
 
   return (
@@ -96,14 +94,10 @@ function App() {
                           <FavoritesProvider>
                             <WatchlistProvider>
                               <UserProfileProvider>
-                                <ChatbotProvider>
-                                  <FeatureNotificationsListener />
-                                  {isDevelopment && <ServiceWorkerDebugPanel />}
-                                  <AppRoutes />
-                                  <ChatbotButton />
-                                  <ChatbotWindow />
-                                  <ProactiveSuggestions />
-                                </ChatbotProvider>
+                                <FeatureNotificationsListener />
+                                {isDevelopment && <ServiceWorkerDebugPanel />}
+                                <AppRoutes />
+                                <Toaster />
                               </UserProfileProvider>
                             </WatchlistProvider>
                           </FavoritesProvider>

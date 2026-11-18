@@ -127,7 +127,7 @@ const TVShowsPage = () => {
           keywords="tv shows, stream tv series, popular tv shows, top rated tv series, watch episodes online"
         />
         <Navbar />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 pb-8 pt-24">
           <TVShowsHeader />
           <TVShowsFilters
             sortBy={sortBy}

@@ -1,5 +1,6 @@
 import { Routes, Route, Outlet, Navigate, useParams } from "react-router-dom";
 import { Suspense, useEffect } from "react";
+import RouteLoading from "@/components/ui/route-loading";
 import { lazyLoadWithRetry } from "./utils/lazy-load-with-retry";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
@@ -27,10 +28,6 @@ const NotFound = lazyLoadWithRetry(() => import("./pages/NotFound"));
 const Trending = lazyLoadWithRetry(() => import("./pages/Trending"));
 
 // Live streams pages
-const LiveStreams = lazyLoadWithRetry(() => import("./pages/LiveStreams"));
-const LiveStreamPlayer = lazyLoadWithRetry(
-  () => import("./pages/LiveStreamPlayer")
-);
 
 // Legal pages
 const PrivacyPolicy = lazyLoadWithRetry(() => import("./pages/PrivacyPolicy"));
@@ -74,7 +71,7 @@ export default function AppRoutes() {
   }, [enableManualRestoration]);
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<RouteLoading />}>
       <AnalyticsWrapper>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -116,10 +113,6 @@ export default function AppRoutes() {
           />
           <Route path="/search" element={<Search />} />
           <Route path="/trending" element={<Trending />} />
-
-          {/* Live streams routes */}
-          <Route path="/live" element={<LiveStreams />} />
-          <Route path="/watch/live/:id" element={<LiveStreamPlayer />} />
 
           {/* Simkl routes */}
           <Route path="/simkl" element={<SimklDiscover />} />

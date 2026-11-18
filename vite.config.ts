@@ -3,7 +3,7 @@ import type {} from "./workbox.d.ts";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import basicSsl from "@vitejs/plugin-basic-ssl";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -11,6 +11,19 @@ import pkg from "./package.json";
 import { simklApiPlugin } from "./scripts/vite-simkl-plugin";
 
 declare const self: ServiceWorkerGlobalScope;
+
+/**
+ * A locally trusted certificate (scripts/gen-dev-cert.mjs) beats
+ * @vitejs/plugin-basic-ssl, which mints a new self-signed certificate every 30
+ * days and therefore trips NET::ERR_CERT_AUTHORITY_INVALID in every browser.
+ * Falls back to the plugin when the local certificate is absent.
+ */
+const devCertFile = path.resolve(__dirname, ".certs/localhost.chain.crt");
+const devKeyFile = path.resolve(__dirname, ".certs/localhost.key");
+const hasLocalDevCert = existsSync(devCertFile) && existsSync(devKeyFile);
+const devHttpsOptions = hasLocalDevCert
+  ? { cert: readFileSync(devCertFile), key: readFileSync(devKeyFile) }
+  : undefined;
 
 // Define types for response data
 interface TMDBResponse {
@@ -56,6 +69,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    https: devHttpsOptions,
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
       "Cross-Origin-Embedder-Policy": "unsafe-none",
@@ -64,6 +78,9 @@ export default defineConfig(({ mode }) => ({
       ".js": "application/javascript",
       ".json": "application/json",
     },
+  },
+  preview: {
+    https: devHttpsOptions,
   },
   build: {
     target: ["es2020", "edge88", "firefox78", "chrome87", "safari14"],
@@ -97,7 +114,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    basicSsl(),
+    ...(hasLocalDevCert ? [] : [basicSsl()]),
     routesConfigPlugin(),
     simklApiPlugin(loadEnv(mode, process.cwd(), "")),
     VitePWA({

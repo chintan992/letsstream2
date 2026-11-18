@@ -49,6 +49,8 @@ const FooterSection = ({
         <div className="w-full">
           <button
             onClick={() => toggleSection(id)}
+            aria-expanded={isExpanded}
+            aria-controls={`footer-section-${id}`}
             className="flex w-full items-center justify-between py-3 font-medium text-white"
           >
             <span>{title}</span>
@@ -61,6 +63,8 @@ const FooterSection = ({
           </button>
 
           <div
+            id={`footer-section-${id}`}
+            aria-hidden={!isExpanded}
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
               isExpanded ? "mb-4 max-h-60 opacity-100" : "max-h-0 opacity-0"
             }`}
@@ -143,7 +147,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Home
@@ -153,7 +157,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/movie"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Movies
@@ -163,7 +167,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/tv"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   TV Shows
@@ -173,7 +177,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/sports"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Sports
@@ -182,18 +186,8 @@ const Footer = () => {
 
               <li>
                 <Link
-                  to="/live"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
-                >
-                  <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
-                  Live Streams
-                </Link>
-              </li>
-
-              <li>
-                <Link
                   to="/simkl"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Simkl
@@ -203,7 +197,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/trending"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Trending
@@ -213,7 +207,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/search"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Search
@@ -235,7 +229,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/terms"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Terms of Service
@@ -245,7 +239,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/privacy"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Privacy Policy
@@ -255,7 +249,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/dmca"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   DMCA Notice
@@ -265,7 +259,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/content-removal"
-                  className="flex items-center text-white/70 transition-colors hover:text-accent"
+                  className="flex min-h-8 items-center text-white/70 transition-colors hover:text-accent"
                 >
                   <span className="bg-accent/70 mr-2 h-1 w-1 rounded-full"></span>
                   Content Removal

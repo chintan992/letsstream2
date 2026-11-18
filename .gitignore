@@ -56,3 +56,6 @@ session/
 # Local Cloudflare Wrangler folder
 .wrangler
 _worker.bundle
+
+# Local development TLS certificates (see scripts/gen-dev-cert.mjs)
+.certs/

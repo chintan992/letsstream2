@@ -11,7 +11,6 @@ const staticRoutes = [
   { path: "/movie", priority: "0.8", changefreq: "weekly" },
   { path: "/tv", priority: "0.8", changefreq: "weekly" },
   { path: "/sports", priority: "0.7", changefreq: "weekly" },
-  { path: "/live", priority: "0.7", changefreq: "weekly" },
   { path: "/trending", priority: "0.7", changefreq: "weekly" },
   { path: "/simkl", priority: "0.7", changefreq: "weekly" },
   { path: "/simkl/trending-movies", priority: "0.7", changefreq: "daily" },

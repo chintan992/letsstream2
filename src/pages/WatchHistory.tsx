@@ -379,7 +379,7 @@ const WatchHistory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <main className="min-h-screen bg-background pb-16">
       <SEO title="Watch History" noIndex={true} />
       <Navbar />
 
@@ -519,7 +519,7 @@ const WatchHistory = () => {
       </m.div>
 
       <Footer />
-    </div>
+    </main>
   );
 };
 

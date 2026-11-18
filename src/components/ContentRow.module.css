@@ -27,6 +27,14 @@
 
 .scrollContainer:hover .scrollButton {
   opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Hover alone hid the controls from keyboard users; reveal them on focus too. */
+.scrollContainer:focus-within .scrollButton {
+  opacity: 1;
+  pointer-events: auto;
   transform: translateY(-50%) translateX(0);
 }
 
@@ -36,6 +44,9 @@
     opacity 0.3s ease,
     transform 0.3s ease;
   contain: layout style paint;
+  /* While invisible the arrow is still 40px of clickable area over the row. It
+     stays in the tab order, and focusing it brings pointer events back. */
+  pointer-events: none;
 }
 
 .scrollButtonLeft {

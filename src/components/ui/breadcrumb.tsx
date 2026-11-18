@@ -63,7 +63,7 @@ const BreadcrumbPage = React.forwardRef<
     aria-disabled="true"
     aria-current="page"
     className={cn(
-      "line-clamp-1 max-w-[200px] font-medium text-white sm:max-w-[320px] md:max-w-none",
+      "max-w-[200px] truncate font-medium text-white sm:max-w-[320px] md:max-w-none",
       className
     )}
     {...props}

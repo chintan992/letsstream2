@@ -1,6 +1,7 @@
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { useScrollRestoration } from "@/hooks";
 import SEO from "@/components/SEO";
+import ErrorState from "@/components/ErrorState";
 import {
   getTrending,
   getPopularMovies,
@@ -41,7 +42,7 @@ const Index = () => {
     isLoading: boolean;
     contentVisible: boolean;
     secondaryLoaded: boolean;
-    fetchError: boolean;
+    fetchError: Error | null;
   }>({
     trendingMedia: [],
     popularMovies: [],
@@ -50,7 +51,7 @@ const Index = () => {
     isLoading: true,
     contentVisible: false,
     secondaryLoaded: false,
-    fetchError: false,
+    fetchError: null,
   });
   const {
     trendingMedia,
@@ -60,8 +61,20 @@ const Index = () => {
     isLoading,
     contentVisible,
     secondaryLoaded,
+    fetchError,
   } = pageState;
   const [isPageHydrated, setIsPageHydrated] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetry = useCallback(() => {
+    setPageState(prev => ({
+      ...prev,
+      isLoading: true,
+      contentVisible: false,
+      fetchError: null,
+    }));
+    setRetryCount(count => count + 1);
+  }, []);
 
   useEffect(() => {
     const hydrated = !isLoading && contentVisible;
@@ -103,7 +116,7 @@ const Index = () => {
           popularTVShows: popularTVData,
           topRatedTVShows: topTVData,
           isLoading: false,
-          fetchError: false,
+          fetchError: null,
         }));
         contentTimer = setTimeout(() => {
           setPageState(prev => ({ ...prev, contentVisible: true }));
@@ -113,7 +126,14 @@ const Index = () => {
         }, 1000);
       } catch (error) {
         console.error("Error fetching homepage data:", error);
-        setPageState(prev => ({ ...prev, isLoading: false, fetchError: true }));
+        setPageState(prev => ({
+          ...prev,
+          isLoading: false,
+          fetchError:
+            error instanceof Error
+              ? error
+              : new Error("Unable to reach the catalogue service."),
+        }));
         clearTimeout(contentTimer);
         clearTimeout(secondaryTimer);
       }
@@ -125,7 +145,7 @@ const Index = () => {
       clearTimeout(contentTimer);
       clearTimeout(secondaryTimer);
     };
-  }, []);
+  }, [retryCount]);
 
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -173,6 +193,15 @@ const Index = () => {
             {/* Hero skeleton */}
             <RowSkeleton />
             <RowSkeleton />
+          </div>
+        ) : fetchError ? (
+          <div className="w-full pt-20">
+            <ErrorState
+              error={fetchError}
+              title="We couldn't load the catalogue"
+              description="Something went wrong while fetching movies and shows. Check your connection and try again."
+              onRetry={handleRetry}
+            />
           </div>
         ) : (
           <>

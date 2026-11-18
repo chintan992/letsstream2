@@ -243,17 +243,6 @@ vi.mock("@/contexts/notification-context", () => ({
     React.createElement(React.Fragment, null, children),
 }));
 
-vi.mock("@/contexts/chatbot-context", () => ({
-  useChatbot: () => ({
-    messages: [],
-    isOpen: false,
-    sendMessage: vi.fn(),
-    toggleChat: vi.fn(),
-  }),
-  ChatbotProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-}));
-
 vi.mock("@/lib/firebase", () => ({
   auth: {},
   db: {},
